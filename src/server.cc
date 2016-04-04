@@ -4,7 +4,7 @@
 #include <string.h>
 
 void print_usage() {
-  // TODO
+  printf("Usage: server TCP\n");
 }
 
 void exec_prog(char* prog_name, char* prog_argv[]) {
@@ -27,18 +27,7 @@ void parse(int argc, char* argv[]) {
 }
 
 int main(int argc, char* argv[]) {
-  int pid;
-  switch (pid = fork()) {
-    case -1:
-      perror("fork");
-      break;
-    case 0:
-      parse(argc, argv);
-      break;
-    default:
-      waitpid(pid, NULL, 0);
-      break;
-  }
+  parse(argc, argv);
 
   return 0;
 }
