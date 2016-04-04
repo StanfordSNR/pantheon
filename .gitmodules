@@ -1,0 +1,3 @@
+[submodule "external/proto-quic"]
+	path = external/proto-quic
+	url = https://github.com/google/proto-quic
