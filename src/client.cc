@@ -1,17 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
 
 void print_usage() {
   // TODO
 }
 
-void exec_prog(char* prog_name, char* ip, char* port) {
-  char* prog_argv[3]; 
-  prog_argv[0] = prog_name;
-  prog_argv[1] = ip;
-  prog_argv[2] = port;
-
+void exec_prog(char* prog_name, char* prog_argv[]) {
   if (execvp(prog_name, prog_argv) == -1) {
     perror(prog_name);
     exit(1);
@@ -19,16 +15,17 @@ void exec_prog(char* prog_name, char* ip, char* port) {
 }
 
 void parse(int argc, char* argv[]) {
-  if (argc < 4) {
+  if (argc < 2) {
     print_usage();
     exit(1);
   }
 
-  char* ip = argv[1];
-  char* port = argv[2];
-  
-  if (strcasecmp(argv[3], "LEDBAT") == 0) {
-    exec_prog("../external/libutp/ucat", ip, port); 
+  if (strcasecmp(argv[1], "TCP") == 0) {
+    char* prog_argv[2];
+    prog_argv[0] = "tcp-client";
+    prog_argv[1] = argv[2]; // IP address
+    exec_prog("default-tcp/tcp-client", prog_argv);
+    return;
   }
 }
 
