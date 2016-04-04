@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <CMakeConfig.h>
+#include <string>
 
 void print_usage() {
   printf("Usage: client TCP 0.0.0.0\n");
@@ -21,10 +23,15 @@ void parse(int argc, char* argv[]) {
   }
 
   if (strcasecmp(argv[1], "TCP") == 0) {
-    char* prog_argv[2];
-    prog_argv[0] = "tcp-client";
-    prog_argv[1] = argv[2]; // IP address
-    exec_prog("default-tcp/tcp-client", prog_argv);
+    char prog_name[256];
+    strcpy(prog_name, SRC_DIRECTORY);
+    strcat(prog_name, "default-tcp/tcp-client");
+    printf("prog_name: %s\n", prog_name);
+
+    char** prog_argv = &argv[1];
+    prog_argv[0] = prog_name; 
+
+    exec_prog(prog_name, prog_argv);
     return;
   }
 }

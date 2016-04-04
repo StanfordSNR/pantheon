@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <CMakeConfig.h>
 
 void print_usage() {
   printf("Usage: server TCP\n");
@@ -21,7 +22,15 @@ void parse(int argc, char* argv[]) {
   }
 
   if (strcasecmp(argv[1], "TCP") == 0) {
-    exec_prog("default-tcp/tcp-server", NULL);
+    char prog_name[256];
+    strcpy(prog_name, SRC_DIRECTORY);
+    strcat(prog_name, "default-tcp/tcp-server");
+    printf("prog_name: %s\n", prog_name);
+
+    char** prog_argv = &argv[1];
+    prog_argv[0] = prog_name; 
+
+    exec_prog(prog_name, prog_argv);
     return;
   }
 }
