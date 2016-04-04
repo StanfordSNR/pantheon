@@ -1,0 +1,6 @@
+[submodule "external/proto-quic"]
+	path = external/proto-quic
+	url = https://github.com/google/proto-quic
+[submodule "external/libutp"]
+	path = external/libutp
+	url = https://github.com/bittorrent/libutp
