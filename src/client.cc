@@ -6,7 +6,8 @@
 #include <string>
 
 void print_usage() {
-  printf("Usage: client TCP 0.0.0.0\n");
+  printf("Usage:\n");
+  printf("Default TCP: ./client TCP 0.0.0.0\n");
 }
 
 void exec_prog(char* prog_name, char* prog_argv[]) {
@@ -24,9 +25,8 @@ void parse(int argc, char* argv[]) {
 
   if (strcasecmp(argv[1], "TCP") == 0) {
     char prog_name[256];
-    strcpy(prog_name, SRC_DIRECTORY);
-    strcat(prog_name, "default-tcp/tcp-client");
-    printf("prog_name: %s\n", prog_name);
+    strcpy(prog_name, BIN_DIRECTORY);
+    strcat(prog_name, "tcp-client");
 
     char** prog_argv = &argv[1];
     prog_argv[0] = prog_name; 

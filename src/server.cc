@@ -5,7 +5,8 @@
 #include <CMakeConfig.h>
 
 void print_usage() {
-  printf("Usage: server TCP\n");
+  printf("Usage:\n");
+  printf("Default TCP: ./server TCP\n");
 }
 
 void exec_prog(char* prog_name, char* prog_argv[]) {
@@ -23,9 +24,8 @@ void parse(int argc, char* argv[]) {
 
   if (strcasecmp(argv[1], "TCP") == 0) {
     char prog_name[256];
-    strcpy(prog_name, SRC_DIRECTORY);
-    strcat(prog_name, "default-tcp/tcp-server");
-    printf("prog_name: %s\n", prog_name);
+    strcpy(prog_name, BIN_DIRECTORY);
+    strcat(prog_name, "tcp-server");
 
     char** prog_argv = &argv[1];
     prog_argv[0] = prog_name; 
