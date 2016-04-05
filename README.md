@@ -23,8 +23,19 @@
 
 The executable files can be found in the 'bin' folder at the top level. Run 'server' and 'client' in two shells respectively, specifying a congestion control mechanism along with additional arguments. 
 
-Example: to use default TCP as congestion control, run
-```
-$ ./server TCP
-$ ./client TCP 0.0.0.0
-```
+Example:
+
+* To use default TCP as congestion control:
+
+  ```
+  $ ./server TCP
+  $ ./client TCP 0.0.0.0
+  ```
+
+* To use LEDBAT as congestion control:
+
+  ```
+  $ ./server LEDBAT
+  $ ./client LEDBAT 0.0.0.0
+  ```
+
