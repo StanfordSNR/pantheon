@@ -11,6 +11,3 @@ configure_file (
   "${PROJECT_SOURCE_DIR}/CMakeConfig.h"
 )
 include_directories("${PROJECT_SOURCE_DIR}")
-
-add_executable(client src/client.cc)
-add_executable(server src/server.cc) 
