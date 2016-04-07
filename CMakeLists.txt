@@ -12,7 +12,5 @@ configure_file (
 )
 include_directories("${PROJECT_SOURCE_DIR}")
 
-add_subdirectory(src/default-tcp bin)
-
 add_executable(client src/client.cc)
 add_executable(server src/server.cc) 
