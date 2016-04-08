@@ -17,6 +17,12 @@
 
   or clone this project with the --recursive option
 
+3. Make all the external repositories:
+
+  ```
+  $ ./make-external.sh
+  ```
+
 ## Usage
 
 The executable files can be found in the 'src' folder at the top
