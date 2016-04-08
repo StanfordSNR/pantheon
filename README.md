@@ -2,40 +2,29 @@
 
 ## Make
 
-1. Get submodules:
+1. Clone this repository
+  ```
+  git clone https://github.com/StanfordLPNG/pantheon.git
+  ```
 
+2. Get submodules:
   ```
   $ git submodule init
   $ git submodule update
   ```
-
   or clone this project with the --recursive option
-
-2. Run the following commands to make:
-
-  ```
-  $ mkdir build
-  $ cd build
-  $ cmake .. && make
-  ```
 
 ## Usage
 
-The executable files can be found in the 'bin' folder at the top level. Run 'server' and 'client' in two shells respectively, specifying a congestion control mechanism along with additional arguments. 
+The executable files can be found in the 'src' folder at the top
+level. Run 'server.py' and 'client.py' in two shells
+respectively, specifying a congestion control option along with
+additional arguments.
 
 Example:
 
 * To use default TCP as congestion control:
-
   ```
-  $ ./server TCP
-  $ ./client TCP 0.0.0.0
+  $ python server.py TCP PORT
+  $ python client.py TCP HOST PORT
   ```
-
-* To use LEDBAT as congestion control:
-
-  ```
-  $ ./server LEDBAT
-  $ ./client LEDBAT 0.0.0.0
-  ```
-
