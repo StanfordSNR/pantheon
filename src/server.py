@@ -1,11 +1,11 @@
 import sys, subprocess
 
 def print_usage():
-    usage = "Usage: python server.py [congestion control option] [args]"
-    default_tcp = "  Default TCP: python server.py TCP PORT"
+    usage = "Usage: python server.py [congestion control option] [args]\n"
+    usage += "    [congestion control option]: TCP, LEDBAT"
+    example = "Example: python server.py TCP PORT"
     print usage
-    print "Examples:"
-    print default_tcp
+    print example
 
 def main():
     if len(sys.argv) < 2:
@@ -13,11 +13,18 @@ def main():
         return
 
     cc_option = sys.argv[1]
+
     if cc_option.lower() == 'tcp':
         cmd = ['./tcpserver']
-        if len(sys.argv) >= 3:
-            cmd += sys.argv[2:]
-        subprocess.call(cmd, cwd='../external/sourdough/examples')
-    
+        path = '../external/sourdough/examples'
+
+    if cc_option.lower() == 'ledbat':
+        cmd = ['./ucat']
+        path = '../external/libutp'
+
+    if len(sys.argv) >= 3:
+        cmd += sys.argv[2:]
+    subprocess.call(cmd, cwd=path)
+
 if __name__ == '__main__':
     main()
