@@ -24,7 +24,7 @@ def main():
 
     if cc_option.lower() == 'quic':
         cmd = ['./quic_server']
-        path = '../external/proto-quic/out/Release'
+        path = '../external/proto-quic/src/out/Release'
     
     if len(sys.argv) >= 3:
         cmd += sys.argv[2:]
