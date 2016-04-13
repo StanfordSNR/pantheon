@@ -38,3 +38,10 @@ Example:
   $ python server.py TCP PORT
   $ python client.py TCP HOST PORT
   ```
+
+* To use LEDBAT as congestion control:
+
+  ```
+  $ python server.py LEDBAT -l -p PORT
+  $ python client.py LEDBAT HOST PORT
+  ```
