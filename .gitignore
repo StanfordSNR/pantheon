@@ -4,3 +4,4 @@ bin/
 *.swp
 *.swo
 *.pyc
+test/random-input
