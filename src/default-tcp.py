@@ -12,8 +12,11 @@ def main():
         print "Done."
 
     if option == 'receiver':
-        proc = subprocess.Popen(['./find-unused-port'], stdout = subprocess.PIPE)
-        port = proc.communicate()[0]  
+        if len(sys.argv) == 3:
+            port = sys.argv[2]
+        else:
+            proc = subprocess.Popen(['./find-unused-port'], stdout = subprocess.PIPE)
+            port = proc.communicate()[0]  
         print "Listening on port:", port
         cmd = ['./tcpserver', port]
         path = '../external/sourdough/examples'
