@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/StanfordLPNG/pantheon.svg?branch=master)](https://travis-ci.org/StanfordLPNG/pantheon)
+
 # Pantheon of Congestion Control
 
 ## Make
