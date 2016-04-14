@@ -20,6 +20,9 @@ def main():
         subprocess.call(cmd, cwd = path)
 
     if option == 'sender':
+        if len(sys.argv) < 4:
+            general_usage()
+            return
         ip = sys.argv[2]
         port = sys.argv[3] 
         cmd = ['./tcpclient', ip, port]
