@@ -1,8 +1,20 @@
 language: python
 sudo: required
+services: docker
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-4.9
 
 before_script:
-  - sudo ./make-external.sh
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 99
+  - ./make-external.sh
 
 script:
   - python run-tests.py
+
+notifications:
+  slack: keithw:WjjCMz8yip3iQrHKBmkFGI1u
