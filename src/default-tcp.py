@@ -9,7 +9,7 @@ def main():
     option = sys.argv[1]
 
     if option == 'setup':
-        print "Done."
+        print "Setup done."
 
     if option == 'receiver':
         if len(sys.argv) == 3:
