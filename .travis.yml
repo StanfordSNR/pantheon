@@ -15,7 +15,7 @@ before_script:
 
 script:
   - python setup_tests.py
-  - python -m unittest discover ./test
+  - cd ./test && python -m unittest discover
 
 notifications:
   slack: keithw:WjjCMz8yip3iQrHKBmkFGI1u
