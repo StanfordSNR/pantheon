@@ -9,15 +9,16 @@ def main():
     option = sys.argv[1]
 
     if option == 'setup':
-        print "Setup done."
+        sys.stderr.write("Setup done.\n")
 
     if option == 'receiver':
         if len(sys.argv) == 3:
             port = sys.argv[2]
         else:
-            proc = subprocess.Popen(['./find-unused-port'], stdout = subprocess.PIPE)
+            proc = subprocess.Popen(['./find_unused_port'], stdout = subprocess.PIPE)
             port = proc.communicate()[0]  
-        print "Listening on port:", port
+        sys.stderr.write("Listening on port: %s\n" % port)
+
         cmd = ['./tcpserver', port]
         path = '../external/sourdough/examples'
         subprocess.call(cmd, cwd = path)

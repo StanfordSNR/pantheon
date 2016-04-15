@@ -15,9 +15,8 @@ def main():
         if len(sys.argv) == 3:
             port = sys.argv[2]
         else:  
-            proc = subprocess.Popen(['./find-unused-port'], stdout = subprocess.PIPE)
+            proc = subprocess.Popen(['./find_unused_port'], stdout = subprocess.PIPE)
             port = proc.communicate()[0]  
-
         sys.stderr.write("Listening on port: %s\n" % port)
 
         cmd = ['./ucat', '-l', '-p', port]

@@ -2,11 +2,12 @@ import os, subprocess
 import unittest
 
 class TestLedbat(unittest.TestCase):
+
     def test_diff(self):
         DEVNULL = open(os.devnull, 'wb')
         ledbat_src = '../src/ledbat.py'
-        input_file = 'test-files/random-input'
-        output_file = 'test-files/ledbat-output'
+        input_file = 'test_files/random_input'
+        output_file = 'test_files/ledbat_output'
 
         # run ledbat setup, ignore any output
         setup_cmd = 'python %s setup' % ledbat_src
@@ -15,7 +16,7 @@ class TestLedbat(unittest.TestCase):
         setup_proc.communicate()
         
         # find unused port
-        port_proc = subprocess.Popen('../src/find-unused-port',
+        port_proc = subprocess.Popen('../src/find_unused_port',
                     stdout = subprocess.PIPE, shell = True) 
         port = port_proc.communicate()[0]
 

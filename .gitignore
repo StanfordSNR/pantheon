@@ -4,4 +4,4 @@ bin/
 *.swp
 *.swo
 *.pyc
-test/test-files
+test/test_files
