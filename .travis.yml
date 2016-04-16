@@ -19,3 +19,4 @@ script:
 
 notifications:
   slack: keithw:WjjCMz8yip3iQrHKBmkFGI1u
+  email: false

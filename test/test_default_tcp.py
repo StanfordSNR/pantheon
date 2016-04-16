@@ -1,33 +1,54 @@
-import os, sys, subprocess
+import os, subprocess
+import unittest
 import time
 
-def main():
-    path = '../src'
-    DEVNULL = open(os.devnull, 'wb')
+class TestLedbat(unittest.TestCase):
+    def test_diff(self):
+        DEVNULL = open(os.devnull, 'wb')
+        src_file = '../src/default_tcp.py'
+        input_file = 'test_files/random_input'
+        output_file = 'test_files/default_tcp_output'
 
-    setup_cmd = 'python default_tcp.py setup'
-    setup_proc = subprocess.Popen(setup_cmd, cwd = path, shell = True)
-    setup_proc.communicate()
+        # run setup, ignore any output
+        setup_cmd = 'python %s setup' % src_file
+        setup_proc = subprocess.Popen(setup_cmd, shell = True,
+                        stdout = DEVNULL, stderr = DEVNULL)
+        setup_proc.communicate()
+        
+        # find unused port
+        port_proc = subprocess.Popen('../src/find_unused_port',
+                    stdout = subprocess.PIPE, shell = True) 
+        port = port_proc.communicate()[0]
 
-    port_proc = subprocess.Popen('./find_unused_port', cwd = path, 
-                stdout = subprocess.PIPE, shell = True) 
-    port = port_proc.communicate()[0]
+        # run receiver, which outputs to output_file 
+        recv_cmd = 'python %s receiver %s' % (src_file, port)
+        output_f = open(output_file, 'wb')
+        recv_proc = subprocess.Popen(recv_cmd, shell = True,
+                    stdout = output_f, stderr = DEVNULL)
 
-    recv_cmd = 'python default_tcp.py receiver %s' % port
-    recv_proc = subprocess.Popen(recv_cmd, cwd = path, shell = True,
-                    stdout = DEVNULL, stderr = DEVNULL)
+        # run sender, which gets input from input_file 
+        ip = '127.0.0.1'
+        send_cmd = 'python %s sender %s %s' % (src_file, ip, port)
+        input_f = open(input_file, 'rb')
+        send_proc = subprocess.Popen(send_cmd, shell = True,
+                    stdin = input_f, stdout = DEVNULL, stderr = DEVNULL)
 
-    ip = '127.0.0.1'
-    send_cmd = 'python default_tcp.py sender %s %s < ../test/random_input' \
-                % (ip, port)
-    send_proc = subprocess.Popen(send_cmd, cwd = path, shell = True,
-                    stdout = DEVNULL, stderr = DEVNULL)
+        # wait until receiver and sender finish transferring 
+        send_proc.communicate()
+        time.sleep(1)
+        recv_proc.terminate()
+        output_f.close()
+        input_f.close()
+        DEVNULL.close()
 
-    time.sleep(5)
-    send_proc.terminate()
-    recv_proc.terminate()
+        # find the difference between the file sent and received
+        diff_cmd = 'diff %s %s' % (input_file, output_file) 
+        diff_proc = subprocess.Popen(diff_cmd, shell = True,
+                    stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+        diff_output = diff_proc.communicate()[0]
 
-    DEVNULL.close()
-    
+        # check the difference result
+        self.assertEqual(diff_output, '')
+
 if __name__ == '__main__':
-    main()
+    unittest.main()
