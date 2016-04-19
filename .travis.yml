@@ -11,11 +11,11 @@ addons:
 
 before_script:
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 99
-  - ./make_external.sh
 
 script:
-  - python setup_tests.py
-  - cd ./test && python -m unittest discover
+  - ./configure
+  - make -j
+# - cd ./test && python -m unittest discover
 
 notifications:
   slack: keithw:WjjCMz8yip3iQrHKBmkFGI1u
