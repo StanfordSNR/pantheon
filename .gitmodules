@@ -1,6 +1,0 @@
-[submodule "external/sourdough"]
-	path = external/sourdough
-	url = https://github.com/StanfordLPNG/sourdough.git
-[submodule "external/libutp"]
-	path = external/libutp
-	url = https://github.com/StanfordLPNG/libutp.git
