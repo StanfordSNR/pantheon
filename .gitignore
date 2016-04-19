@@ -18,7 +18,8 @@ Makefile.in
 /compile
 .deps
 /autoscan.log
+/autoscan-*.log
+/configure.scan
 
 /src/find_unused_port
-
 
