@@ -1,7 +1,10 @@
 *~
+*.a
+*.o
 *.swp
 *.swo
 *.pyc
+*.log
 Makefile
 Makefile.in
 /aclocal.m4
@@ -17,9 +20,6 @@ Makefile.in
 /stamp-h1
 /compile
 .deps
-/autoscan.log
-/autoscan-*.log
 /configure.scan
 
 /src/find_unused_port
-
