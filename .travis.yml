@@ -17,6 +17,7 @@ script:
   - autoreconf -fi
   - ./configure
   - make -j
+  - python ./test/test.py default_tcp
   - python ./test/test.py ledbat
 
 notifications:
