@@ -9,6 +9,9 @@ addons:
     packages:
     - g++-4.9
 
+install:
+  - pip install interruptingcow 
+
 before_script:
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 99
   - ./make_third_party.sh
