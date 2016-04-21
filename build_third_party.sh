@@ -2,7 +2,7 @@
 
 cd third_party
 
-# make libutp
+# build libutp
 cd libutp
 make
 cd ..
