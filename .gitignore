@@ -5,6 +5,7 @@
 *.swo
 *.pyc
 *.log
+*.html
 Makefile
 Makefile.in
 /aclocal.m4
