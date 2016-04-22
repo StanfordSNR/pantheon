@@ -6,14 +6,16 @@ addons:
   apt:
     sources:
     - ubuntu-toolchain-r-test
-    - keithw/mahimahi
     packages:
     - g++-4.9
-    - mahimahi
+    - iperf
 
 install:
   - pip install interruptingcow 
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 99
+  - sudo add-apt-repository -y ppa:keithw/mahimahi
+  - sudo apt-get update
+  - sudo apt-get -y --force-yes install mahimahi
 
 script:
   - ./build_third_party.sh
