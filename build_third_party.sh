@@ -10,7 +10,6 @@ make
 # build proto-quic
 cd $third_party_dir/proto-quic
 export PATH=$PATH:`pwd`/depot_tools
-./src/build/install-build-deps.sh --no-prompt
-
 cd $third_party_dir/proto-quic/src
+./build/install-build-deps.sh --no-syms --no-arm --no-chromeos-fonts --no-nacl
 gclient runhooks && ninja -C out/Release quic_client quic_server net_unittests
