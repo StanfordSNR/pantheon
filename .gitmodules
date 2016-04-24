@@ -1,3 +1,6 @@
 [submodule "third_party/libutp"]
 	path = third_party/libutp
 	url = https://github.com/bittorrent/libutp.git
+[submodule "third_party/proto-quic"]
+	path = third_party/proto-quic
+	url = https://github.com/google/proto-quic.git
