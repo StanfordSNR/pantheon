@@ -3,25 +3,25 @@ from subprocess import Popen, PIPE
 from usage import general_usage
 
 def main():
-    script_path = os.path.dirname(__file__)
-    find_unused_port_file = os.path.join(script_path, 'find_unused_port')
+    src_dir = os.path.abspath(os.path.dirname(__file__))
+    find_unused_port_file = os.path.join(src_dir, 'find_unused_port')
     src_file = 'iperf'
 
     if len(sys.argv) < 2:
         general_usage()
         return
 
-    cc_option = sys.argv[1]
+    option = sys.argv[1]
 
     # setup
-    if cc_option == 'setup':
+    if option == 'setup':
         if len(sys.argv) != 2: 
             general_usage()
             return
         sys.stderr.write("Setup done.\n")
 
     # receiver
-    if cc_option == 'receiver':
+    if option == 'receiver':
         if len(sys.argv) != 2: 
             general_usage()
             return
@@ -34,7 +34,7 @@ def main():
         subprocess.call(cmd)
 
     # sender
-    if cc_option == 'sender':
+    if option == 'sender':
         if len(sys.argv) != 4:
             general_usage()
             return
@@ -43,7 +43,6 @@ def main():
         port = sys.argv[3] 
         cmd = [src_file, '-c', ip, '-p', port, '-t', '10']
         subprocess.call(cmd)
-
 
 if __name__ == '__main__':
     main()
