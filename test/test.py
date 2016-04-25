@@ -21,6 +21,9 @@ def parse_cc_option(cc_option):
     if cc_option == 'quic':
         return 'QUIC', 'quic.py'
 
+    if cc_option == 'pcc':
+        return 'PCC', 'pcc.py'
+
     print "Congestion control option is not valid."
     return None, None
 
@@ -40,8 +43,8 @@ class TestCongestionControl(unittest.TestCase):
     def __del__(self):
         self.DEVNULL.close()
 
-    # Default TCP
-    def run_default_tcp(self):
+    # Pattern 1: run receiver, run sender, no necessary input to sender
+    def run_pattern1(self):
         # run receiver
         recv_cmd = ['python', self.src_file, 'receiver'] 
         recv_proc = Popen(recv_cmd, stdout=self.DEVNULL, stderr=PIPE)
@@ -58,6 +61,8 @@ class TestCongestionControl(unittest.TestCase):
 
         send_proc = Popen(mahimahi_cmd, shell=True, 
                     stdout=self.DEVNULL, stderr=self.DEVNULL)
+
+        # simply wait for 10 seconds
         try:
             with timeout(10, exception=RuntimeError):
                 send_proc.communicate()
@@ -69,8 +74,8 @@ class TestCongestionControl(unittest.TestCase):
         send_proc.terminate()
         recv_proc.terminate()
 
-    # LEDBAT
-    def run_ledbat(self):
+    # Pattern 2: run receiver, run sender, require input to sender from stdin
+    def run_pattern2(self):
         # run receiver
         recv_cmd = ['python', self.src_file, 'receiver'] 
         recv_proc = Popen(recv_cmd, stdout=self.DEVNULL, stderr=PIPE)
@@ -101,7 +106,7 @@ class TestCongestionControl(unittest.TestCase):
         send_proc.terminate()
         recv_proc.terminate()
 
-    # QUIC
+    # QUIC Pattern: run sender, run receiver, generate a HTML as input to sender
     def run_quic(self):
         # generate html of size that can be transferred longer than 10 seconds 
         generate_html(300000)
@@ -115,7 +120,7 @@ class TestCongestionControl(unittest.TestCase):
         port = port_info.rstrip().rsplit(' ', 1)[1]
 
         # run receiver (notice direction: switch uplink and downlink trace)
-        recv_cmd = "'python %s receiver %s %s > /dev/null'" % (self.src_file, self.ip, port)
+        recv_cmd = "'python %s receiver %s %s'" % (self.src_file, self.ip, port)
         mahimahi_cmd = 'mm-link %s %s --once --downlink-log=%s -- sh -c %s' % \
                         (self.downlink_trace, self.uplink_trace,
                          self.link_log, recv_cmd) 
@@ -156,11 +161,11 @@ class TestCongestionControl(unittest.TestCase):
 
         print 'Running %s...' % self.cc_friendly_name 
         # add more congestion control mechanisms tests here
-        if src_name == 'default_tcp.py':
-            self.run_default_tcp()
+        if src_name == 'default_tcp.py' or src_name == 'pcc.py':
+            self.run_pattern1()
 
         if src_name == 'ledbat.py':
-            self.run_ledbat()
+            self.run_pattern2()
 
         if src_name == 'quic.py':
             self.run_quic()
