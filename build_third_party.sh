@@ -13,6 +13,12 @@ make
 cd $third_party_dir/pcc/receiver
 make
 
+# build verus
+cd $third_party_dir/verus
+autoreconf -i
+./configure
+make
+
 # build proto-quic
 # cd $third_party_dir/proto-quic
 # export PATH=$PATH:`pwd`/depot_tools
