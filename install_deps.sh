@@ -6,4 +6,4 @@ sudo apt-get -y --force-yes install mahimahi
 sudo sysctl -w net.ipv4.ip_forward=1
 
 sudo apt-get -y --force-yes install python-pip iperf libnss3-tools
-sudo pip install interruptingcow
+pip install interruptingcow
