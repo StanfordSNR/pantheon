@@ -17,33 +17,48 @@
   $ git submodule update
   ```
 
-  or clone this project with the --recursive option
-
-3. Make all the external repositories:
+3. Install dependencies: 
 
   ```
-  $ ./make-external.sh
+  $ ./install_deps.sh
   ```
 
+4. Build third-party repositories:
+
+  ```
+  $ ./build_third_party.sh
+  ```
+
+5. Build pantheon:
+
+  ```
+  $ ./autogen.sh
+  $ ./configure
+  $ make -j
+  ```
 ## Usage
 
-The executable files can be found in the 'src' folder at the top
-level. Run 'server.py' and 'client.py' in two shells
-respectively, specifying a congestion control option along with
-additional arguments.
-
-Example:
-
-* To use default TCP as congestion control:
+* General Usage:
 
   ```
-  $ python server.py TCP PORT
-  $ python client.py TCP HOST PORT
+  $ cd panthon/src
+  $ python congestion_control_name.py setup 
+  $ python congestion_control_name.py receiver 
+  $ python congestion_control_name.py sender IP port 
   ```
 
-* To use LEDBAT as congestion control:
+* Exception: to run QUIC,
 
   ```
-  $ python server.py LEDBAT -l -p PORT
-  $ python client.py LEDBAT HOST PORT
+  $ cd panthon/src
+  $ python quic.py setup 
+  $ python quic.py sender 
+  $ python quic.py receiver IP port 
+  ```
+
+* Run tests:
+
+  ```
+  $ cd pantheon/test
+  $ python test.py congestion_control_name
   ```
