@@ -22,6 +22,7 @@ script:
   - python test.py default_tcp
   - python test.py ledbat
   - python test.py pcc
+  - python test.py verus
   # - python test.py quic
 
 notifications:

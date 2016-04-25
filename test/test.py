@@ -80,7 +80,7 @@ class TestCongestionControl(unittest.TestCase):
 
         # simply wait for 10 seconds
         try:
-            with timeout(3, exception=RuntimeError):
+            with timeout(10, exception=RuntimeError):
                 send_proc.communicate()
         except:
             pass
