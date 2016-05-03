@@ -2,6 +2,9 @@ language: python
 sudo: required
 services: docker
 
+git:
+  submodules: false
+
 addons:
   apt:
     sources:
@@ -9,12 +12,15 @@ addons:
     packages:
     - g++-4.9
 
+before_install:
+  - git submodule update --init
+
 install:
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 99
 
 script:
-  - sh -x install_deps.sh
-  - sh -x build_third_party.sh
+  - ./install_deps.sh
+  - ./build_third_party.sh
   - ./autogen.sh
   - ./configure
   - make -j
@@ -22,8 +28,8 @@ script:
   - python test.py default_tcp
   - python test.py ledbat
   - python test.py pcc
+  - python test.py quic
   # - python test.py verus
-  # - python test.py quic
 
 notifications:
   slack: keithw:WjjCMz8yip3iQrHKBmkFGI1u
