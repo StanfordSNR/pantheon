@@ -9,7 +9,7 @@ def main():
 
     if len(sys.argv) < 2:
         general_usage()
-        return
+        sys.exit(1)
 
     option = sys.argv[1]
 
@@ -17,32 +17,43 @@ def main():
     if option == 'setup':
         if len(sys.argv) != 2: 
             general_usage()
-            return
+            sys.exit(1)
         sys.stderr.write("Setup done.\n")
 
     # receiver
     if option == 'receiver':
         if len(sys.argv) != 2: 
             general_usage()
-            return
+            sys.exit(1)
 
-        proc = Popen([find_unused_port_file], stdout=PIPE)
-        port = proc.communicate()[0]  
+        try:
+            proc = Popen([find_unused_port_file], stdout=PIPE)
+            port = proc.communicate()[0]
+        except:
+            sys.exit(1)
+
         sys.stderr.write("Listening on port: %s\n" % port)
 
-        cmd = [src_file, '-s', '-p', port, '-t', '10']
-        subprocess.call(cmd)
+        try:
+            cmd = [src_file, '-s', '-p', port, '-t', '10']
+            subprocess.call(cmd)
+        except:
+            sys.exit(1)
 
     # sender
     if option == 'sender':
         if len(sys.argv) != 4:
             general_usage()
-            return
+            sys.exit(1)
 
         ip = sys.argv[2]
         port = sys.argv[3] 
-        cmd = [src_file, '-c', ip, '-p', port, '-t', '10']
-        subprocess.call(cmd)
+
+        try:
+            cmd = [src_file, '-c', ip, '-p', port, '-t', '10']
+            subprocess.call(cmd)
+        except:
+            sys.exit(1)
 
 if __name__ == '__main__':
     main()
