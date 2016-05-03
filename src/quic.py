@@ -76,6 +76,7 @@ def main():
                  os.path.join(src_dir, 'certs/out/leaf_cert.pem'),
               '--key_file=%s' % \
                  os.path.join(src_dir, 'certs/out/leaf_cert.pkcs8')]
+        print cmd
         subprocess.call(cmd)
 
     # receiver

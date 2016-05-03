@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -xe
 
 sudo add-apt-repository -y ppa:keithw/mahimahi
 sudo apt-get update

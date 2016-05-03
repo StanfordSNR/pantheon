@@ -13,8 +13,8 @@ install:
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 99
 
 script:
-  - ./install_deps.sh
-  - ./build_third_party.sh
+  - sh -x install_deps.sh
+  - sh -x build_third_party.sh
   - ./autogen.sh
   - ./configure
   - make -j
@@ -22,7 +22,7 @@ script:
   - python test.py default_tcp
   - python test.py ledbat
   - python test.py pcc
-  - python test.py verus
+  # - python test.py verus
   # - python test.py quic
 
 notifications:
