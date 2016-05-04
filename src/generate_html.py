@@ -30,12 +30,3 @@ def generate_html(size):
             "</html>\n")
 
     f.close()
-
-def main():
-    size = 1000
-    if len(sys.argv) == 2:
-        size = int(sys.argv[1])
-    generate_html(size)
-
-if __name__ == '__main__':
-    main()
