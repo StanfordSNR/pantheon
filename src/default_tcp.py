@@ -1,6 +1,8 @@
-import os, sys, subprocess
-from subprocess import Popen, PIPE
-from usage import general_usage
+#!/usr/bin/python
+
+import os, sys
+from subprocess import check_output, check_call 
+import usage
 
 def main():
     src_dir = os.path.abspath(os.path.dirname(__file__))
@@ -8,7 +10,7 @@ def main():
     src_file = 'iperf'
 
     if len(sys.argv) < 2:
-        general_usage()
+        usage.print_usage(usage.RECV_FIRST)
         sys.exit(1)
 
     option = sys.argv[1]
@@ -16,44 +18,33 @@ def main():
     # setup
     if option == 'setup':
         if len(sys.argv) != 2: 
-            general_usage()
+            usage.print_usage(usage.RECV_FIRST)
             sys.exit(1)
-        sys.stderr.write("Setup done.\n")
+        sys.stderr.write("Receiver first.\n")
 
     # receiver
     if option == 'receiver':
         if len(sys.argv) != 2: 
-            general_usage()
+            usage.print_usage(usage.RECV_FIRST)
             sys.exit(1)
 
-        try:
-            proc = Popen([find_unused_port_file], stdout=PIPE)
-            port = proc.communicate()[0]
-        except:
-            sys.exit(1)
-
+        port = check_output([find_unused_port_file])
         sys.stderr.write("Listening on port: %s\n" % port)
 
-        try:
-            cmd = [src_file, '-s', '-p', port, '-t', '10']
-            subprocess.call(cmd)
-        except:
-            sys.exit(1)
+        cmd = [src_file, '-s', '-p', port, '-t', '15']
+        check_call(cmd)
 
     # sender
     if option == 'sender':
         if len(sys.argv) != 4:
-            general_usage()
+            usage.print_usage(usage.RECV_FIRST)
             sys.exit(1)
 
         ip = sys.argv[2]
         port = sys.argv[3] 
 
-        try:
-            cmd = [src_file, '-c', ip, '-p', port, '-t', '10']
-            subprocess.call(cmd)
-        except:
-            sys.exit(1)
+        cmd = [src_file, '-c', ip, '-p', port, '-t', '15']
+        check_call(cmd)
 
 if __name__ == '__main__':
     main()
