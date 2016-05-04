@@ -1,8 +1,7 @@
 #!/usr/bin/python
 
-import os, sys 
+import os, sys, signal 
 from subprocess import Popen, PIPE
-from interruptingcow import timeout
 import unittest
 
 # print test usage
@@ -20,6 +19,9 @@ class TestCongestionControl(unittest.TestCase):
 
     def __del__(self):
         self.DEVNULL.close()
+
+    def timeout_handler(signum, frame):
+        raise
 
     def run_congestion_control(self, first_to_run):
         second_to_run = 'sender'
@@ -47,12 +49,13 @@ class TestCongestionControl(unittest.TestCase):
         sys.stderr.write('Running %s...\n' % self.cc_option)
 
         # running for 10 seconds
+        signal.signal(signal.SIGALRM, self.timeout_handler)
+        signal.alarm(10)
+
         try:
-            with timeout(10, exception=RuntimeError):
-                proc2_err = proc2.communicate()[1]
+            proc2_err = proc2.communicate()[1]
         except:
-            sys.stderr.write('Done.\n')
-            pass
+            sys.stderr.write('Done\n')
         else:
             if proc2.returncode != 0:
                 sys.stderr.write(proc2_err)
