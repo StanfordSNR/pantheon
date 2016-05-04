@@ -1,42 +1,26 @@
-import os, sys, subprocess, errno
-from subprocess import Popen, PIPE
-from usage import general_usage
+#!/usr/bin/python
+
+import os, sys, time, errno
+from subprocess import check_output, check_call, PIPE, Popen 
+import usage
+from generate_html import generate_html
+
+def print_usage():
+    usage.print_usage(os.path.basename(__file__), order=usage.SEND_FIRST)
+    sys.exit(1)
 
 def setup():
     # generate certificate
-    certs_dir = os.path.abspath(os.path.join(os.path.dirname(__file__),
-                'certs'))
-    certs_proc = subprocess.call(['./generate-certs.sh'], cwd=certs_dir)
+    certs_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'certs'))
+    certs_proc = check_call(['./generate-certs.sh'], cwd=certs_dir)
 
     # trust certificate
     pem = os.path.join(certs_dir, 'out/2048-sha256-root.pem')
     cmd = 'certutil -d sql:$HOME/.pki/nssdb -A -t "C,," -n "QUIC" -i %s' % pem
-    subprocess.call(cmd, shell=True)
+    check_call(cmd, shell=True)
 
-    # create example website served by QUIC server
-    website_name = '/tmp/quic-data/www.example.org/index.html'
-    website_dir = os.path.dirname(website_name)
-
-    # create file directory if it doesn't exist
-    try:
-        os.makedirs(website_dir)
-    except OSError as exception:
-        if exception.errno != errno.EEXIST:
-            raise
-
-    f = open(website_name, 'wb')
-    f.write("HTTP/1.1 200 OK\n"
-            "X-Original-Url: https://www.example.org/\n"
-            "\n"
-            "<!DOCTYPE html>\n"
-            "<html>\n"
-            "<body>\n"
-            "<p>\n"
-            "This is an example website for QUIC.\n"
-            "</p>\n"
-            "</body>\n"
-            "</html>\n")
-    f.close()
+    # generate a html of size that can be transferred longer than 10 seconds 
+    generate_html(300000)
 
 def main():
     # find paths of this script, find_unused_port and scheme source to run
@@ -49,24 +33,22 @@ def main():
     quic_client = os.path.join(quic_src_dir, 'out/Release/quic_client')
 
     if len(sys.argv) < 2:
-        general_usage()
-        return
+        print_usage()
 
     option = sys.argv[1]
 
     # setup
     if option == 'setup':
         if len(sys.argv) != 2: 
-            general_usage()
-            return
+            print_usage()
+
         setup() 
-        sys.stderr.write("Setup done.\n")
+        sys.stderr.write("Sender first.\n")
 
     # sender
     if option == 'sender':
         if len(sys.argv) != 2: 
-            general_usage()
-            return
+            print_usage()
 
         sys.stderr.write("Listening on port: 6121\n")
 
@@ -76,20 +58,19 @@ def main():
                  os.path.join(src_dir, 'certs/out/leaf_cert.pem'),
               '--key_file=%s' % \
                  os.path.join(src_dir, 'certs/out/leaf_cert.pkcs8')]
-        print cmd
-        subprocess.call(cmd)
+        check_call(cmd)
 
     # receiver
     if option == 'receiver':
         if len(sys.argv) != 4:
-            general_usage()
-            return
+            print_usage()
 
         ip = sys.argv[2]
         port = sys.argv[3]
+
         cmd = [quic_client, '--host=%s' % ip, '--port=%s' % port,
               'https://www.example.org/']
-        subprocess.call(cmd)
+        check_call(cmd)
     
 if __name__ == '__main__':
     main()
