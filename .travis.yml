@@ -25,10 +25,10 @@ script:
   - ./configure
   - make -j
   - cd test
-  - python test.py default_tcp
-  - python test.py ledbat
-  - python test.py pcc
-  # - python test.py quic
+  - ./test.py default_tcp
+  - ./test.py ledbat
+  - ./test.py pcc
+  - ./test.py quic
 
 notifications:
   slack: keithw:WjjCMz8yip3iQrHKBmkFGI1u
