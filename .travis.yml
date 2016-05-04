@@ -28,8 +28,7 @@ script:
   - python test.py default_tcp
   - python test.py ledbat
   - python test.py pcc
-  - python test.py quic
-  # - python test.py verus
+  # - python test.py quic
 
 notifications:
   slack: keithw:WjjCMz8yip3iQrHKBmkFGI1u
