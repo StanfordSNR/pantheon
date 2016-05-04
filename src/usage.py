@@ -1,14 +1,12 @@
 RECV_FIRST = 0
 SEND_FIRST = 1
 
-def print_usage(option):
+def print_usage(name, option=RECV_FIRST):
     print "Usage:" 
-    print "./scheme.py setup"
+    print "./%s setup" % name
     if option == RECV_FIRST:
-        print "./scheme.py receiver"
-        print "./scheme.py sender IP port"
+        print "./%s receiver" % name
+        print "./%s sender IP port" % name
     elif option == SEND_FIRST:
-        print "./scheme.py sender"
-        print "./scheme.py receiver IP port"
-    else:
-        print "Error in printing usage!"
+        print "./%s sender" % name
+        print "./%s receiver IP port" % name
