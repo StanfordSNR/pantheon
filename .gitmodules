@@ -7,6 +7,3 @@
 [submodule "third_party/pcc"]
 	path = third_party/pcc
 	url = https://github.com/modong/pcc.git
-[submodule "third_party/verus"]
-	path = third_party/verus
-	url = https://github.com/yzaki/verus.git
