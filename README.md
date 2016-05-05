@@ -13,8 +13,7 @@
 2. Get submodules:
 
   ```
-  $ git submodule init
-  $ git submodule update
+  $ git submodule update --init
   ```
 
 3. Install dependencies: 
@@ -42,23 +41,28 @@
 
   ```
   $ cd panthon/src
-  $ python congestion_control_name.py setup 
-  $ python congestion_control_name.py receiver 
-  $ python congestion_control_name.py sender IP port 
+  $ ./congestion-control-name.py setup 
   ```
 
-* Exception: to run QUIC,
+  Depending on the print of running order, run 
 
   ```
-  $ cd panthon/src
-  $ python quic.py setup 
-  $ python quic.py sender 
-  $ python quic.py receiver IP port 
+  # Receiver first
+  $ ./congestion-control-name.py receiver 
+  $ ./congestion-control-name.py sender IP port 
+  ```
+
+  or
+
+  ```
+  # Sender first
+  $ ./congestion-control-name.py sender 
+  $ ./congestion-control-name.py receiver IP port 
   ```
 
 * Run tests:
 
   ```
   $ cd pantheon/test
-  $ python test.py congestion_control_name
+  $ ./test.py congestion-control_name
   ```
