@@ -10,6 +10,9 @@ sudo sysctl -w net.ipv4.ip_forward=1
 sudo apt-get -yq --force-yes install iperf
 
 # QUIC
+# generate certificate using certutil
+sudo apt-get -yq --force-yes install libnss3-tools
+# build dependencies
 dev_list="bison cdbs curl dpkg-dev elfutils devscripts fakeroot flex 
           git-core git-svn gperf libapache2-mod-php5 libasound2-dev 
           libbrlapi-dev libav-tools libbz2-dev libcairo2-dev libcap-dev 
@@ -30,5 +33,4 @@ lib_list="libatk1.0-0 libc6 libasound2 libcairo2 libcap2 libcups2 libexpat1
           libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxdmcp6 libxext6
           libxfixes3 libxi6 libxinerama1 libxrandr2 libxrender1 libxtst6
           zlib1g"
-
 sudo apt-get -yq --force-yes install $dev_list $lib_list
