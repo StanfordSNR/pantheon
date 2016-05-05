@@ -33,7 +33,8 @@ def setup():
 
     # trust certificate
     pem = os.path.join(certs_dir, 'out/2048-sha256-root.pem')
-    cmd = 'certutil -d sql:%s -A -t "C,," -n "QUIC" -i %s' % (nssdb_dir, pem)
+    cmd = 'certutil -d sql:%s -A -t "C,," -n "QUIC" -i %s -f %s' \
+            % (nssdb_dir, pem, cert_pwd)
     check_call(cmd, shell=True)
 
     # generate a html of size that can be transferred longer than 10 seconds 
