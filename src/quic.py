@@ -26,6 +26,7 @@ def setup():
         if exception.errno != errno.EEXIST:
             raise
     cmd = 'certutil -d %s -N -f %s' % (nssdb_dir, cert_pwd)
+    check_call(cmd, shell=True)
 
     # generate certificate
     certs_proc = check_call(['./generate-certs.sh'], cwd=certs_dir)
