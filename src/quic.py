@@ -10,13 +10,29 @@ def print_usage():
     sys.exit(1)
 
 def setup():
-    # generate certificate
+    # generate a random password
     certs_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'certs'))
+    cert_pwd = os.path.join(certs_dir, 'cert_pwd')
+    cmd = 'date +%%s | sha256sum | base64 | head -c 32 > %s' % cert_pwd 
+    check_call(cmd, shell=True)
+
+    # initialize certificate
+    home_dir = os.path.abspath(os.path.expanduser('~'))
+    nssdb_dir = os.path.join(home_dir, '.pki/nssdb')
+    # create nssdb directory if it doesn't exist
+    try:
+        os.makedirs(nssdb_dir)
+    except OSError as exception:
+        if exception.errno != errno.EEXIST:
+            raise
+    cmd = 'certutil -d %s -N -f %s' % (nssdb_dir, cert_pwd)
+
+    # generate certificate
     certs_proc = check_call(['./generate-certs.sh'], cwd=certs_dir)
 
     # trust certificate
     pem = os.path.join(certs_dir, 'out/2048-sha256-root.pem')
-    cmd = 'certutil -d sql:$HOME/.pki/nssdb -A -t "C,," -n "QUIC" -i %s' % pem
+    cmd = 'certutil -d sql:%s -A -t "C,," -n "QUIC" -i %s' % (nssdb_dir, pem)
     check_call(cmd, shell=True)
 
     # generate a html of size that can be transferred longer than 10 seconds 

@@ -30,3 +30,5 @@ lib_list="libatk1.0-0 libc6 libasound2 libcairo2 libcap2 libcups2 libexpat1
           libxfixes3 libxi6 libxinerama1 libxrandr2 libxrender1 libxtst6
           zlib1g" 
 sudo apt-get -yq --force-yes install $dev_list $lib_list
+## generate certificate using certutil
+sudo apt-get -yq --force-yes install libnss3-tools
