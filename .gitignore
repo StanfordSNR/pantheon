@@ -22,6 +22,7 @@ Makefile.in
 /compile
 .deps
 /configure.scan
+/cert_pwd
 
 /src/find_unused_port
 /src/certs/out/
