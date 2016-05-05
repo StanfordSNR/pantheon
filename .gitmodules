@@ -1,9 +1,12 @@
 [submodule "third_party/libutp"]
 	path = third_party/libutp
 	url = https://github.com/bittorrent/libutp.git
+  ignore = dirty
 [submodule "third_party/proto-quic"]
 	path = third_party/proto-quic
 	url = https://github.com/google/proto-quic.git
+  ignore = dirty
 [submodule "third_party/pcc"]
 	path = third_party/pcc
 	url = https://github.com/modong/pcc.git
+  ignore = dirty
