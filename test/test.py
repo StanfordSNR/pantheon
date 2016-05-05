@@ -136,7 +136,9 @@ def main():
     # create test suite to run
     suite = unittest.TestSuite()
     suite.addTest(TestCongestionControl("test_congestion_control", cc_option))
-    unittest.TextTestRunner().run(suite)
+    success = unittest.TextTestRunner().run(suite).wasSuccessful()
+    if not success:
+        sys.exit(1)
 
 if __name__ == '__main__':
    main() 
