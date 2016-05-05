@@ -1,23 +1,14 @@
 #!/bin/sh -xe
 
-# Mahimahi
+# mahimahi
 sudo add-apt-repository -y ppa:keithw/mahimahi
 sudo apt-get -yq update
 sudo apt-get -yq --force-yes install mahimahi
-sudo sysctl -w net.ipv4.ip_forward=1
 
 # Default TCP
 sudo apt-get -yq --force-yes install iperf
 
 # QUIC
-
-## initialize certificate using certutil
-sudo apt-get -yq --force-yes install libnss3-tools
-date +%s | sha256sum | base64 | head -c 32 > cert_pwd
-mkdir -p $HOME/.pki/nssdb
-certutil -d $HOME/.pki/nssdb -N -f cert_pwd
-
-## build dependencies
 dev_list= "bison cdbs curl dpkg-dev elfutils devscripts fakeroot flex git-core
            git-svn gperf libapache2-mod-php5 libasound2-dev libbrlapi-dev 
            libav-tools libbz2-dev libcairo2-dev libcap-dev libcups2-dev
