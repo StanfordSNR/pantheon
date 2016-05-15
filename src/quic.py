@@ -61,7 +61,7 @@ def main():
             print_usage()
 
         setup() 
-        sys.stderr.write("Sender first.\n")
+        sys.stderr.write("Sender first\n")
 
     # sender
     if option == 'sender':

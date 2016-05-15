@@ -23,7 +23,7 @@ def main():
         if len(sys.argv) != 2: 
             print_usage()
 
-        sys.stderr.write("Receiver first.\n")
+        sys.stderr.write("Receiver first\n")
 
     # receiver
     if option == 'receiver':
