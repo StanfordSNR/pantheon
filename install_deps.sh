@@ -32,3 +32,7 @@ lib_list="libatk1.0-0 libc6 libasound2 libcairo2 libcap2 libcups2 libexpat1
 sudo apt-get -yq --force-yes install $dev_list $lib_list
 ## generate certificate using certutil
 sudo apt-get -yq --force-yes install libnss3-tools
+
+# Verus
+sudo apt-get -yq --force-yes install libtbb-dev libasio-dev libalglib-dev \
+                                     libboost-system-dev
