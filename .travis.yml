@@ -28,6 +28,7 @@ script:
   - ./test.py default_tcp
   - ./test.py ledbat
   - ./test.py pcc
+  - ./test.py verus 
   - ./test.py quic
 
 notifications:
