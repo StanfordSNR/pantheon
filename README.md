@@ -44,7 +44,7 @@
   $ ./congestion-control-name.py setup 
   ```
 
-  Depending on the print of running order, run 
+  Depending on the output about running order, run
 
   ```
   # Receiver first
@@ -64,5 +64,5 @@
 
   ```
   $ cd pantheon/test
-  $ ./test.py congestion-control_name
+  $ ./test.py congestion-control-name
   ```
