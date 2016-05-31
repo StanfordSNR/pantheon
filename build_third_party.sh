@@ -26,3 +26,10 @@ cd $third_party_dir/verus
 autoreconf -i
 ./configure
 make
+
+# build scream
+cd $third_party_dir/scream
+git submodule update --init
+./autogen.sh
+./configure
+make
