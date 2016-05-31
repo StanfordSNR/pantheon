@@ -30,6 +30,7 @@ script:
   - ./test.py pcc
   - ./test.py verus 
   - ./test.py quic
+  - ./test.py scream
 
 notifications:
   slack: keithw:WjjCMz8yip3iQrHKBmkFGI1u
