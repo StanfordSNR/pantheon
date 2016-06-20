@@ -18,3 +18,6 @@
 	path = third_party/scream
 	url = https://github.com/StanfordLPNG/scream.git
   ignore = dirty
+[submodule "third_party/webrtc"]
+	path = third_party/webrtc
+	url = https://github.com/StanfordLPNG/webrtc.git

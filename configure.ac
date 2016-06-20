@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([pantheon], [1.0], [yuyan0@stanford.edu])
+AC_INIT([pantheon], [1.0], [francisyyan@stanford.edu])
 AM_INIT_AUTOMAKE([foreign])
 AC_CONFIG_SRCDIR([src/find_unused_port.c])
 AC_CONFIG_HEADERS([config.h])
