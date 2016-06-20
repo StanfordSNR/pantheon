@@ -33,3 +33,7 @@ git submodule update --init
 ./autogen.sh
 ./configure
 make
+
+# build webrtc
+cd $third_party_dir/webrtc
+npm install
