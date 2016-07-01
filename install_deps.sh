@@ -36,3 +36,7 @@ sudo apt-get -yq --force-yes install libnss3-tools
 # Verus
 sudo apt-get -yq --force-yes install libtbb-dev libasio-dev libalglib-dev \
                                      libboost-system-dev
+
+# WebRTC
+sudo apt-get install chromium-browser nodejs xvfb xfonts-100dpi xfonts-75dpi \
+                     xfonts-cyrillic xorg dbus-x11
