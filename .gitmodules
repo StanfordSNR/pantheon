@@ -22,3 +22,6 @@
 	path = third_party/webrtc
 	url = https://github.com/StanfordLPNG/webrtc.git
   ignore = dirty
+[submodule "third_party/sprout"]
+	path = third_party/sprout
+	url = https://github.com/keithw/alfalfa.git
