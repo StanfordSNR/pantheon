@@ -37,3 +37,9 @@ make
 # build webrtc
 cd $third_party_dir/webrtc
 npm install
+
+# build sprout
+cd $third_party_dir/sprout
+./autogen.sh
+./configure --enable-examples
+make
