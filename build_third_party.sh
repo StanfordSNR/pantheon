@@ -7,13 +7,13 @@ third_party_dir=$proj_dir/third_party
 
 # build libutp
 cd $third_party_dir/libutp
-make
+make -j
 
 # build pcc
 cd $third_party_dir/pcc/sender
-make
+make -j
 cd $third_party_dir/pcc/receiver
-make
+make -j
 
 # build proto-quic
 cd $third_party_dir/proto-quic
@@ -25,14 +25,14 @@ gclient runhooks && ninja -C out/Release quic_client quic_server
 cd $third_party_dir/verus
 autoreconf -i
 ./configure
-make
+make -j
 
 # build scream
 cd $third_party_dir/scream
 git submodule update --init
 ./autogen.sh
 ./configure
-make
+make -j
 
 # build webrtc
 cd $third_party_dir/webrtc
@@ -42,4 +42,4 @@ npm install
 cd $third_party_dir/sprout
 ./autogen.sh
 ./configure --enable-examples
-make
+make -j
