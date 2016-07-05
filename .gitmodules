@@ -25,3 +25,4 @@
 [submodule "third_party/sprout"]
 	path = third_party/sprout
 	url = https://github.com/keithw/alfalfa.git
+  ignore = dirty
