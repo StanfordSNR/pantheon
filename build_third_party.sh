@@ -11,9 +11,9 @@ make -j
 
 # build pcc
 cd $third_party_dir/pcc/sender
-make -j
+make
 cd $third_party_dir/pcc/receiver
-make -j
+make
 
 # build proto-quic
 : '
