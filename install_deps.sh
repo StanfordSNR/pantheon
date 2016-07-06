@@ -43,4 +43,4 @@ sudo apt-get -yq --force-yes install chromium-browser nodejs xvfb \
 
 # Sprout
 sudo apt-get -yq --force-yes install libboost-math-dev \
-  libboost-math1.54.0 libprotobuf8 libprotobuf-dev
+  libboost-math1.54.0 libprotobuf8 libprotoc-dev libprotobuf-dev 
