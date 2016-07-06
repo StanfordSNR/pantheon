@@ -26,6 +26,7 @@ script:
   - make -j
   - cd test
   - ./test.py default_tcp
+  - ./test.py vegas
   - ./test.py ledbat
   - ./test.py pcc
   - ./test.py verus 
