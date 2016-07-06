@@ -21,6 +21,7 @@ Makefile.in
 /stamp-h1
 /compile
 .deps
+/ar-lib
 /configure.scan
 
 /src/find_unused_port
