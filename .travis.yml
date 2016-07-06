@@ -20,7 +20,7 @@ install:
   - ./install_deps.sh
 
 script:
-  - ./build_third_party.sh
+  - source build_third_party.sh
   - ./autogen.sh
   - ./configure
   - make -j
