@@ -48,9 +48,9 @@ class TestCongestionControl(unittest.TestCase):
 
         sys.stderr.write('Running %s...\n' % self.cc_option)
 
-        # running for 10 seconds
+        # running for 60 seconds
         signal.signal(signal.SIGALRM, self.timeout_handler)
-        signal.alarm(10)
+        signal.alarm(60)
 
         try:
             proc2_err = proc2.communicate()[1]
@@ -60,7 +60,7 @@ class TestCongestionControl(unittest.TestCase):
             if proc2.returncode != 0:
                 sys.stderr.write(proc2_err)
             else:
-                sys.stderr.write('Running is shorter than 10s\n')
+                sys.stderr.write('Running is shorter than 60s\n')
             sys.exit(1)
 
         proc2.kill()
@@ -93,13 +93,13 @@ class TestCongestionControl(unittest.TestCase):
         self.acklink_log = os.path.join(test_dir, '%s_acklink.log' % cc_option) 
 
         if first_to_run == 'receiver':
-            self.uplink_trace = traces_dir + 'Verizon-LTE-short.up'
-            self.downlink_trace = traces_dir + 'Verizon-LTE-short.down'
+            self.uplink_trace = traces_dir + 'Verizon-LTE-driving.up'
+            self.downlink_trace = traces_dir + 'Verizon-LTE-driving.down'
             self.uplink_log = self.datalink_log
             self.downlink_log = self.acklink_log
         else:
-            self.uplink_trace = traces_dir + 'Verizon-LTE-short.down'
-            self.downlink_trace = traces_dir + 'Verizon-LTE-short.up'
+            self.uplink_trace = traces_dir + 'Verizon-LTE-driving.down'
+            self.downlink_trace = traces_dir + 'Verizon-LTE-driving.up'
             self.uplink_log = self.acklink_log
             self.downlink_log = self.datalink_log
 
