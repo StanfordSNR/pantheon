@@ -9,6 +9,7 @@ sudo apt-get -yq --force-yes install mahimahi
 sudo apt-get -yq --force-yes install iperf
 
 # QUIC
+: '
 dev_list="bison cdbs curl dpkg-dev elfutils devscripts fakeroot flex 
           git-core git-svn gperf libapache2-mod-php5 libasound2-dev
           libbrlapi-dev libav-tools libbz2-dev libcairo2-dev libcap-dev
@@ -32,6 +33,7 @@ lib_list="libatk1.0-0 libc6 libasound2 libcairo2 libcap2 libcups2 libexpat1
 sudo apt-get -yq --force-yes install $dev_list $lib_list
 ## generate certificate using certutil
 sudo apt-get -yq --force-yes install libnss3-tools
+'
 
 # Verus
 sudo apt-get -yq --force-yes install libtbb-dev libasio-dev libalglib-dev \
