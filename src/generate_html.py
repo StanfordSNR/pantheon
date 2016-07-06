@@ -1,4 +1,5 @@
 import os, sys, errno
+import string, random
 
 def generate_html(size):
     file_name = '/tmp/quic-data/www.example.org/index.html'
@@ -21,8 +22,8 @@ def generate_html(size):
             "<p>\n")
 
     i = 0
-    while i < size:
-        f.write('ABCDEFGHIJKLMNOPQRSTUVWXYZ\n') 
+    while i < size - 113: # the other parts are 113 bytes
+        f.write(random.choice(string.letters))
         i += 1
 
     f.write("</p>\n"
