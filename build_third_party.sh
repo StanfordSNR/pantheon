@@ -39,6 +39,10 @@ make -j
 # build webrtc
 cd $third_party_dir/webrtc
 npm install
+wget -O /tmp/video.y4m http://media.xiph.org/video/derf/y4m/bus_cif_15fps.y4m
+node $third_party_dir/webrtc/app.js >/dev/null 2>&1 &
+Xvfb :1 >/dev/null 2>&1 &
+export DISPLAY=:1
 
 # build sprout
 cd $third_party_dir/sprout
