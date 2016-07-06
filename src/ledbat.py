@@ -50,7 +50,7 @@ def main():
         cmd = [src_file, ip, port]
         proc = Popen(cmd, stdin=PIPE)
         
-        timeout = time.time() + 15
+        timeout = time.time() + 75
         while True:
             proc.stdin.write(os.urandom(1024 * 1024))
             if time.time() > timeout:
