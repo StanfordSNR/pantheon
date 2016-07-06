@@ -50,3 +50,6 @@ cd $third_party_dir/sprout
 ./configure --enable-examples
 make -j
 export SPROUT_MODEL_IN=$third_party_dir/sprout/src/examples/sprout.model
+
+# cd back to project's root directory
+cd $proj_dir
