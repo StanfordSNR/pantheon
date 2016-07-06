@@ -2,7 +2,7 @@
 
 sudo sysctl -w net.ipv4.ip_forward=1
 
-proj_dir=$( cd $(dirname $0) ; pwd )
+proj_dir=$( cd $(dirname ${BASH_SOURCE[0]}) ; pwd )
 third_party_dir=$proj_dir/third_party
 
 # build libutp
