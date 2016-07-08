@@ -10,7 +10,7 @@ def print_usage():
 
 def main():
     # find paths of this script, find_unused_port and scheme source to run
-    src_dir = os.path.abspath(os.path.dirname(__file__)) 
+    src_dir = os.path.abspath(os.path.dirname(__file__))
     src_file = os.path.abspath(os.path.join(src_dir,
                                '../third_party/webrtc/app.js'))
     video_file = os.path.abspath('/tmp/video.y4m')
@@ -23,21 +23,23 @@ def main():
 
     # setup
     if option == 'setup':
-        if len(sys.argv) != 2: 
+        if len(sys.argv) != 2:
             print_usage()
 
         sys.stderr.write("Sender first\n")
- 
+
     # sender
     if option == 'sender':
-        if len(sys.argv) != 2: 
+        if len(sys.argv) != 2:
             print_usage()
 
         sys.stderr.write("Listening on port: %s\n" % 3000)
 
         cmd = 'chromium-browser --app=http://localhost:3000/sender ' \
+              '--use-fake-ui-for-media-stream ' \
               '--use-fake-device-for-media-stream ' \
-              '--use-file-for-fake-video-capture=%s' % video_file 
+              '--use-file-for-fake-video-capture=%s ' \
+              '--user-data-dir=/tmp/nonexistent$(date +%%s%%N)' % video_file
         check_call(cmd, stdout=DEVNULL, stderr=DEVNULL, shell=True)
 
     # receiver
@@ -46,13 +48,13 @@ def main():
             print_usage()
 
         ip = sys.argv[2]
-        port = sys.argv[3] 
+        port = sys.argv[3]
 
-        cmd = 'chromium-browser --app=http://localhost:3000/receiver?' \
-              'peerAddr=%s:%s' % (ip, port) 
+        time.sleep(3) # at least wait until the sender is ready
+        cmd = 'chromium-browser --app=http://%s:%s/receiver ' \
+              '--user-data-dir=/tmp/nonexistent$(date +%%s%%N)' % (ip, port)
         check_call(cmd, stdout=DEVNULL, stderr=DEVNULL, shell=True)
-        time.sleep(75)
-        
+
     DEVNULL.close()
 
 if __name__ == '__main__':
