@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import os, sys, signal 
+import os, sys, signal
 from subprocess import Popen, PIPE
 import unittest
 
@@ -29,7 +29,7 @@ class TestCongestionControl(unittest.TestCase):
             second_to_run = 'receiver'
 
         # run the side specified by first_to_run
-        cmd1 = ['python', self.src_file, first_to_run] 
+        cmd1 = ['python', self.src_file, first_to_run]
         proc1 = Popen(cmd1, stdout=self.DEVNULL, stderr=PIPE)
 
         # find port printed
@@ -37,13 +37,13 @@ class TestCongestionControl(unittest.TestCase):
         port = port_info.rstrip().rsplit(' ', 1)[-1]
 
         # run the other side specified by second_to_run
-        cmd2 = "'python %s %s %s %s'" % (self.src_file, second_to_run, 
+        cmd2 = "'python %s %s %s %s'" % (self.src_file, second_to_run,
                                          self.ip, port)
-        mm_cmd = 'mm-link %s %s --once --uplink-log=%s --downlink-log=%s \
-                  -- sh -c %s' % (self.uplink_trace, self.downlink_trace,
-                  self.uplink_log, self.downlink_log, cmd2) 
+        mm_cmd = 'mm-link %s %s --once --uplink-log=%s --downlink-log=%s' \
+                 ' -- sh -c %s' % (self.uplink_trace, self.downlink_trace,
+                 self.uplink_log, self.downlink_log, cmd2)
 
-        proc2 = Popen(mm_cmd, shell=True, 
+        proc2 = Popen(mm_cmd, shell=True,
                       stdout=self.DEVNULL, stderr=PIPE)
 
         sys.stderr.write('Running %s...\n' % self.cc_option)
@@ -70,13 +70,13 @@ class TestCongestionControl(unittest.TestCase):
     def test_congestion_control(self):
         cc_option = self.cc_option
         test_dir = os.path.abspath(os.path.dirname(__file__))
-        src_dir = os.path.abspath(os.path.join(test_dir, '../src')) 
-        self.src_file = os.path.join(src_dir, cc_option + '.py') 
+        src_dir = os.path.abspath(os.path.join(test_dir, '../src'))
+        self.src_file = os.path.join(src_dir, cc_option + '.py')
 
         # run setup
-        setup_cmd = ['python', self.src_file, 'setup'] 
+        setup_cmd = ['python', self.src_file, 'setup']
         setup_proc = Popen(setup_cmd, stdout=self.DEVNULL, stderr=PIPE)
-        setup_info = setup_proc.communicate()[1] 
+        setup_info = setup_proc.communicate()[1]
         if setup_proc.returncode != 0:
             sys.stderr.write(setup_info)
             sys.exit(1)
@@ -86,11 +86,11 @@ class TestCongestionControl(unittest.TestCase):
         if first_to_run != 'receiver' and first_to_run != 'sender':
             sys.stderr.write('Requires specifying receiver or sender first')
             sys.exit(1)
-        
+
         # prepare mahimahi
-        traces_dir = '/usr/share/mahimahi/traces/' 
-        self.datalink_log = os.path.join(test_dir, '%s_datalink.log' % cc_option) 
-        self.acklink_log = os.path.join(test_dir, '%s_acklink.log' % cc_option) 
+        traces_dir = '/usr/share/mahimahi/traces/'
+        self.datalink_log = os.path.join(test_dir, '%s_datalink.log' % cc_option)
+        self.acklink_log = os.path.join(test_dir, '%s_acklink.log' % cc_option)
 
         if first_to_run == 'receiver':
             self.uplink_trace = traces_dir + 'Verizon-LTE-driving.up'
@@ -110,7 +110,7 @@ class TestCongestionControl(unittest.TestCase):
 
         # generate throughput graphs
         sys.stderr.write('* Data link statistics:\n')
-        datalink_throughput = open(os.path.join(test_dir, 
+        datalink_throughput = open(os.path.join(test_dir,
                                 '%s_datalink_throughput.html' % cc_option), 'wb')
         proc = Popen(['mm-throughput-graph', '500', self.datalink_log],
                      stdout=datalink_throughput, stderr=PIPE)
@@ -119,7 +119,7 @@ class TestCongestionControl(unittest.TestCase):
         datalink_throughput.close()
 
         sys.stderr.write('* ACK link statistics:\n')
-        acklink_throughput = open(os.path.join(test_dir, 
+        acklink_throughput = open(os.path.join(test_dir,
                                 '%s_acklink_throughput.html' % cc_option), 'wb')
         proc = Popen(['mm-throughput-graph', '500', self.acklink_log],
                      stdout=acklink_throughput, stderr=PIPE)
@@ -141,4 +141,4 @@ def main():
         sys.exit(1)
 
 if __name__ == '__main__':
-   main() 
+   main()
