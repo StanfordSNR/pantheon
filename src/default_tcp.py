@@ -33,7 +33,7 @@ def main():
         port = check_output([find_unused_port_file])
         sys.stderr.write("Listening on port: %s\n" % port)
 
-        cmd = [src_file, '-s', '-p', port, '-t', '75']
+        cmd = [src_file, '-s', '-p', port]
         check_call(cmd)
 
     # sender
