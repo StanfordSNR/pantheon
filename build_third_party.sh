@@ -33,7 +33,6 @@ git submodule update --init
 ./autogen.sh
 ./configure
 make -j
-sudo modprobe tcp_vegas
 
 # build webrtc
 cd $third_party_dir/webrtc

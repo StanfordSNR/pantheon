@@ -23,6 +23,8 @@ def main():
         if len(sys.argv) != 2:
             print_usage()
 
+        cmd = ['sudo', 'modprobe', 'tcp_vegas']
+        check_call(cmd)
         sys.stderr.write("Receiver first\n")
 
     # receiver
