@@ -23,10 +23,6 @@ def main():
         if len(sys.argv) != 2: 
             print_usage()
         
-        cmd = 'sudo modprobe tcp_vegas && ' \
-              'sudo bash -c "echo vegas > /proc/sys/net/ipv4/tcp_congestion_control"'
-        print cmd
-        check_call(cmd, shell=True)
         sys.stderr.write("Receiver first\n")
 
     # receiver
@@ -37,7 +33,7 @@ def main():
         port = check_output([find_unused_port_file])
         sys.stderr.write("Listening on port: %s\n" % port)
 
-        cmd = [src_file, '-s', '-p', port, '-t', '75']
+        cmd = [src_file, '-s', '-p', port]
         check_call(cmd)
 
     # sender
@@ -48,7 +44,7 @@ def main():
         ip = sys.argv[2]
         port = sys.argv[3] 
 
-        cmd = [src_file, '-c', ip, '-p', port, '-t', '75']
+        cmd = ['sudo', src_file, '-c', ip, '-p', port, '-t', '75', '-Z', 'vegas']
         check_call(cmd)
 
 if __name__ == '__main__':
