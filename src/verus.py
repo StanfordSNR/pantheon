@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
-import os, sys 
-from subprocess import check_output, check_call 
+import os, sys
+from subprocess import check_output, check_call
 import usage
 
 def print_usage():
@@ -10,7 +10,7 @@ def print_usage():
 
 def main():
     # find paths of this script, find_unused_port and scheme source to run
-    src_dir = os.path.abspath(os.path.dirname(__file__)) 
+    src_dir = os.path.abspath(os.path.dirname(__file__))
     find_unused_port_file = os.path.join(src_dir, 'find_unused_port')
 
     verus_dir = os.path.abspath(os.path.join(src_dir, '../third_party/verus/src'))
@@ -24,14 +24,14 @@ def main():
 
     # setup
     if option == 'setup':
-        if len(sys.argv) != 2: 
+        if len(sys.argv) != 2:
             print_usage()
 
         sys.stderr.write("Sender first\n")
 
     # sender
     if option == 'sender':
-        if len(sys.argv) != 2: 
+        if len(sys.argv) != 2:
             print_usage()
 
         port = check_output([find_unused_port_file])
@@ -39,14 +39,14 @@ def main():
 
         cmd = [send_file, '-name', 'verus_tmp', '-p', port, '-t', '75']
         check_call(cmd)
-        
+
     # receiver
     if option == 'receiver':
         if len(sys.argv) != 4:
             print_usage()
 
         ip = sys.argv[2]
-        port = sys.argv[3] 
+        port = sys.argv[3]
 
         cmd = [recv_file, ip, '-p', port]
         check_call(cmd)

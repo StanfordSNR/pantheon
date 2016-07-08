@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import os, sys
-from subprocess import check_output, check_call 
+from subprocess import check_output, check_call
 import usage
 
 def print_usage():
@@ -20,14 +20,14 @@ def main():
 
     # setup
     if option == 'setup':
-        if len(sys.argv) != 2: 
+        if len(sys.argv) != 2:
             print_usage()
-        
+
         sys.stderr.write("Receiver first\n")
 
     # receiver
     if option == 'receiver':
-        if len(sys.argv) != 2: 
+        if len(sys.argv) != 2:
             print_usage()
 
         port = check_output([find_unused_port_file])
@@ -42,7 +42,7 @@ def main():
             print_usage()
 
         ip = sys.argv[2]
-        port = sys.argv[3] 
+        port = sys.argv[3]
 
         cmd = ['sudo', src_file, '-c', ip, '-p', port, '-t', '75', '-Z', 'vegas']
         check_call(cmd)

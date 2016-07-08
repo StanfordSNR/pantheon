@@ -16,7 +16,7 @@
   $ git submodule update --init
   ```
 
-3. Install dependencies: 
+3. Install dependencies:
 
   ```
   $ ./install_deps.sh
@@ -41,23 +41,23 @@
 
   ```
   $ cd panthon/src
-  $ ./congestion-control-name.py setup 
+  $ ./congestion-control-name.py setup
   ```
 
   Depending on the output about running order, run
 
   ```
   # Receiver first
-  $ ./congestion-control-name.py receiver 
-  $ ./congestion-control-name.py sender IP port 
+  $ ./congestion-control-name.py receiver
+  $ ./congestion-control-name.py sender IP port
   ```
 
   or
 
   ```
   # Sender first
-  $ ./congestion-control-name.py sender 
-  $ ./congestion-control-name.py receiver IP port 
+  $ ./congestion-control-name.py sender
+  $ ./congestion-control-name.py receiver IP port
   ```
 
 * Run tests:

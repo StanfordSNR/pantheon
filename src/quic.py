@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import os, sys, time, errno
-from subprocess import check_output, check_call, PIPE, Popen 
+from subprocess import check_output, check_call, PIPE, Popen
 import usage
 from generate_html import generate_html
 
@@ -13,7 +13,7 @@ def setup():
     # generate a random password
     certs_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'certs'))
     cert_pwd = os.path.join(certs_dir, 'cert_pwd')
-    cmd = 'date +%%s | sha256sum | base64 | head -c 32 > %s' % cert_pwd 
+    cmd = 'date +%%s | sha256sum | base64 | head -c 32 > %s' % cert_pwd
     check_call(cmd, shell=True)
 
     # initialize certificate
@@ -37,16 +37,16 @@ def setup():
             % (nssdb_dir, pem, cert_pwd)
     check_call(cmd, shell=True)
 
-    # generate a html of size that can be transferred longer than 60 seconds 
+    # generate a html of size that can be transferred longer than 60 seconds
     generate_html(100000000)
 
 def main():
     # find paths of this script, find_unused_port and scheme source to run
-    src_dir = os.path.abspath(os.path.dirname(__file__)) 
+    src_dir = os.path.abspath(os.path.dirname(__file__))
     find_unused_port_file = os.path.join(src_dir, 'find_unused_port')
     quic_src_dir = os.path.abspath(os.path.join(src_dir,
                                     '../third_party/proto-quic/src'))
-    
+
     quic_server = os.path.join(quic_src_dir, 'out/Release/quic_server')
     quic_client = os.path.join(quic_src_dir, 'out/Release/quic_client')
 
@@ -57,15 +57,15 @@ def main():
 
     # setup
     if option == 'setup':
-        if len(sys.argv) != 2: 
+        if len(sys.argv) != 2:
             print_usage()
 
-        setup() 
+        setup()
         sys.stderr.write("Sender first\n")
 
     # sender
     if option == 'sender':
-        if len(sys.argv) != 2: 
+        if len(sys.argv) != 2:
             print_usage()
 
         sys.stderr.write("Listening on port: 6121\n")
@@ -89,6 +89,6 @@ def main():
         cmd = [quic_client, '--host=%s' % ip, '--port=%s' % port,
               'https://www.example.org/']
         check_call(cmd)
-    
+
 if __name__ == '__main__':
     main()
