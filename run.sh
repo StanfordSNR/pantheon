@@ -12,3 +12,4 @@ cd $test_dir
 ./test.py quic
 ./test.py scream
 ./test.py sprout
+./test.py webrtc
