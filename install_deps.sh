@@ -39,8 +39,8 @@ sudo apt-get -yq --force-yes install libtbb-dev libasio-dev libalglib-dev \
 
 # WebRTC
 sudo apt-get -yq --force-yes install chromium-browser nodejs xvfb \
-  xfonts-100dpi xfonts-75dpi xfonts-cyrillic xorg dbus-x11
+  xfonts-100dpi xfonts-75dpi xfonts-cyrillic xorg dbus-x11 npm
 
 # Sprout
 sudo apt-get -yq --force-yes install libboost-math-dev \
-  libboost-math1.54.0 libprotobuf8 libprotobuf-dev protobuf-compiler
+  libboost-math1.54.0 libprotobuf8 libprotobuf-dev protobuf-compiler libncurses5-dev
