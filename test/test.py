@@ -73,7 +73,7 @@ class TestCongestionControl(unittest.TestCase):
         build_cmd = 'python %s build' % self.src_file
         sys.stderr.write(build_cmd + '\n')
         sys.stderr.write('Building...\n')
-        check_call(build_cmd, stdout=DEVNULL, stderr=DEVNULL, shell=True)
+        check_call(build_cmd, shell=True)
         sys.stderr.write('Done\n')
 
         # run setup
