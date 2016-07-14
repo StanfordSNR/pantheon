@@ -9,7 +9,7 @@ cd $test_dir
 ./test.py ledbat
 ./test.py pcc
 ./test.py verus
-./test.py quic
 ./test.py scream
-./test.py sprout
 ./test.py webrtc
+./test.py quic
+./test.py sprout
