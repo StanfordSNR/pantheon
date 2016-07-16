@@ -12,6 +12,10 @@ def main():
     src_file = 'iperf'
     DEVNULL = open(os.devnull, 'wb')
 
+    # build dependencies
+    if option == 'deps':
+        print 'iperf'
+
     # build
     if option == 'build':
         pass

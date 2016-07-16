@@ -15,6 +15,10 @@ def main():
     send_file = os.path.join(submodule_dir, 'sender/app/appclient')
     DEVNULL = open(os.devnull, 'wb')
 
+    # build dependencies
+    if option == 'deps':
+        print ''
+
     # build
     if option == 'build':
         cmd = 'cd %s/sender && make && cd %s/receiver && make' % \

@@ -15,6 +15,10 @@ def main():
     send_file = os.path.join(submodule_dir, 'scream-for-pantheon/ScreamClient')
     DEVNULL = open(os.devnull, 'wb')
 
+    # build dependencies
+    if option == 'deps':
+        print ""
+
     # build
     if option == 'build':
         cmd = 'cd %s && git submodule update --init && ' \
