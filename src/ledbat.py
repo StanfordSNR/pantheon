@@ -14,6 +14,10 @@ def main():
     src_file = os.path.join(submodule_dir, 'ucat-static')
     DEVNULL = open(os.devnull, 'wb')
 
+    # build dependencies
+    if option == 'deps':
+        print ""
+
     # build
     if option == 'build':
         cmd = 'cd %s && make -j' % submodule_dir

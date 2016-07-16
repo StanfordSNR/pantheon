@@ -15,6 +15,10 @@ def main():
     recv_file = os.path.join(submodule_dir, 'src/verus_client')
     DEVNULL = open(os.devnull, 'wb')
 
+    # build dependencies
+    if option == 'deps':
+        print 'libtbb-dev libasio-dev libalglib-dev libboost-system-dev'
+
     # build
     if option == 'build':
         cmd = 'cd %s && autoreconf -i && ./configure && make -j' % submodule_dir
