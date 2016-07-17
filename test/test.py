@@ -113,6 +113,7 @@ class TestCongestionControl(unittest.TestCase):
         proc1.terminate()
 
     def gen_results(self):
+        # DATA link
         sys.stderr.write('* Data link statistics:\n')
         datalink_throughput = open('%s/%s_datalink_throughput.svg' \
                                    % (self.test_dir, self.cc_option), 'wb')
@@ -122,6 +123,14 @@ class TestCongestionControl(unittest.TestCase):
         sys.stderr.write(datalink_results)
         datalink_throughput.close()
 
+        datalink_delay = open('%s/%s_datalink_delay.svg' \
+                              % (self.test_dir, self.cc_option), 'wb')
+        proc = Popen(['mm-delay-graph', '500', self.datalink_log],
+                     stdout=datalink_delay, stderr=DEVNULL)
+        proc.communicate()
+        datalink_delay.close()
+
+        # ACK link
         sys.stderr.write('* ACK link statistics:\n')
         acklink_throughput = open('%s/%s_acklink_throughput.svg' \
                                   % (self.test_dir, self.cc_option), 'wb')
@@ -130,6 +139,13 @@ class TestCongestionControl(unittest.TestCase):
         acklink_results = proc.communicate()[1]
         sys.stderr.write(acklink_results)
         acklink_throughput.close()
+
+        acklink_delay = open('%s/%s_acklink_delay.svg' \
+                             % (self.test_dir, self.cc_option), 'wb')
+        proc = Popen(['mm-delay-graph', '500', self.acklink_log],
+                     stdout=acklink_delay, stderr=DEVNULL)
+        proc.communicate()
+        acklink_delay.close()
 
     # congestion control test
     def test_congestion_control(self):
