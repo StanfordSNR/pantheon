@@ -70,9 +70,16 @@ class TestCongestionControl(unittest.TestCase):
         self.src_file = os.path.join(src_dir, cc_option + '.py')
 
         # get build dependencies
-        deps_needed = check_output(['python', self.src_file, 'deps'])
-        sys.stderr.write('Installing dependencies: ' + deps_needed + '\n')
-        check_call('sudo apt-get -yq --force-yes install ' + deps_needed, shell=True)
+        deps_cmd = 'python %s deps' % self.src_file
+        sys.stderr.write(deps_cmd + '\n')
+        deps_proc = Popen(deps_cmd, stdout=DEVNULL, stderr=PIPE, shell=True)
+        deps_needed = deps_proc.communicate()[1]
+        if deps_needed:
+            sys.stderr.write('Installing dependencies...\n')
+            sys.stderr.write(deps_needed)
+            install_cmd = 'sudo apt-get -yq --force-yes install ' + deps_needed
+            check_call(install_cmd , shell=True)
+        sys.stderr.write('Done\n')
 
         # run build
         build_cmd = 'python %s build' % self.src_file
