@@ -14,3 +14,5 @@ cd $test_dir
 ./test.py sprout
 # Put the most time-consuming QUIC at the end
 ./test.py quic
+# Combile all HTML reports into one
+./combine_html.py
