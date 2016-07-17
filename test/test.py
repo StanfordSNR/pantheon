@@ -1,8 +1,7 @@
 #!/usr/bin/python
 
-import os, sys, signal
-from subprocess import Popen, PIPE, check_call, check_output
-import unittest
+import os, sys, signal, unittest
+from subprocess import Popen, PIPE, check_call
 
 # print test usage
 def test_usage():
@@ -113,39 +112,72 @@ class TestCongestionControl(unittest.TestCase):
         proc1.terminate()
 
     def gen_results(self):
+        datalink_throughput_svg = '%s/%s_datalink_throughput.svg' \
+                                      % (self.test_dir, self.cc_option)
+        datalink_delay_svg = '%s/%s_datalink_delay.svg' \
+                                % (self.test_dir, self.cc_option)
+        acklink_throughput_svg = '%s/%s_acklink_throughput.svg' \
+                                    % (self.test_dir, self.cc_option)
+        acklink_delay_svg = '%s/%s_acklink_delay.svg' \
+                               % (self.test_dir, self.cc_option)
+        report_html = '%s_report.html' % self.cc_option
+
         # DATA link
         sys.stderr.write('* Data link statistics:\n')
-        datalink_throughput = open('%s/%s_datalink_throughput.svg' \
-                                   % (self.test_dir, self.cc_option), 'wb')
+        datalink_throughput = open(datalink_throughput_svg, 'wb')
         proc = Popen(['mm-throughput-graph', '500', self.datalink_log],
                      stdout=datalink_throughput, stderr=PIPE)
         datalink_results = proc.communicate()[1]
         sys.stderr.write(datalink_results)
         datalink_throughput.close()
 
-        datalink_delay = open('%s/%s_datalink_delay.svg' \
-                              % (self.test_dir, self.cc_option), 'wb')
-        proc = Popen(['mm-delay-graph', '500', self.datalink_log],
+        datalink_delay = open(datalink_delay_svg, 'wb')
+        proc = Popen(['mm-delay-graph', self.datalink_log],
                      stdout=datalink_delay, stderr=DEVNULL)
         proc.communicate()
         datalink_delay.close()
 
         # ACK link
         sys.stderr.write('* ACK link statistics:\n')
-        acklink_throughput = open('%s/%s_acklink_throughput.svg' \
-                                  % (self.test_dir, self.cc_option), 'wb')
+        acklink_throughput = open(acklink_throughput_svg, 'wb')
         proc = Popen(['mm-throughput-graph', '500', self.acklink_log],
                      stdout=acklink_throughput, stderr=PIPE)
         acklink_results = proc.communicate()[1]
         sys.stderr.write(acklink_results)
         acklink_throughput.close()
 
-        acklink_delay = open('%s/%s_acklink_delay.svg' \
-                             % (self.test_dir, self.cc_option), 'wb')
-        proc = Popen(['mm-delay-graph', '500', self.acklink_log],
+        acklink_delay = open(acklink_delay_svg, 'wb')
+        proc = Popen(['mm-delay-graph', self.acklink_log],
                      stdout=acklink_delay, stderr=DEVNULL)
         proc.communicate()
         acklink_delay.close()
+
+        # Generate HTML
+        report = open(report_html, 'wb')
+        report.write(
+            '<!DOCTYPE html>\n'
+            '<html>\n'
+            '<head>\n'
+            '<title> %s </title>\n'
+            '<body>\n'
+            '  <h1> Congestion Control Report: %s </h1>\n'
+            '  <h2> Data Link </h2>\n'
+            '  <h3> %s <h3>\n'
+            '  <img src=%s class="svg">\n'
+            '  <img src=%s class="svg">\n'
+            '  <h2> ACK Link </h2>\n'
+            '  <h3> %s <h3>\n'
+            '  <img src=%s class="svg">\n'
+            '  <img src=%s class="svg">\n'
+            '</body>\n'
+            '</html>\n'
+            % (self.cc_option, self.cc_option,
+               datalink_results.replace('\n', '<br>\n'),
+               datalink_throughput_svg, datalink_delay_svg,
+               acklink_results.replace('\n', '<br>\n'),
+               acklink_throughput_svg, acklink_delay_svg)
+        )
+        report.close()
 
     # congestion control test
     def test_congestion_control(self):
