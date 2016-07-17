@@ -11,5 +11,6 @@ cd $test_dir
 ./test.py verus
 ./test.py scream
 ./test.py webrtc
-./test.py quic
 ./test.py sprout
+# Put the most time-consuming QUIC at the end
+./test.py quic

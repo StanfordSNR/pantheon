@@ -17,7 +17,7 @@ def main():
     # build dependencies
     if option == 'deps':
         deps_list = 'chromium-browser nodejs xvfb xfonts-100dpi xfonts-75dpi ' \
-                    'xfonts-cyrillic xorg dbus-x11 npm'
+                    'xfonts-cyrillic xorg dbus-x11'
         sys.stderr.write(deps_list + '\n')
 
     # build
