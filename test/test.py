@@ -77,7 +77,8 @@ class TestCongestionControl(unittest.TestCase):
         cmd = 'python %s %s' % (self.src_file, self.first_to_run)
         sys.stderr.write('+ ' + cmd + '\n')
         sys.stderr.write('Running %s %s...\n' % (self.cc_option, self.first_to_run))
-        proc1 = Popen(cmd, stdout=DEVNULL, stderr=PIPE, shell=True)
+        proc1 = Popen(cmd, stdout=DEVNULL, stderr=PIPE, shell=True,
+                      preexec_fn=os.setpgrp)
 
         # find port printed
         port_info = proc1.stderr.readline()
@@ -94,7 +95,8 @@ class TestCongestionControl(unittest.TestCase):
                  self.uplink_log, self.downlink_log, cmd)
         sys.stderr.write('+ ' + mm_cmd + '\n')
         sys.stderr.write('Running %s %s...\n' % (self.cc_option, self.second_to_run))
-        proc2 = Popen(mm_cmd, stdout=DEVNULL, stderr=PIPE, shell=True)
+        proc2 = Popen(mm_cmd, stdout=DEVNULL, stderr=PIPE, shell=True,
+                      preexec_fn=os.setpgrp)
 
         # run for 60 seconds
         signal.signal(signal.SIGALRM, self.timeout_handler)
@@ -108,8 +110,8 @@ class TestCongestionControl(unittest.TestCase):
             sys.stderr.write('Running is shorter than 60s\n')
             sys.exit(1)
 
-        proc2.terminate()
-        proc1.terminate()
+        os.killpg(os.getpgid(proc2.pid), signal.SIGTERM)
+        os.killpg(os.getpgid(proc1.pid), signal.SIGTERM)
 
     def gen_results(self):
         datalink_throughput_svg = '%s/%s_datalink_throughput.svg' \
