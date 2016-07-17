@@ -17,7 +17,8 @@ def main():
 
     # build dependencies
     if option == 'deps':
-        print 'libtbb-dev libasio-dev libalglib-dev libboost-system-dev'
+        deps_list = 'libtbb-dev libasio-dev libalglib-dev libboost-system-dev'
+        sys.stderr.write(deps_list + '\n')
 
     # build
     if option == 'build':

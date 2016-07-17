@@ -15,8 +15,9 @@ def main():
 
     # build dependencies
     if option == 'deps':
-        print 'libboost-math-dev libboost-math1.54.0 libprotobuf8 ' \
-              'libprotobuf-dev protobuf-compiler libncurses5-dev'
+        deps_list = 'libboost-math-dev libboost-math1.54.0 libprotobuf8 ' \
+                    'libprotobuf-dev protobuf-compiler libncurses5-dev'
+        sys.stderr.write(deps_list + '\n')
 
     # build
     if option == 'build':
@@ -28,11 +29,11 @@ def main():
     if option == 'setup':
         os.environ['SPROUT_MODEL_IN'] = '%s/src/examples/sprout.model' \
                                         % submodule_dir
-        sys.stderr.write("Receiver first\n")
+        sys.stderr.write('Receiver first\n')
 
     # receiver
     if option == 'receiver':
-        sys.stderr.write("Listening on port: %s\n" % 60001)
+        sys.stderr.write('Listening on port: %s\n' % 60001)
         cmd = [src_file]
         check_call(cmd, stdout=DEVNULL, stderr=DEVNULL)
 

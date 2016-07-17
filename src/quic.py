@@ -62,7 +62,7 @@ def main():
                  'patch perl php5-cgi pkg-config python-cherrypy3 ' \
                  'python-crypto python-dev python-numpy python-opencv ' \
                  'python-openssl python-psutil python-yaml rpm ruby ' \
-                 'subversion wdiff zip'
+                 'subversion wdiff zip libnss3-tools'
 
         lib_list = 'libatk1.0-0 libc6 libasound2 libcairo2 libcap2 libcups2 ' \
                    'libexpat1 libffi6 libfontconfig1 libfreetype6 ' \
@@ -73,7 +73,7 @@ def main():
                    'libxext6 libxfixes3 libxi6 libxinerama1 libxrandr2 ' \
                    'libxrender1 libxtst6 zlib1g'
 
-        print 'libnss3-tools ' + dev_list + ' ' + lib_list
+        sys.stderr.write(dev_list + ' ' + lib_list + '\n')
 
     # build
     if option == 'build':
@@ -85,11 +85,11 @@ def main():
     # setup
     if option == 'setup':
         setup()
-        sys.stderr.write("Sender first\n")
+        sys.stderr.write('Sender first\n')
 
     # sender
     if option == 'sender':
-        sys.stderr.write("Listening on port: 6121\n")
+        sys.stderr.write('Listening on port: 6121\n')
         cmd = [quic_server,
               '--quic_in_memory_cache_dir=/tmp/quic-data/www.example.org',
               '--certificate_file=%s/certs/out/leaf_cert.pem' % src_dir,

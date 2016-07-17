@@ -16,8 +16,9 @@ def main():
 
     # build dependencies
     if option == 'deps':
-        print 'chromium-browser nodejs xvfb xfonts-100dpi xfonts-75dpi ' \
-              'xfonts-cyrillic xorg dbus-x11 npm'
+        deps_list = 'chromium-browser nodejs xvfb xfonts-100dpi xfonts-75dpi ' \
+                    'xfonts-cyrillic xorg dbus-x11 npm'
+        sys.stderr.write(deps_list + '\n')
 
     # build
     if option == 'build':
@@ -29,7 +30,7 @@ def main():
         video_url = 'http://media.xiph.org/video/derf/y4m/city_cif_15fps.y4m'
         cmd = ['wget', '-O', video_file, video_url]
         check_call(cmd, stdout=DEVNULL, stderr=DEVNULL)
-        sys.stderr.write("Sender first\n")
+        sys.stderr.write('Sender first\n')
 
     # sender
     if option == 'sender':
@@ -38,7 +39,7 @@ def main():
         os.environ['DISPLAY']=':1'
         cmd = ['node', src_file]
         signaling_server = Popen(cmd, stdout=DEVNULL, stderr=DEVNULL)
-        sys.stderr.write("Listening on port: %s\n" % 3000)
+        sys.stderr.write('Listening on port: %s\n' % 3000)
         cmd = 'chromium-browser --app=http://localhost:3000/sender ' \
               '--use-fake-ui-for-media-stream ' \
               '--use-fake-device-for-media-stream ' \

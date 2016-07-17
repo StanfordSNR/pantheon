@@ -14,7 +14,7 @@ def main():
 
     # build dependencies
     if option == 'deps':
-        print 'iperf'
+        sys.stderr.write('iperf\n')
 
     # build
     if option == 'build':

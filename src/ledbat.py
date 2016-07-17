@@ -16,7 +16,7 @@ def main():
 
     # build dependencies
     if option == 'deps':
-        print ""
+        pass
 
     # build
     if option == 'build':
