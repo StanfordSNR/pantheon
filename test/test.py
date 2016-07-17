@@ -149,7 +149,7 @@ def main():
     # Enable IP forwarding
     cmd = 'sudo sysctl -w net.ipv4.ip_forward=1'
     sys.stderr.write('+ ' + cmd + '\n')
-    check_call(cmd, stdout=DEVNULL, stderr=DEVNULL, shell=True)
+    check_call(cmd, shell=True)
 
     # create test suite to run
     suite = unittest.TestSuite()
@@ -158,10 +158,6 @@ def main():
         sys.exit(1)
 
 if __name__ == '__main__':
-    os.setpgrp()
     DEVNULL = open(os.devnull, 'wb')
-    try:
-        main()
-    finally:
-        DEVNULL.close()
-        os.killpg(0, signal.SIGTERM)
+    main()
+    DEVNULL.close()
