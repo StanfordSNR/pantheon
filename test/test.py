@@ -59,8 +59,8 @@ class TestCongestionControl(unittest.TestCase):
                 sys.stderr.write('Running is shorter than 60s\n')
             sys.exit(1)
 
-        proc2.kill()
-        proc1.kill()
+        proc2.terminate()
+        proc1.terminate()
 
     # congestion control test
     def test_congestion_control(self):
@@ -161,6 +161,10 @@ def main():
         sys.exit(1)
 
 if __name__ == '__main__':
+    os.setpgrp()
     DEVNULL = open(os.devnull, 'wb')
-    main()
-    DEVNULL.close()
+    try:
+        main()
+    finally:
+        DEVNULL.close()
+        os.killpg(0, signal.SIGTERM)
