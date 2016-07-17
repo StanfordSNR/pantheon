@@ -161,22 +161,27 @@ class TestCongestionControl(unittest.TestCase):
             '<html>\n'
             '<head>\n'
             '<title> %s </title>\n'
+            '</head>\n'
             '<body>\n'
-            '  <h1> Congestion Control Report: %s </h1>\n'
-            '  <h2> Data Link </h2>\n'
-            '  <h3> %s <h3>\n'
-            '  <img src=%s class="svg">\n'
-            '  <img src=%s class="svg">\n'
-            '  <h2> ACK Link </h2>\n'
-            '  <h3> %s <h3>\n'
-            '  <img src=%s class="svg">\n'
-            '  <img src=%s class="svg">\n'
+            '<h1> Congestion Control Report: %s </h1>\n'
+            '<h2> Data Link </h2>\n'
+            '<h3>\n'
+            '%s'
+            '</h3>\n'
+            '<img src=%s class="svg">\n'
+            '<img src=%s class="svg">\n'
+            '<h2> ACK Link </h2>\n'
+            '<h3>\n'
+            '%s'
+            '</h3>\n'
+            '<img src=%s class="svg">\n'
+            '<img src=%s class="svg">\n'
             '</body>\n'
             '</html>\n'
             % (self.cc_option, self.cc_option,
-               datalink_results.replace('\n', '<br>\n'),
+               datalink_results.replace('\n', ' <br>\n'),
                datalink_throughput_svg, datalink_delay_svg,
-               acklink_results.replace('\n', '<br>\n'),
+               acklink_results.replace('\n', ' <br>\n'),
                acklink_throughput_svg, acklink_delay_svg)
         )
         report.close()
