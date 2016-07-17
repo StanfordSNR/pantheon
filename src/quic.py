@@ -49,7 +49,7 @@ def main():
 
     # build dependencies
     if option == 'deps':
-        dev_list='bison cdbs curl dpkg-dev elfutils devscripts fakeroot flex' \
+        dev_list='bison cdbs curl dpkg-dev elfutils devscripts fakeroot flex ' \
                  'git-core git-svn gperf libapache2-mod-php5 libasound2-dev ' \
                  'libbrlapi-dev libav-tools libbz2-dev libcairo2-dev ' \
                  'libcap-dev libcups2-dev libcurl4-gnutls-dev libdrm-dev ' \
