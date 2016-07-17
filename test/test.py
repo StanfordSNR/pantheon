@@ -24,6 +24,9 @@ class TestCongestionControl(unittest.TestCase):
         # find port printed
         port_info = proc1.stderr.readline()
         port = port_info.rstrip().rsplit(' ', 1)[-1]
+        if not port.isdigit():
+            sys.stderr.write('Invalid port number\n')
+            sys.exit(1)
 
         # run the other side specified by self.second_to_run
         cmd = 'python %s %s %s %s' % (self.src_file, self.second_to_run,
@@ -62,6 +65,10 @@ class TestCongestionControl(unittest.TestCase):
         sys.stderr.write('+ ' + deps_cmd + '\n')
         deps_proc = Popen(deps_cmd, stdout=DEVNULL, stderr=PIPE, shell=True)
         deps_needed = deps_proc.communicate()[1]
+        if deps_proc.returncode != 0:
+            sys.stderr.write(deps_needed)
+            sys.exit(1)
+
         if deps_needed:
             sys.stderr.write('Installing dependencies...\n')
             sys.stderr.write(deps_needed)
