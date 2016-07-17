@@ -26,22 +26,18 @@ def main():
 
     # setup
     if option == 'setup':
+        os.environ['SPROUT_MODEL_IN'] = '%s/src/examples/sprout.model' \
+                                        % submodule_dir
         sys.stderr.write("Receiver first\n")
 
     # receiver
     if option == 'receiver':
-        os.environ['SPROUT_MODEL_IN'] = '%s/src/examples/sprout.model' \
-                                        % submodule_dir
-        print os.environ['SPROUT_MODEL_IN']
         sys.stderr.write("Listening on port: %s\n" % 60001)
         cmd = [src_file]
         check_call(cmd, stdout=DEVNULL, stderr=DEVNULL)
 
     # sender
     if option == 'sender':
-        os.environ['SPROUT_MODEL_IN'] = '%s/src/examples/sprout.model' \
-                                        % submodule_dir
-        print os.environ['SPROUT_MODEL_IN']
         ip = sys.argv[2]
         port = sys.argv[3]
         cmd = [src_file, ip, port]
