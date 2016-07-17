@@ -13,6 +13,11 @@ def main():
     src_file = os.path.join(submodule_dir, 'src/examples/sproutbt2')
     DEVNULL = open(os.devnull, 'wb')
 
+    # build dependencies
+    if option == 'deps':
+        print 'libboost-math-dev libboost-math1.54.0 libprotobuf8 ' \
+              'libprotobuf-dev protobuf-compiler libncurses5-dev'
+
     # build
     if option == 'build':
         cmd = 'cd %s && ./autogen.sh && ./configure --enable-examples && ' \

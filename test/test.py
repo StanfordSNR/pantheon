@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import os, sys, signal
-from subprocess import Popen, PIPE, check_call
+from subprocess import Popen, PIPE, check_call, check_output
 import unittest
 
 # print test usage
@@ -68,6 +68,11 @@ class TestCongestionControl(unittest.TestCase):
         test_dir = os.path.abspath(os.path.dirname(__file__))
         src_dir = os.path.abspath(os.path.join(test_dir, '../src'))
         self.src_file = os.path.join(src_dir, cc_option + '.py')
+
+        # get build dependencies
+        deps_needed = check_output(['python', self.src_file, 'deps'])
+        sys.stderr.write('Installing dependencies: ' + deps_needed + '\n')
+        check_call('sudo apt-get -yq --force-yes install ' + deps_needed, shell=True)
 
         # run build
         build_cmd = 'python %s build' % self.src_file

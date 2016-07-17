@@ -14,6 +14,11 @@ def main():
     video_file = os.path.abspath('/tmp/video.y4m')
     DEVNULL = open(os.devnull, 'wb')
 
+    # build dependencies
+    if option == 'deps':
+        print 'chromium-browser nodejs xvfb xfonts-100dpi xfonts-75dpi ' \
+              'xfonts-cyrillic xorg dbus-x11 npm'
+
     # build
     if option == 'build':
         cmd = 'cd %s && npm install' % submodule_dir

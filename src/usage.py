@@ -5,6 +5,7 @@ SEND_FIRST = 1
 
 def print_usage(name, order):
     print "Usage:"
+    print "./%s deps" % name
     print "./%s build" % name
     print "./%s setup" % name
     if order == RECV_FIRST:
@@ -21,24 +22,23 @@ def check_args(args, name, order):
 
     option = args[1]
 
-    if option == 'build' or option == 'setup':
+    if option == 'deps' or option == 'build' or option == 'setup':
         if len(args) != 2:
             print_usage(name, order)
 
-    if option == 'receiver':
+    elif option == 'receiver':
         if order == RECV_FIRST and len(args) != 2:
             print_usage(name, order)
 
         if order == SEND_FIRST and len(args) != 4:
             print_usage(name, order)
 
-    if option == 'sender':
+    elif option == 'sender':
         if order == RECV_FIRST and len(args) != 4:
             print_usage(name, order)
 
         if order == SEND_FIRST and len(args) != 2:
             print_usage(name, order)
 
-    if option != 'build' and option != 'setup' and \
-       option != 'receiver' and option != 'sender':
+    else:
         print_usage(name, order)
