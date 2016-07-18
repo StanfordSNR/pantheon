@@ -123,14 +123,8 @@ class TestCongestionControl(unittest.TestCase):
         acklink_delay_svg = '%s/%s_acklink_delay.svg' \
                              % (self.test_dir, self.cc_option)
 
-        datalink_throughput_png = '%s/%s_datalink_throughput.png' \
-                                    % (self.test_dir, self.cc_option)
-        datalink_delay_png = '%s/%s_datalink_delay.png' \
-                              % (self.test_dir, self.cc_option)
-        acklink_throughput_png = '%s/%s_acklink_throughput.png' \
-                                  % (self.test_dir, self.cc_option)
-        acklink_delay_png = '%s/%s_acklink_delay.png' \
-                             % (self.test_dir, self.cc_option)
+        stats_log = '%s/%s_stats.log' % (self.test_dir, self.cc_option)
+        stats = open(stats_log, 'wb')
 
         # Data link
         sys.stderr.write('* Data link statistics:\n')
@@ -139,6 +133,7 @@ class TestCongestionControl(unittest.TestCase):
                      stdout=datalink_throughput, stderr=PIPE)
         datalink_results = proc.communicate()[1]
         sys.stderr.write(datalink_results)
+        stats.write(datalink_results)
         datalink_throughput.close()
 
         datalink_delay = open(datalink_delay_svg, 'wb')
@@ -154,6 +149,7 @@ class TestCongestionControl(unittest.TestCase):
                      stdout=acklink_throughput, stderr=PIPE)
         acklink_results = proc.communicate()[1]
         sys.stderr.write(acklink_results)
+        stats.write(acklink_results)
         acklink_throughput.close()
 
         acklink_delay = open(acklink_delay_svg, 'wb')
@@ -162,26 +158,7 @@ class TestCongestionControl(unittest.TestCase):
         proc.communicate()
         acklink_delay.close()
 
-        # Convert SVGs to PNGs
-        sys.stderr.write('Converting SVGs to PNGs...\n')
-        cvt_cmd = []
-        cvt_str = 'inkscape -z -e %s %s'
-        cvt_cmd.append(cvt_str % (datalink_throughput_png, datalink_throughput_svg))
-        cvt_cmd.append(cvt_str % (acklink_throughput_png, acklink_throughput_svg))
-        cvt_cmd.append(cvt_str % (datalink_delay_png, datalink_delay_svg))
-        cvt_cmd.append(cvt_str % (acklink_delay_png, acklink_delay_svg))
-
-        for cmd in cvt_cmd:
-            sys.stderr.write('+ ' + cmd + '\n')
-            proc = Popen(cmd, stdout=PIPE, stderr=DEVNULL, shell=True)
-            while True:
-                line = proc.stdout.readline()
-                if not line:
-                    sys.stderr.write('Failed to convert SVG to PNG\n')
-                    sys.exit(1)
-                if line.split(' ', 1)[0] == 'Bitmap':
-                    proc.terminate()
-                    break
+        stats.close()
 
     # congestion control test
     def test_congestion_control(self):
