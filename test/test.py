@@ -4,8 +4,8 @@ import os, sys, signal, unittest
 from subprocess import Popen, PIPE, check_call
 
 # print test usage
-def test_usage():
-    print 'Test Usage:'
+def usage():
+    print 'Usage:'
     print './test.py <congestion-control-name>'
     sys.exit(1)
 
@@ -210,7 +210,7 @@ class TestCongestionControl(unittest.TestCase):
 
 def main():
     if len(sys.argv) != 2:
-        test_usage()
+        usage()
 
     # Enable IP forwarding
     cmd = 'sudo sysctl -w net.ipv4.ip_forward=1'
