@@ -3,7 +3,15 @@
 import os, sys, string
 from subprocess import check_call
 
+def usage():
+    print 'Usage:'
+    print './combine.py <congestion-control-1> [<congestion-control-2> ...]'
+    sys.exit(1)
+
 def main():
+    if len(sys.argv) <= 1:
+        usage()
+
     test_dir = os.path.abspath(os.path.dirname(__file__))
     latex = '\\documentclass{article}\n' \
             '\\usepackage{graphicx}\n' \
