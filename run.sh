@@ -15,4 +15,4 @@ cd $test_dir
 # Put the most time-consuming QUIC at the end
 ./test.py quic
 # Combile all HTML reports into one
-./combine_html.py
+./combine.py default_tcp vegas ledbat pcc verus scream webrtc sprout quic
