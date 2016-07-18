@@ -8,3 +8,6 @@ sudo apt-get -yq --force-yes install mahimahi inkscape
 
 # Add NodeSource PPA (to access the latest nodejs)
 curl -sL https://deb.nodesource.com/setup_4.x | sudo -E bash -
+
+# Install TeX Live
+sudo apt-get install -yq --force-yes texlive
