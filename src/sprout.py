@@ -27,8 +27,7 @@ def main():
 
     # commands to be run after building and before running
     if option == 'initialize':
-        os.environ['SPROUT_MODEL_IN'] = '%s/src/examples/sprout.model' \
-                                        % submodule_dir
+        pass
 
     # who goes first
     if option == 'who_goes_first':
@@ -36,12 +35,16 @@ def main():
 
     # receiver
     if option == 'receiver':
+        os.environ['SPROUT_MODEL_IN'] = '%s/src/examples/sprout.model' \
+                                         % submodule_dir
         sys.stderr.write('Listening on port: %s\n' % 60001)
         cmd = [src_file]
         check_call(cmd, stdout=DEVNULL, stderr=DEVNULL)
 
     # sender
     if option == 'sender':
+        os.environ['SPROUT_MODEL_IN'] = '%s/src/examples/sprout.model' \
+                                         % submodule_dir
         ip = sys.argv[2]
         port = sys.argv[3]
         cmd = [src_file, ip, port]
