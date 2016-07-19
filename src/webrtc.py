@@ -25,11 +25,14 @@ def main():
         cmd = 'cd %s && npm install' % submodule_dir
         check_call(cmd, shell=True)
 
-    # setup
-    if option == 'setup':
+    # commands to be run after building and before running
+    if option == 'initialize':
         video_url = 'http://media.xiph.org/video/derf/y4m/city_cif_15fps.y4m'
         cmd = ['wget', '-O', video_file, video_url]
         check_call(cmd, stdout=DEVNULL, stderr=DEVNULL)
+
+    # who goes first
+    if option == 'who_goes_first':
         sys.stderr.write('Sender first\n')
 
     # sender

@@ -36,18 +36,23 @@ class TestCongestionControl(unittest.TestCase):
         check_call(build_cmd, shell=True)
         sys.stderr.write('Done\n')
 
-    def setup(self):
-        setup_cmd = 'python %s setup' % self.src_file
-        sys.stderr.write('+ ' + setup_cmd + '\n')
-        sys.stderr.write('Setting up...\n')
-        setup_proc = Popen(setup_cmd, stdout=DEVNULL, stderr=PIPE, shell=True)
-        setup_info = setup_proc.communicate()[1]
-        if setup_proc.returncode != 0:
-            sys.stderr.write(setup_info)
+    def initialize(self):
+        initialize_cmd = 'python %s initialize' % self.src_file
+        sys.stderr.write('+ ' + initialize_cmd + '\n')
+        sys.stderr.write('Performing intialization commands...\n')
+        check_call(initialize_cmd, shell=True)
+        sys.stderr.write('Done\n')
+
+    def who_goes_first(self):
+        who_goes_first_cmd = 'python %s who_goes_first' % self.src_file
+        who_goes_first_proc = Popen(who_goes_first_cmd, stdout=DEVNULL, stderr=PIPE, shell=True)
+        who_goes_first_info = who_goes_first_proc.communicate()[1]
+        if who_goes_first_proc.returncode != 0:
+            sys.stderr.write(who_goes_first_info)
             sys.exit(1)
 
-        setup_info = setup_info.rstrip().rsplit('\n', 1)[-1]
-        self.first_to_run = setup_info.split(' ')[0].lower()
+        who_goes_first_info = who_goes_first_info.rstrip().rsplit('\n', 1)[-1]
+        self.first_to_run = who_goes_first_info.split(' ')[0].lower()
         if self.first_to_run != 'receiver' and self.first_to_run != 'sender':
             sys.stderr.write('Need to specify receiver or sender first\n')
             sys.exit(1)
@@ -170,11 +175,14 @@ class TestCongestionControl(unittest.TestCase):
         # get build dependencies
         self.install()
 
-        # run build
+        # run build commands
         self.build()
 
-        # run setup
-        self.setup()
+        # run initialize commands
+        self.initialize()
+
+        # record who goes first
+        self.who_goes_first()
 
         # prepare mahimahi
         self.prepare_mahimahi()

@@ -7,7 +7,8 @@ def print_usage(name, order):
     print "Usage:"
     print "./%s deps" % name
     print "./%s build" % name
-    print "./%s setup" % name
+    print "./%s initialize" % name
+    print "./%s who_goes_first" % name
     if order == RECV_FIRST:
         print "./%s receiver" % name
         print "./%s sender IP port" % name
@@ -22,7 +23,7 @@ def check_args(args, name, order):
 
     option = args[1]
 
-    if option == 'deps' or option == 'build' or option == 'setup':
+    if option == 'deps' or option == 'build' or option == 'initialize' or option == 'who_goes_first':
         if len(args) != 2:
             print_usage(name, order)
 

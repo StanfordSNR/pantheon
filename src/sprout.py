@@ -25,10 +25,13 @@ def main():
               'make -j' % submodule_dir
         check_call(cmd, shell=True)
 
-    # setup
-    if option == 'setup':
+    # commands to be run after building and before running
+    if option == 'initialize':
         os.environ['SPROUT_MODEL_IN'] = '%s/src/examples/sprout.model' \
                                         % submodule_dir
+
+    # who goes first
+    if option == 'who_goes_first':
         sys.stderr.write('Receiver first\n')
 
     # receiver

@@ -25,8 +25,12 @@ def main():
               './autogen.sh && ./configure && make -j' % submodule_dir
         check_call(cmd, shell=True)
 
-    # setup
-    if option == 'setup':
+    # commands to be run after building and before running
+    if option == 'initialize':
+        pass
+
+    # who goes first
+    if option == 'who_goes_first':
         sys.stderr.write('Receiver first\n')
 
     # receiver

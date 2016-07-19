@@ -5,7 +5,7 @@ from subprocess import check_call
 import usage
 from generate_html import generate_html
 
-def setup():
+def initialize():
     # generate a random password
     certs_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'certs'))
     cert_pwd = os.path.join(certs_dir, 'cert_pwd')
@@ -82,9 +82,12 @@ def main():
               'quic_client quic_server' % submodule_dir
         check_call(cmd, shell=True)
 
-    # setup
-    if option == 'setup':
-        setup()
+    # commands to be run after building and before running
+    if option == 'initialize':
+        initialize()
+
+    # who goes first
+    if option == 'who_goes_first':
         sys.stderr.write('Sender first\n')
 
     # sender

@@ -20,10 +20,13 @@ def main():
     if option == 'build':
         pass
 
-    # setup
-    if option == 'setup':
+    # commands to be run after building and before running
+    if option == 'initialize':
         cmd = ['sudo', 'modprobe', 'tcp_vegas']
         check_call(cmd)
+
+    # who goes first
+    if option == 'who_goes_first':
         sys.stderr.write('Receiver first\n')
 
     # receiver
