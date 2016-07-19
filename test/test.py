@@ -13,36 +13,6 @@ class TestCongestionControl(unittest.TestCase):
     def timeout_handler(signum, frame):
         raise
 
-    def install(self):
-        deps_cmd = 'python %s deps' % self.src_file
-        sys.stderr.write('+ ' + deps_cmd + '\n')
-        deps_proc = Popen(deps_cmd, stdout=DEVNULL, stderr=PIPE, shell=True)
-        deps_needed = deps_proc.communicate()[1]
-        if deps_proc.returncode != 0:
-            sys.stderr.write(deps_needed)
-            sys.exit(1)
-
-        if deps_needed:
-            sys.stderr.write('Installing dependencies...\n')
-            sys.stderr.write(deps_needed)
-            install_cmd = 'sudo apt-get -yq --force-yes install ' + deps_needed
-            check_call(install_cmd , shell=True)
-        sys.stderr.write('Done\n')
-
-    def build(self):
-        build_cmd = 'python %s build' % self.src_file
-        sys.stderr.write('+ ' + build_cmd + '\n')
-        sys.stderr.write('Building...\n')
-        check_call(build_cmd, shell=True)
-        sys.stderr.write('Done\n')
-
-    def initialize(self):
-        initialize_cmd = 'python %s initialize' % self.src_file
-        sys.stderr.write('+ ' + initialize_cmd + '\n')
-        sys.stderr.write('Performing intialization commands...\n')
-        check_call(initialize_cmd, shell=True)
-        sys.stderr.write('Done\n')
-
     def who_goes_first(self):
         who_goes_first_cmd = 'python %s who_goes_first' % self.src_file
         who_goes_first_proc = Popen(who_goes_first_cmd, stdout=DEVNULL, stderr=PIPE, shell=True)
@@ -172,15 +142,6 @@ class TestCongestionControl(unittest.TestCase):
         src_dir = os.path.abspath(os.path.join(self.test_dir, '../src'))
         self.src_file = os.path.join(src_dir, self.cc_option + '.py')
 
-        # get build dependencies
-        self.install()
-
-        # run build commands
-        self.build()
-
-        # run initialize commands
-        self.initialize()
-
         # record who goes first
         self.who_goes_first()
 
@@ -196,11 +157,6 @@ class TestCongestionControl(unittest.TestCase):
 def main():
     if len(sys.argv) != 2:
         usage()
-
-    # Enable IP forwarding
-    cmd = 'sudo sysctl -w net.ipv4.ip_forward=1'
-    sys.stderr.write('+ ' + cmd + '\n')
-    check_call(cmd, shell=True)
 
     # create test suite to run
     suite = unittest.TestSuite()

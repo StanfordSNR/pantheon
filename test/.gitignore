@@ -1,5 +1,3 @@
 *
-
 !.gitignore
-!test.py
-!combine_reports.py
+!*.py
