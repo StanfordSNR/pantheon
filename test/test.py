@@ -100,12 +100,14 @@ class TestCongestionControl(unittest.TestCase):
         sys.stderr.write(datalink_results)
         stats.write(datalink_results)
         datalink_throughput.close()
+        self.assertEqual(proc.returncode, 0)
 
         datalink_delay = open(datalink_delay_svg, 'wb')
         proc = Popen(['mm-delay-graph', self.datalink_log],
                      stdout=datalink_delay, stderr=DEVNULL)
         proc.communicate()
         datalink_delay.close()
+        self.assertEqual(proc.returncode, 0)
 
         # ACK link
         sys.stderr.write('* ACK link statistics:\n')
@@ -116,12 +118,14 @@ class TestCongestionControl(unittest.TestCase):
         sys.stderr.write(acklink_results)
         stats.write(acklink_results)
         acklink_throughput.close()
+        self.assertEqual(proc.returncode, 0)
 
         acklink_delay = open(acklink_delay_svg, 'wb')
         proc = Popen(['mm-delay-graph', self.acklink_log],
                      stdout=acklink_delay, stderr=DEVNULL)
         proc.communicate()
         acklink_delay.close()
+        self.assertEqual(proc.returncode, 0)
 
         stats.close()
 
