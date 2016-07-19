@@ -14,6 +14,7 @@ class TestCongestionControl(unittest.TestCase):
         deps_cmd = 'python %s deps' % self.src_file
         sys.stderr.write('+ ' + deps_cmd + '\n')
         deps_needed = check_output(deps_cmd, shell=True)
+
         if deps_needed:
             sys.stderr.write('Installing dependencies...\n')
             sys.stderr.write(deps_needed)
