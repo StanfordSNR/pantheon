@@ -17,9 +17,7 @@ class TestCongestionControl(unittest.TestCase):
         who_goes_first_cmd = 'python %s who_goes_first' % self.src_file
         who_goes_first_info = check_output(who_goes_first_cmd, shell=True)
         self.first_to_run = who_goes_first_info.split(' ')[0].lower()
-        if self.first_to_run != 'receiver' and self.first_to_run != 'sender':
-            sys.stderr.write('Need to specify receiver or sender first\n')
-            sys.exit(1)
+        self.assertTrue(self.first_to_run == 'receiver' or self.first_to_run == 'sender', msg='Need to specify receiver or sender first')
         sys.stderr.write('Done\n')
 
     def prepare_mahimahi(self):
@@ -52,9 +50,7 @@ class TestCongestionControl(unittest.TestCase):
         # find port printed
         port_info = proc1.stderr.readline()
         port = port_info.rstrip().rsplit(' ', 1)[-1]
-        if not port.isdigit():
-            sys.stderr.write('Invalid port number\n')
-            sys.exit(1)
+        self.assertTrue(port.isdigit())
 
         # run the other side specified by self.second_to_run
         cmd = 'python %s %s %s %s' % (self.src_file, self.second_to_run,
