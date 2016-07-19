@@ -29,7 +29,7 @@ def main():
 
     # who goes first
     if option == 'who_goes_first':
-        sys.stderr.write('Receiver first\n')
+        print 'Receiver first'
 
     # receiver
     if option == 'receiver':

@@ -18,7 +18,7 @@ def main():
     # build dependencies
     if option == 'deps':
         deps_list = 'libtbb-dev libasio-dev libalglib-dev libboost-system-dev'
-        sys.stderr.write(deps_list + '\n')
+        print deps_list
 
     # build
     if option == 'build':
@@ -31,7 +31,7 @@ def main():
 
     # who goes first
     if option == 'who_goes_first':
-        sys.stderr.write('Sender first\n')
+        print 'Sender first'
 
     # sender
     if option == 'sender':

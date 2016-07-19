@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import os, sys, signal, unittest
-from subprocess import Popen, PIPE, check_call
+from subprocess import Popen, PIPE, check_call, check_output
 
 # print test usage
 def usage():
@@ -15,13 +15,7 @@ class TestCongestionControl(unittest.TestCase):
 
     def who_goes_first(self):
         who_goes_first_cmd = 'python %s who_goes_first' % self.src_file
-        who_goes_first_proc = Popen(who_goes_first_cmd, stdout=DEVNULL, stderr=PIPE, shell=True)
-        who_goes_first_info = who_goes_first_proc.communicate()[1]
-        if who_goes_first_proc.returncode != 0:
-            sys.stderr.write(who_goes_first_info)
-            sys.exit(1)
-
-        who_goes_first_info = who_goes_first_info.rstrip().rsplit('\n', 1)[-1]
+        who_goes_first_info = check_output(who_goes_first_cmd, shell=True)
         self.first_to_run = who_goes_first_info.split(' ')[0].lower()
         if self.first_to_run != 'receiver' and self.first_to_run != 'sender':
             sys.stderr.write('Need to specify receiver or sender first\n')

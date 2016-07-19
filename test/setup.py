@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import os, sys, unittest
-from subprocess import Popen, PIPE, check_call
+from subprocess import Popen, PIPE, check_call, check_output
 
 # print setup usage
 def usage():
@@ -13,12 +13,7 @@ class TestCongestionControl(unittest.TestCase):
     def install(self):
         deps_cmd = 'python %s deps' % self.src_file
         sys.stderr.write('+ ' + deps_cmd + '\n')
-        deps_proc = Popen(deps_cmd, stdout=DEVNULL, stderr=PIPE, shell=True)
-        deps_needed = deps_proc.communicate()[1]
-        if deps_proc.returncode != 0:
-            sys.stderr.write(deps_needed)
-            sys.exit(1)
-
+        deps_needed = check_output(deps_cmd, shell=True)
         if deps_needed:
             sys.stderr.write('Installing dependencies...\n')
             sys.stderr.write(deps_needed)

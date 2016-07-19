@@ -14,7 +14,7 @@ def main():
 
     # build dependencies
     if option == 'deps':
-        sys.stderr.write('iperf\n')
+        print 'iperf'
 
     # build
     if option == 'build':
@@ -27,7 +27,7 @@ def main():
 
     # who goes first
     if option == 'who_goes_first':
-        sys.stderr.write('Receiver first\n')
+        print 'Receiver first'
 
     # receiver
     if option == 'receiver':

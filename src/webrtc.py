@@ -18,7 +18,7 @@ def main():
     if option == 'deps':
         deps_list = 'chromium-browser nodejs xvfb xfonts-100dpi xfonts-75dpi ' \
                     'xfonts-cyrillic xorg dbus-x11'
-        sys.stderr.write(deps_list + '\n')
+        print deps_list
 
     # build
     if option == 'build':
@@ -33,7 +33,7 @@ def main():
 
     # who goes first
     if option == 'who_goes_first':
-        sys.stderr.write('Sender first\n')
+        print 'Sender first'
 
     # sender
     if option == 'sender':

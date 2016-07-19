@@ -17,7 +17,7 @@ def main():
     if option == 'deps':
         deps_list = 'libboost-math-dev libboost-math1.54.0 libprotobuf8 ' \
                     'libprotobuf-dev protobuf-compiler libncurses5-dev'
-        sys.stderr.write(deps_list + '\n')
+        print deps_list
 
     # build
     if option == 'build':
@@ -31,7 +31,7 @@ def main():
 
     # who goes first
     if option == 'who_goes_first':
-        sys.stderr.write('Receiver first\n')
+        print 'Receiver first'
 
     # receiver
     if option == 'receiver':

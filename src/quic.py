@@ -73,7 +73,7 @@ def main():
                    'libxext6 libxfixes3 libxi6 libxinerama1 libxrandr2 ' \
                    'libxrender1 libxtst6 zlib1g'
 
-        sys.stderr.write(dev_list + ' ' + lib_list + '\n')
+        print dev_list + ' ' + lib_list
 
     # build
     if option == 'build':
@@ -88,7 +88,7 @@ def main():
 
     # who goes first
     if option == 'who_goes_first':
-        sys.stderr.write('Sender first\n')
+        print 'Sender first'
 
     # sender
     if option == 'sender':
