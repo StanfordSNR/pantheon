@@ -1,1 +1,1 @@
-SUBDIRS = src
+SUBDIRS = src src/sourdough src/scream
