@@ -8,11 +8,9 @@ def main():
     usage.check_args(sys.argv, os.path.basename(__file__), usage.RECV_FIRST)
     option = sys.argv[1]
     src_dir = os.path.abspath(os.path.dirname(__file__))
-    submodule_dir = os.path.abspath(os.path.join(src_dir,
-                                    '../third_party/scream'))
     find_unused_port_file = os.path.join(src_dir, 'find_unused_port')
-    recv_file = os.path.join(submodule_dir, 'scream-for-pantheon/ScreamServer')
-    send_file = os.path.join(submodule_dir, 'scream-for-pantheon/ScreamClient')
+    recv_file = os.path.join(src_dir, 'scream/ScreamServer')
+    send_file = os.path.join(src_dir, 'scream/ScreamClient')
     DEVNULL = open(os.devnull, 'wb')
 
     # build dependencies
@@ -21,9 +19,7 @@ def main():
 
     # build
     if option == 'build':
-        cmd = 'cd %s && git submodule update --init && ' \
-              './autogen.sh && ./configure && make -j' % submodule_dir
-        check_call(cmd, shell=True)
+        pass
 
     # commands to be run after building and before running
     if option == 'initialize':
