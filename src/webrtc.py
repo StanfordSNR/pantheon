@@ -27,7 +27,7 @@ def main():
 
     # commands to be run after building and before running
     if option == 'initialize':
-        video_url = 'http://media.xiph.org/video/derf/y4m/city_cif_15fps.y4m'
+        video_url = 'https://media.xiph.org/video/derf/y4m/blue_sky_1080p25.y4m'
         cmd = ['wget', '-O', video_file, video_url]
         check_call(cmd, stdout=DEVNULL, stderr=DEVNULL)
 
