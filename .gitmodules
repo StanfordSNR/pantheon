@@ -22,3 +22,7 @@
 	path = third_party/sprout
 	url = https://github.com/keithw/alfalfa.git
   ignore = dirty
+[submodule "third_party/scream"]
+	path = third_party/scream
+	url = https://github.com/EricssonResearch/scream.git
+  ignore = dirty
