@@ -44,7 +44,7 @@ class TestCongestionControl(unittest.TestCase):
         cmd = 'python %s %s' % (self.src_file, self.first_to_run)
         sys.stderr.write('+ ' + cmd + '\n')
         sys.stderr.write('Running %s %s...\n' % (self.cc_option, self.first_to_run))
-        proc1 = Popen(cmd, stdout=DEVNULL, stderr=PIPE, shell=True,
+        proc1 = Popen(cmd, stderr=PIPE, shell=True,
                       preexec_fn=os.setpgrp)
 
         # find port printed
@@ -60,7 +60,7 @@ class TestCongestionControl(unittest.TestCase):
                  self.uplink_log, self.downlink_log, cmd)
         sys.stderr.write('+ ' + mm_cmd + '\n')
         sys.stderr.write('Running %s %s...\n' % (self.cc_option, self.second_to_run))
-        proc2 = Popen(mm_cmd, stdout=DEVNULL, stderr=PIPE, shell=True,
+        proc2 = Popen(mm_cmd, stderr=PIPE, shell=True,
                       preexec_fn=os.setpgrp)
 
         # run for 60 seconds
@@ -104,7 +104,7 @@ class TestCongestionControl(unittest.TestCase):
 
         datalink_delay = open(datalink_delay_svg, 'wb')
         proc = Popen(['mm-delay-graph', self.datalink_log],
-                     stdout=datalink_delay, stderr=DEVNULL)
+                     stdout=datalink_delay)
         proc.communicate()
         datalink_delay.close()
         self.assertEqual(proc.returncode, 0)
@@ -122,7 +122,7 @@ class TestCongestionControl(unittest.TestCase):
 
         acklink_delay = open(acklink_delay_svg, 'wb')
         proc = Popen(['mm-delay-graph', self.acklink_log],
-                     stdout=acklink_delay, stderr=DEVNULL)
+                     stdout=acklink_delay)
         proc.communicate()
         acklink_delay.close()
         self.assertEqual(proc.returncode, 0)
@@ -159,6 +159,4 @@ def main():
         sys.exit(1)
 
 if __name__ == '__main__':
-    DEVNULL = open(os.devnull, 'wb')
     main()
-    DEVNULL.close()
