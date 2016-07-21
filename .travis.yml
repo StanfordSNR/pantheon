@@ -5,9 +5,15 @@ services: docker
 addons:
   apt:
     sources:
-    - ubuntu-toolchain-r-test
+    - sourceline: 'ppa:ubuntu-toolchain-r/test'
+    - sourceline: 'ppa:keithw/mahimahi'
+    - sourceline: 'ppa:inkscape.dev/stable'
     packages:
     - g++-4.9
+    - mahimahi
+    - mahimahi-traces
+    - inkscape
+    - texlive
   artifacts:
     paths:
     - test/pantheon-report.pdf
