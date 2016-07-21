@@ -4,6 +4,9 @@ proj_dir=$( cd $(dirname $0) ; pwd )
 test_dir=$proj_dir/test
 
 cd $test_dir
+./setup.py quic
+./test.py  quic
+
 ./setup.py default_tcp
 ./test.py  default_tcp
 
@@ -27,12 +30,9 @@ cd $test_dir
 
 ./setup.py sprout
 ./test.py  sprout
-# Put the most time-consuming QUIC at the end
-./setup.py quic
-./test.py  quic
 
 # Assemble a throughput-delay plot
-./summary-plot.pl pantheon_summary.pdf default_tcp vegas ledbat pcc verus scream webrtc sprout quic
+./summary-plot.pl pantheon_summary.pdf quic default_tcp vegas ledbat pcc verus scream webrtc sprout
 
 # Combile all HTML reports into one
-./combine_reports.py default_tcp vegas ledbat pcc verus scream webrtc sprout quic
+./combine_reports.py                   quic default_tcp vegas ledbat pcc verus scream webrtc sprout
