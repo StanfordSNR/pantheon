@@ -11,6 +11,10 @@ addons:
     - ubuntu-toolchain-r-test
     packages:
     - g++-4.9
+  artifacts:
+    paths:
+    - test/pantheon-report.pdf
+    debug: true
 
 before_install:
   - git submodule update --init
