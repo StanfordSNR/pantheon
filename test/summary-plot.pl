@@ -18,7 +18,7 @@ sub prettify { # maybe this should be every driver's responsibility too!
   $scheme =~ s{scream}{SCReAM};
   $scheme =~ s{webrtc}{WebRTC media};
   $scheme =~ s{sprout}{Sprout};
-  $scheme =~ s{quic}{QUIC Cubic};
+  $scheme =~ s{quic}{QUIC Cubic (toy)};
   return $scheme;
 }
 
