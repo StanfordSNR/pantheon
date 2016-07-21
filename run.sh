@@ -30,5 +30,9 @@ cd $test_dir
 # Put the most time-consuming QUIC at the end
 ./setup.py quic
 ./test.py  quic
+
+# Assemble a throughput-delay plot
+./summary-plot.pl pantheon_summary.pdf default_tcp vegas ledbat pcc verus scream webrtc sprout quic
+
 # Combile all HTML reports into one
 ./combine_reports.py default_tcp vegas ledbat pcc verus scream webrtc sprout quic

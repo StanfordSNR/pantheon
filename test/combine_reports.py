@@ -48,9 +48,11 @@ def main():
     latex = open('/tmp/pantheon-report.tex', 'wb')
 
     latex.write('\\documentclass{article}\n' \
-                '\\usepackage{graphicx}\n' \
+                '\\usepackage{pdfpages, graphicx}\n' \
                 '\\usepackage{float}\n' \
                 '\\begin{document}\n')
+
+    latex.write('\\includepdf{pantheon_summary.pdf}\n')
 
     for i in range(1, len(sys.argv)):
         cc = sys.argv[i]
