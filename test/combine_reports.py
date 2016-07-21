@@ -22,7 +22,7 @@ def svg2png(test_dir, cc):
     # Convert SVGs to PNGs
     sys.stderr.write('Converting SVGs to PNGs...\n')
     cvt_cmd = []
-    cvt_str = 'inkscape -z -e %s %s'
+    cvt_str = 'inkscape -d 300 -z -e %s %s'
     cvt_cmd.append(cvt_str % (datalink_throughput_png, datalink_throughput_svg))
     cvt_cmd.append(cvt_str % (acklink_throughput_png, acklink_throughput_svg))
     cvt_cmd.append(cvt_str % (datalink_delay_png, datalink_delay_svg))
