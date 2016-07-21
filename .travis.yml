@@ -2,9 +2,6 @@ language: python
 sudo: required
 services: docker
 
-git:
-  submodules: false
-
 addons:
   apt:
     sources:
@@ -16,9 +13,6 @@ addons:
     - test/pantheon-report.pdf
     target_paths: ""
     debug: true
-
-before_install:
-  - git submodule update --init
 
 install:
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 99
