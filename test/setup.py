@@ -6,7 +6,7 @@ from subprocess import Popen, PIPE, check_call, check_output
 # print setup usage
 def usage():
     print 'Usage:'
-    print './setup.py <congestion-control-name>'
+    print sys.argv[0] + ' <congestion-control-name>'
     sys.exit(1)
 
 class TestCongestionControl(unittest.TestCase):

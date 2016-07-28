@@ -5,7 +5,7 @@ from subprocess import check_call, PIPE, Popen
 
 def usage():
     print 'Usage:'
-    print './combine.py <congestion-control-1> [<congestion-control-2> ...]'
+    print sys.argv[0] + ' <congestion-control-1> [<congestion-control-2> ...]'
     sys.exit(1)
 
 def svg2png(test_dir, cc):
