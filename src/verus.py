@@ -22,7 +22,7 @@ def main():
 
     # build
     if option == 'build':
-        cmd = 'cd %s && autoreconf -i && ./configure && make -j' % submodule_dir
+        cmd = 'cd %s && ./bootstrap.sh && ./configure && make -j' % submodule_dir
         check_call(cmd, shell=True)
 
     # commands to be run after building and before running
