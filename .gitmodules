@@ -26,3 +26,6 @@
 	path = third_party/scream
 	url = https://github.com/EricssonResearch/scream.git
   ignore = dirty
+[submodule "third_party/sourdough"]
+	path = third_party/sourdough
+	url = https://github.com/keithw/sourdough

@@ -24,7 +24,7 @@ void sendRtcp(ScreamRx *screamRx, UDPSocket &socket)
   uint32_t recv_timestamp_ms; 
   uint16_t ack_seq_num;
   uint64_t ack_vector;
-  if (screamRx->getFeedback(timestamp_us(), ssrc, 
+  if (screamRx->getFeedback(timestamp_ms() * 1000, ssrc,
       recv_timestamp_ms, ack_seq_num, ack_vector)) {
     RtcpPacket rtcpPacket(ssrc, ack_seq_num, ack_vector, recv_timestamp_ms);
     socket.send(rtcpPacket.to_string());
@@ -68,7 +68,7 @@ void recvRtp(ScreamRx *screamRx, UDPSocket &socket, Timerfd &feedbackTimer)
 
   /* Generate RTCP feedback */
   if (screamRx->isFeedback()) {
-    uint64_t sinceLastFeedback_us = timestamp_us() - screamRx->getLastFeedbackT();
+    uint64_t sinceLastFeedback_us = (timestamp_ms() * 1000) - screamRx->getLastFeedbackT();
     if (sinceLastFeedback_us > feedbackInterval_us) {
       sendRtcp(screamRx, socket);
     } else {
