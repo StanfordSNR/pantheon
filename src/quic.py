@@ -11,7 +11,6 @@ def main():
     src_dir = os.path.abspath(os.path.dirname(__file__))
     submodule_dir = os.path.abspath(os.path.join(src_dir,
                                     '../third_party/proto-quic'))
-    find_unused_port_file = os.path.join(src_dir, 'find_unused_port')
     quic_server = os.path.join(submodule_dir, 'src/out/Release/quic_server')
     quic_client = os.path.join(submodule_dir, 'src/out/Release/quic_client')
     DEVNULL = open(os.devnull, 'wb')
