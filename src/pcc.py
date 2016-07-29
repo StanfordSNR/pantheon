@@ -13,7 +13,6 @@ def main():
     find_unused_port_file = os.path.join(src_dir, 'find_unused_port')
     recv_file = os.path.join(submodule_dir, 'receiver/app/appserver')
     send_file = os.path.join(submodule_dir, 'sender/app/appclient')
-    DEVNULL = open(os.devnull, 'wb')
 
     # build dependencies
     if option == 'deps':
@@ -39,7 +38,7 @@ def main():
         sys.stderr.write('Listening on port: %s\n' % port)
         os.environ['LD_LIBRARY_PATH'] = '%s/receiver/src' % submodule_dir
         cmd = [recv_file, port]
-        check_call(cmd, stdout=DEVNULL, stderr=DEVNULL)
+        check_call(cmd)
 
     # sender
     if option == 'sender':
@@ -47,9 +46,7 @@ def main():
         port = sys.argv[3]
         os.environ['LD_LIBRARY_PATH'] = '%s/sender/src' % submodule_dir
         cmd = [send_file, ip, port]
-        check_call(cmd, stdout=DEVNULL, stderr=DEVNULL)
-
-    DEVNULL.close()
+        check_call(cmd)
 
 if __name__ == '__main__':
     main()

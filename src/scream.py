@@ -11,7 +11,6 @@ def main():
     find_unused_port_file = os.path.join(src_dir, 'find_unused_port')
     recv_file = os.path.join(src_dir, 'scream/ScreamServer')
     send_file = os.path.join(src_dir, 'scream/ScreamClient')
-    DEVNULL = open(os.devnull, 'wb')
 
     # build dependencies
     if option == 'deps':
@@ -34,16 +33,14 @@ def main():
         port = check_output([find_unused_port_file])
         sys.stderr.write('Listening on port: %s\n' % port)
         cmd = [recv_file, port]
-        check_call(cmd, stdout=DEVNULL, stderr=DEVNULL)
+        check_call(cmd)
 
     # sender
     if option == 'sender':
         ip = sys.argv[2]
         port = sys.argv[3]
         cmd = [send_file, ip, port]
-        check_call(cmd, stdout=DEVNULL, stderr=DEVNULL)
-
-    DEVNULL.close()
+        check_call(cmd)
 
 if __name__ == '__main__':
     main()

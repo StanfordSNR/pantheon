@@ -36,14 +36,14 @@ def main():
         port = check_output([find_unused_port_file])
         sys.stderr.write('Listening on port: %s\n' % port)
         cmd = [src_file, '-l', '-p', port]
-        check_call(cmd, stdout=DEVNULL, stderr=DEVNULL)
+        check_call(cmd, stdout=DEVNULL) # suppress stdout as it prints all the bytes received
 
     # sender
     if option == 'sender':
         ip = sys.argv[2]
         port = sys.argv[3]
         cmd = [src_file, ip, port]
-        proc = Popen(cmd, stdout=DEVNULL, stderr=DEVNULL, stdin=PIPE)
+        proc = Popen(cmd, stdin=PIPE)
 
         timeout = time.time() + 75
         while True:

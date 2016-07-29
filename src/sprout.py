@@ -11,7 +11,6 @@ def main():
     submodule_dir = os.path.abspath(os.path.join(src_dir,
                                     '../third_party/sprout'))
     src_file = os.path.join(submodule_dir, 'src/examples/sproutbt2')
-    DEVNULL = open(os.devnull, 'wb')
 
     # build dependencies
     if option == 'deps':
@@ -39,7 +38,7 @@ def main():
                                          % submodule_dir
         sys.stderr.write('Listening on port: %s\n' % 60001)
         cmd = [src_file]
-        check_call(cmd, stdout=DEVNULL, stderr=DEVNULL)
+        check_call(cmd)
 
     # sender
     if option == 'sender':
@@ -48,9 +47,7 @@ def main():
         ip = sys.argv[2]
         port = sys.argv[3]
         cmd = [src_file, ip, port]
-        check_call(cmd, stdout=DEVNULL, stderr=DEVNULL)
-
-    DEVNULL.close()
+        check_call(cmd)
 
 if __name__ == '__main__':
     main()
