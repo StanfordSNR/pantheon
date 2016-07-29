@@ -8,7 +8,7 @@ def get_open_port_helper(socket_type):
     s.bind(("",0))
     port = s.getsockname()[1]
     s.close()
-    return port
+    return str(port)
 
 def get_open_udp_port():
     return get_open_port_helper(socket.SOCK_DGRAM)
