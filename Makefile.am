@@ -1,1 +1,1 @@
-SUBDIRS = src src/sourdough src/scream
+SUBDIRS = src third_party/sourdough src/scream

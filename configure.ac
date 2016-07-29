@@ -29,6 +29,9 @@ AC_TYPE_UINT16_T
 
 AC_CONFIG_FILES([Makefile
                  src/Makefile
-                 src/sourdough/Makefile
+                 third_party/sourdough/Makefile
+                 third_party/sourdough/src/Makefile
+                 third_party/sourdough/examples/Makefile
+                 third_party/sourdough/datagrump/Makefile
                  src/scream/Makefile])
 AC_OUTPUT

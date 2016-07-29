@@ -27,7 +27,7 @@ void encodeVideoFrame(VideoEnc *videoEnc, ScreamTx *screamTx)
 
   /* encode(time) accepts time as seconds */
   int rtpBytes = videoEnc->encode((float) timestamp_ms() / 1000);
-  screamTx->newMediaFrame(timestamp_us(), SSRC, rtpBytes);
+  screamTx->newMediaFrame(timestamp_ms() * 1000, SSRC, rtpBytes);
 }
 
 /* Check if client can send RTP packets now */
@@ -35,7 +35,7 @@ void sendRtp(ScreamTx *screamTx, RtpQueue *rtpQueue,
              Timerfd &txTimer, UDPSocket &socket)
 {
   uint32_t ssrc; /* will be filled in with the SSRC of prioritized stream */
-  float dT = screamTx->isOkToTransmit(timestamp_us(), ssrc); 
+  float dT = screamTx->isOkToTransmit(timestamp_ms() * 1000, ssrc);
 
   /* RTP packet with ssrc can be immediately transmitted */
   if (dT == 0.0f) {
@@ -54,7 +54,7 @@ void sendRtp(ScreamTx *screamTx, RtpQueue *rtpQueue,
         << " at time " << timestamp_ms() << endl;
     }
 
-    dT = screamTx->addTransmitted(timestamp_us(), ssrc, size, seqNr);
+    dT = screamTx->addTransmitted(timestamp_ms() * 1000, ssrc, size, seqNr);
   }
 
   /* isOkToTransmit() should be called again until dT seconds later */
