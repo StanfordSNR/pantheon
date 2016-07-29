@@ -5,37 +5,6 @@ from subprocess import check_call
 import usage
 from generate_html import generate_html
 
-def initialize():
-    # generate a random password
-    certs_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'certs'))
-    cert_pwd = os.path.join(certs_dir, 'cert_pwd')
-    cmd = 'date +%%s | sha256sum | base64 | head -c 32 > %s' % cert_pwd
-    check_call(cmd, shell=True)
-
-    # initialize certificate
-    home_dir = os.path.abspath(os.path.expanduser('~'))
-    nssdb_dir = os.path.join(home_dir, '.pki/nssdb')
-    # create nssdb directory if it doesn't exist
-    try:
-        os.makedirs(nssdb_dir)
-    except OSError as exception:
-        if exception.errno != errno.EEXIST:
-            raise
-    cmd = 'certutil -d %s -N -f %s' % (nssdb_dir, cert_pwd)
-    check_call(cmd, shell=True)
-
-    # generate certificate
-    certs_proc = check_call(['./generate-certs.sh'], cwd=certs_dir)
-
-    # trust certificate
-    pem = os.path.join(certs_dir, 'out/2048-sha256-root.pem')
-    cmd = 'certutil -d sql:%s -A -t "C,," -n "QUIC" -i %s -f %s' \
-            % (nssdb_dir, pem, cert_pwd)
-    check_call(cmd, shell=True)
-
-    # generate a html of size that can be transferred longer than 60 seconds
-    generate_html(50000000)
-
 def main():
     usage.check_args(sys.argv, os.path.basename(__file__), usage.SEND_FIRST)
     option = sys.argv[1]
@@ -84,7 +53,35 @@ def main():
 
     # commands to be run after building and before running
     if option == 'initialize':
-        initialize()
+        # generate a random password
+        certs_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'certs'))
+        cert_pwd = os.path.join(certs_dir, 'cert_pwd')
+        cmd = 'date +%%s | sha256sum | base64 | head -c 32 > %s' % cert_pwd
+        check_call(cmd, shell=True)
+
+        # initialize certificate
+        home_dir = os.path.abspath(os.path.expanduser('~'))
+        nssdb_dir = os.path.join(home_dir, '.pki/nssdb')
+        # create nssdb directory if it doesn't exist
+        try:
+            os.makedirs(nssdb_dir)
+        except OSError as exception:
+            if exception.errno != errno.EEXIST:
+                raise
+        cmd = 'certutil -d %s -N -f %s' % (nssdb_dir, cert_pwd)
+        check_call(cmd, shell=True)
+
+        # generate certificate
+        certs_proc = check_call(['./generate-certs.sh'], cwd=certs_dir)
+
+        # trust certificate
+        pem = os.path.join(certs_dir, 'out/2048-sha256-root.pem')
+        cmd = 'certutil -d sql:%s -A -t "C,," -n "QUIC" -i %s -f %s' \
+                % (nssdb_dir, pem, cert_pwd)
+        check_call(cmd, shell=True)
+
+        # generate a html of size that can be transferred longer than 60 seconds
+        generate_html(50000000)
 
     # who goes first
     if option == 'who_goes_first':
