@@ -10,7 +10,6 @@ def main():
     src_dir = os.path.abspath(os.path.dirname(__file__))
     find_unused_port_file = os.path.join(src_dir, 'find_unused_port')
     src_file = 'iperf'
-    DEVNULL = open(os.devnull, 'wb')
 
     # build dependencies
     if option == 'deps':
@@ -33,16 +32,14 @@ def main():
         port = check_output([find_unused_port_file])
         sys.stderr.write('Listening on port: %s\n' % port)
         cmd = [src_file, '-s', '-p', port]
-        check_call(cmd, stdout=DEVNULL, stderr=DEVNULL)
+        check_call(cmd)
 
     # sender
     if option == 'sender':
         ip = sys.argv[2]
         port = sys.argv[3]
         cmd = [src_file, '-c', ip, '-p', port, '-t', '75']
-        check_call(cmd, stdout=DEVNULL, stderr=DEVNULL)
-
-    DEVNULL.close()
+        check_call(cmd)
 
 if __name__ == '__main__':
     main()

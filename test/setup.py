@@ -68,6 +68,4 @@ def main():
         sys.exit(1)
 
 if __name__ == '__main__':
-    DEVNULL = open(os.devnull, 'wb')
     main()
-    DEVNULL.close()

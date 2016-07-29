@@ -13,7 +13,6 @@ def main():
     find_unused_port_file = os.path.join(src_dir, 'find_unused_port')
     send_file = os.path.join(submodule_dir, 'src/verus_server')
     recv_file = os.path.join(submodule_dir, 'src/verus_client')
-    DEVNULL = open(os.devnull, 'wb')
 
     # build dependencies
     if option == 'deps':
@@ -38,16 +37,14 @@ def main():
         port = check_output([find_unused_port_file])
         sys.stderr.write('Listening on port: %s\n' % port)
         cmd = [send_file, '-name', 'verus_tmp', '-p', port, '-t', '75']
-        check_call(cmd, stdout=DEVNULL, stderr=DEVNULL)
+        check_call(cmd)
 
     # receiver
     if option == 'receiver':
         ip = sys.argv[2]
         port = sys.argv[3]
         cmd = [recv_file, ip, '-p', port]
-        check_call(cmd, stdout=DEVNULL, stderr=DEVNULL)
-
-    DEVNULL.close()
+        check_call(cmd)
 
 if __name__ == '__main__':
     main()

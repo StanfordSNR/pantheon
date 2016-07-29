@@ -12,7 +12,6 @@ def main():
                                     '../third_party/webrtc'))
     src_file = os.path.join(submodule_dir, 'app.js')
     video_file = os.path.abspath('/tmp/video.y4m')
-    DEVNULL = open(os.devnull, 'wb')
 
     # build dependencies
     if option == 'deps':
@@ -29,7 +28,7 @@ def main():
     if option == 'initialize':
         video_url = 'https://media.xiph.org/video/derf/y4m/blue_sky_1080p25.y4m'
         cmd = ['wget', '-O', video_file, video_url]
-        check_call(cmd, stdout=DEVNULL, stderr=DEVNULL)
+        check_call(cmd)
 
     # who goes first
     if option == 'who_goes_first':
@@ -38,31 +37,29 @@ def main():
     # sender
     if option == 'sender':
         cmd = ['Xvfb', ':1']
-        xvfb = Popen(cmd, stdout=DEVNULL, stderr=DEVNULL)
+        xvfb = Popen(cmd)
         os.environ['DISPLAY']=':1'
         cmd = ['node', src_file]
-        signaling_server = Popen(cmd, stdout=DEVNULL, stderr=DEVNULL)
+        signaling_server = Popen(cmd)
         sys.stderr.write('Listening on port: %s\n' % 3000)
         cmd = 'chromium-browser --app=http://localhost:3000/sender ' \
               '--use-fake-ui-for-media-stream ' \
               '--use-fake-device-for-media-stream ' \
               '--use-file-for-fake-video-capture=%s ' \
               '--user-data-dir=/tmp/nonexistent$(date +%%s%%N)' % video_file
-        check_call(cmd, stdout=DEVNULL, stderr=DEVNULL, shell=True)
+        check_call(cmd, shell=True)
 
     # receiver
     if option == 'receiver':
         cmd = ['Xvfb', ':2']
-        xvfb = Popen(cmd, stdout=DEVNULL, stderr=DEVNULL)
+        xvfb = Popen(cmd)
         os.environ['DISPLAY']=':2'
         ip = sys.argv[2]
         port = sys.argv[3]
         time.sleep(3) # at least wait until the sender is ready
         cmd = 'chromium-browser --app=http://%s:%s/receiver ' \
               '--user-data-dir=/tmp/nonexistent$(date +%%s%%N)' % (ip, port)
-        check_call(cmd, stdout=DEVNULL, stderr=DEVNULL, shell=True)
-
-    DEVNULL.close()
+        check_call(cmd, shell=True)
 
 if __name__ == '__main__':
     main()
