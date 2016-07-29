@@ -11,6 +11,9 @@ def main():
     src_dir = os.path.abspath(os.path.dirname(__file__))
     recv_file = os.path.join(src_dir, 'scream/ScreamServer')
     send_file = os.path.join(src_dir, 'scream/ScreamClient')
+    submodule_dir = os.path.abspath(os.path.join(src_dir,
+                                    '../third_party/sourdough'))
+    code_dir = os.path.abspath(os.path.join(src_dir, 'scream/'))
 
     # build dependencies
     if option == 'deps':
@@ -18,7 +21,9 @@ def main():
 
     # build
     if option == 'build':
-        pass
+        cmd = 'cd %s && ./autogen.sh && ./configure && make -j' % submodule_dir
+        cmd += ' && cd %s && ./autogen.sh && ./configure && make -j' % code_dir
+        check_call(cmd, shell=True)
 
     # commands to be run after building and before running
     if option == 'initialize':
