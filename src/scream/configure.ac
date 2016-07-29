@@ -4,7 +4,6 @@
 AC_PREREQ([2.69])
 AC_INIT([pantheon], [1.0], [francisyyan@stanford.edu])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
-AC_CONFIG_SRCDIR([src/find_unused_port.c])
 AC_CONFIG_HEADERS([config.h])
 
 # Add picky CXXFLAGS
@@ -27,11 +26,5 @@ AC_TYPE_UINT16_T
 
 # Checks for library functions.
 
-AC_CONFIG_FILES([Makefile
-                 src/Makefile
-                 third_party/sourdough/Makefile
-                 third_party/sourdough/src/Makefile
-                 third_party/sourdough/examples/Makefile
-                 third_party/sourdough/datagrump/Makefile
-                 src/scream/Makefile])
+AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
