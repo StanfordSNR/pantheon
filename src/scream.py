@@ -3,12 +3,12 @@
 import os, sys
 from subprocess import check_output, check_call
 import usage
+from get_open_port import *
 
 def main():
     usage.check_args(sys.argv, os.path.basename(__file__), usage.RECV_FIRST)
     option = sys.argv[1]
     src_dir = os.path.abspath(os.path.dirname(__file__))
-    find_unused_port_file = os.path.join(src_dir, 'find_unused_port')
     recv_file = os.path.join(src_dir, 'scream/ScreamServer')
     send_file = os.path.join(src_dir, 'scream/ScreamClient')
 
@@ -30,7 +30,7 @@ def main():
 
     # receiver
     if option == 'receiver':
-        port = check_output([find_unused_port_file])
+        port = get_open_udp_port()
         sys.stderr.write('Listening on port: %s\n' % port)
         cmd = [recv_file, port]
         check_call(cmd)
