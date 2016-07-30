@@ -13,56 +13,53 @@
 2. Get submodules:
 
   ```
-  $ git submodule update --init
+  git submodule update --init
   ```
 
-3. Install dependencies:
+3. Build pantheon:
 
   ```
-  $ ./install_deps.sh
+  ./autogen.sh
+  ./configure
+  make -j
   ```
 
-4. Build third-party repositories:
-
-  ```
-  $ ./build_third_party.sh
-  ```
-
-5. Build pantheon:
-
-  ```
-  $ ./autogen.sh
-  $ ./configure
-  $ make -j
-  ```
 ## Usage
 
-* General Usage:
+### To run a specific congestion control scheme:
+* Perform local setup/build commands for scheme
 
   ```
-  $ cd panthon/src
-  $ ./congestion-control-name.py setup
+  cd test/
+  ./setup.py [congestion-control-name]
   ```
 
-  Depending on the output about running order, run
+* Find running order for scheme
+
+  ```
+  cd src/
+  ./[congestion-control-name].py who_goes_first
+  ```
+* Depending on the output about running order, run
 
   ```
   # Receiver first
-  $ ./congestion-control-name.py receiver
-  $ ./congestion-control-name.py sender IP port
+  ./[congestion-control-name].py receiver
+  ./[congestion-control-name].py sender IP port
   ```
 
   or
 
   ```
   # Sender first
-  $ ./congestion-control-name.py sender
-  $ ./congestion-control-name.py receiver IP port
+  ./[congestion-control-name].py sender
+  ./[congestion-control-name].py receiver IP port
   ```
 
-* Run tests:
+* To test a scheme locally over emulated mahimahi link:
 
   ```
-  $ cd pantheon/test
-  $ ./test.py congestion-control-name
+  cd test/
+  ./setup.py congestion-control-name
+  ./test_locally.py congestion-control-name
   ```
