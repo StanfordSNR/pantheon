@@ -24,9 +24,6 @@ install:
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 99
 
 script:
-  - ./autogen.sh
-  - ./configure
-  - make -j
   - ./run.sh
 
 notifications:
