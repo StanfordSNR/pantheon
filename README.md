@@ -16,12 +16,12 @@
   git submodule update --init
   ```
 
-3. Build pantheon:
+3. Get mahimahi for `test_local.py` and texlive/inkscape for report generation:
 
   ```
-  ./autogen.sh
-  ./configure
-  make -j
+  sudo add-apt-repository ppa:keithw/mahimahi
+  sudo add-apt-repository ppa:inkscape.dev/stable
+  sudo apt-get install mahimahi inkscape texlive
   ```
 
 ## Usage
