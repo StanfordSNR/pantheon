@@ -61,5 +61,5 @@
   ```
   cd test/
   ./setup.py congestion-control-name
-  ./test_locally.py congestion-control-name
+  ./test_local.py congestion-control-name
   ```
