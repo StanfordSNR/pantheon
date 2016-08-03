@@ -14,7 +14,7 @@ def main():
 
     # build dependencies
     if option == 'deps':
-        deps_list = 'libboost-math-dev libboost-math1.54.0 libprotobuf8 ' \
+        deps_list = 'libboost-math-dev ' \
                     'libprotobuf-dev protobuf-compiler libncurses5-dev'
         print deps_list
 
