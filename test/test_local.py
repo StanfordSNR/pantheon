@@ -149,8 +149,9 @@ class TestCongestionControl(unittest.TestCase):
         self.assertEqual(proc.returncode, 0)
 
         acklink_delay = open(acklink_delay_svg, 'wb')
+
         proc = Popen(['mm-delay-graph', self.acklink_log],
-                     stdout=acklink_delay)
+                     stdout=acklink_delay, stderr=DEVNULL)
         proc.communicate()
         acklink_delay.close()
         self.assertEqual(proc.returncode, 0)
@@ -196,4 +197,6 @@ def main():
         sys.exit(1)
 
 if __name__ == '__main__':
+    DEVNULL = open(os.devnull, 'wb')
     main()
+    DEVNULL.close()
