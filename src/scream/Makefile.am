@@ -1,9 +1,7 @@
 AM_CPPFLAGS = $(CXX11_FLAGS) -I../../third_party/sourdough/src -I../../third_party/scream/code
-AM_CPPFLAGS += $(GLIB_CFLAGS)
 AM_CXXFLAGS = $(PICKY_CXXFLAGS)
 
 LDADD = ../../third_party/sourdough/src/libsourdough.a -lpthread
-LDADD += $(GLIB_LIBS)
 
 bin_PROGRAMS = ScreamClient ScreamServer
 
