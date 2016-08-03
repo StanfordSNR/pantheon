@@ -23,3 +23,5 @@ Makefile.in
 .deps
 /ar-lib
 /configure.scan
+/ScreamClient
+/ScreamServer
