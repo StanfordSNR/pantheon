@@ -39,7 +39,7 @@ def main():
         cmd = ['Xvfb', ':1']
         xvfb = Popen(cmd)
         os.environ['DISPLAY']=':1'
-        cmd = ['node', src_file]
+        cmd = ['nodejs', src_file]
         signaling_server = Popen(cmd)
         sys.stderr.write('Listening on port: %s\n' % 3000)
         cmd = 'chromium-browser --app=http://localhost:3000/sender ' \
