@@ -79,7 +79,7 @@ class TestCongestionControl(unittest.TestCase):
                     self.uplink_log, self.downlink_log, self.time_fname, cmd)
         sys.stderr.write('+ ' + mm_cmd + '\n')
         sys.stderr.write('Running %s %s...\n' % (self.cc_option, self.second_to_run))
-        proc2 = Popen(mm_cmd, stdout=PIPE, stderr=PIPE, shell=True,
+        proc2 = Popen(mm_cmd, stdout=PIPE, shell=True,
                       preexec_fn=os.setpgrp)
 
         # find process id of proc2
