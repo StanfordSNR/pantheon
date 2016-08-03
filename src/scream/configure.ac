@@ -17,7 +17,6 @@ AC_PROG_CXX
 AC_PROG_RANLIB
 
 # Checks for libraries.
-PKG_CHECK_MODULES([GLIB], [glib-2.0])
 
 # Checks for header files.
 
