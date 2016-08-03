@@ -13,6 +13,7 @@ def main():
                                     '../third_party/pcc'))
     recv_file = os.path.join(submodule_dir, 'receiver/app/appserver')
     send_file = os.path.join(submodule_dir, 'sender/app/appclient')
+    DEVNULL = open(os.devnull, 'wb')
 
     # build dependencies
     if option == 'deps':
@@ -46,7 +47,7 @@ def main():
         port = sys.argv[3]
         os.environ['LD_LIBRARY_PATH'] = '%s/sender/src' % submodule_dir
         cmd = [send_file, ip, port]
-        check_call(cmd)
+        check_call(cmd, stderr=DEVNULL)
 
 if __name__ == '__main__':
     main()
