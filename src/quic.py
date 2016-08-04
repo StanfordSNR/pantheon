@@ -65,12 +65,13 @@ def main():
 
     # sender
     if option == 'sender':
-        sys.stderr.write('Listening on port: 6121\n')
+        print 'Listening on port: 6121'
+        sys.stdout.flush()
         cmd = [quic_server,
               '--quic_in_memory_cache_dir=/tmp/quic-data/www.example.org',
               '--certificate_file=%s/certs/out/leaf_cert.pem' % src_dir,
               '--key_file=%s/certs/out/leaf_cert.pkcs8' % src_dir]
-        check_call(cmd, stdout=DEVNULL, stderr=DEVNULL)
+        check_call(cmd)
 
     # receiver
     if option == 'receiver':
@@ -78,7 +79,7 @@ def main():
         port = sys.argv[3]
         cmd = [quic_client, '--host=%s' % ip, '--port=%s' % port,
               'https://www.example.org/']
-        check_call(cmd, stdout=DEVNULL, stderr=DEVNULL)
+        check_call(cmd, stdout=DEVNULL)
 
     DEVNULL.close()
 

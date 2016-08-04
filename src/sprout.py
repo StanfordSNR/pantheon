@@ -36,7 +36,7 @@ def main():
     if option == 'receiver':
         os.environ['SPROUT_MODEL_IN'] = '%s/src/examples/sprout.model' \
                                          % submodule_dir
-        sys.stderr.write('Listening on port: %s\n' % 60001)
+        # sproutbt2 prints the 'listening on port' message to stdout
         cmd = [src_file]
         check_call(cmd)
 
