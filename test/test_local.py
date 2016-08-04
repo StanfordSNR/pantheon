@@ -70,6 +70,12 @@ class TestCongestionControl(unittest.TestCase):
         port = port_info.rstrip().rsplit(' ', 1)[-1]
         self.assertTrue(port.isdigit())
 
+        # sleep 1 second just in case the process isn't quite
+        # listening yet
+        time.sleep(1)
+        # XXX the cleaner approach might be to try to verify the
+        # socket is open.
+
         # run the other side specified by self.second_to_run
         cmd = 'python %s %s %s %s' % (self.src_file, self.second_to_run,
                                       self.ip, port)
