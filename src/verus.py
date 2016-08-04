@@ -35,7 +35,8 @@ def main():
     # sender
     if option == 'sender':
         port = get_open_udp_port()
-        sys.stderr.write('Listening on port: %s\n' % port)
+        print 'Listening on port: %s' % port
+        sys.stdout.flush()
         cmd = [send_file, '-name', 'verus_tmp', '-p', port, '-t', '75']
         check_call(cmd)
 

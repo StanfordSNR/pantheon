@@ -34,7 +34,8 @@ def main():
     # receiver
     if option == 'receiver':
         port = get_open_udp_port()
-        sys.stderr.write('Listening on port: %s\n' % port)
+        print 'Listening on port: %s' % port
+        sys.stdout.flush()
         cmd = [src_file, '-l', '-p', port]
         check_call(cmd, stdout=DEVNULL) # suppress stdout as it prints all the bytes received
 

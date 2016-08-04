@@ -41,7 +41,8 @@ def main():
         os.environ['DISPLAY']=':1'
         cmd = ['nodejs', src_file]
         signaling_server = Popen(cmd)
-        sys.stderr.write('Listening on port: %s\n' % 3000)
+        print 'Listening on port: 3000' # XXX we want to run multiple flows
+        sys.stdout.flush()
         cmd = 'chromium-browser --app=http://localhost:3000/sender ' \
               '--use-fake-ui-for-media-stream ' \
               '--use-fake-device-for-media-stream ' \

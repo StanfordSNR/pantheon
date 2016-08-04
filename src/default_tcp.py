@@ -30,7 +30,8 @@ def main():
     # receiver
     if option == 'receiver':
         port = get_open_tcp_port()
-        sys.stderr.write('Listening on port: %s\n' % port)
+        print 'Listening on port: %s' % port
+        sys.stdout.flush()
         cmd = [src_file, '-s', '-p', port]
         check_call(cmd)
 

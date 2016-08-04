@@ -59,14 +59,14 @@ class TestCongestionControl(unittest.TestCase):
               % (self.time_fname, self.src_file, self.first_to_run)
         sys.stderr.write('+ ' + cmd + '\n')
         sys.stderr.write('Running %s %s...\n' % (self.cc_option, self.first_to_run))
-        proc1 = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True,
+        proc1 = Popen(cmd, stdout=PIPE, shell=True,
                       preexec_fn=os.setpgrp)
 
         # find process id of proc1
         proc1_id = int(proc1.stdout.readline().strip())
 
         # find port printed
-        port_info = proc1.stderr.readline()
+        port_info = proc1.stdout.readline()
         port = port_info.rstrip().rsplit(' ', 1)[-1]
         self.assertTrue(port.isdigit())
 
