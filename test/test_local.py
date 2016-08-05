@@ -24,6 +24,7 @@ class TestCongestionControl(unittest.TestCase):
         self.datalink_log = '%s/%s_datalink.log' % (self.test_dir, self.cc_option)
         self.acklink_log = '%s/%s_acklink.log' % (self.test_dir, self.cc_option)
         self.test_runtime = 60
+        self.first_to_run_setup_time = 1
 
         if self.first_to_run == 'receiver':
             self.uplink_trace = traces_dir + 'Verizon-LTE-short.up'
@@ -44,8 +45,8 @@ class TestCongestionControl(unittest.TestCase):
         open(self.time_fname, 'wb').close()
 
         # run the side specified by self.first_to_run
-        cmd = "timeout --kill-after=2s %i /usr/bin/time -av -o %s sh -c 'python %s %s'" \
-              % (self.test_runtime + 1, self.time_fname, self.src_file, self.first_to_run)
+        cmd = "timeout --kill-after=2s %i python %s %s" \
+              % (self.test_runtime + self.first_to_run_setup_time, self.src_file, self.first_to_run)
         sys.stderr.write('+ ' + cmd + '\n')
         sys.stderr.write('Running %s %s...\n' % (self.cc_option, self.first_to_run))
         proc1 = Popen(cmd, stdout=PIPE, shell=True,
@@ -56,9 +57,9 @@ class TestCongestionControl(unittest.TestCase):
         port = port_info.rstrip().rsplit(' ', 1)[-1]
         self.assertTrue(port.isdigit())
 
-        # sleep 1 second just in case the process isn't quite
+        # sleep just in case the process isn't quite
         # listening yet
-        time.sleep(1)
+        time.sleep(self.first_to_run_setup_time)
         # XXX the cleaner approach might be to try to verify the
         # socket is open.
 
@@ -66,9 +67,9 @@ class TestCongestionControl(unittest.TestCase):
         cmd = 'python %s %s %s %s' % (self.src_file, self.second_to_run,
                                       self.ip, port)
         mm_cmd = "timeout --kill-after=2s %i mm-link %s %s --once --uplink-log=%s --downlink-log=%s -- " \
-                 "/usr/bin/time -av -o %s sh -c '%s'" \
+                 "sh -c '%s'" \
                  % (self.test_runtime, self.uplink_trace, self.downlink_trace,
-                    self.uplink_log, self.downlink_log, self.time_fname, cmd)
+                    self.uplink_log, self.downlink_log, cmd)
         sys.stderr.write('+ ' + mm_cmd + '\n')
         sys.stderr.write('Running %s %s...\n' % (self.cc_option, self.second_to_run))
         proc2 = Popen(mm_cmd, stdout=PIPE, shell=True,
