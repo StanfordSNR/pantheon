@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import os, sys, signal, unittest, time
+import os, sys, unittest, time
 from subprocess import Popen, PIPE, check_call, check_output
 
 # print test usage
@@ -9,19 +9,7 @@ def usage():
     print sys.argv[0] + ' <congestion-control-name>'
     sys.exit(1)
 
-# check for the existence of a unix pid
-def check_pid(pid):
-    try:
-        os.kill(pid, 0)
-    except OSError:
-        return False
-    else:
-        return True
-
 class TestCongestionControl(unittest.TestCase):
-    def timeout_handler(signum, frame):
-        raise
-
     def who_goes_first(self):
         who_goes_first_cmd = 'python %s who_goes_first' % self.src_file
         who_goes_first_info = check_output(who_goes_first_cmd, shell=True)
@@ -35,6 +23,7 @@ class TestCongestionControl(unittest.TestCase):
         traces_dir = '/usr/share/mahimahi/traces/'
         self.datalink_log = '%s/%s_datalink.log' % (self.test_dir, self.cc_option)
         self.acklink_log = '%s/%s_acklink.log' % (self.test_dir, self.cc_option)
+        self.test_runtime = 60
 
         if self.first_to_run == 'receiver':
             self.uplink_trace = traces_dir + 'Verizon-LTE-short.up'
@@ -55,15 +44,12 @@ class TestCongestionControl(unittest.TestCase):
         open(self.time_fname, 'wb').close()
 
         # run the side specified by self.first_to_run
-        cmd = "/usr/bin/time -av -o %s sh -c 'echo $$; python %s %s'" \
-              % (self.time_fname, self.src_file, self.first_to_run)
+        cmd = "timeout --kill-after=2s %i /usr/bin/time -av -o %s sh -c 'python %s %s'" \
+              % (self.test_runtime + 1, self.time_fname, self.src_file, self.first_to_run)
         sys.stderr.write('+ ' + cmd + '\n')
         sys.stderr.write('Running %s %s...\n' % (self.cc_option, self.first_to_run))
         proc1 = Popen(cmd, stdout=PIPE, shell=True,
                       preexec_fn=os.setpgrp)
-
-        # find process id of proc1
-        proc1_id = int(proc1.stdout.readline().strip())
 
         # find port printed
         port_info = proc1.stdout.readline()
@@ -79,38 +65,23 @@ class TestCongestionControl(unittest.TestCase):
         # run the other side specified by self.second_to_run
         cmd = 'python %s %s %s %s' % (self.src_file, self.second_to_run,
                                       self.ip, port)
-        mm_cmd = "mm-link %s %s --once --uplink-log=%s --downlink-log=%s -- " \
-                 "/usr/bin/time -av -o %s sh -c 'echo $$; %s'" \
-                 % (self.uplink_trace, self.downlink_trace,
+        mm_cmd = "timeout --kill-after=2s %i mm-link %s %s --once --uplink-log=%s --downlink-log=%s -- " \
+                 "/usr/bin/time -av -o %s sh -c '%s'" \
+                 % (self.test_runtime, self.uplink_trace, self.downlink_trace,
                     self.uplink_log, self.downlink_log, self.time_fname, cmd)
         sys.stderr.write('+ ' + mm_cmd + '\n')
         sys.stderr.write('Running %s %s...\n' % (self.cc_option, self.second_to_run))
         proc2 = Popen(mm_cmd, stdout=PIPE, shell=True,
                       preexec_fn=os.setpgrp)
 
-        # find process id of proc2
-        proc2_id = int(proc2.stdout.readline().strip())
-
-        # run for 60 seconds
-        signal.signal(signal.SIGALRM, self.timeout_handler)
-        signal.alarm(60)
-
-        try:
-            proc2.communicate()
-        except:
-            sys.stderr.write('Done\n')
+        if self.first_to_run == 'receiver':
+            sender_timeout_retcode = proc2.wait()
         else:
-            sys.stderr.write('Running is shorter than 60s\n')
+            sender_timeout_retcode = proc1.wait()
+
+        if sender_timeout_retcode != 124:
+            sys.stderr.write('Sender exited before test time limit\n')
             sys.exit(1)
-
-        os.kill(proc1_id, signal.SIGTERM)
-        os.kill(proc2_id, signal.SIGTERM)
-        # ensure the subprocesses inside /usr/bin/time done
-        while check_pid(proc1_id) or check_pid(proc2_id):
-            time.sleep(1)
-
-        os.killpg(os.getpgid(proc2.pid), signal.SIGTERM)
-        os.killpg(os.getpgid(proc1.pid), signal.SIGTERM)
 
     def gen_results(self):
         datalink_throughput_svg = '%s/%s_datalink_throughput.svg' \
