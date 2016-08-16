@@ -4,6 +4,7 @@ import os, sys, errno
 from subprocess import check_call
 import usage
 from generate_html import generate_html
+from get_open_port import *
 
 def main():
     usage.check_args(sys.argv, os.path.basename(__file__), usage.SEND_FIRST)
@@ -64,9 +65,11 @@ def main():
 
     # sender
     if option == 'sender':
-        print 'Listening on port: 6121'
+        port = get_open_udp_port()
+        print 'Listening on port: %s' % port
         sys.stdout.flush()
         cmd = [quic_server,
+              '--port=%s' % port,
               '--quic_in_memory_cache_dir=/tmp/quic-data/www.example.org',
               '--certificate_file=%s/certs/leaf_cert.pem' % src_dir,
               '--key_file=%s/certs/leaf_cert.pkcs8' % src_dir]
