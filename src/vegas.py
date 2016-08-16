@@ -33,14 +33,14 @@ def main():
         port = get_open_tcp_port()
         print 'Listening on port: %s' % port
         sys.stdout.flush()
-        cmd = [src_file, '-s', '-p', port]
+        cmd = ['sudo', src_file, '-Z', 'vegas', '-s', '-p', port]
         check_call(cmd)
 
     # sender
     if option == 'sender':
         ip = sys.argv[2]
         port = sys.argv[3]
-        cmd = ['sudo', src_file, '-c', ip, '-p', port, '-t', '75', '-Z', 'vegas']
+        cmd = ['sudo', src_file, '-Z', 'vegas', '-c', ip, '-p', port, '-t', '75']
         check_call(cmd)
 
 if __name__ == '__main__':
