@@ -21,8 +21,10 @@ def main():
 
     # commands to be run after building and before running
     if option == 'initialize':
-        cmd = ['sudo', 'modprobe', 'tcp_vegas']
-        check_call(cmd)
+        cmd = 'sudo modprobe tcp_vegas'
+        check_call(cmd, shell=True)
+        cmd = 'echo "vegas" | sudo tee /proc/sys/net/ipv4/tcp_allowed_congestion_control'
+        check_call(cmd, shell=True)
 
     # who goes first
     if option == 'who_goes_first':
@@ -33,14 +35,14 @@ def main():
         port = get_open_tcp_port()
         print 'Listening on port: %s' % port
         sys.stdout.flush()
-        cmd = ['sudo', src_file, '-Z', 'vegas', '-s', '-p', port]
+        cmd = [src_file, '-Z', 'vegas', '-s', '-p', port]
         check_call(cmd)
 
     # sender
     if option == 'sender':
         ip = sys.argv[2]
         port = sys.argv[3]
-        cmd = ['sudo', src_file, '-Z', 'vegas', '-c', ip, '-p', port, '-t', '75']
+        cmd = [src_file, '-Z', 'vegas', '-c', ip, '-p', port, '-t', '75']
         check_call(cmd)
 
 if __name__ == '__main__':
