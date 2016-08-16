@@ -29,29 +29,28 @@ def main():
 
     # commands to be run after building and before running
     if option == 'initialize':
-        # generate a random password
         certs_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'certs'))
-        cert_pwd = os.path.join(certs_dir, 'cert_pwd')
-        cmd = 'date +%%s | sha256sum | base64 | head -c 32 > %s' % cert_pwd
-        check_call(cmd, shell=True)
 
-        # initialize certificate
+        # initialize NSS Shared DB
         home_dir = os.path.abspath(os.path.expanduser('~'))
         nssdb_dir = os.path.join(home_dir, '.pki/nssdb')
-        # create nssdb directory if it doesn't exist
+
         try:
+            # create nssdb directory if it doesn't exist
             os.makedirs(nssdb_dir)
         except OSError as exception:
             if exception.errno != errno.EEXIST:
                 raise
+
+        for f in os.listdir(nssdb_dir):
+            os.remove(os.path.join(nssdb_dir, f))
+
+        cert_pwd = os.path.join(certs_dir, 'cert_pwd')
         cmd = 'certutil -d %s -N -f %s' % (nssdb_dir, cert_pwd)
         check_call(cmd, shell=True)
 
-        # generate certificate
-        certs_proc = check_call(['./generate-certs.sh'], cwd=certs_dir)
-
         # trust certificate
-        pem = os.path.join(certs_dir, 'out/2048-sha256-root.pem')
+        pem = os.path.join(certs_dir, '2048-sha256-root.pem')
         cmd = 'certutil -d sql:%s -A -t "C,," -n "QUIC" -i %s -f %s' \
                 % (nssdb_dir, pem, cert_pwd)
         check_call(cmd, shell=True)
@@ -69,8 +68,8 @@ def main():
         sys.stdout.flush()
         cmd = [quic_server,
               '--quic_in_memory_cache_dir=/tmp/quic-data/www.example.org',
-              '--certificate_file=%s/certs/out/leaf_cert.pem' % src_dir,
-              '--key_file=%s/certs/out/leaf_cert.pkcs8' % src_dir]
+              '--certificate_file=%s/certs/leaf_cert.pem' % src_dir,
+              '--key_file=%s/certs/leaf_cert.pkcs8' % src_dir]
         check_call(cmd)
 
     # receiver
