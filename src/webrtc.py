@@ -3,6 +3,7 @@
 import os, sys, time
 from subprocess import check_call, Popen
 import usage
+from get_open_port import *
 
 def main():
     usage.check_args(sys.argv, os.path.basename(__file__), usage.SEND_FIRST)
@@ -39,15 +40,19 @@ def main():
         cmd = ['Xvfb', ':1']
         xvfb = Popen(cmd)
         os.environ['DISPLAY']=':1'
-        cmd = ['nodejs', src_file]
+
+        port = get_open_udp_port()
+        cmd = ['nodejs', src_file, port]
         signaling_server = Popen(cmd)
-        print 'Listening on port: 3000' # XXX we want to run multiple flows
+        print 'Listening on port: %s' % port
         sys.stdout.flush()
-        cmd = 'chromium-browser --app=http://localhost:3000/sender ' \
+
+        cmd = 'chromium-browser --app=http://localhost:%s/sender ' \
               '--use-fake-ui-for-media-stream ' \
               '--use-fake-device-for-media-stream ' \
               '--use-file-for-fake-video-capture=%s ' \
-              '--user-data-dir=/tmp/nonexistent$(date +%%s%%N)' % video_file
+              '--user-data-dir=/tmp/nonexistent$(date +%%s%%N)' \
+              % (port, video_file)
         check_call(cmd, shell=True)
 
     # receiver
@@ -55,11 +60,14 @@ def main():
         cmd = ['Xvfb', ':2']
         xvfb = Popen(cmd)
         os.environ['DISPLAY']=':2'
+
         ip = sys.argv[2]
         port = sys.argv[3]
-        time.sleep(3) # at least wait until the sender is ready
         cmd = 'chromium-browser --app=http://%s:%s/receiver ' \
               '--user-data-dir=/tmp/nonexistent$(date +%%s%%N)' % (ip, port)
+
+        # wait until the sender has communicated with the signaling server
+        time.sleep(3)
         check_call(cmd, shell=True)
 
 if __name__ == '__main__':
