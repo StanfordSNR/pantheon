@@ -1,9 +1,11 @@
 #!/usr/bin/python
 
-import os, sys
-from subprocess import check_output, check_call
+import os
+import sys
 import usage
-from get_open_port import *
+from subprocess import check_output, check_call
+from get_open_port import get_open_tcp_port
+
 
 def main():
     usage.check_args(sys.argv, os.path.basename(__file__), usage.RECV_FIRST)
@@ -41,6 +43,7 @@ def main():
         port = sys.argv[3]
         cmd = [src_file, '-c', ip, '-p', port, '-t', '75']
         check_call(cmd)
+
 
 if __name__ == '__main__':
     main()

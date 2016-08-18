@@ -1,5 +1,9 @@
-import os, sys, errno
-import string, random
+import os
+import sys
+import errno
+import string
+import random
+
 
 def generate_html(size):
     file_name = '/tmp/quic-data/www.example.org/index.html'
@@ -26,7 +30,7 @@ def generate_html(size):
 
     i = len(head_text) + len(foot_text)
     # check we can actually write something
-    assert( size >= i )
+    assert (size >= i)
 
     f = open(file_name, 'wb')
     f.write(head_text)
@@ -34,7 +38,8 @@ def generate_html(size):
     block_size = 1024
     while i < size:
         if i + block_size <= size:
-            block = ''.join(random.choice(string.letters) for _ in range(block_size))
+            block = ''.join(
+                random.choice(string.letters) for _ in range(block_size))
             f.write(block)
             i += block_size
         else:

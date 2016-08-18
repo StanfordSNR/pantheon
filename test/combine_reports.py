@@ -1,12 +1,16 @@
 #!/usr/bin/python
 
-import os, sys, string
+import os
+import sys
+import string
 from subprocess import check_call, PIPE, Popen
+
 
 def usage():
     print 'Usage:'
     print sys.argv[0] + ' <congestion-control-1> [<congestion-control-2> ...]'
     sys.exit(1)
+
 
 def svg2png(test_dir, cc):
     datalink_throughput_svg = '%s/%s_datalink_throughput.svg' % (test_dir, cc)
@@ -23,7 +27,8 @@ def svg2png(test_dir, cc):
     sys.stderr.write('Converting SVGs to PNGs...\n')
     cvt_cmd = []
     cvt_str = 'inkscape -d 300 -z -e %s %s'
-    cvt_cmd.append(cvt_str % (datalink_throughput_png, datalink_throughput_svg))
+    cvt_cmd.append(cvt_str %
+                   (datalink_throughput_png, datalink_throughput_svg))
     cvt_cmd.append(cvt_str % (acklink_throughput_png, acklink_throughput_svg))
     cvt_cmd.append(cvt_str % (datalink_delay_png, datalink_delay_svg))
     cvt_cmd.append(cvt_str % (acklink_delay_png, acklink_delay_svg))
@@ -39,6 +44,7 @@ def svg2png(test_dir, cc):
             if line.split(' ', 1)[0] == 'Bitmap':
                 proc.terminate()
                 break
+
 
 def main():
     if len(sys.argv) <= 1:
@@ -105,6 +111,7 @@ def main():
 
     cmd = 'pdflatex -output-directory %s /tmp/pantheon-report.tex' % test_dir
     check_call(cmd, shell=True)
+
 
 if __name__ == '__main__':
     DEVNULL = open(os.devnull, 'wb')

@@ -1,7 +1,11 @@
 #!/usr/bin/python
 
-import os, sys, unittest, time
+import os
+import sys
+import unittest
+import time
 from subprocess import Popen, PIPE, check_call, check_output
+
 
 # print test usage
 def usage():
@@ -9,20 +13,24 @@ def usage():
     print sys.argv[0] + ' <congestion-control-name>'
     sys.exit(1)
 
+
 class TestCongestionControl(unittest.TestCase):
     def who_goes_first(self):
         who_goes_first_cmd = 'python %s who_goes_first' % self.src_file
         who_goes_first_info = check_output(who_goes_first_cmd, shell=True)
         self.first_to_run = who_goes_first_info.split(' ')[0].lower()
-        self.assertTrue(self.first_to_run == 'receiver' or self.first_to_run == 'sender',
-                        msg='Need to specify receiver or sender first')
+        self.assertTrue(
+            self.first_to_run == 'receiver' or self.first_to_run == 'sender',
+            msg='Need to specify receiver or sender first')
         sys.stderr.write('Done\n')
 
     def prepare_mahimahi(self):
         self.ip = '$MAHIMAHI_BASE'
         traces_dir = '/usr/share/mahimahi/traces/'
-        self.datalink_log = '%s/%s_datalink.log' % (self.test_dir, self.cc_option)
-        self.acklink_log = '%s/%s_acklink.log' % (self.test_dir, self.cc_option)
+        self.datalink_log = '%s/%s_datalink.log' % (self.test_dir,
+                                                    self.cc_option)
+        self.acklink_log = '%s/%s_acklink.log' % (self.test_dir,
+                                                  self.cc_option)
         self.test_runtime = 60
         self.first_to_run_setup_time = 1
 
@@ -40,17 +48,19 @@ class TestCongestionControl(unittest.TestCase):
             self.second_to_run = 'receiver'
 
     def run_congestion_control(self):
-        self.time_fname = os.path.join(self.test_dir, '%s_time.log' % self.cc_option)
+        self.time_fname = os.path.join(self.test_dir, '%s_time.log' %
+                                       self.cc_option)
         # clear time log
         open(self.time_fname, 'wb').close()
 
         # run the side specified by self.first_to_run
-        cmd = "timeout --kill-after=2s %i python %s %s" \
-              % (self.test_runtime + self.first_to_run_setup_time, self.src_file, self.first_to_run)
+        cmd = 'timeout --kill-after=2s %i python %s %s' \
+              % (self.test_runtime + self.first_to_run_setup_time,
+                 self.src_file, self.first_to_run)
         sys.stderr.write('+ ' + cmd + '\n')
-        sys.stderr.write('Running %s %s...\n' % (self.cc_option, self.first_to_run))
-        proc1 = Popen(cmd, stdout=PIPE, shell=True,
-                      preexec_fn=os.setpgrp)
+        sys.stderr.write('Running %s %s...\n' %
+                         (self.cc_option, self.first_to_run))
+        proc1 = Popen(cmd, stdout=PIPE, shell=True, preexec_fn=os.setpgrp)
 
         # find port printed
         port_info = proc1.stdout.readline()
@@ -66,14 +76,14 @@ class TestCongestionControl(unittest.TestCase):
         # run the other side specified by self.second_to_run
         cmd = 'python %s %s %s %s' % (self.src_file, self.second_to_run,
                                       self.ip, port)
-        mm_cmd = "timeout --kill-after=2s %i mm-link %s %s --once --uplink-log=%s --downlink-log=%s -- " \
-                 "sh -c '%s'" \
+        mm_cmd = "timeout --kill-after=2s %i mm-link %s %s --once " \
+                 "--uplink-log=%s --downlink-log=%s -- sh -c '%s'" \
                  % (self.test_runtime, self.uplink_trace, self.downlink_trace,
                     self.uplink_log, self.downlink_log, cmd)
         sys.stderr.write('+ ' + mm_cmd + '\n')
-        sys.stderr.write('Running %s %s...\n' % (self.cc_option, self.second_to_run))
-        proc2 = Popen(mm_cmd, stdout=PIPE, shell=True,
-                      preexec_fn=os.setpgrp)
+        sys.stderr.write('Running %s %s...\n' %
+                         (self.cc_option, self.second_to_run))
+        proc2 = Popen(mm_cmd, stdout=PIPE, shell=True, preexec_fn=os.setpgrp)
 
         if self.first_to_run == 'receiver':
             sender_timeout_retcode = proc2.wait()
@@ -100,8 +110,10 @@ class TestCongestionControl(unittest.TestCase):
         # Data link
         sys.stderr.write('* Data link statistics:\n')
         datalink_throughput = open(datalink_throughput_svg, 'wb')
-        proc = Popen(['mm-throughput-graph', '500', self.datalink_log],
-                     stdout=datalink_throughput, stderr=PIPE)
+        proc = Popen(
+            ['mm-throughput-graph', '500', self.datalink_log],
+            stdout=datalink_throughput,
+            stderr=PIPE)
         datalink_results = proc.communicate()[1]
         sys.stderr.write(datalink_results)
         stats.write(datalink_results)
@@ -109,8 +121,8 @@ class TestCongestionControl(unittest.TestCase):
         self.assertEqual(proc.returncode, 0)
 
         datalink_delay = open(datalink_delay_svg, 'wb')
-        proc = Popen(['mm-delay-graph', self.datalink_log],
-                     stdout=datalink_delay)
+        proc = Popen(
+            ['mm-delay-graph', self.datalink_log], stdout=datalink_delay)
         proc.communicate()
         datalink_delay.close()
         self.assertEqual(proc.returncode, 0)
@@ -118,8 +130,10 @@ class TestCongestionControl(unittest.TestCase):
         # ACK link
         sys.stderr.write('* ACK link statistics:\n')
         acklink_throughput = open(acklink_throughput_svg, 'wb')
-        proc = Popen(['mm-throughput-graph', '500', self.acklink_log],
-                     stdout=acklink_throughput, stderr=PIPE)
+        proc = Popen(
+            ['mm-throughput-graph', '500', self.acklink_log],
+            stdout=acklink_throughput,
+            stderr=PIPE)
         acklink_results = proc.communicate()[1]
         sys.stderr.write(acklink_results)
         stats.write(acklink_results)
@@ -128,8 +142,10 @@ class TestCongestionControl(unittest.TestCase):
 
         acklink_delay = open(acklink_delay_svg, 'wb')
 
-        proc = Popen(['mm-delay-graph', self.acklink_log],
-                     stdout=acklink_delay, stderr=DEVNULL)
+        proc = Popen(
+            ['mm-delay-graph', self.acklink_log],
+            stdout=acklink_delay,
+            stderr=DEVNULL)
         proc.communicate()
         acklink_delay.close()
         self.assertEqual(proc.returncode, 0)
@@ -164,6 +180,7 @@ class TestCongestionControl(unittest.TestCase):
         # generate results, including statistics and graphs
         self.gen_results()
 
+
 def main():
     if len(sys.argv) != 2:
         usage()
@@ -173,6 +190,7 @@ def main():
     suite.addTest(TestCongestionControl('test_congestion_control'))
     if not unittest.TextTestRunner().run(suite).wasSuccessful():
         sys.exit(1)
+
 
 if __name__ == '__main__':
     DEVNULL = open(os.devnull, 'wb')

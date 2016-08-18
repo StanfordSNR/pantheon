@@ -1,13 +1,17 @@
 #!/usr/bin/python
 
-import os, sys, unittest
+import os
+import sys
+import unittest
 from subprocess import Popen, PIPE, check_call, check_output
+
 
 # print setup usage
 def usage():
     print 'Usage:'
     print sys.argv[0] + ' <congestion-control-name>'
     sys.exit(1)
+
 
 class TestCongestionControl(unittest.TestCase):
     def install(self):
@@ -19,7 +23,7 @@ class TestCongestionControl(unittest.TestCase):
             sys.stderr.write('Installing dependencies...\n')
             sys.stderr.write(deps_needed)
             install_cmd = 'sudo apt-get -yq --force-yes install ' + deps_needed
-            check_call(install_cmd , shell=True)
+            check_call(install_cmd, shell=True)
         sys.stderr.write('Done\n')
 
     def build(self):
@@ -52,6 +56,7 @@ class TestCongestionControl(unittest.TestCase):
         # run initialize commands
         self.initialize()
 
+
 def main():
     if len(sys.argv) != 2:
         usage()
@@ -66,6 +71,7 @@ def main():
     suite.addTest(TestCongestionControl('test_congestion_control_setup'))
     if not unittest.TextTestRunner().run(suite).wasSuccessful():
         sys.exit(1)
+
 
 if __name__ == '__main__':
     main()

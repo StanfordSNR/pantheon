@@ -1,23 +1,26 @@
 #!/usr/bin/python
 
-import os, sys, time
-from subprocess import check_call, Popen
+import os
+import sys
+import time
 import usage
-from get_open_port import *
+from subprocess import check_call, Popen
+from get_open_port import get_open_udp_port
+
 
 def main():
     usage.check_args(sys.argv, os.path.basename(__file__), usage.SEND_FIRST)
     option = sys.argv[1]
     src_dir = os.path.abspath(os.path.dirname(__file__))
-    submodule_dir = os.path.abspath(os.path.join(src_dir,
-                                    '../third_party/webrtc'))
+    submodule_dir = os.path.abspath(
+        os.path.join(src_dir, '../third_party/webrtc'))
     src_file = os.path.join(submodule_dir, 'app.js')
     video_file = os.path.abspath('/tmp/video.y4m')
 
     # build dependencies
     if option == 'deps':
-        deps_list = 'chromium-browser nodejs npm xvfb xfonts-100dpi xfonts-75dpi ' \
-                    'xfonts-cyrillic xorg dbus-x11'
+        deps_list = 'chromium-browser nodejs npm xvfb xfonts-100dpi ' \
+                    'xfonts-75dpi xfonts-cyrillic xorg dbus-x11'
         print deps_list
 
     # build
@@ -39,7 +42,7 @@ def main():
     if option == 'sender':
         cmd = ['Xvfb', ':1']
         xvfb = Popen(cmd)
-        os.environ['DISPLAY']=':1'
+        os.environ['DISPLAY'] = ':1'
 
         port = get_open_udp_port()
         cmd = ['nodejs', src_file, port]
@@ -59,7 +62,7 @@ def main():
     if option == 'receiver':
         cmd = ['Xvfb', ':2']
         xvfb = Popen(cmd)
-        os.environ['DISPLAY']=':2'
+        os.environ['DISPLAY'] = ':2'
 
         ip = sys.argv[2]
         port = sys.argv[3]
@@ -69,6 +72,7 @@ def main():
         # wait until the sender has communicated with the signaling server
         time.sleep(3)
         check_call(cmd, shell=True)
+
 
 if __name__ == '__main__':
     main()

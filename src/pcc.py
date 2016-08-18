@@ -1,16 +1,18 @@
 #!/usr/bin/python
 
-import os, sys
-from subprocess import check_output, check_call
+import os
+import sys
 import usage
-from get_open_port import *
+from subprocess import check_output, check_call
+from get_open_port import get_open_udp_port
+
 
 def main():
     usage.check_args(sys.argv, os.path.basename(__file__), usage.RECV_FIRST)
     option = sys.argv[1]
     src_dir = os.path.abspath(os.path.dirname(__file__))
-    submodule_dir = os.path.abspath(os.path.join(src_dir,
-                                    '../third_party/pcc'))
+    submodule_dir = os.path.abspath(
+        os.path.join(src_dir, '../third_party/pcc'))
     recv_file = os.path.join(submodule_dir, 'receiver/app/appserver')
     send_file = os.path.join(submodule_dir, 'sender/app/appclient')
     DEVNULL = open(os.devnull, 'wb')
@@ -49,6 +51,7 @@ def main():
         os.environ['LD_LIBRARY_PATH'] = '%s/sender/src' % submodule_dir
         cmd = [send_file, ip, port]
         check_call(cmd, stderr=DEVNULL)
+
 
 if __name__ == '__main__':
     main()
