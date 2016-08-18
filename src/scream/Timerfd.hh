@@ -8,9 +8,9 @@
 class Timerfd : public FileDescriptor
 {
 public:
-  /* 
-   * Default is blocking timer 
-   * Pass in TFD_NONBLOCK for non-blocking timer 
+  /*
+   * Default is blocking timer
+   * Pass in TFD_NONBLOCK for non-blocking timer
    */
   Timerfd(int flags = 0);
 

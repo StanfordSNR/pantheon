@@ -4,7 +4,7 @@
 #include <poll.h>
 
 #include "socket.hh"
-#include "timestamp.hh" 
+#include "timestamp.hh"
 #include "util.hh"
 
 #include "ScreamRx.h"
@@ -19,9 +19,9 @@ bool debug = false;
 void sendRtcp(ScreamRx *screamRx, UDPSocket &socket)
 {
   uint32_t ssrc;
-  /* recv_timestamp_ms will be filled in with recv_timestamp_us 
+  /* recv_timestamp_ms will be filled in with recv_timestamp_us
    * passed in screamRx->receive() divided by 1000 */
-  uint32_t recv_timestamp_ms; 
+  uint32_t recv_timestamp_ms;
   uint16_t ack_seq_num;
   uint64_t ack_vector;
   if (screamRx->getFeedback(timestamp_ms() * 1000, ssrc,
@@ -31,17 +31,17 @@ void sendRtcp(ScreamRx *screamRx, UDPSocket &socket)
 
     if (debug) {
       cerr << "Sent a RTCP packet acking sequence number " << ack_seq_num
-        << " at time " << recv_timestamp_ms << endl;
+           << " at time " << recv_timestamp_ms << endl;
     }
   }
 }
 
 /* Receive incoming RTP packet and generate RTCP feedback */
-void recvRtp(ScreamRx *screamRx, UDPSocket &socket, Timerfd &feedbackTimer) 
+void recvRtp(ScreamRx *screamRx, UDPSocket &socket, Timerfd &feedbackTimer)
 {
-  /* Feedback rate limits the target bitrate 
+  /* Feedback rate limits the target bitrate
    * Adopt the same value as in the original scream_01 experiment */
-  static uint64_t feedbackInterval_us = 5000; 
+  static uint64_t feedbackInterval_us = 5000;
 
   UDPSocket::received_datagram recd = socket.recv();
   uint64_t recv_timestamp_us = recd.timestamp * 1000;
@@ -58,33 +58,35 @@ void recvRtp(ScreamRx *screamRx, UDPSocket &socket, Timerfd &feedbackTimer)
 
   if (debug) {
     cerr << "Received a RTP packet of size " << rtpPacket.payload.size()
-      << " with sequence number " << rtpPacket.header.seq_num
-      << " at time " << recd.timestamp << endl;
+         << " with sequence number " << rtpPacket.header.seq_num
+         << " at time " << recd.timestamp << endl;
   }
 
   /* Receives RTP packet */
-  screamRx->receive(recv_timestamp_us, 0, rtpPacket.header.ssrc, 
-                    (int) rtpPacket.payload.size(), rtpPacket.header.seq_num); 
+  screamRx->receive(recv_timestamp_us, 0, rtpPacket.header.ssrc,
+                    (int) rtpPacket.payload.size(), rtpPacket.header.seq_num);
 
   /* Generate RTCP feedback */
   if (screamRx->isFeedback()) {
-    uint64_t sinceLastFeedback_us = (timestamp_ms() * 1000) - screamRx->getLastFeedbackT();
+    uint64_t sinceLastFeedback_us =
+        (timestamp_ms() * 1000) - screamRx->getLastFeedbackT();
     if (sinceLastFeedback_us > feedbackInterval_us) {
       sendRtcp(screamRx, socket);
     } else {
-      /* Pace the pending feedbacks */ 
+      /* Pace the pending feedbacks */
       if (feedbackTimer.is_disarmed())
-        feedbackTimer.arm((int) ((feedbackInterval_us - sinceLastFeedback_us) / 1000));
+        feedbackTimer.arm(
+            (int) ((feedbackInterval_us - sinceLastFeedback_us) / 1000));
     }
   }
 }
 
-int main(int argc, char *argv[]) 
+int main(int argc, char *argv[])
 {
   if (argc == 3 && string(argv[2]) == "debug") {
     debug = true;
   } else if (argc != 2) {
-    cerr << "Usage: " << argv[0] << " PORT [debug]" << endl; 
+    cerr << "Usage: " << argv[0] << " PORT [debug]" << endl;
     return EXIT_FAILURE;
   }
 
