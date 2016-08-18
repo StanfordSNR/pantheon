@@ -103,8 +103,7 @@ def main():
     latex.write('\\end{document}')
     latex.close()
 
-    cmd = 'pdflatex -output-directory /tmp /tmp/pantheon-report.tex && ' \
-          'cp /tmp/pantheon-report.pdf %s' % test_dir
+    cmd = 'pdflatex -output-directory %s /tmp/pantheon-report.tex' % test_dir
     check_call(cmd, shell=True)
 
 if __name__ == '__main__':
