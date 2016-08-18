@@ -42,7 +42,7 @@ void sendRtp(ScreamTx *screamTx, RtpQueue *rtpQueue,
     void *rtpPacketNull = NULL; /* won't be filled in by API */
     int size;
     uint16_t seqNr;
-    rtpQueue->sendPacket(rtpPacketNull, size, seqNr); 
+    rtpQueue->sendPacket(rtpPacketNull, size, seqNr);
 
     /* Create RTP packet with dummy payload of size `size` */
     RtpPacket rtpPacket(ssrc, (uint32_t) size, seqNr);
@@ -50,8 +50,8 @@ void sendRtp(ScreamTx *screamTx, RtpQueue *rtpQueue,
 
     if (debug) {
       cerr << "Sent a RTP packet of size " << rtpPacket.payload.size()
-        << " with sequence number " << seqNr
-        << " at time " << timestamp_ms() << endl;
+           << " with sequence number " << seqNr
+           << " at time " << timestamp_ms() << endl;
     }
 
     dT = screamTx->addTransmitted(timestamp_ms() * 1000, ssrc, size, seqNr);
@@ -73,15 +73,15 @@ void recvRtcp(ScreamTx *screamTx, UDPSocket &socket)
 {
   UDPSocket::received_datagram recd = socket.recv();
   /* Client timestamp (us) when received RTCP */
-  uint64_t client_recv_rtcp_ts_us = recd.timestamp * 1000; 
+  uint64_t client_recv_rtcp_ts_us = recd.timestamp * 1000;
 
   /* Assemble RTCP packet */
   RtcpPacket rtcpPacket(recd.payload);
 
   if (debug) {
     cerr << "Received a RTCP packet acking sequence number "
-      << rtcpPacket.header.ack_seq_num
-      << " at time " << recd.timestamp << endl;
+         << rtcpPacket.header.ack_seq_num
+         << " at time " << recd.timestamp << endl;
   }
 
   uint32_t ssrc = rtcpPacket.header.ssrc;
@@ -91,8 +91,9 @@ void recvRtcp(ScreamTx *screamTx, UDPSocket &socket)
   uint64_t ack_vector = rtcpPacket.header.ack_vector;
 
   /* Calculate one-way delay and RTT inside, then update CWND */
-  screamTx->incomingFeedback(client_recv_rtcp_ts_us, ssrc, server_recv_rtp_ts_ms,
-                             ack_seq_num, ack_vector, false);
+  screamTx->incomingFeedback(client_recv_rtcp_ts_us, ssrc,
+                             server_recv_rtp_ts_ms, ack_seq_num,
+                             ack_vector, false);
 }
 
 int main(int argc, char *argv[])
@@ -100,7 +101,7 @@ int main(int argc, char *argv[])
   if (argc == 4 && string(argv[3]) == "debug") {
     debug = true;
   } else if (argc != 3) {
-    cerr << "Usage: " << argv[0] << " HOST PORT [debug]" << endl; 
+    cerr << "Usage: " << argv[0] << " HOST PORT [debug]" << endl;
     return EXIT_FAILURE;
   }
 
@@ -111,7 +112,7 @@ int main(int argc, char *argv[])
   UDPSocket socket;
   socket.set_timestamps();
   socket.connect(Address(argv[1], argv[2]));
-  
+
   float frameRate = 25.0f; /* encode 25 frames per second */
   ScreamTx *screamTx = new ScreamTx();
   RtpQueue *rtpQueue = new RtpQueue();
@@ -119,12 +120,12 @@ int main(int argc, char *argv[])
   VideoEnc *videoEnc = new VideoEnc(rtpQueue, frameRate, 0.1f, false, false, 0);
   screamTx->registerNewStream(rtpQueue, SSRC, 1.0f, 64e3, 5e6);
 
-  /* Non-blocking timers for client and video encoder */ 
+  /* Non-blocking timers for client and video encoder */
   Timerfd txTimer(TFD_NONBLOCK);
   Timerfd videoTimer(TFD_NONBLOCK);
   int encodeInterval_ms = (int) (1e3 / frameRate);
   videoTimer.arm(encodeInterval_ms, encodeInterval_ms);
-  
+
   /* Always read the timer that returned POLLIN before arm it again */
   struct pollfd fds[3];
   fds[0].fd = txTimer.fd_num();
@@ -154,7 +155,7 @@ int main(int argc, char *argv[])
 
     /* Incoming RTCP feedback */
     if (fds[2].revents & POLLIN) {
-      recvRtcp(screamTx, socket); 
+      recvRtcp(screamTx, socket);
       if (txTimer.is_disarmed())
         sendRtp(screamTx, rtpQueue, txTimer, socket);
     }

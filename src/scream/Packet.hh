@@ -11,10 +11,10 @@ struct RtpPacket
     uint16_t seq_num;
   } header;
 
-  std::string payload; 
+  std::string payload;
 
   /* Create RTP packet with dummy payload */
-  RtpPacket(uint32_t ssrc, uint32_t size, uint16_t seq_num); 
+  RtpPacket(uint32_t ssrc, uint32_t size, uint16_t seq_num);
 
   /* Parse incoming RTP packet */
   RtpPacket(std::string &str);
@@ -28,13 +28,13 @@ struct RtcpPacket
   struct __attribute__((__packed__)) Header {
     uint32_t ssrc;
     uint16_t ack_seq_num;
-    uint64_t ack_vector; 
-    uint32_t recv_timestamp; 
+    uint64_t ack_vector;
+    uint32_t recv_timestamp;
   } header;
 
   /* Create RTCP packet */
   RtcpPacket(uint32_t ssrc, uint16_t ack_seq_num,
-             uint64_t ack_vector, uint32_t recv_timestamp); 
+             uint64_t ack_vector, uint32_t recv_timestamp);
 
   /* Parse incoming RTCP packet */
   RtcpPacket(std::string &str);

@@ -11,11 +11,11 @@ Timerfd::Timerfd(int flags)
 
 void Timerfd::arm(int first_exp_ms, int interval_ms)
 {
-  int first_exp_s = first_exp_ms / 1000; 
-  int first_exp_ns = (first_exp_ms - first_exp_s * 1000) * 1000000; 
+  int first_exp_s = first_exp_ms / 1000;
+  int first_exp_ns = (first_exp_ms - first_exp_s * 1000) * 1000000;
 
-  int interval_s = interval_ms / 1000; 
-  int interval_ns = (interval_ms - interval_s * 1000) * 1000000; 
+  int interval_s = interval_ms / 1000;
+  int interval_ns = (interval_ms - interval_s * 1000) * 1000000;
 
   struct itimerspec ts;
   ts.it_value.tv_sec = first_exp_s;
