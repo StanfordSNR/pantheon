@@ -1,32 +1,32 @@
 [submodule "third_party/libutp"]
 	path = third_party/libutp
 	url = https://github.com/bittorrent/libutp.git
-  ignore = dirty
+	ignore = dirty
 [submodule "third_party/proto-quic"]
 	path = third_party/proto-quic
 	url = https://github.com/google/proto-quic.git
-  ignore = dirty
+	ignore = dirty
 [submodule "third_party/pcc"]
 	path = third_party/pcc
 	url = https://github.com/modong/pcc.git
-  ignore = dirty
+	ignore = dirty
 [submodule "third_party/verus"]
 	path = third_party/verus
 	url = https://github.com/yzaki/verus.git
-  ignore = dirty
+	ignore = dirty
 [submodule "third_party/webrtc"]
 	path = third_party/webrtc
 	url = https://github.com/StanfordLPNG/webrtc.git
-  ignore = dirty
+	ignore = dirty
 [submodule "third_party/sprout"]
 	path = third_party/sprout
 	url = https://github.com/keithw/alfalfa.git
-  ignore = dirty
+	ignore = dirty
 [submodule "third_party/scream"]
 	path = third_party/scream
 	url = https://github.com/EricssonResearch/scream.git
-  ignore = dirty
+	ignore = dirty
 [submodule "third_party/sourdough"]
 	path = third_party/sourdough
 	url = https://github.com/keithw/sourdough
-  ignore = dirty
+	ignore = dirty
