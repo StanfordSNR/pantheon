@@ -1,17 +1,20 @@
 #!/usr/bin/python
 
-import os, sys, errno
-from subprocess import check_call
+import os
+import sys
+import errno
 import usage
+from subprocess import check_call
 from generate_html import generate_html
-from get_open_port import *
+from get_open_port import get_open_udp_port
+
 
 def main():
     usage.check_args(sys.argv, os.path.basename(__file__), usage.SEND_FIRST)
     option = sys.argv[1]
     src_dir = os.path.abspath(os.path.dirname(__file__))
-    submodule_dir = os.path.abspath(os.path.join(src_dir,
-                                    '../third_party/proto-quic'))
+    submodule_dir = os.path.abspath(
+        os.path.join(src_dir, '../third_party/proto-quic'))
     find_unused_port_file = os.path.join(src_dir, 'find_unused_port')
     quic_server = os.path.join(submodule_dir, 'src/out/Release/quic_server')
     quic_client = os.path.join(submodule_dir, 'src/out/Release/quic_client')
@@ -30,7 +33,8 @@ def main():
 
     # commands to be run after building and before running
     if option == 'initialize':
-        certs_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'certs'))
+        certs_dir = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), 'certs'))
 
         # initialize NSS Shared DB
         home_dir = os.path.abspath(os.path.expanduser('~'))
@@ -68,11 +72,10 @@ def main():
         port = get_open_udp_port()
         print 'Listening on port: %s' % port
         sys.stdout.flush()
-        cmd = [quic_server,
-              '--port=%s' % port,
-              '--quic_in_memory_cache_dir=/tmp/quic-data/www.example.org',
-              '--certificate_file=%s/certs/leaf_cert.pem' % src_dir,
-              '--key_file=%s/certs/leaf_cert.pkcs8' % src_dir]
+        cmd = [quic_server, '--port=%s' % port,
+               '--quic_in_memory_cache_dir=/tmp/quic-data/www.example.org',
+               '--certificate_file=%s/certs/leaf_cert.pem' % src_dir,
+               '--key_file=%s/certs/leaf_cert.pkcs8' % src_dir]
         check_call(cmd)
 
     # receiver
@@ -80,10 +83,11 @@ def main():
         ip = sys.argv[2]
         port = sys.argv[3]
         cmd = [quic_client, '--host=%s' % ip, '--port=%s' % port,
-              'https://www.example.org/']
+               'https://www.example.org/']
         check_call(cmd, stdout=DEVNULL)
 
     DEVNULL.close()
+
 
 if __name__ == '__main__':
     main()

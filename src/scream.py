@@ -1,9 +1,11 @@
 #!/usr/bin/python
 
-import os, sys
-from subprocess import check_output, check_call
+import os
+import sys
 import usage
-from get_open_port import *
+from subprocess import check_output, check_call
+from get_open_port import get_open_udp_port
+
 
 def main():
     usage.check_args(sys.argv, os.path.basename(__file__), usage.RECV_FIRST)
@@ -11,8 +13,8 @@ def main():
     src_dir = os.path.abspath(os.path.dirname(__file__))
     recv_file = os.path.join(src_dir, 'scream/ScreamServer')
     send_file = os.path.join(src_dir, 'scream/ScreamClient')
-    submodule_dir = os.path.abspath(os.path.join(src_dir,
-                                    '../third_party/sourdough'))
+    submodule_dir = os.path.abspath(
+        os.path.join(src_dir, '../third_party/sourdough'))
     code_dir = os.path.abspath(os.path.join(src_dir, 'scream/'))
 
     # build dependencies
@@ -47,6 +49,7 @@ def main():
         port = sys.argv[3]
         cmd = [send_file, ip, port]
         check_call(cmd)
+
 
 if __name__ == '__main__':
     main()

@@ -1,16 +1,19 @@
 #!/usr/bin/python
 
-import os, sys, time
-from subprocess import check_output, check_call, PIPE, Popen
+import os
+import sys
+import time
 import usage
-from get_open_port import *
+from subprocess import check_output, check_call, PIPE, Popen
+from get_open_port import get_open_udp_port
+
 
 def main():
     usage.check_args(sys.argv, os.path.basename(__file__), usage.RECV_FIRST)
     option = sys.argv[1]
     src_dir = os.path.abspath(os.path.dirname(__file__))
-    submodule_dir = os.path.abspath(os.path.join(src_dir,
-                                    '../third_party/libutp'))
+    submodule_dir = os.path.abspath(
+        os.path.join(src_dir, '../third_party/libutp'))
     src_file = os.path.join(submodule_dir, 'ucat-static')
     DEVNULL = open(os.devnull, 'wb')
 
@@ -37,7 +40,8 @@ def main():
         print 'Listening on port: %s' % port
         sys.stdout.flush()
         cmd = [src_file, '-l', '-p', port]
-        check_call(cmd, stdout=DEVNULL) # suppress stdout as it prints all the bytes received
+        # suppress stdout as it prints all the bytes received
+        check_call(cmd, stdout=DEVNULL)
 
     # sender
     if option == 'sender':
@@ -54,6 +58,7 @@ def main():
         proc.stdin.close()
 
     DEVNULL.close()
+
 
 if __name__ == '__main__':
     main()

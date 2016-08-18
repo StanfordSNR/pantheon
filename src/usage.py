@@ -3,6 +3,7 @@ import sys
 RECV_FIRST = 0
 SEND_FIRST = 1
 
+
 def print_usage(name, order):
     print "Usage:"
     print "./%s deps" % name
@@ -17,13 +18,15 @@ def print_usage(name, order):
         print "./%s receiver IP port" % name
     sys.exit(1)
 
+
 def check_args(args, name, order):
     if len(args) < 2:
         print_usage(name, order)
 
     option = args[1]
 
-    if option == 'deps' or option == 'build' or option == 'initialize' or option == 'who_goes_first':
+    if option == 'deps' or option == 'build' or option == 'initialize' or \
+       option == 'who_goes_first':
         if len(args) != 2:
             print_usage(name, order)
 

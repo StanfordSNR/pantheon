@@ -1,15 +1,17 @@
 #!/usr/bin/python
 
-import os, sys
-from subprocess import check_call
+import os
+import sys
 import usage
+from subprocess import check_call
+
 
 def main():
     usage.check_args(sys.argv, os.path.basename(__file__), usage.RECV_FIRST)
     option = sys.argv[1]
     src_dir = os.path.abspath(os.path.dirname(__file__))
-    submodule_dir = os.path.abspath(os.path.join(src_dir,
-                                    '../third_party/sprout'))
+    submodule_dir = os.path.abspath(
+        os.path.join(src_dir, '../third_party/sprout'))
     src_file = os.path.join(submodule_dir, 'src/examples/sproutbt2')
 
     # build dependencies
@@ -48,6 +50,7 @@ def main():
         port = sys.argv[3]
         cmd = [src_file, ip, port]
         check_call(cmd)
+
 
 if __name__ == '__main__':
     main()

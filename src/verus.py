@@ -1,16 +1,18 @@
 #!/usr/bin/python
 
-import os, sys
-from subprocess import check_output, check_call
+import os
+import sys
 import usage
-from get_open_port import *
+from subprocess import check_output, check_call
+from get_open_port import get_open_udp_port
+
 
 def main():
     usage.check_args(sys.argv, os.path.basename(__file__), usage.SEND_FIRST)
     option = sys.argv[1]
     src_dir = os.path.abspath(os.path.dirname(__file__))
-    submodule_dir = os.path.abspath(os.path.join(src_dir,
-                                    '../third_party/verus'))
+    submodule_dir = os.path.abspath(
+        os.path.join(src_dir, '../third_party/verus'))
     send_file = os.path.join(submodule_dir, 'src/verus_server')
     recv_file = os.path.join(submodule_dir, 'src/verus_client')
 
@@ -21,7 +23,8 @@ def main():
 
     # build
     if option == 'build':
-        cmd = 'cd %s && ./bootstrap.sh && ./configure && make -j' % submodule_dir
+        cmd = 'cd %s && ./bootstrap.sh && ./configure && make -j' % \
+              submodule_dir
         check_call(cmd, shell=True)
 
     # commands to be run after building and before running
@@ -46,6 +49,7 @@ def main():
         port = sys.argv[3]
         cmd = [recv_file, ip, '-p', port]
         check_call(cmd)
+
 
 if __name__ == '__main__':
     main()
