@@ -6,6 +6,3 @@
 *.pyc
 *.log
 *.svg
-
-/src/certs/out/
-/src/certs/cert_pwd
