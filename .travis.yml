@@ -17,7 +17,7 @@ addons:
   artifacts:
     paths:
     - test/pantheon-report.pdf
-    - test/*.log
+    - test/pantheon-packet-logs.xz
     debug: true
 
 install:
@@ -25,6 +25,9 @@ install:
 
 script:
   - ./run.sh
+
+after_script:
+  - tar caf test/pantheon-packet-logs.xz test/*.log
 
 notifications:
   slack: keithw:WjjCMz8yip3iQrHKBmkFGI1u
