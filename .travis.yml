@@ -17,6 +17,7 @@ addons:
   artifacts:
     paths:
     - test/pantheon-report.pdf
+    - test/*.log
     debug: true
 
 install:
