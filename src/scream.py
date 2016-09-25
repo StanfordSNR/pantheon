@@ -19,7 +19,7 @@ def main():
 
     # build dependencies
     if option == 'deps':
-        pass
+        print 'dh-autoreconf'
 
     # build
     if option == 'build':
