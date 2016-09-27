@@ -4,7 +4,7 @@ import os
 import sys
 import time
 import usage
-from subprocess import check_call, Popen, CalledProcessError
+from subprocess import check_call, check_output, PIPE, Popen, CalledProcessError
 from get_open_port import get_open_udp_port
 
 
@@ -26,6 +26,7 @@ def main():
         os.path.join(src_dir, '../third_party/webrtc'))
     src_file = os.path.join(submodule_dir, 'app.js')
     video_file = os.path.abspath('/tmp/video.y4m')
+    video_md5 = "a4ef8836e546bbef4276346d0b86e81b"
 
     # build dependencies
     if option == 'deps':
@@ -40,9 +41,18 @@ def main():
 
     # commands to be run after building and before running
     if option == 'initialize':
-        video_url = 'https://media.xiph.org/video/derf/y4m/blue_sky_1080p25.y4m'
-        cmd = ['wget', '-O', video_file, video_url]
-        check_call(cmd)
+        # check if video already exists on system and if it's md5 checksum is correct
+        cmd = ['md5sum', video_file]
+        md5_proc = Popen(cmd, stdout=PIPE)
+        md5_out = md5_proc.communicate()[0]
+
+        if md5_proc.returncode != 0 or md5_out.split()[0] != video_md5:
+            video_url = 'https://media.xiph.org/video/derf/y4m/blue_sky_1080p25.y4m'
+            cmd = ['wget', '-O', video_file, video_url]
+            check_call(cmd)
+
+            cmd = ['md5sum', video_file]
+            assert(check_output(cmd).split()[0] == video_md5)
 
     # who goes first
     if option == 'who_goes_first':
