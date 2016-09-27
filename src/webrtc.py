@@ -4,8 +4,18 @@ import os
 import sys
 import time
 import usage
-from subprocess import check_call, Popen
+from subprocess import check_call, Popen, CalledProcessError
 from get_open_port import get_open_udp_port
+
+
+def xvfb_in_use(display):
+    try:
+        cmd = 'xdpyinfo -display :%d >/dev/null 2>&1' % display
+        check_call(cmd, shell=True)
+    except CalledProcessError:
+        return 0
+    else:
+        return 1
 
 
 def main():
@@ -40,8 +50,9 @@ def main():
 
     # sender
     if option == 'sender':
-        cmd = ['Xvfb', ':1']
-        xvfb = Popen(cmd)
+        if not xvfb_in_use(1):
+            cmd = ['Xvfb', ':1']
+            xvfb = Popen(cmd)
         os.environ['DISPLAY'] = ':1'
 
         port = get_open_udp_port()
@@ -60,8 +71,9 @@ def main():
 
     # receiver
     if option == 'receiver':
-        cmd = ['Xvfb', ':2']
-        xvfb = Popen(cmd)
+        if not xvfb_in_use(2):
+            cmd = ['Xvfb', ':2']
+            xvfb = Popen(cmd)
         os.environ['DISPLAY'] = ':2'
 
         ip = sys.argv[2]
