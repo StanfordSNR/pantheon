@@ -12,6 +12,7 @@ sub prettify { # maybe this should be every driver's responsibility too!
   my ( $scheme ) = @_;
   $scheme =~ s{default_tcp}{TCP Cubic};
   $scheme =~ s{vegas}{TCP Vegas};
+  $scheme =~ s{koho_cc}{KohoCC};
   $scheme =~ s{ledbat}{LEDBAT};
   $scheme =~ s{pcc}{PCC};
   $scheme =~ s{verus}{Verus};
