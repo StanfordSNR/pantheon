@@ -10,6 +10,9 @@ cd $test_dir
 ./setup.py vegas
 ./test_local.py vegas
 
+./setup.py koho_cc
+./test_local.py koho_cc
+
 ./setup.py ledbat
 ./test_local.py ledbat
 
@@ -34,8 +37,8 @@ cd $test_dir
 
 # Assemble a throughput-delay plot
 ./summary-plot.pl pantheon_summary.pdf \
-    default_tcp vegas ledbat pcc verus scream webrtc sprout quic
+    default_tcp vegas koho_cc ledbat pcc verus scream webrtc sprout quic
 
 # Combile all HTML reports into one
 ./combine_reports.py \
-    default_tcp vegas ledbat pcc verus scream webrtc sprout quic
+    default_tcp vegas koho_cc ledbat pcc verus scream webrtc sprout quic

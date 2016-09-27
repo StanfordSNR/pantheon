@@ -30,3 +30,7 @@
 	path = third_party/sourdough
 	url = https://github.com/keithw/sourdough
 	ignore = dirty
+[submodule "third_party/koho_cc"]
+	path = third_party/koho_cc
+	url = https://github.com/greghill/koho_cc.git
+	ignore = dirty
