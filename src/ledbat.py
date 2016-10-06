@@ -4,7 +4,7 @@ import os
 import sys
 import time
 import usage
-from subprocess import check_output, check_call, PIPE, Popen
+from subprocess import check_call, PIPE, Popen
 from get_open_port import get_open_udp_port
 
 

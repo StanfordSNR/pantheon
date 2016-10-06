@@ -4,7 +4,7 @@ import os
 import sys
 import errno
 import usage
-from subprocess import check_output, check_call
+from subprocess import check_call
 from generate_html import generate_html
 from get_open_port import get_open_udp_port
 
