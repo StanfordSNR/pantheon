@@ -52,11 +52,6 @@ class TestCongestionControl(unittest.TestCase):
             self.second_to_run = 'receiver'
 
     def run_congestion_control(self):
-        self.time_fname = os.path.join(self.test_dir, '%s_time.log' %
-                                       self.cc_option)
-        # clear time log
-        open(self.time_fname, 'wb').close()
-
         # run the side specified by self.first_to_run
         cmd = 'python %s %s' % (self.src_file, self.first_to_run)
         sys.stderr.write('+ ' + cmd + '\n')
@@ -161,15 +156,6 @@ class TestCongestionControl(unittest.TestCase):
         self.assertEqual(proc.returncode, 0)
 
         stats.close()
-
-        # Running time
-        time_file = open(self.time_fname, 'rb')
-        while True:
-            line = time_file.readline()
-            if not line:
-                break
-            sys.stderr.write(line)
-        time_file.close()
 
     # congestion control test
     def test_congestion_control(self):
