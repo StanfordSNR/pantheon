@@ -3,7 +3,7 @@
 import os
 import sys
 import usage
-from subprocess import check_output, check_call
+from subprocess import check_call
 from get_open_port import get_open_tcp_port
 
 
