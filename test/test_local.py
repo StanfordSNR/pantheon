@@ -31,10 +31,10 @@ class TestCongestionControl(unittest.TestCase):
     def prepare_mahimahi(self):
         self.ip = '$MAHIMAHI_BASE'
         traces_dir = '/usr/share/mahimahi/traces/'
-        self.datalink_log = '%s/%s_datalink.log' % (self.test_dir,
-                                                    self.cc_option)
-        self.acklink_log = '%s/%s_acklink.log' % (self.test_dir,
-                                                  self.cc_option)
+        self.datalink_log = os.path.join(self.test_dir,
+                                         '%s_datalink.log' % self.cc_option)
+        self.acklink_log = os.path.join(self.test_dir,
+                                        '%s_acklink.log' % self.cc_option)
         self.test_runtime = 60
         self.first_to_run_setup_time = 1
 
@@ -64,11 +64,9 @@ class TestCongestionControl(unittest.TestCase):
         port = port_info.rstrip().rsplit(' ', 1)[-1]
         self.assertTrue(port.isdigit())
 
-        # sleep just in case the process isn't quite
-        # listening yet
+        # sleep just in case the process isn't quite listening yet
         time.sleep(self.first_to_run_setup_time)
-        # XXX the cleaner approach might be to try to verify the
-        # socket is open.
+        # XXX the cleaner approach might be to try to verify the socket is open
 
         # run the other side specified by self.second_to_run
         cmd = 'python %s %s %s %s' % (self.src_file, self.second_to_run,
@@ -100,25 +98,23 @@ class TestCongestionControl(unittest.TestCase):
             sys.exit(1)
 
     def gen_results(self):
-        datalink_throughput_svg = '%s/%s_datalink_throughput.svg' \
-                                   % (self.test_dir, self.cc_option)
-        datalink_delay_svg = '%s/%s_datalink_delay.svg' \
-                              % (self.test_dir, self.cc_option)
-        acklink_throughput_svg = '%s/%s_acklink_throughput.svg' \
-                                  % (self.test_dir, self.cc_option)
-        acklink_delay_svg = '%s/%s_acklink_delay.svg' \
-                             % (self.test_dir, self.cc_option)
+        datalink_throughput_svg = os.path.join(self.test_dir,
+                                  '%s_datalink_throughput.svg' % self.cc_option)
+        datalink_delay_svg = os.path.join(self.test_dir,
+                             '%s_datalink_delay.svg' % self.cc_option)
+        acklink_throughput_svg = os.path.join(self.test_dir,
+                                 '%s_acklink_throughput.svg' % self.cc_option)
+        acklink_delay_svg = os.path.join(self.test_dir,
+                            '%s_acklink_delay.svg' % self.cc_option)
 
-        stats_log = '%s/%s_stats.log' % (self.test_dir, self.cc_option)
+        stats_log = os.path.join(self.test_dir, '%s_stats.log' % self.cc_option)
         stats = open(stats_log, 'wb')
 
         # Data link
         sys.stderr.write('* Data link statistics:\n')
         datalink_throughput = open(datalink_throughput_svg, 'wb')
-        proc = Popen(
-            ['mm-throughput-graph', '500', self.datalink_log],
-            stdout=datalink_throughput,
-            stderr=PIPE)
+        proc = Popen(['mm-throughput-graph', '500', self.datalink_log],
+                     stdout=datalink_throughput, stderr=PIPE)
         datalink_results = proc.communicate()[1]
         sys.stderr.write(datalink_results)
         stats.write(datalink_results)
@@ -126,8 +122,8 @@ class TestCongestionControl(unittest.TestCase):
         self.assertEqual(proc.returncode, 0)
 
         datalink_delay = open(datalink_delay_svg, 'wb')
-        proc = Popen(
-            ['mm-delay-graph', self.datalink_log], stdout=datalink_delay)
+        proc = Popen(['mm-delay-graph', self.datalink_log],
+                     stdout=datalink_delay, stderr=DEVNULL)
         proc.communicate()
         datalink_delay.close()
         self.assertEqual(proc.returncode, 0)
@@ -135,10 +131,8 @@ class TestCongestionControl(unittest.TestCase):
         # ACK link
         sys.stderr.write('* ACK link statistics:\n')
         acklink_throughput = open(acklink_throughput_svg, 'wb')
-        proc = Popen(
-            ['mm-throughput-graph', '500', self.acklink_log],
-            stdout=acklink_throughput,
-            stderr=PIPE)
+        proc = Popen(['mm-throughput-graph', '500', self.acklink_log],
+                      stdout=acklink_throughput, stderr=PIPE)
         acklink_results = proc.communicate()[1]
         sys.stderr.write(acklink_results)
         stats.write(acklink_results)
@@ -146,11 +140,8 @@ class TestCongestionControl(unittest.TestCase):
         self.assertEqual(proc.returncode, 0)
 
         acklink_delay = open(acklink_delay_svg, 'wb')
-
-        proc = Popen(
-            ['mm-delay-graph', self.acklink_log],
-            stdout=acklink_delay,
-            stderr=DEVNULL)
+        proc = Popen(['mm-delay-graph', self.acklink_log],
+                     stdout=acklink_delay, stderr=DEVNULL)
         proc.communicate()
         acklink_delay.close()
         self.assertEqual(proc.returncode, 0)

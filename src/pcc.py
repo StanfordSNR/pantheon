@@ -13,8 +13,8 @@ def main():
     src_dir = os.path.abspath(os.path.dirname(__file__))
     submodule_dir = os.path.abspath(
         os.path.join(src_dir, '../third_party/pcc'))
-    recv_file = os.path.join(submodule_dir, 'receiver/app/appserver')
-    send_file = os.path.join(submodule_dir, 'sender/app/appclient')
+    recv_dir = os.path.join(submodule_dir, 'receiver')
+    send_dir = os.path.join(submodule_dir, 'sender')
     DEVNULL = open(os.devnull, 'wb')
 
     # build dependencies
@@ -23,8 +23,7 @@ def main():
 
     # build
     if option == 'build':
-        cmd = 'cd %s/sender && make && cd %s/receiver && make' % \
-              (submodule_dir, submodule_dir)
+        cmd = 'cd %s && make && cd %s && make' % (send_dir, recv_dir)
         check_call(cmd, shell=True)
 
     # commands to be run after building and before running
@@ -40,16 +39,16 @@ def main():
         port = get_open_udp_port()
         print 'Listening on port: %s' % port
         sys.stdout.flush()
-        os.environ['LD_LIBRARY_PATH'] = '%s/receiver/src' % submodule_dir
-        cmd = [recv_file, port]
+        os.environ['LD_LIBRARY_PATH'] = os.path.join(recv_dir, 'src')
+        cmd = [os.path.join(recv_dir, 'app/appserver'), port]
         check_call(cmd)
 
     # sender
     if option == 'sender':
         ip = sys.argv[2]
         port = sys.argv[3]
-        os.environ['LD_LIBRARY_PATH'] = '%s/sender/src' % submodule_dir
-        cmd = [send_file, ip, port]
+        os.environ['LD_LIBRARY_PATH'] = os.path.join(send_dir, 'src')
+        cmd = [os.path.join(recv_dir, 'app/appclient'), ip, port]
         check_call(cmd, stderr=DEVNULL)
 
 
