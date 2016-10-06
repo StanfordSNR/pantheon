@@ -13,10 +13,12 @@ def usage():
 
 
 def svg2png(test_dir, cc):
-    datalink_throughput_svg = '%s/%s_datalink_throughput.svg' % (test_dir, cc)
-    datalink_delay_svg = '%s/%s_datalink_delay.svg' % (test_dir, cc)
-    acklink_throughput_svg = '%s/%s_acklink_throughput.svg' % (test_dir, cc)
-    acklink_delay_svg = '%s/%s_acklink_delay.svg' % (test_dir, cc)
+    datalink_throughput_svg = os.path.join(test_dir,
+                              '%s_datalink_throughput.svg' % cc)
+    datalink_delay_svg = os.path.join(test_dir, '%s_datalink_delay.svg' % cc)
+    acklink_throughput_svg = os.path.join(test_dir,
+                             '%s_acklink_throughput.svg' % cc)
+    acklink_delay_svg = os.path.join(test_dir, '%s_acklink_delay.svg' % cc)
 
     datalink_throughput_png = '/tmp/%s_datalink_throughput.png' % cc
     datalink_delay_png = '/tmp/%s_datalink_delay.png' % cc

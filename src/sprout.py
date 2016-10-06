@@ -36,16 +36,16 @@ def main():
 
     # receiver
     if option == 'receiver':
-        os.environ['SPROUT_MODEL_IN'] = '%s/src/examples/sprout.model' \
-                                         % submodule_dir
+        os.environ['SPROUT_MODEL_IN'] = os.path.join(submodule_dir,
+                                        'src/examples/sprout.model')
         # sproutbt2 prints the 'listening on port' message to stdout
         cmd = [src_file]
         check_call(cmd)
 
     # sender
     if option == 'sender':
-        os.environ['SPROUT_MODEL_IN'] = '%s/src/examples/sprout.model' \
-                                         % submodule_dir
+        os.environ['SPROUT_MODEL_IN'] = os.path.join(submodule_dir,
+                                        'src/examples/sprout.model')
         ip = sys.argv[2]
         port = sys.argv[3]
         cmd = [src_file, ip, port]
