@@ -5,17 +5,16 @@ import sys
 import unittest
 import time
 import signal
+import argparse
 from subprocess import Popen, PIPE, check_call, check_output
 
 
-# print test usage
-def usage():
-    print 'Usage:'
-    print sys.argv[0] + ' <congestion-control-name>'
-    sys.exit(1)
-
-
 class TestCongestionControl(unittest.TestCase):
+    def __init__(self, test_name, args):
+        super(TestCongestionControl, self).__init__(test_name)
+        self.cc_option = args.cc_option.lower()
+        self.flows = args.flows
+
     def timeout_handler(signum, frame):
         raise
 
@@ -150,7 +149,6 @@ class TestCongestionControl(unittest.TestCase):
 
     # congestion control test
     def test_congestion_control(self):
-        self.cc_option = sys.argv[1].lower()
         self.test_dir = os.path.abspath(os.path.dirname(__file__))
         src_dir = os.path.abspath(os.path.join(self.test_dir, '../src'))
         self.src_file = os.path.join(src_dir, self.cc_option + '.py')
@@ -169,12 +167,16 @@ class TestCongestionControl(unittest.TestCase):
 
 
 def main():
-    if len(sys.argv) != 2:
-        usage()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('cc_option', metavar='congestion-control', type=str,
+                        help='name of a congestion control scheme')
+    parser.add_argument('-f', action='store', dest='flows', type=int, default=0,
+                        help='number of flows')
+    args = parser.parse_args()
 
     # create test suite to run
     suite = unittest.TestSuite()
-    suite.addTest(TestCongestionControl('test_congestion_control'))
+    suite.addTest(TestCongestionControl('test_congestion_control', args))
     if not unittest.TextTestRunner().run(suite).wasSuccessful():
         sys.exit(1)
 
