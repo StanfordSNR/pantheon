@@ -28,27 +28,41 @@ class TestCongestionControl(unittest.TestCase):
         sys.stderr.write('Done\n')
 
     def prepare_mahimahi(self):
+        self.test_runtime = 60
+        self.first_to_run_setup_time = 1
         self.ip = '$MAHIMAHI_BASE'
+
         traces_dir = '/usr/share/mahimahi/traces/'
         self.datalink_log = os.path.join(self.test_dir,
                                          '%s_datalink.log' % self.cc_option)
         self.acklink_log = os.path.join(self.test_dir,
                                         '%s_acklink.log' % self.cc_option)
-        self.test_runtime = 60
-        self.first_to_run_setup_time = 1
 
         if self.first_to_run == 'receiver':
+            self.second_to_run = 'sender'
+        else:
+            self.second_to_run = 'receiver'
+
+        if self.first_to_run == 'receiver' or self.flows > 0:
             self.uplink_trace = traces_dir + 'Verizon-LTE-short.up'
             self.downlink_trace = traces_dir + 'Verizon-LTE-short.down'
             self.uplink_log = self.datalink_log
             self.downlink_log = self.acklink_log
-            self.second_to_run = 'sender'
         else:
             self.uplink_trace = traces_dir + 'Verizon-LTE-short.down'
             self.downlink_trace = traces_dir + 'Verizon-LTE-short.up'
             self.uplink_log = self.acklink_log
             self.downlink_log = self.datalink_log
-            self.second_to_run = 'receiver'
+
+        # if run multiple flows
+        if self.flows > 0:
+            self.tunnel_uplogs = []
+            self.tunnel_downlogs = []
+            for i in xrange(self.flows):
+                self.tunnel_uplogs.append(os.path.join(self.test_dir,
+                    '%s_tunnel_up%i.log' % (self.cc_option, i + 1)))
+                self.tunnel_downlogs.append(os.path.join(self.test_dir,
+                    '%s_tunnel_down%i.log' % (self.cc_option, i + 1)))
 
     def run_congestion_control(self):
         # run the side specified by self.first_to_run
