@@ -115,8 +115,9 @@ class TestCongestionControl(unittest.TestCase):
         tunserver_elogs = []
         tunclient_ilogs = []
         tunclient_elogs = []
+
         tunserver_procs = []
-        tunclient_cmd = '{ '
+        tunclient_cmds = '{ '
 
         for i in xrange(self.flows):
             tunserver_ilogs.append('/tmp/tunserver%i.ingress.log' % (i + 1))
@@ -124,60 +125,90 @@ class TestCongestionControl(unittest.TestCase):
             tunclient_ilogs.append('/tmp/tunclient%i.ingress.log' % (i + 1))
             tunclient_elogs.append('/tmp/tunclient%i.egress.log' % (i + 1))
 
-            # mm-tunnelserver cmd
-            cmd = 'mm-tunnelserver --ingress-log=%s --egress-log=%s ' \
-                  'python %s receiver' % (tunserver_ilogs[i],
-                  tunserver_elogs[i], self.src_file)
+            # start mm-tunnelserver
+            tunserver_cmd = ['mm-tunnelserver',
+                             '--ingress-log=' + tunserver_ilogs[i],
+                             '--egress-log=' + tunserver_elogs[i]]
+            sys.stderr.write('+ ' + ' '.join(tunserver_cmd) + '\n')
+            tunserver_proc = Popen(tunserver_cmd, stdin=PIPE, stdout=PIPE,
+                                   preexec_fn=os.setsid)
+            tunserver_procs.append(tunserver_proc)
 
-            sys.stderr.write('+ ' + cmd + '\n')
-            sys.stderr.write('Flow %i running %s %s...\n' %
-                (i + 1, self.cc_option, self.first_to_run))
-            proc = Popen(cmd, stdout=PIPE, shell=True, preexec_fn=os.setsid)
-            tunserver_procs.append(proc)
+            # prepare cmds for mm-tunnelclient
+            tunclient_cmd = tunserver_proc.stdout.readline().split()
+            tunclient_cmd[1] = self.ip
+            tunclient_ip = tunclient_cmd[3]
+            tunserver_ip = tunclient_cmd[4]
+            tunclient_cmd = ' '.join(tunclient_cmd)
+            tunclient_cmd += ' --ingress-log=%s --egress-log=%s ' % \
+                             (tunclient_ilogs[i], tunclient_elogs[i])
 
-            # mm-tunnelclient cmd
-            cmd = proc.stdout.readline().split()
-            cmd[1] = self.ip
-            tunserver_ip = cmd[4]
-            cmd = ' '.join(cmd)
+            if self.first_to_run == 'receiver':
+                receiver_cmd = 'python %s receiver\n' % self.src_file
+                sys.stderr.write('Flow %i: ' % (i + 1) + receiver_cmd)
+                tunserver_proc.stdin.write(receiver_cmd)
 
-            # find port printed
-            port_info = proc.stdout.readline()
-            port = port_info.rstrip().rsplit(' ', 1)[-1]
-            self.assertTrue(port.isdigit())
+                # find port printed
+                port_info = tunserver_proc.stdout.readline()
+                port = port_info.rstrip().rsplit(' ', 1)[-1]
+                self.assertTrue(port.isdigit())
 
-            # sleep just in case the process isn't quite listening yet
-            time.sleep(self.first_to_run_setup_time)
+                tunclient_cmd += 'python %s sender %s %s' % (self.src_file,
+                                 tunserver_ip, port)
 
-            tunclient_cmd += cmd + ' --ingress-log=%s --egress-log=%s ' \
-                'python %s sender %s %s' % (tunclient_ilogs[i],
-                 tunclient_elogs[i], self.src_file, tunserver_ip, port)
-            if i < self.flows - 1:
-                tunclient_cmd += '; } & { sleep %i; ' % \
-                                 (self.test_runtime / self.flows)
+                if i < self.flows - 1:
+                    tunclient_cmds += tunclient_cmd + '; } & { sleep %i; ' % \
+                                     (self.test_runtime / self.flows)
+                else:
+                    tunclient_cmds += tunclient_cmd + '; } & wait'
             else:
-                tunclient_cmd += '; } & wait'
+                tunclient_cmd += 'python %s sender' % self.src_file
+
+                if i < self.flows - 1:
+                    tunclient_cmds += tunclient_cmd + '; } & { '
+                else:
+                    tunclient_cmds += tunclient_cmd + '; } & wait'
 
         mm_cmd = "mm-link %s %s --once --uplink-log=%s --downlink-log=%s " \
                  "-- sh -c '%s'" % (self.uplink_trace, self.downlink_trace,
-                  self.uplink_log, self.downlink_log, tunclient_cmd)
-
+                  self.uplink_log, self.downlink_log, tunclient_cmds)
         sys.stderr.write('+ ' + mm_cmd + '\n')
-        proc = Popen(mm_cmd, stdout=PIPE, shell=True, preexec_fn=os.setsid)
+
+        # sleep just in case the process isn't quite listening yet
+        time.sleep(self.first_to_run_setup_time)
+
+        if self.first_to_run == 'receiver':
+            tunclient_proc = Popen(mm_cmd, shell=True, preexec_fn=os.setsid)
+        else:
+            tunclient_proc = Popen(mm_cmd, stdout=PIPE, shell=True,
+                                   preexec_fn=os.setsid)
+            for i in xrange(self.flows):
+                # find port printed
+                port_info = tunclient_proc.stdout.readline()
+                port = port_info.rstrip().rsplit(' ', 1)[-1]
+                self.assertTrue(port.isdigit())
+
+                receiver_cmd = 'python %s receiver %s %s\n' % (self.src_file,
+                               tunclient_ip, port)
+                sys.stderr.write('Flow %i: ' % (i + 1) + receiver_cmd)
+                tunserver_proc.stdin.write(receiver_cmd)
+
+                if i < self.flows - 1:
+                    time.sleep(self.test_runtime / self.flows)
 
         signal.signal(signal.SIGALRM, self.timeout_handler)
         signal.alarm(self.test_runtime)
 
         try:
-            proc.communicate()
+            tunclient_proc.communicate()
         except:
             sys.stderr.write('Done\n')
-            os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+            os.killpg(os.getpgid(tunclient_proc.pid), signal.SIGKILL)
             for i in xrange(self.flows):
                 os.killpg(os.getpgid(tunserver_procs[i].pid), signal.SIGKILL)
         else:
             sys.stderr.write('Test exited before test time limit\n')
-            os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+            os.killpg(os.getpgid(tunclient_proc.pid), signal.SIGKILL)
             for i in xrange(self.flows):
                 os.killpg(os.getpgid(tunserver_procs[i].pid), signal.SIGKILL)
             sys.exit(1)
