@@ -56,13 +56,13 @@ class TestCongestionControl(unittest.TestCase):
 
         # if run multiple flows
         if self.flows > 0:
-            self.tunnel_uplogs = []
-            self.tunnel_downlogs = []
+            self.tun_datalink_logs = []
+            self.tun_acklink_logs = []
             for i in xrange(self.flows):
-                self.tunnel_uplogs.append(os.path.join(self.test_dir,
-                    '%s_tunnel_up%i.log' % (self.cc_option, i + 1)))
-                self.tunnel_downlogs.append(os.path.join(self.test_dir,
-                    '%s_tunnel_down%i.log' % (self.cc_option, i + 1)))
+                self.tun_datalink_logs.append(os.path.join(self.test_dir,
+                    '%s_datalink%i.log' % (self.cc_option, i + 1)))
+                self.tun_acklink_logs.append(os.path.join(self.test_dir,
+                    '%s_acklink%i.log' % (self.cc_option, i + 1)))
 
     def run_congestion_control(self):
         # run the side specified by self.first_to_run
@@ -213,17 +213,26 @@ class TestCongestionControl(unittest.TestCase):
                 os.killpg(os.getpgid(tunserver_procs[i].pid), signal.SIGKILL)
             sys.exit(1)
 
-    def gen_results(self):
-        datalink_throughput_svg = os.path.join(self.test_dir,
-                                  '%s_datalink_throughput.svg' % self.cc_option)
-        datalink_delay_svg = os.path.join(self.test_dir,
-                             '%s_datalink_delay.svg' % self.cc_option)
-        acklink_throughput_svg = os.path.join(self.test_dir,
-                                 '%s_acklink_throughput.svg' % self.cc_option)
-        acklink_delay_svg = os.path.join(self.test_dir,
-                            '%s_acklink_delay.svg' % self.cc_option)
+        for i in xrange(self.flows):
+            check_call('mm-combine-tunnel-logs %s %s > %s' %
+                       (tunserver_ilogs[i], tunclient_elogs[i],
+                        self.tun_datalink_logs[i]), shell=True)
+            check_call('mm-combine-tunnel-logs %s %s > %s' %
+                       (tunclient_ilogs[i], tunserver_elogs[i],
+                        self.tun_acklink_logs[i]), shell=True)
 
-        stats_log = os.path.join(self.test_dir, '%s_stats.log' % self.cc_option)
+    def gen_results(self, flow_id = ''):
+        datalink_throughput_svg = os.path.join(self.test_dir,
+            '%s_datalink_throughput%s.svg' % (self.cc_option, flow_id))
+        datalink_delay_svg = os.path.join(self.test_dir,
+            '%s_datalink_delay%s.svg' % (self.cc_option, flow_id))
+        acklink_throughput_svg = os.path.join(self.test_dir,
+            '%s_acklink_throughput%s.svg' % (self.cc_option, flow_id))
+        acklink_delay_svg = os.path.join(self.test_dir,
+            '%s_acklink_delay%s.svg' % (self.cc_option, flow_id))
+
+        stats_log = os.path.join(self.test_dir,
+            '%s_stats%s.log' % (self.cc_option, flow_id))
         stats = open(stats_log, 'wb')
 
         # Data link
@@ -285,6 +294,13 @@ class TestCongestionControl(unittest.TestCase):
 
         # generate results, including statistics and graphs
         self.gen_results()
+
+        if self.flows > 0:
+            for i in xrange(self.flows):
+                sys.stderr.write('Flow %i:\n' % (i + 1))
+                self.datalink_log = self.tun_datalink_logs[i]
+                self.acklink_log = self.tun_acklink_logs[i]
+                self.gen_results(i + 1)
 
 
 def main():
