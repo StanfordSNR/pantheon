@@ -56,13 +56,10 @@ class TestCongestionControl(unittest.TestCase):
 
         # if run multiple flows
         if self.flows > 0:
-            self.tun_datalink_logs = []
-            self.tun_acklink_logs = []
-            for i in xrange(self.flows):
-                self.tun_datalink_logs.append(os.path.join(self.test_dir,
-                    '%s_datalink%i.log' % (self.cc_option, i + 1)))
-                self.tun_acklink_logs.append(os.path.join(self.test_dir,
-                    '%s_acklink%i.log' % (self.cc_option, i + 1)))
+            self.flows_datalink_log = os.path.join(self.test_dir,
+                '%s_flows_datalink.log' % self.cc_option)
+            self.flows_acklink_log = os.path.join(self.test_dir,
+                '%s_flows_acklink.log' % self.cc_option)
 
     def run_congestion_control(self):
         # run the side specified by self.first_to_run
@@ -213,27 +210,56 @@ class TestCongestionControl(unittest.TestCase):
                 os.killpg(os.getpgid(tunserver_procs[i].pid), signal.SIGKILL)
             sys.exit(1)
 
-        for i in xrange(self.flows):
-            check_call('mm-combine-tunnel-logs %s %s > %s' %
-                       (tunserver_ilogs[i], tunclient_elogs[i],
-                        self.tun_datalink_logs[i]), shell=True)
-            check_call('mm-combine-tunnel-logs %s %s > %s' %
-                       (tunclient_ilogs[i], tunserver_elogs[i],
-                        self.tun_acklink_logs[i]), shell=True)
+        combine_datalink_cmd = 'mm-combine-multi-flow-logs --link-log=' + \
+                               self.uplink_log
+        combine_acklink_cmd = 'mm-combine-multi-flow-logs --link-log=' + \
+                               self.downlink_log
 
-    def gen_results(self, flow_id = ''):
+        for i in xrange(self.flows):
+            tun_datalink_log = '/tmp/tun_datalink%s.log' % (i + 1)
+            tun_acklink_log = '/tmp/tun_acklink%s.log' % (i + 1)
+
+            combine_tun_logs_cmd = 'mm-combine-tunnel-logs %s %s > %s' % \
+                                   (tunserver_ilogs[i], tunclient_elogs[i],
+                                    tun_datalink_log)
+            sys.stderr.write(combine_tun_logs_cmd + '\n')
+            check_call(combine_tun_logs_cmd, shell=True)
+
+            combine_tun_logs_cmd = 'mm-combine-tunnel-logs %s %s > %s' % \
+                                   (tunclient_ilogs[i], tunserver_elogs[i],
+                                    tun_acklink_log)
+            sys.stderr.write(combine_tun_logs_cmd + '\n')
+            check_call(combine_tun_logs_cmd, shell=True)
+
+            combine_datalink_cmd += ' ' + tun_datalink_log
+            combine_acklink_cmd += ' ' + tun_acklink_log
+
+        combine_datalink_cmd += ' > ' + self.flows_datalink_log
+        combine_acklink_cmd += ' > ' + self.flows_acklink_log
+        sys.stderr.write(combine_datalink_cmd + '\n')
+        sys.stderr.write(combine_acklink_cmd + '\n')
+        check_call(combine_datalink_cmd, shell=True)
+        check_call(combine_acklink_cmd, shell=True)
+
+    def gen_results(self, flows_str = ''):
         datalink_throughput_svg = os.path.join(self.test_dir,
-            '%s_datalink_throughput%s.svg' % (self.cc_option, flow_id))
+            '%s_%sdatalink_throughput.svg' % (self.cc_option, flows_str))
         datalink_delay_svg = os.path.join(self.test_dir,
-            '%s_datalink_delay%s.svg' % (self.cc_option, flow_id))
+            '%s_%sdatalink_delay.svg' % (self.cc_option, flows_str))
         acklink_throughput_svg = os.path.join(self.test_dir,
-            '%s_acklink_throughput%s.svg' % (self.cc_option, flow_id))
+            '%s_%sacklink_throughput.svg' % (self.cc_option, flows_str))
         acklink_delay_svg = os.path.join(self.test_dir,
-            '%s_acklink_delay%s.svg' % (self.cc_option, flow_id))
+            '%s_%sacklink_delay.svg' % (self.cc_option, flows_str))
 
         stats_log = os.path.join(self.test_dir,
-            '%s_stats%s.log' % (self.cc_option, flow_id))
+            '%s_%sstats.log' % (self.cc_option, flows_str))
         stats = open(stats_log, 'wb')
+
+        sys.stderr.write('\n')
+        if not flows_str:
+            delay_cmd = 'mm-delay-graph'
+        else:
+            delay_cmd = 'mm-signal-delay-graph'
 
         # Data link
         sys.stderr.write('* Data link statistics:\n')
@@ -247,7 +273,8 @@ class TestCongestionControl(unittest.TestCase):
         self.assertEqual(proc.returncode, 0)
 
         datalink_delay = open(datalink_delay_svg, 'wb')
-        proc = Popen(['mm-delay-graph', self.datalink_log],
+
+        proc = Popen([delay_cmd, self.datalink_log],
                      stdout=datalink_delay, stderr=DEVNULL)
         proc.communicate()
         datalink_delay.close()
@@ -265,7 +292,7 @@ class TestCongestionControl(unittest.TestCase):
         self.assertEqual(proc.returncode, 0)
 
         acklink_delay = open(acklink_delay_svg, 'wb')
-        proc = Popen(['mm-delay-graph', self.acklink_log],
+        proc = Popen([delay_cmd, self.acklink_log],
                      stdout=acklink_delay, stderr=DEVNULL)
         proc.communicate()
         acklink_delay.close()
@@ -296,11 +323,9 @@ class TestCongestionControl(unittest.TestCase):
         self.gen_results()
 
         if self.flows > 0:
-            for i in xrange(self.flows):
-                sys.stderr.write('Flow %i:\n' % (i + 1))
-                self.datalink_log = self.tun_datalink_logs[i]
-                self.acklink_log = self.tun_acklink_logs[i]
-                self.gen_results(i + 1)
+            self.datalink_log = self.flows_datalink_log
+            self.acklink_log = self.flows_acklink_log
+            self.gen_results("flows_")
 
 
 def main():
