@@ -16,7 +16,7 @@ def parse_arguments():
     parser.add_argument('cc', metavar='congestion-control', type=str,
                         help='name of a congestion control scheme')
     parser.add_argument('-f', action='store', dest='flows', type=int,
-                        default=0, help='number of flows '
+                        default=1, help='number of flows '
                         '(mm-tunnelclient/mm-tunnelserver pairs)')
     parser.add_argument('-r', action='store', dest='remote_addr', type=str,
                         help='remote address: [user@]hostname')
