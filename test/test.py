@@ -11,7 +11,7 @@ from subprocess import Popen, PIPE, check_call, check_output
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument('cc_option', metavar='congestion-control', type=str,
+    parser.add_argument('cc', metavar='congestion-control', type=str,
                         help='name of a congestion control scheme')
     parser.add_argument('-f', action='store', dest='flows', type=int,
                         default=0, help='number of flows')
@@ -25,7 +25,7 @@ def parse_arguments():
 class TestCongestionControl(unittest.TestCase):
     def __init__(self, test_name, args):
         super(TestCongestionControl, self).__init__(test_name)
-        self.cc_option = args.cc_option.lower()
+        self.cc = args.cc.lower()
         self.flows = args.flows
 
     def timeout_handler(signum, frame):
@@ -47,9 +47,9 @@ class TestCongestionControl(unittest.TestCase):
 
         traces_dir = '/usr/share/mahimahi/traces/'
         self.datalink_log = os.path.join(self.test_dir,
-                                         '%s_datalink.log' % self.cc_option)
+                                         '%s_datalink.log' % self.cc)
         self.acklink_log = os.path.join(self.test_dir,
-                                        '%s_acklink.log' % self.cc_option)
+                                        '%s_acklink.log' % self.cc)
 
         if self.first_to_run == 'receiver':
             self.second_to_run = 'sender'
@@ -70,16 +70,16 @@ class TestCongestionControl(unittest.TestCase):
         # if run multiple flows
         if self.flows > 0:
             self.flows_datalink_log = os.path.join(self.test_dir,
-                '%s_flows_datalink.log' % self.cc_option)
+                '%s_flows_datalink.log' % self.cc)
             self.flows_acklink_log = os.path.join(self.test_dir,
-                '%s_flows_acklink.log' % self.cc_option)
+                '%s_flows_acklink.log' % self.cc)
 
     def run_congestion_control(self):
         # run the side specified by self.first_to_run
         cmd = 'python %s %s' % (self.src_file, self.first_to_run)
         sys.stderr.write('+ ' + cmd + '\n')
         sys.stderr.write('Running %s %s...\n' %
-                         (self.cc_option, self.first_to_run))
+                         (self.cc, self.first_to_run))
         proc1 = Popen(cmd, stdout=PIPE, shell=True, preexec_fn=os.setsid)
 
         # find port printed
@@ -99,7 +99,7 @@ class TestCongestionControl(unittest.TestCase):
                  self.uplink_log, self.downlink_log, cmd)
         sys.stderr.write('+ ' + mm_cmd + '\n')
         sys.stderr.write('Running %s %s...\n' %
-                         (self.cc_option, self.second_to_run))
+                         (self.cc, self.second_to_run))
         proc2 = Popen(mm_cmd, stdout=PIPE, shell=True, preexec_fn=os.setsid)
 
         signal.signal(signal.SIGALRM, self.timeout_handler)
@@ -256,16 +256,16 @@ class TestCongestionControl(unittest.TestCase):
 
     def gen_results(self, flows_str = ''):
         datalink_throughput_svg = os.path.join(self.test_dir,
-            '%s_%sdatalink_throughput.svg' % (self.cc_option, flows_str))
+            '%s_%sdatalink_throughput.svg' % (self.cc, flows_str))
         datalink_delay_svg = os.path.join(self.test_dir,
-            '%s_%sdatalink_delay.svg' % (self.cc_option, flows_str))
+            '%s_%sdatalink_delay.svg' % (self.cc, flows_str))
         acklink_throughput_svg = os.path.join(self.test_dir,
-            '%s_%sacklink_throughput.svg' % (self.cc_option, flows_str))
+            '%s_%sacklink_throughput.svg' % (self.cc, flows_str))
         acklink_delay_svg = os.path.join(self.test_dir,
-            '%s_%sacklink_delay.svg' % (self.cc_option, flows_str))
+            '%s_%sacklink_delay.svg' % (self.cc, flows_str))
 
         stats_log = os.path.join(self.test_dir,
-            '%s_%sstats.log' % (self.cc_option, flows_str))
+            '%s_%sstats.log' % (self.cc, flows_str))
         stats = open(stats_log, 'wb')
 
         sys.stderr.write('\n')
@@ -317,7 +317,7 @@ class TestCongestionControl(unittest.TestCase):
     def test_congestion_control(self):
         self.test_dir = os.path.abspath(os.path.dirname(__file__))
         src_dir = os.path.abspath(os.path.join(self.test_dir, '../src'))
-        self.src_file = os.path.join(src_dir, self.cc_option + '.py')
+        self.src_file = os.path.join(src_dir, self.cc + '.py')
 
         # record who goes first
         self.who_goes_first()
