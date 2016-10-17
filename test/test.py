@@ -18,13 +18,13 @@ def parse_arguments():
     parser.add_argument('-f', action='store', dest='flows', type=int,
                         default=1, help='number of flows '
                         '(mm-tunnelclient/mm-tunnelserver pairs)')
-    parser.add_argument('-r', action='store', dest='remote_addr', type=str,
-                        help='remote address: [user@]hostname')
+    parser.add_argument('-r', action='store', dest='remote', type=str,
+                        help='remote pantheon directory: [user@]hostname:dir')
     parser.add_argument('-i', action='store', dest='private_key', type=str,
                         help='identity file (private key) for ssh/scp to use')
     args = parser.parse_args()
 
-    if args.flows == 0 and args.remote_addr:
+    if args.flows == 0 and args.remote:
         sys.stderr.write('Remote test must run at least one flow '
                          '(one pair of mm-tunnelclient/mm-tunnelserver)\n')
         sys.exit(1)
@@ -37,7 +37,7 @@ class TestCongestionControl(unittest.TestCase):
         super(TestCongestionControl, self).__init__(test_name)
         self.cc = args.cc.lower()
         self.flows = args.flows
-        self.remote_addr = args.remote_addr
+        self.remote = args.remote
         self.private_key = args.private_key
 
     def timeout_handler(signum, frame):
@@ -73,7 +73,7 @@ class TestCongestionControl(unittest.TestCase):
             self.tun_acklink_log = path.join(self.test_dir, self.cc +
                                              '_tun_acklink.log')
 
-        if not self.remote_addr:  # local setup
+        if not self.remote:  # local setup
             self.remote_ip = '$MAHIMAHI_BASE'
             traces_dir = '/usr/share/mahimahi/traces/'
             if self.first_to_run == 'receiver' or self.flows > 0:
@@ -87,6 +87,10 @@ class TestCongestionControl(unittest.TestCase):
                 self.uplink_log = self.acklink_log
                 self.downlink_log = self.datalink_log
         else:  # remote setup
+            (self.remote_addr, self.remote_dir) = self.remote.split(':')
+            remote_src_dir = path.join(self.remote_dir, 'src')
+            self.remote_src_file = path.join(remote_src_dir, self.cc + '.py')
+
             self.ssh_cmd = ['ssh', self.remote_addr]
             if self.private_key:
                 self.ssh_cmd += ['-i', self.private_key]
@@ -134,7 +138,7 @@ class TestCongestionControl(unittest.TestCase):
     def run_with_tunnel(self):
         # ts: mm-tunnelserver tc: mm-tunnelclient
         ts_procs = []
-        if self.remote_addr:
+        if self.remote:
             tc_procs = []
 
         ts_ilogs = []
@@ -153,7 +157,7 @@ class TestCongestionControl(unittest.TestCase):
             # start mm-tunnelserver
             ts_cmd = ['mm-tunnelserver', '--ingress-log=' + ts_ilogs[i],
                       '--egress-log=' + ts_elogs[i]]
-            if self.remote_addr:
+            if self.remote:
                 ts_cmd = self.ssh_cmd + ts_cmd
             sys.stderr.write('+ ' + ' '.join(ts_cmd) + '\n')
             ts_proc = Popen(ts_cmd, stdin=PIPE, stdout=PIPE,
@@ -168,14 +172,14 @@ class TestCongestionControl(unittest.TestCase):
             tc_cmd += ['--ingress-log=' + tc_ilogs[i],
                        '--egress-log=' + tc_elogs[i]]
 
-            if self.remote_addr:
+            if self.remote:
                 sys.stderr.write('+ ' + ' '.join(tc_cmd) + '\n')
                 tc_proc = Popen(tc_cmd, stdin=PIPE, stdout=PIPE,
                                 preexec_fn=os.setsid)
                 tc_procs.append(tc_proc)
 
             if self.first_to_run == 'receiver':
-                recv_cmd = 'python %s receiver\n' % self.src_file
+                recv_cmd = 'python %s receiver\n' % self.remote_src_file
                 sys.stderr.write('+ ' + recv_cmd)
                 ts_proc.stdin.write(recv_cmd)
                 time.sleep(self.first_to_run_setup_time)
@@ -183,19 +187,19 @@ class TestCongestionControl(unittest.TestCase):
                 port = self.get_port(ts_proc)
                 send_cmd = ('python %s sender %s %s\n' %
                             (self.src_file, ts_ip, port))
-                if self.remote_addr:
+                if self.remote:
                     sys.stderr.write('+ ' + send_cmd)
                     tc_proc.stdin.write(send_cmd)
             else:
                 send_cmd = 'python %s sender\n' % self.src_file
-                if self.remote_addr:
+                if self.remote:
                     sys.stderr.write('+ ' + send_cmd)
                     tc_proc.stdin.write(send_cmd)
                     time.sleep(self.first_to_run_setup_time)
 
                     port = self.get_port(tc_proc)
                     recv_cmd = ('python %s receiver %s %s\n' %
-                                (self.src_file, tc_ip, port))
+                                (self.remote_src_file, tc_ip, port))
                     sys.stderr.write('+ ' + recv_cmd)
                     ts_proc.stdin.write(recv_cmd)
 
@@ -214,7 +218,7 @@ class TestCongestionControl(unittest.TestCase):
         finally:
             for i in xrange(self.flows):
                 os.killpg(os.getpgid(ts_procs[i].pid), signal.SIGKILL)
-                if self.remote_addr:
+                if self.remote:
                     os.killpg(os.getpgid(tc_procs[i].pid), signal.SIGKILL)
 
         # combine logs generated by tunnel clients and servers
