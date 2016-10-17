@@ -337,9 +337,10 @@ class TestCongestionControl(unittest.TestCase):
         self.run_congestion_control()
 
         # generate results, including statistics and graphs
-        self.gen_results()
+        if not self.remote:
+            self.gen_results()
 
-        if self.flows > 0:
+        if self.remote or self.flows:
             self.datalink_log = self.tun_datalink_log
             self.acklink_log = self.tun_acklink_log
             self.gen_results("tun_")
