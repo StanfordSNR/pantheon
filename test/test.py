@@ -50,10 +50,8 @@ class TestCongestionControl(unittest.TestCase):
         self.datalink_log = path.join(self.test_dir, self.cc + '_datalink.log')
         self.acklink_log = path.join(self.test_dir, self.cc + '_acklink.log')
 
-        if self.first_to_run == 'receiver':
-            self.second_to_run = 'sender'
-        else:
-            self.second_to_run = 'receiver'
+        self.second_to_run = ('sender' if self.first_to_run == 'receiver'
+                              else 'receiver')
 
         if self.first_to_run == 'receiver' or self.flows > 0:
             self.uplink_trace = traces_dir + 'Verizon-LTE-short.up'
@@ -266,10 +264,7 @@ class TestCongestionControl(unittest.TestCase):
         stats = open(stats_log, 'wb')
 
         sys.stderr.write('\n')
-        if not flows_str:
-            delay_cmd = 'mm-delay-graph'
-        else:
-            delay_cmd = 'mm-signal-delay-graph'
+        delay_cmd = 'mm-signal-delay-graph' if flows_str else 'mm-delay-graph'
 
         # Data link
         sys.stderr.write('* Data link statistics:\n')
