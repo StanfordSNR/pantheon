@@ -118,10 +118,8 @@ class TestCongestionControl(unittest.TestCase):
             os.killpg(os.getpgid(proc_first.pid), signal.SIGKILL)
             os.killpg(os.getpgid(proc_second.pid), signal.SIGKILL)
 
-    def run_congestion_control(self):
-        self.run_with_tunnel() if self.flows > 0 else self.run_without_tunnel()
-
-    def run_multiple_flows(self):
+    # test congestion control using mm-tunnelclient/mm-tunnelserver
+    def run_with_tunnel(self):
         tunserver_ilogs = []
         tunserver_elogs = []
         tunclient_ilogs = []
@@ -255,6 +253,9 @@ class TestCongestionControl(unittest.TestCase):
         check_call(combine_datalink_cmd, shell=True)
         check_call(combine_acklink_cmd, shell=True)
 
+    def run_congestion_control(self):
+        self.run_with_tunnel() if self.flows > 0 else self.run_without_tunnel()
+
     def gen_results(self, flows_str = ''):
         datalink_throughput_svg = path.join(self.test_dir,
             '%s_%sdatalink_throughput.svg' % (self.cc, flows_str))
@@ -323,12 +324,8 @@ class TestCongestionControl(unittest.TestCase):
         # local or remote setup before running tests
         self.setup()
 
-        if self.flows == 0:
-            # run receiver and sender
-            self.run_congestion_control()
-        else:
-            # run multiple flows
-            self.run_multiple_flows()
+        # run receiver and sender
+        self.run_congestion_control()
 
         # generate results, including statistics and graphs
         self.gen_results()
