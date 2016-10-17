@@ -22,8 +22,14 @@ def parse_arguments():
                         help='remote address: [user@]hostname')
     parser.add_argument('-i', action='store', dest='private_key', type=str,
                         help='identity file (private key) for ssh/scp to use')
+    args = parser.parse_args()
 
-    return parser.parse_args()
+    if args.flows == 0 and args.remote_addr:
+        sys.stderr.write('Remote test must run at least one flow '
+                         '(one pair of mm-tunnelclient/mm-tunnelserver)\n')
+        sys.exit(1)
+
+    return args
 
 class TestCongestionControl(unittest.TestCase):
     def __init__(self, test_name, args):
