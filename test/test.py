@@ -78,49 +78,48 @@ class TestCongestionControl(unittest.TestCase):
                 self.ssh_cmd += ['-i', self.private_key]
             self.remote_ip = self.remote_addr.split('@')[-1]
 
-    def run_congestion_control(self):
+    # test congestion control without running mm-tunnelclient/mm-tunnelserver
+    def run_without_tunnel(self):
         # run the side specified by self.first_to_run
-        cmd = 'python %s %s' % (self.src_file, self.first_to_run)
-        sys.stderr.write('+ ' + cmd + '\n')
+        cmd = ['python', self.src_file, self.first_to_run]
+        sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
         sys.stderr.write('Running %s %s...\n' % (self.cc, self.first_to_run))
-        proc1 = Popen(cmd, stdout=PIPE, shell=True, preexec_fn=os.setsid)
+        proc_first = Popen(cmd, stdout=PIPE, preexec_fn=os.setsid)
 
         # find port printed
-        port_info = proc1.stdout.readline()
+        port_info = proc_first.stdout.readline()
         port = port_info.rstrip().rsplit(' ', 1)[-1]
         self.assertTrue(port.isdigit())
 
         # sleep just in case the process isn't quite listening yet
+        # the cleaner approach might be to try to verify the socket is open
         time.sleep(self.first_to_run_setup_time)
-        # XXX the cleaner approach might be to try to verify the socket is open
 
         # run the other side specified by self.second_to_run
-        cmd = 'python %s %s %s %s' % (self.src_file, self.second_to_run,
-                                      self.ip, port)
-        mm_cmd = "mm-link %s %s --once --uplink-log=%s --downlink-log=%s " \
-                 "-- sh -c '%s'" % (self.uplink_trace, self.downlink_trace,
-                 self.uplink_log, self.downlink_log, cmd)
-        sys.stderr.write('+ ' + mm_cmd + '\n')
+        cmd = ('mm-link %s %s --once --uplink-log=%s --downlink-log=%s' %
+               (self.uplink_trace, self.downlink_trace,
+                self.uplink_log, self.downlink_log))
+        cmd += (" -- sh -c 'python %s %s %s %s'" %
+                (self.src_file, self.second_to_run, self.ip, port))
+        sys.stderr.write('+ ' + cmd + '\n')
         sys.stderr.write('Running %s %s...\n' % (self.cc, self.second_to_run))
-        proc2 = Popen(mm_cmd, stdout=PIPE, shell=True, preexec_fn=os.setsid)
+        proc_second = Popen(cmd, stdout=PIPE, shell=True, preexec_fn=os.setsid)
 
         signal.signal(signal.SIGALRM, self.timeout_handler)
         signal.alarm(self.test_runtime)
 
         try:
-            if self.first_to_run == 'receiver':
-                proc2.communicate()
-            else:
-                proc1.communicate()
+            proc_second.communicate()
         except:
             sys.stderr.write('Done\n')
-            os.killpg(os.getpgid(proc2.pid), signal.SIGKILL)
-            os.killpg(os.getpgid(proc1.pid), signal.SIGKILL)
         else:
-            sys.stderr.write('Sender exited before test time limit\n')
-            os.killpg(os.getpgid(proc2.pid), signal.SIGKILL)
-            os.killpg(os.getpgid(proc1.pid), signal.SIGKILL)
-            sys.exit(1)
+            self.fail('Test exited before time limit')
+        finally:
+            os.killpg(os.getpgid(proc_first.pid), signal.SIGKILL)
+            os.killpg(os.getpgid(proc_second.pid), signal.SIGKILL)
+
+    def run_congestion_control(self):
+        self.run_with_tunnel() if self.flows > 0 else self.run_without_tunnel()
 
     def run_multiple_flows(self):
         tunserver_ilogs = []
