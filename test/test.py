@@ -31,6 +31,7 @@ def parse_arguments():
 
     return args
 
+
 class TestCongestionControl(unittest.TestCase):
     def __init__(self, test_name, args):
         super(TestCongestionControl, self).__init__(test_name)
@@ -66,12 +67,12 @@ class TestCongestionControl(unittest.TestCase):
         self.acklink_log = path.join(self.test_dir, self.cc + '_acklink.log')
 
         if self.flows > 0:
-            self.flows_datalink_log = path.join(self.test_dir, self.cc +
-                                                '_flows_datalink.log')
-            self.flows_acklink_log = path.join(self.test_dir, self.cc +
-                                               '_flows_acklink.log')
+            self.tun_datalink_log = path.join(self.test_dir, self.cc +
+                                              '_tun_datalink.log')
+            self.tun_acklink_log = path.join(self.test_dir, self.cc +
+                                             '_tun_acklink.log')
 
-        if not self.remote_addr: # local setup
+        if not self.remote_addr:  # local setup
             self.remote_ip = '$MAHIMAHI_BASE'
             traces_dir = '/usr/share/mahimahi/traces/'
             if self.first_to_run == 'receiver' or self.flows > 0:
@@ -84,7 +85,7 @@ class TestCongestionControl(unittest.TestCase):
                 self.downlink_trace = traces_dir + 'Verizon-LTE-short.up'
                 self.uplink_log = self.acklink_log
                 self.downlink_log = self.datalink_log
-        else: # remote setup
+        else:  # remote setup
             self.ssh_cmd = ['ssh', self.remote_addr]
             if self.private_key:
                 self.ssh_cmd += ['-i', self.private_key]
@@ -134,15 +135,15 @@ class TestCongestionControl(unittest.TestCase):
         ts_procs = []
         tc_procs = []
 
-        ts_ilog = lambda index: '/tmp/ts%s.ingress.log' % (index + 1)
-        ts_elog = lambda index: '/tmp/ts%s.egress.log' % (index + 1)
-        tc_ilog = lambda index: '/tmp/tc%s.ingress.log' % (index + 1)
-        tc_elog = lambda index: '/tmp/tc%s.egress.log' % (index + 1)
+        ts_ilogs = []
+        ts_elogs = []
+        tc_ilogs = []
+        tc_elogs = []
 
         for i in xrange(self.flows):
             # start mm-tunnelserver
-            ts_cmd = ['mm-tunnelserver', '--ingress-log=' + ts_ilog(i),
-                      '--egress-log=' + ts_elog(i)]
+            ts_cmd = ['mm-tunnelserver', '--ingress-log=' + ts_ilogs[i],
+                      '--egress-log=' + ts_elogs[i]]
             if self.remote_addr:
                 ts_cmd = self.ssh_cmd + ts_cmd
             sys.stderr.write('+ ' + ' '.join(ts_cmd) + '\n')
@@ -153,10 +154,10 @@ class TestCongestionControl(unittest.TestCase):
             # prepare command to run mm-tunnelclient
             tc_cmd = ts_proc.stdout.readline().split()
             tc_cmd[1] = self.remote_ip
-            tc_ip = tc_cmd[3] # client IP inside tunnel
-            ts_ip = tc_cmd[4] # server IP inside tunnel
-            tc_cmd += ['--ingress-log=' + tc_ilog(i),
-                       '--egress-log=' + tc_elog(i)]
+            tc_ip = tc_cmd[3]  # client IP inside tunnel
+            ts_ip = tc_cmd[4]  # server IP inside tunnel
+            tc_cmd += ['--ingress-log=' + tc_ilogs[i],
+                       '--egress-log=' + tc_elogs[i]]
 
             if self.remote_addr:
                 sys.stderr.write('+ ' + ' '.join(tc_cmd) + '\n')
@@ -214,46 +215,45 @@ class TestCongestionControl(unittest.TestCase):
             tun_datalink_log = '/tmp/tun_datalink%s.log' % (i + 1)
             tun_acklink_log = '/tmp/tun_acklink%s.log' % (i + 1)
 
-            combine_tun_logs_cmd = ('mm-combine-tunnel-logs %s %s > %s' %
-                                    (ts_ilog(i), tc_elog(i), tun_datalink_log))
-            sys.stderr.write('+ ' + combine_tun_logs_cmd + '\n')
-            check_call(combine_tun_logs_cmd, shell=True)
+            combine_cmd = ('mm-combine-tunnel-logs %s %s > %s' %
+                           (ts_ilogs[i], tc_elogs[i], tun_datalink_log))
+            sys.stderr.write('+ ' + combine_cmd + '\n')
+            check_call(combine_cmd, shell=True)
 
-            combine_tun_logs_cmd = ('mm-combine-tunnel-logs %s %s > %s' %
-                                    (tc_ilog(i), ts_elog(i), tun_acklink_log))
-            sys.stderr.write('+ ' + combine_tun_logs_cmd + '\n')
-            check_call(combine_tun_logs_cmd, shell=True)
+            combine_cmd = ('mm-combine-tunnel-logs %s %s > %s' %
+                           (tc_ilogs[i], ts_elogs[i], tun_acklink_log))
+            sys.stderr.write('+ ' + combine_cmd + '\n')
+            check_call(combine_cmd, shell=True)
 
             combine_datalink_cmd += ' ' + tun_datalink_log
             combine_acklink_cmd += ' ' + tun_acklink_log
 
-        combine_datalink_cmd += ' > ' + self.flows_datalink_log
+        combine_datalink_cmd += ' > ' + self.tun_datalink_log
         sys.stderr.write('+ ' + combine_datalink_cmd + '\n')
         check_call(combine_datalink_cmd, shell=True)
 
-        combine_acklink_cmd += ' > ' + self.flows_acklink_log
+        combine_acklink_cmd += ' > ' + self.tun_acklink_log
         sys.stderr.write('+ ' + combine_acklink_cmd + '\n')
         check_call(combine_acklink_cmd, shell=True)
 
     def run_congestion_control(self):
         self.run_with_tunnel() if self.flows > 0 else self.run_without_tunnel()
 
-    def gen_results(self, flows_str = ''):
-        datalink_throughput_svg = path.join(self.test_dir,
-            '%s_%sdatalink_throughput.svg' % (self.cc, flows_str))
-        datalink_delay_svg = path.join(self.test_dir,
-            '%s_%sdatalink_delay.svg' % (self.cc, flows_str))
-        acklink_throughput_svg = path.join(self.test_dir,
-            '%s_%sacklink_throughput.svg' % (self.cc, flows_str))
-        acklink_delay_svg = path.join(self.test_dir,
-            '%s_%sacklink_delay.svg' % (self.cc, flows_str))
+    def gen_results(self, tun=''):
+        datalink_throughput_svg = path.join(
+            self.test_dir, '%s_%sdatalink_throughput.svg' % (self.cc, tun))
+        datalink_delay_svg = path.join(
+            self.test_dir, '%s_%sdatalink_delay.svg' % (self.cc, tun))
+        acklink_throughput_svg = path.join(
+            self.test_dir, '%s_%sacklink_throughput.svg' % (self.cc, tun))
+        acklink_delay_svg = path.join(
+            self.test_dir, '%s_%sacklink_delay.svg' % (self.cc, tun))
 
-        stats_log = path.join(self.test_dir,
-                              '%s_%sstats.log' % (self.cc, flows_str))
+        stats_log = path.join(self.test_dir, '%s_%sstats.log' % (self.cc, tun))
         stats = open(stats_log, 'wb')
 
+        delay_cmd = 'mm-signal-delay-graph' if tun else 'mm-delay-graph'
         sys.stderr.write('\n')
-        delay_cmd = 'mm-signal-delay-graph' if flows_str else 'mm-delay-graph'
 
         # Data link
         sys.stderr.write('* Data link statistics:\n')
@@ -267,7 +267,6 @@ class TestCongestionControl(unittest.TestCase):
         self.assertEqual(proc.returncode, 0)
 
         datalink_delay = open(datalink_delay_svg, 'wb')
-
         proc = Popen([delay_cmd, self.datalink_log],
                      stdout=datalink_delay, stderr=DEVNULL)
         proc.communicate()
@@ -278,7 +277,7 @@ class TestCongestionControl(unittest.TestCase):
         sys.stderr.write('* ACK link statistics:\n')
         acklink_throughput = open(acklink_throughput_svg, 'wb')
         proc = Popen(['mm-throughput-graph', '500', self.acklink_log],
-                      stdout=acklink_throughput, stderr=PIPE)
+                     stdout=acklink_throughput, stderr=PIPE)
         acklink_results = proc.communicate()[1]
         sys.stderr.write(acklink_results)
         stats.write(acklink_results)
@@ -313,9 +312,9 @@ class TestCongestionControl(unittest.TestCase):
         self.gen_results()
 
         if self.flows > 0:
-            self.datalink_log = self.flows_datalink_log
-            self.acklink_log = self.flows_acklink_log
-            self.gen_results("flows_")
+            self.datalink_log = self.tun_datalink_log
+            self.acklink_log = self.tun_acklink_log
+            self.gen_results("tun_")
 
 
 def main():
