@@ -91,9 +91,10 @@ class TestCongestionControl(unittest.TestCase):
             remote_src_dir = path.join(self.remote_dir, 'src')
             self.remote_src_file = path.join(remote_src_dir, self.cc + '.py')
 
-            self.ssh_cmd = ['ssh', self.remote_addr]
+            self.ssh_cmd = ['ssh']
             if self.private_key:
                 self.ssh_cmd += ['-i', self.private_key]
+            self.ssh_cmd.append(self.remote_addr)
             self.remote_ip = self.remote_addr.split('@')[-1]
 
     # test congestion control without running mm-tunnelclient/mm-tunnelserver
@@ -229,6 +230,16 @@ class TestCongestionControl(unittest.TestCase):
         combine_acklink_cmd = 'mm-combine-multi-flow-logs'
 
         for i in xrange(self.flows):
+            # download logs from remote side
+            scp_cmd = ['scp']
+            if self.private_key:
+                scp_cmd += ['-i', self.private_key]
+
+            check_call(scp_cmd + [self.remote_addr + ':' + self.ts_ilogs[i],
+                                  self.ts_ilogs[i]])
+            check_call(scp_cmd + [self.remote_addr + ':' + self.ts_elogs[i],
+                                  self.ts_elogs[i]])
+
             tun_datalink_log = '/tmp/tun_datalink%s.log' % (i + 1)
             tun_acklink_log = '/tmp/tun_acklink%s.log' % (i + 1)
 
