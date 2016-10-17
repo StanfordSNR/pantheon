@@ -51,6 +51,7 @@ class TestCongestionControl(unittest.TestCase):
 
     def who_goes_first(self):
         who_goes_first_cmd = ['python', self.src_file, 'who_goes_first']
+        sys.stderr.write('+ ' + ' '.join(who_goes_first_cmd) + '\n')
         who_goes_first_info = check_output(who_goes_first_cmd)
         self.first_to_run = who_goes_first_info.split(' ')[0].lower()
         self.assertTrue(
@@ -133,7 +134,8 @@ class TestCongestionControl(unittest.TestCase):
     def run_with_tunnel(self):
         # ts: mm-tunnelserver tc: mm-tunnelclient
         ts_procs = []
-        tc_procs = []
+        if self.remote_addr:
+            tc_procs = []
 
         ts_ilogs = []
         ts_elogs = []
@@ -141,6 +143,13 @@ class TestCongestionControl(unittest.TestCase):
         tc_elogs = []
 
         for i in xrange(self.flows):
+            sys.stderr.write('Flow %s:\n' % (i + 1))
+
+            ts_ilogs.append('/tmp/ts%s.ingress.log' % (i + 1))
+            ts_elogs.append('/tmp/ts%s.egress.log' % (i + 1))
+            tc_ilogs.append('/tmp/tc%s.ingress.log' % (i + 1))
+            tc_elogs.append('/tmp/tc%s.egress.log' % (i + 1))
+
             # start mm-tunnelserver
             ts_cmd = ['mm-tunnelserver', '--ingress-log=' + ts_ilogs[i],
                       '--egress-log=' + ts_elogs[i]]
@@ -149,7 +158,7 @@ class TestCongestionControl(unittest.TestCase):
             sys.stderr.write('+ ' + ' '.join(ts_cmd) + '\n')
             ts_proc = Popen(ts_cmd, stdin=PIPE, stdout=PIPE,
                             preexec_fn=os.setsid)
-            ts_procs += ts_proc
+            ts_procs.append(ts_proc)
 
             # prepare command to run mm-tunnelclient
             tc_cmd = ts_proc.stdout.readline().split()
@@ -163,11 +172,11 @@ class TestCongestionControl(unittest.TestCase):
                 sys.stderr.write('+ ' + ' '.join(tc_cmd) + '\n')
                 tc_proc = Popen(tc_cmd, stdin=PIPE, stdout=PIPE,
                                 preexec_fn=os.setsid)
-                tc_procs += tc_proc
+                tc_procs.append(tc_proc)
 
             if self.first_to_run == 'receiver':
                 recv_cmd = 'python %s receiver\n' % self.src_file
-                sys.stderr.write('Flow %s: + ' % (i + 1) + recv_cmd)
+                sys.stderr.write('+ ' + recv_cmd)
                 ts_proc.stdin.write(recv_cmd)
                 time.sleep(self.first_to_run_setup_time)
 
@@ -175,18 +184,19 @@ class TestCongestionControl(unittest.TestCase):
                 send_cmd = ('python %s sender %s %s\n' %
                             (self.src_file, ts_ip, port))
                 if self.remote_addr:
+                    sys.stderr.write('+ ' + send_cmd)
                     tc_proc.stdin.write(send_cmd)
             else:
                 send_cmd = 'python %s sender\n' % self.src_file
-
                 if self.remote_addr:
-                    sys.stderr.write('Flow %s: + ' % (i + 1) + send_cmd)
+                    sys.stderr.write('+ ' + send_cmd)
                     tc_proc.stdin.write(send_cmd)
                     time.sleep(self.first_to_run_setup_time)
 
                     port = self.get_port(tc_proc)
                     recv_cmd = ('python %s receiver %s %s\n' %
                                 (self.src_file, tc_ip, port))
+                    sys.stderr.write('+ ' + recv_cmd)
                     ts_proc.stdin.write(recv_cmd)
 
         signal.signal(signal.SIGALRM, self.timeout_handler)
