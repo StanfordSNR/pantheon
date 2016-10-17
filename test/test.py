@@ -36,6 +36,12 @@ class TestCongestionControl(unittest.TestCase):
     def timeout_handler(signum, frame):
         raise
 
+    def get_port(self, process):
+        port_info = process.stdout.readline()
+        port = port_info.rstrip().rsplit(' ', 1)[-1]
+        self.assertTrue(port.isdigit())
+        return port
+
     def who_goes_first(self):
         who_goes_first_cmd = ['python', self.src_file, 'who_goes_first']
         who_goes_first_info = check_output(who_goes_first_cmd)
@@ -59,8 +65,8 @@ class TestCongestionControl(unittest.TestCase):
             self.flows_acklink_log = path.join(self.test_dir, self.cc +
                                                '_flows_acklink.log')
 
-        if self.remote_addr is None: # local setup
-            self.ip = '$MAHIMAHI_BASE'
+        if not self.remote_addr: # local setup
+            self.remote_ip = '$MAHIMAHI_BASE'
             traces_dir = '/usr/share/mahimahi/traces/'
             if self.first_to_run == 'receiver' or self.flows > 0:
                 self.uplink_trace = traces_dir + 'Verizon-LTE-short.up'
@@ -74,7 +80,7 @@ class TestCongestionControl(unittest.TestCase):
                 self.downlink_log = self.datalink_log
         else: # remote setup
             self.ssh_cmd = ['ssh', self.remote_addr]
-            if self.private_key is not None:
+            if self.private_key:
                 self.ssh_cmd += ['-i', self.private_key]
             self.remote_ip = self.remote_addr.split('@')[-1]
 
@@ -87,9 +93,7 @@ class TestCongestionControl(unittest.TestCase):
         proc_first = Popen(cmd, stdout=PIPE, preexec_fn=os.setsid)
 
         # find port printed
-        port_info = proc_first.stdout.readline()
-        port = port_info.rstrip().rsplit(' ', 1)[-1]
-        self.assertTrue(port.isdigit())
+        port = self.get_port(proc_first)
 
         # sleep just in case the process isn't quite listening yet
         # the cleaner approach might be to try to verify the socket is open
@@ -100,7 +104,7 @@ class TestCongestionControl(unittest.TestCase):
                (self.uplink_trace, self.downlink_trace,
                 self.uplink_log, self.downlink_log))
         cmd += (" -- sh -c 'python %s %s %s %s'" %
-                (self.src_file, self.second_to_run, self.ip, port))
+                (self.src_file, self.second_to_run, self.remote_ip, port))
         sys.stderr.write('+ ' + cmd + '\n')
         sys.stderr.write('Running %s %s...\n' % (self.cc, self.second_to_run))
         proc_second = Popen(cmd, stdout=PIPE, shell=True, preexec_fn=os.setsid)
@@ -120,137 +124,109 @@ class TestCongestionControl(unittest.TestCase):
 
     # test congestion control using mm-tunnelclient/mm-tunnelserver
     def run_with_tunnel(self):
-        tunserver_ilogs = []
-        tunserver_elogs = []
-        tunclient_ilogs = []
-        tunclient_elogs = []
+        # ts: mm-tunnelserver tc: mm-tunnelclient
+        ts_procs = []
+        tc_procs = []
 
-        tunserver_procs = []
-        tunclient_cmds = '{ '
+        ts_ilog = lambda index: '/tmp/ts%s.ingress.log' % (index + 1)
+        ts_elog = lambda index: '/tmp/ts%s.egress.log' % (index + 1)
+        tc_ilog = lambda index: '/tmp/tc%s.ingress.log' % (index + 1)
+        tc_elog = lambda index: '/tmp/tc%s.egress.log' % (index + 1)
 
         for i in xrange(self.flows):
-            tunserver_ilogs.append('/tmp/tunserver%i.ingress.log' % (i + 1))
-            tunserver_elogs.append('/tmp/tunserver%i.egress.log' % (i + 1))
-            tunclient_ilogs.append('/tmp/tunclient%i.ingress.log' % (i + 1))
-            tunclient_elogs.append('/tmp/tunclient%i.egress.log' % (i + 1))
-
             # start mm-tunnelserver
-            tunserver_cmd = ['mm-tunnelserver',
-                             '--ingress-log=' + tunserver_ilogs[i],
-                             '--egress-log=' + tunserver_elogs[i]]
-            sys.stderr.write('+ ' + ' '.join(tunserver_cmd) + '\n')
-            tunserver_proc = Popen(tunserver_cmd, stdin=PIPE, stdout=PIPE,
-                                   preexec_fn=os.setsid)
-            tunserver_procs.append(tunserver_proc)
+            ts_cmd = ['mm-tunnelserver', '--ingress-log=' + ts_ilog(i),
+                      '--egress-log=' + ts_elog(i)]
+            if self.remote_addr:
+                ts_cmd = self.ssh_cmd + ts_cmd
+            sys.stderr.write('+ ' + ' '.join(ts_cmd) + '\n')
+            ts_proc = Popen(ts_cmd, stdin=PIPE, stdout=PIPE,
+                            preexec_fn=os.setsid)
+            ts_procs += ts_proc
 
-            # prepare cmds for mm-tunnelclient
-            tunclient_cmd = tunserver_proc.stdout.readline().split()
-            tunclient_cmd[1] = self.ip
-            tunclient_ip = tunclient_cmd[3]
-            tunserver_ip = tunclient_cmd[4]
-            tunclient_cmd = ' '.join(tunclient_cmd)
-            tunclient_cmd += ' --ingress-log=%s --egress-log=%s ' % \
-                             (tunclient_ilogs[i], tunclient_elogs[i])
+            # prepare command to run mm-tunnelclient
+            tc_cmd = ts_proc.stdout.readline().split()
+            tc_cmd[1] = self.remote_ip
+            tc_ip = tc_cmd[3] # client IP inside tunnel
+            ts_ip = tc_cmd[4] # server IP inside tunnel
+            tc_cmd += ['--ingress-log=' + tc_ilog(i),
+                       '--egress-log=' + tc_elog(i)]
+
+            if self.remote_addr:
+                sys.stderr.write('+ ' + ' '.join(tc_cmd) + '\n')
+                tc_proc = Popen(tc_cmd, stdin=PIPE, stdout=PIPE,
+                                preexec_fn=os.setsid)
+                tc_procs += tc_proc
 
             if self.first_to_run == 'receiver':
-                receiver_cmd = 'python %s receiver\n' % self.src_file
-                sys.stderr.write('Flow %i: ' % (i + 1) + receiver_cmd)
-                tunserver_proc.stdin.write(receiver_cmd)
+                recv_cmd = 'python %s receiver\n' % self.src_file
+                sys.stderr.write('Flow %s: + ' % (i + 1) + recv_cmd)
+                ts_proc.stdin.write(recv_cmd)
+                time.sleep(self.first_to_run_setup_time)
 
-                # find port printed
-                port_info = tunserver_proc.stdout.readline()
-                port = port_info.rstrip().rsplit(' ', 1)[-1]
-                self.assertTrue(port.isdigit())
-
-                tunclient_cmd += 'python %s sender %s %s' % (self.src_file,
-                                 tunserver_ip, port)
-
-                if i < self.flows - 1:
-                    tunclient_cmds += tunclient_cmd + '; } & { sleep %i; ' % \
-                                      (self.test_runtime / self.flows)
-                else:
-                    tunclient_cmds += tunclient_cmd + '; } & wait'
+                port = self.get_port(ts_proc)
+                send_cmd = ('python %s sender %s %s\n' %
+                            (self.src_file, ts_ip, port))
+                if self.remote_addr:
+                    tc_proc.stdin.write(send_cmd)
             else:
-                tunclient_cmd += 'python %s sender' % self.src_file
+                send_cmd = 'python %s sender\n' % self.src_file
 
-                if i < self.flows - 1:
-                    tunclient_cmds += tunclient_cmd + '; } & { '
-                else:
-                    tunclient_cmds += tunclient_cmd + '; } & wait'
+                if self.remote_addr:
+                    sys.stderr.write('Flow %s: + ' % (i + 1) + send_cmd)
+                    tc_proc.stdin.write(send_cmd)
+                    time.sleep(self.first_to_run_setup_time)
 
-        mm_cmd = "mm-link %s %s --once --uplink-log=%s --downlink-log=%s " \
-                 "-- sh -c '%s'" % (self.uplink_trace, self.downlink_trace,
-                 self.uplink_log, self.downlink_log, tunclient_cmds)
-        sys.stderr.write('+ ' + mm_cmd + '\n')
-
-        # sleep just in case the process isn't quite listening yet
-        time.sleep(self.first_to_run_setup_time)
-
-        if self.first_to_run == 'receiver':
-            tunclient_proc = Popen(mm_cmd, shell=True, preexec_fn=os.setsid)
-        else:
-            tunclient_proc = Popen(mm_cmd, stdout=PIPE, shell=True,
-                                   preexec_fn=os.setsid)
-            for i in xrange(self.flows):
-                # find port printed
-                port_info = tunclient_proc.stdout.readline()
-                port = port_info.rstrip().rsplit(' ', 1)[-1]
-                self.assertTrue(port.isdigit())
-
-                receiver_cmd = 'python %s receiver %s %s\n' % (self.src_file,
-                               tunclient_ip, port)
-                sys.stderr.write('Flow %i: ' % (i + 1) + receiver_cmd)
-                tunserver_proc.stdin.write(receiver_cmd)
-
-                if i < self.flows - 1:
-                    time.sleep(self.test_runtime / self.flows)
+                    port = self.get_port(tc_proc)
+                    recv_cmd = ('python %s receiver %s %s\n' %
+                                (self.src_file, tc_ip, port))
+                    ts_proc.stdin.write(recv_cmd)
 
         signal.signal(signal.SIGALRM, self.timeout_handler)
         signal.alarm(self.test_runtime)
 
         try:
-            tunclient_proc.communicate()
+            if self.first_to_run == 'receiver':
+                tc_proc.communicate()
+            else:
+                ts_proc.communicate()
         except:
             sys.stderr.write('Done\n')
-            os.killpg(os.getpgid(tunclient_proc.pid), signal.SIGKILL)
-            for i in xrange(self.flows):
-                os.killpg(os.getpgid(tunserver_procs[i].pid), signal.SIGKILL)
         else:
-            sys.stderr.write('Test exited before test time limit\n')
-            os.killpg(os.getpgid(tunclient_proc.pid), signal.SIGKILL)
+            self.fail('Test exited before time limit')
+        finally:
             for i in xrange(self.flows):
-                os.killpg(os.getpgid(tunserver_procs[i].pid), signal.SIGKILL)
-            sys.exit(1)
+                os.killpg(os.getpgid(ts_procs[i].pid), signal.SIGKILL)
+            if self.remote_addr:
+                os.killpg(os.getpgid(tc_proc.pid), signal.SIGKILL)
 
-        combine_datalink_cmd = 'mm-combine-multi-flow-logs --link-log=' + \
-                               self.uplink_log
-        combine_acklink_cmd = 'mm-combine-multi-flow-logs --link-log=' + \
-                               self.downlink_log
+        # combine logs generated by tunnel clients and servers
+        combine_datalink_cmd = 'mm-combine-multi-flow-logs'
+        combine_acklink_cmd = 'mm-combine-multi-flow-logs'
 
         for i in xrange(self.flows):
             tun_datalink_log = '/tmp/tun_datalink%s.log' % (i + 1)
             tun_acklink_log = '/tmp/tun_acklink%s.log' % (i + 1)
 
-            combine_tun_logs_cmd = 'mm-combine-tunnel-logs %s %s > %s' % \
-                                   (tunserver_ilogs[i], tunclient_elogs[i],
-                                    tun_datalink_log)
-            sys.stderr.write(combine_tun_logs_cmd + '\n')
+            combine_tun_logs_cmd = ('mm-combine-tunnel-logs %s %s > %s' %
+                                    (ts_ilog(i), tc_elog(i), tun_datalink_log))
+            sys.stderr.write('+ ' + combine_tun_logs_cmd + '\n')
             check_call(combine_tun_logs_cmd, shell=True)
 
-            combine_tun_logs_cmd = 'mm-combine-tunnel-logs %s %s > %s' % \
-                                   (tunclient_ilogs[i], tunserver_elogs[i],
-                                    tun_acklink_log)
-            sys.stderr.write(combine_tun_logs_cmd + '\n')
+            combine_tun_logs_cmd = ('mm-combine-tunnel-logs %s %s > %s' %
+                                    (tc_ilog(i), ts_elog(i), tun_acklink_log))
+            sys.stderr.write('+ ' + combine_tun_logs_cmd + '\n')
             check_call(combine_tun_logs_cmd, shell=True)
 
             combine_datalink_cmd += ' ' + tun_datalink_log
             combine_acklink_cmd += ' ' + tun_acklink_log
 
         combine_datalink_cmd += ' > ' + self.flows_datalink_log
-        combine_acklink_cmd += ' > ' + self.flows_acklink_log
-        sys.stderr.write(combine_datalink_cmd + '\n')
-        sys.stderr.write(combine_acklink_cmd + '\n')
+        sys.stderr.write('+ ' + combine_datalink_cmd + '\n')
         check_call(combine_datalink_cmd, shell=True)
+
+        combine_acklink_cmd += ' > ' + self.flows_acklink_log
+        sys.stderr.write('+ ' + combine_acklink_cmd + '\n')
         check_call(combine_acklink_cmd, shell=True)
 
     def run_congestion_control(self):
