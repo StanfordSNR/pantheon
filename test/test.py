@@ -47,32 +47,36 @@ class TestCongestionControl(unittest.TestCase):
                               else 'receiver')
         sys.stderr.write('Done\n')
 
-    def prepare_mahimahi(self):
+    def setup(self):
         self.test_runtime = 60
         self.first_to_run_setup_time = 1
-        self.ip = '$MAHIMAHI_BASE'
-
-        traces_dir = '/usr/share/mahimahi/traces/'
         self.datalink_log = path.join(self.test_dir, self.cc + '_datalink.log')
         self.acklink_log = path.join(self.test_dir, self.cc + '_acklink.log')
 
-        if self.first_to_run == 'receiver' or self.flows > 0:
-            self.uplink_trace = traces_dir + 'Verizon-LTE-short.up'
-            self.downlink_trace = traces_dir + 'Verizon-LTE-short.down'
-            self.uplink_log = self.datalink_log
-            self.downlink_log = self.acklink_log
-        else:
-            self.uplink_trace = traces_dir + 'Verizon-LTE-short.down'
-            self.downlink_trace = traces_dir + 'Verizon-LTE-short.up'
-            self.uplink_log = self.acklink_log
-            self.downlink_log = self.datalink_log
-
-        # if run multiple flows
         if self.flows > 0:
             self.flows_datalink_log = path.join(self.test_dir, self.cc +
                                                 '_flows_datalink.log')
             self.flows_acklink_log = path.join(self.test_dir, self.cc +
                                                '_flows_acklink.log')
+
+        if self.remote_addr is None: # local setup
+            self.ip = '$MAHIMAHI_BASE'
+            traces_dir = '/usr/share/mahimahi/traces/'
+            if self.first_to_run == 'receiver' or self.flows > 0:
+                self.uplink_trace = traces_dir + 'Verizon-LTE-short.up'
+                self.downlink_trace = traces_dir + 'Verizon-LTE-short.down'
+                self.uplink_log = self.datalink_log
+                self.downlink_log = self.acklink_log
+            else:
+                self.uplink_trace = traces_dir + 'Verizon-LTE-short.down'
+                self.downlink_trace = traces_dir + 'Verizon-LTE-short.up'
+                self.uplink_log = self.acklink_log
+                self.downlink_log = self.datalink_log
+        else: # remote setup
+            self.ssh_cmd = ['ssh', self.remote_addr]
+            if self.private_key is not None:
+                self.ssh_cmd += ['-i', self.private_key]
+            self.remote_ip = self.remote_addr.split('@')[-1]
 
     def run_congestion_control(self):
         # run the side specified by self.first_to_run
@@ -317,8 +321,8 @@ class TestCongestionControl(unittest.TestCase):
         # record who goes first
         self.who_goes_first()
 
-        # prepare mahimahi
-        self.prepare_mahimahi()
+        # local or remote setup before running tests
+        self.setup()
 
         if self.flows == 0:
             # run receiver and sender
