@@ -37,12 +37,14 @@ class TestCongestionControl(unittest.TestCase):
         raise
 
     def who_goes_first(self):
-        who_goes_first_cmd = 'python %s who_goes_first' % self.src_file
-        who_goes_first_info = check_output(who_goes_first_cmd, shell=True)
+        who_goes_first_cmd = ['python', self.src_file, 'who_goes_first']
+        who_goes_first_info = check_output(who_goes_first_cmd)
         self.first_to_run = who_goes_first_info.split(' ')[0].lower()
         self.assertTrue(
             self.first_to_run == 'receiver' or self.first_to_run == 'sender',
             msg='Need to specify receiver or sender first')
+        self.second_to_run = ('sender' if self.first_to_run == 'receiver'
+                              else 'receiver')
         sys.stderr.write('Done\n')
 
     def prepare_mahimahi(self):
@@ -53,9 +55,6 @@ class TestCongestionControl(unittest.TestCase):
         traces_dir = '/usr/share/mahimahi/traces/'
         self.datalink_log = path.join(self.test_dir, self.cc + '_datalink.log')
         self.acklink_log = path.join(self.test_dir, self.cc + '_acklink.log')
-
-        self.second_to_run = ('sender' if self.first_to_run == 'receiver'
-                              else 'receiver')
 
         if self.first_to_run == 'receiver' or self.flows > 0:
             self.uplink_trace = traces_dir + 'Verizon-LTE-short.up'
