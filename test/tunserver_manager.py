@@ -28,6 +28,7 @@ def main():
     flows = args.flows
 
     # prepare tunnelserver logs
+    ts_procs = []
     ts_ilogs = []
     ts_elogs = []
     for i in xrange(flows):
@@ -35,7 +36,6 @@ def main():
         ts_elogs.append('/tmp/ts%s.egress.log' % (i + 1))
 
     # run mm-tunnelserver
-    ts_procs = []
     for i in xrange(flows):
         ts_cmd = ['mm-tunnelserver', '--ingress-log=' + ts_ilogs[i],
                   '--egress-log=' + ts_elogs[i]]
@@ -51,10 +51,18 @@ def main():
         events = poller.poll(-1)
 
         for fd, flag in events:
-            if fd == sys.stdin.fileno() and flag & select.POLLIN:
-                cmd = sys.stdin.readline().strip()
-                if cmd == 'halt':
-                    destroy(ts_procs)
+            if not (fd == sys.stdin.fileno() and flag & select.POLLIN):
+                continue
+            cmd = sys.stdin.readline().split()
+
+            if cmd[0] == 'tunnel':
+                tun_id = int(cmd[1]) - 1
+
+                if cmd[2] == 'python':
+                    ts_procs[tun_id].stdin.write(' '.join(cmd[2:]) + '\n')
+
+            elif cmd[0] == 'halt':
+                destroy(ts_procs)
 
 
 if __name__ == '__main__':
