@@ -20,6 +20,8 @@ def destroy(tc_procs):
     for tc_proc in tc_procs:
         os.killpg(os.getpgid(tc_proc.pid), signal.SIGKILL)
 
+    sys.exit(0)
+
 
 def main():
     args = parse_arguments()
@@ -50,7 +52,14 @@ def main():
                                 preexec_fn=os.setsid)
                 tc_procs.append(tc_proc)
 
-    destroy(tc_procs)
+    while True:
+        events = poller.poll(-1)
+
+        for fd, flag in events:
+            if fd == sys.stdin.fileno() and flag & select.POLLIN:
+                cmd = sys.stdin.readline().strip()
+                if cmd == 'halt':
+                    destroy(tc_procs)
 
 
 if __name__ == '__main__':
