@@ -28,6 +28,7 @@ def main():
     flows = args.flows
 
     # prepare tunnelclient logs
+    tc_procs = [None] * flows
     tc_ilogs = []
     tc_elogs = []
     for i in xrange(flows):
@@ -38,28 +39,28 @@ def main():
     poller = select.poll()
     poller.register(sys.stdin, select.POLLIN)
 
-    # read "flows" lines from sys.stdin and connect to mm-tunnelserver
-    tc_procs = []
-    for i in xrange(flows):
-        events = poller.poll(-1)
-
-        for fd, flag in events:
-            if fd == sys.stdin.fileno() and flag & select.POLLIN:
-                tc_cmd = sys.stdin.readline().split()
-                tc_cmd = tc_cmd + ['--ingress-log=' + tc_ilogs[i],
-                                   '--egress-log=' + tc_elogs[i]]
-                tc_proc = Popen(tc_cmd, stdin=PIPE, stdout=PIPE,
-                                preexec_fn=os.setsid)
-                tc_procs.append(tc_proc)
-
     while True:
         events = poller.poll(-1)
 
         for fd, flag in events:
-            if fd == sys.stdin.fileno() and flag & select.POLLIN:
-                cmd = sys.stdin.readline().strip()
-                if cmd == 'halt':
-                    destroy(tc_procs)
+            if not (fd == sys.stdin.fileno() and flag & select.POLLIN):
+                continue
+            cmd = sys.stdin.readline().split()
+
+            if cmd[0] == 'tunnel':
+                tun_id = int(cmd[1]) - 1
+
+                if cmd[2] == 'mm-tunnelclient':
+                    tc_cmd = cmd[2:] + ['--ingress-log=' + tc_ilogs[tun_id],
+                                        '--egress-log=' + tc_elogs[tun_id]]
+                    tc_proc = Popen(tc_cmd, stdin=PIPE, stdout=PIPE,
+                                    preexec_fn=os.setsid)
+                    tc_procs[tun_id] = tc_proc
+                elif cmd[2] == 'python':
+                    tc_procs[tun_id].stdin.write(' '.join(cmd[2:]) + '\n')
+
+            elif cmd[0] == 'halt':
+                destroy(tc_procs)
 
 
 if __name__ == '__main__':
