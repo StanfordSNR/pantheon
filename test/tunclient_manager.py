@@ -53,8 +53,9 @@ def main():
                 if cmd[2] == 'mm-tunnelclient':
                     tc_cmd = cmd[2:] + ['--ingress-log=' + tc_ilogs[tun_id],
                                         '--egress-log=' + tc_elogs[tun_id]]
+                    tc_cmd = ' '.join(tc_cmd)
                     tc_proc = Popen(tc_cmd, stdin=PIPE, stdout=PIPE,
-                                    preexec_fn=os.setsid)
+                                    shell=True, preexec_fn=os.setsid)
                     tc_procs[tun_id] = tc_proc
                 elif cmd[2] == 'python':
                     tc_procs[tun_id].stdin.write(' '.join(cmd[2:]) + '\n')
