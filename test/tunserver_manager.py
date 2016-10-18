@@ -40,7 +40,9 @@ def main():
         ts_cmd = ['mm-tunnelserver', '--ingress-log=' + ts_ilogs[i],
                   '--egress-log=' + ts_elogs[i]]
         ts_proc = Popen(ts_cmd, stdin=PIPE, stdout=PIPE, preexec_fn=os.setsid)
+
         sys.stdout.write(ts_proc.stdout.readline())
+        sys.stdout.flush()
         ts_procs.append(ts_proc)
 
     # poller for sys.stdin
@@ -60,6 +62,9 @@ def main():
 
                 if cmd[2] == 'python':
                     ts_procs[tun_id].stdin.write(' '.join(cmd[2:]) + '\n')
+                    if cmd[4] == 'receiver':
+                        sys.stdout.write(ts_procs[tun_id].stdout.readline())
+                        sys.stdout.flush()
 
             elif cmd[0] == 'halt':
                 destroy(ts_procs)
