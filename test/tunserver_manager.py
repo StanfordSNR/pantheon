@@ -2,9 +2,9 @@
 
 import os
 import sys
-import time
 import signal
 import argparse
+import select
 from subprocess import Popen, PIPE
 
 
@@ -19,6 +19,8 @@ def parse_arguments():
 def destroy(ts_procs):
     for ts_proc in ts_procs:
         os.killpg(os.getpgid(ts_proc.pid), signal.SIGKILL)
+
+    sys.exit(0)
 
 
 def main():
@@ -41,8 +43,18 @@ def main():
         sys.stdout.write(ts_proc.stdout.readline())
         ts_procs.append(ts_proc)
 
-    time.sleep(10)
-    destroy(ts_procs)
+    # poller for sys.stdin
+    poller = select.poll()
+    poller.register(sys.stdin, select.POLLIN)
+
+    while True:
+        events = poller.poll(-1)
+
+        for fd, flag in events:
+            if fd == sys.stdin.fileno() and flag & select.POLLIN:
+                cmd = sys.stdin.readline().strip()
+                if cmd == 'halt':
+                    destroy(ts_procs)
 
 
 if __name__ == '__main__':
