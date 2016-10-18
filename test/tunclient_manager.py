@@ -59,6 +59,9 @@ def main():
                     tc_procs[tun_id] = tc_proc
                 elif cmd[2] == 'python':
                     tc_procs[tun_id].stdin.write(' '.join(cmd[2:]) + '\n')
+                    if cmd[4] == 'sender':
+                        sys.stdout.write(tc_procs[tun_id].stdout.readline())
+                        sys.stdout.flush()
 
             elif cmd[0] == 'halt':
                 destroy(tc_procs)
