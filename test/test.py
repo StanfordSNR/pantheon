@@ -167,35 +167,41 @@ class TestCongestionControl(unittest.TestCase):
             tc_manager_cmd = (' '.join(self.mm_link_cmd) + " -- sh -c '%s'\n" %
                               tc_manager_cmd)
 
-        sys.stderr.write('+ ' + tc_manager_cmd + '\n')
+        sys.stderr.write('+ ' + tc_manager_cmd)
         tc_manager_proc = Popen(tc_manager_cmd, stdin=PIPE, stdout=PIPE,
                                 shell=True, preexec_fn=os.setsid)
 
         for i in xrange(self.flows):
             cmd = ts_manager_proc.stdout.readline().split()
+
             cmd[1] = self.remote_ip
             tc_private_ip = cmd[3]  # client private IP
             ts_private_ip = cmd[4]  # server private IP
-            tc_manager_proc.stdin.write(' '.join(cmd) + '\n')
+
+            tc_cmd = 'tunnel %s %s\n' % (i + 1, ' '.join(cmd))
+            sys.stderr.write('+ ' + tc_cmd)
+            tc_manager_proc.stdin.write(tc_cmd)
 
             if self.first_to_run == 'receiver':
-                recv_cmd = 'python %s receiver\n' % self.remote_src_file
+                recv_cmd = ('tunnel %s python %s receiver\n' %
+                            (i + 1, self.remote_src_file))
                 sys.stderr.write('+ ' + recv_cmd)
                 ts_manager_proc.stdin.write(recv_cmd)
 
                 port = self.get_port(ts_manager_proc)
-                send_cmd = ('python %s sender %s %s\n' %
-                            (self.src_file, ts_private_ip, port))
+                send_cmd = ('tunnel %s python %s sender %s %s\n' %
+                            (i + 1, self.src_file, ts_private_ip, port))
                 sys.stderr.write('+ ' + send_cmd)
                 tc_manager_proc.stdin.write(send_cmd)
             else:
-                send_cmd = 'python %s sender\n' % self.src_file
+                send_cmd = ('tunnel %s python %s sender\n' %
+                            (i + 1, self.src_file))
                 sys.stderr.write('+ ' + send_cmd)
                 tc_manager_proc.stdin.write(send_cmd)
 
                 port = self.get_port(tc_manager_proc)
-                recv_cmd = ('python %s receiver %s %s\n' %
-                            (self.remote_src_file, tc_ip, port))
+                recv_cmd = ('tunnel %s python %s receiver %s %s\n' %
+                            (i + 1, self.remote_src_file, tc_ip, port))
                 sys.stderr.write('+ ' + recv_cmd)
                 ts_manager_proc.stdin.write(recv_cmd)
 
