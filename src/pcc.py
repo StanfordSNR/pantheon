@@ -48,7 +48,7 @@ def main():
         ip = sys.argv[2]
         port = sys.argv[3]
         os.environ['LD_LIBRARY_PATH'] = os.path.join(send_dir, 'src')
-        cmd = [os.path.join(recv_dir, 'app/appclient'), ip, port]
+        cmd = [os.path.join(send_dir, 'app/appclient'), ip, port]
         check_call(cmd, stderr=DEVNULL)
 
 
