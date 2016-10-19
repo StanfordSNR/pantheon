@@ -3,8 +3,8 @@
 import os
 import sys
 import signal
-import select
-from subprocess import Popen, PIPE
+import subprocess
+from subprocess import Popen, PIPE, STDOUT
 
 
 def destroy(procs):
@@ -17,37 +17,36 @@ def destroy(procs):
 def main():
     procs = {}
 
-    # poller for sys.stdin
-    poller = select.poll()
-    poller.register(sys.stdin, select.POLLIN)
-
     while True:
-        events = poller.poll(-1)
+        raw_cmd = sys.stdin.readline()
+        cmd = raw_cmd.split()
 
-        for fd, flag in events:
-            if not (fd == sys.stdin.fileno() and flag & select.POLLIN):
+        if cmd[0] == 'tunnel':
+            if len(cmd) < 3:
+                sys.stderr.write('Unknown command: ' + raw_cmd)
                 continue
-            cmd = sys.stdin.readline().split()
 
-            if cmd[0] == 'tunnel':
-                tun_id = int(cmd[1]) - 1
-                sh_cmd = ' '.join(cmd[2:])
+            tun_id = int(cmd[1]) - 1
+            cmd_to_run = ' '.join(cmd[2:])
 
-                if cmd[2] == 'mm-tunnelclient' or 'mm-tunnelserver':
-                    proc = Popen(sh_cmd, stdin=PIPE, stdout=PIPE,
-                                 shell=True, preexec_fn=os.setsid)
-                    procs[tun_id] = proc
-                elif cmd[2] == 'python':
-                    procs[tun_id].stdin.write(sh_cmd + '\n')
-                elif cmd[2] == 'readline':
-                    sys.stdout.write(procs[tun_id].stdout.readline())
-                    sys.stdout.flush()
-                else:
-                    sys.stderr.write('Unknown command: %s\n' % ' '.join(cmd))
-            elif cmd[0] == 'halt':
-                destroy(procs)
+            if cmd[2] == 'mm-tunnelclient' or cmd[2] == 'mm-tunnelserver':
+                proc = Popen(
+                    cmd_to_run, stdin=PIPE, stdout=PIPE, stderr=STDOUT,
+                    shell=True, preexec_fn=os.setsid)
+                procs[tun_id] = proc
+            elif cmd[2] == 'python':
+                procs[tun_id].stdin.write(cmd_to_run + '\n')
+            elif cmd[2] == 'readline':
+                sys.stdout.write(procs[tun_id].stdout.readline())
+                sys.stdout.flush()
             else:
-                sys.stderr.write('Unknown command: %s\n' % ' '.join(cmd))
+                sys.stderr.write('Unknown command: ' + raw_cmd)
+                continue
+        elif cmd[0] == 'halt':
+            destroy(procs)
+        else:
+            sys.stderr.write('Unknown command: ' + raw_cmd)
+            continue
 
 
 if __name__ == '__main__':
