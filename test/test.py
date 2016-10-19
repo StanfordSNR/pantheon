@@ -43,10 +43,11 @@ class TestCongestionControl(unittest.TestCase):
         raise
 
     def get_port(self, process):
-        port_info = process.stdout.readline()
-        port = port_info.rstrip().rsplit(' ', 1)[-1]
-        self.assertTrue(port.isdigit())
-        return port
+        port_info = process.stdout.readline().split(': ')
+        if port_info[0] == 'Listening on port':
+            return port_info[1].strip()
+        else:
+            return None
 
     def who_goes_first(self):
         who_goes_first_cmd = ['python', self.src_file, 'who_goes_first']
@@ -58,14 +59,22 @@ class TestCongestionControl(unittest.TestCase):
             msg='Need to specify receiver or sender first')
         self.second_to_run = ('sender' if self.first_to_run == 'receiver'
                               else 'receiver')
-        sys.stderr.write('Done\n')
 
     def setup(self):
         self.test_runtime = 60
         self.first_to_run_setup_time = 1
+
+        self.test_dir = path.abspath(path.dirname(__file__))
+        src_dir = path.abspath(path.join(self.test_dir, '../src'))
+        self.src_file = path.join(src_dir, self.cc + '.py')
+        self.tunnel_manager = path.join(self.test_dir, 'tunnel_manager.py')
+
+        # record who goes first
+        self.who_goes_first()
+
+        # prepare output logs
         self.datalink_log = path.join(self.test_dir, self.cc + '_datalink.log')
         self.acklink_log = path.join(self.test_dir, self.cc + '_acklink.log')
-
         if self.flows:
             self.tun_datalink_log = path.join(self.test_dir, self.cc +
                                               '_tun_datalink.log')
@@ -102,6 +111,10 @@ class TestCongestionControl(unittest.TestCase):
             self.remote_ip = self.remote_addr.split('@')[-1]
             remote_src_dir = path.join(self.remote_dir, 'src')
             self.remote_src_file = path.join(remote_src_dir, self.cc + '.py')
+
+            remote_test_dir = path.join(self.remote_dir, 'test')
+            self.remote_tunnel_manager = path.join(remote_test_dir,
+                                                   'tunnel_manager.py')
 
     # test congestion control without running mm-tunnelclient/mm-tunnelserver
     def run_without_tunnel(self):
@@ -142,6 +155,7 @@ class TestCongestionControl(unittest.TestCase):
     # test congestion control using mm-tunnelclient/mm-tunnelserver
     def run_with_tunnel(self):
         # ts: mm-tunnelserver  tc: mm-tunnelclient
+        # prepare ingress and egress logs
         self.ts_ilogs = []
         self.ts_elogs = []
         self.tc_ilogs = []
@@ -153,62 +167,101 @@ class TestCongestionControl(unittest.TestCase):
             self.tc_ilogs.append('/tmp/tc%s.ingress.log' % (i + 1))
             self.tc_elogs.append('/tmp/tc%s.egress.log' % (i + 1))
 
-        ts_manager_cmd = ['python', 'tunserver_manager.py',
-                          '-f', str(self.flows)]
+        # run mm-tunnelserver manager
         if self.remote:
-            ts_manager_cmd = self.ssh_cmd + ts_manager_cmd
+            ts_manager_cmd = self.ssh_cmd + ['python',
+                                             self.remote_tunnel_manager]
+        else:
+            ts_manager_cmd = ['python', self.tunnel_manager]
 
-        sys.stderr.write('+ ' + ' '.join(ts_manager_cmd) + '\n')
-        ts_manager_proc = Popen(ts_manager_cmd, stdin=PIPE, stdout=PIPE,
-                                preexec_fn=os.setsid)
+        sys.stderr.write('tunnel server manager (tsm) ' +
+                         ' '.join(ts_manager_cmd) + '\n')
+        ts_manager_proc = Popen(ts_manager_cmd, stdin=PIPE,
+                                stdout=PIPE, preexec_fn=os.setsid)
 
-        tc_manager_cmd = 'python tunclient_manager.py -f %s' % self.flows
+        # run mm-tunnelclient manager
+        tc_manager_cmd = ['python', self.tunnel_manager]
         if not self.remote:
-            tc_manager_cmd = (' '.join(self.mm_link_cmd) + " -- sh -c '%s'\n" %
-                              tc_manager_cmd)
+            tc_manager_cmd = self.mm_link_cmd + tc_manager_cmd
 
-        sys.stderr.write('+ ' + tc_manager_cmd)
-        tc_manager_proc = Popen(tc_manager_cmd, stdin=PIPE, stdout=PIPE,
-                                shell=True, preexec_fn=os.setsid)
+        sys.stderr.write('tunnel client manager (tcm) ' +
+                         ' '.join(tc_manager_cmd) + '\n')
+        tc_manager_proc = Popen(tc_manager_cmd, stdin=PIPE,
+                                stdout=PIPE, preexec_fn=os.setsid)
 
         for i in xrange(self.flows):
-            cmd = ts_manager_proc.stdout.readline().split()
+            tun_id = i + 1
 
+            # run mm-tunnelserver
+            ts_cmd = ('mm-tunnelserver --ingress-log=%s --egress-log=%s' %
+                      (self.ts_ilogs[i], self.ts_elogs[i]))
+            ts_cmd = 'tunnel %s %s\n' % (tun_id, ts_cmd)
+
+            sys.stderr.write('(tsm) ' + ts_cmd)
+            ts_manager_proc.stdin.write(ts_cmd)
+
+            # read the command for mm-tunnelclient to run
+            ts_manager_proc.stdin.write('tunnel %s readline\n' % tun_id)
+            cmd = ts_manager_proc.stdout.readline().split()
             cmd[1] = self.remote_ip
             tc_private_ip = cmd[3]  # client private IP
             ts_private_ip = cmd[4]  # server private IP
 
-            tc_cmd = 'tunnel %s %s\n' % (i + 1, ' '.join(cmd))
-            sys.stderr.write('+ ' + tc_cmd)
+            # run mm-tunnelclient
+            tc_cmd = ('%s --ingress-log=%s --egress-log=%s' %
+                      (' '.join(cmd), self.tc_ilogs[i], self.tc_elogs[i]))
+            tc_cmd = 'tunnel %s %s\n' % (tun_id, tc_cmd)
+
+            sys.stderr.write('(tcm) ' + tc_cmd)
             tc_manager_proc.stdin.write(tc_cmd)
 
+            readline_cmd = 'tunnel %s readline\n' % tun_id
             if self.first_to_run == 'receiver':
                 recv_cmd = ('tunnel %s python %s receiver\n' %
-                            (i + 1, self.remote_src_file))
-                sys.stderr.write('+ ' + recv_cmd)
+                            (tun_id, self.remote_src_file))
+                sys.stderr.write('(tsm) ' + recv_cmd)
                 ts_manager_proc.stdin.write(recv_cmd)
 
-                port = self.get_port(ts_manager_proc)
+                # find printed port
+                port = None
+                while not port:
+                    sys.stderr.write('(tsm) ' + readline_cmd)
+                    ts_manager_proc.stdin.write(readline_cmd)
+                    port = self.get_port(ts_manager_proc)
+
                 send_cmd = ('tunnel %s python %s sender %s %s\n' %
-                            (i + 1, self.src_file, ts_private_ip, port))
-                sys.stderr.write('+ ' + send_cmd)
+                            (tun_id, self.src_file, ts_private_ip, port))
+                sys.stderr.write('(tcm) ' + send_cmd)
                 tc_manager_proc.stdin.write(send_cmd)
             else:
                 send_cmd = ('tunnel %s python %s sender\n' %
-                            (i + 1, self.src_file))
-                sys.stderr.write('+ ' + send_cmd)
+                            (tun_id, self.src_file))
+                sys.stderr.write('(tcm) ' + send_cmd)
                 tc_manager_proc.stdin.write(send_cmd)
 
-                port = self.get_port(tc_manager_proc)
-                recv_cmd = ('tunnel %s python %s receiver %s %s\n' %
-                            (i + 1, self.remote_src_file, tc_ip, port))
-                sys.stderr.write('+ ' + recv_cmd)
+                # find printed port
+                port = None
+                while not port:
+                    sys.stderr.write('(tcm) ' + readline_cmd)
+                    tc_manager_proc.stdin.write(readline_cmd)
+                    port = self.get_port(tc_manager_proc)
+
+                recv_cmd = (
+                    'tunnel %s python %s receiver %s %s\n' %
+                    (tun_id, self.remote_src_file, tc_private_ip, port))
+                sys.stderr.write('(tsm) ' + recv_cmd)
                 ts_manager_proc.stdin.write(recv_cmd)
 
         time.sleep(self.test_runtime)
-        sys.stderr.write('Done\n')
+
+        sys.stderr.write('(tsm) halt\n')
         ts_manager_proc.stdin.write('halt\n')
+
+        sys.stderr.write('(tcm) halt\n')
         tc_manager_proc.stdin.write('halt\n')
+
+        self.combine_tunnel_logs()
+        sys.stderr.write('Done\n')
 
     def combine_tunnel_logs(self):
         # combine logs generated by tunnel clients and servers
@@ -216,15 +269,16 @@ class TestCongestionControl(unittest.TestCase):
         combine_acklink_cmd = 'mm-combine-multi-flow-logs'
 
         for i in xrange(self.flows):
-            # download logs from remote side
-            scp_cmd = ['scp']
-            if self.private_key:
-                scp_cmd += ['-i', self.private_key]
+            if self.remote:
+                # download logs from remote side
+                scp_cmd = ['scp']
+                if self.private_key:
+                    scp_cmd += ['-i', self.private_key]
 
-            check_call(scp_cmd + [self.remote_addr + ':' + self.ts_ilogs[i],
-                                  self.ts_ilogs[i]])
-            check_call(scp_cmd + [self.remote_addr + ':' + self.ts_elogs[i],
-                                  self.ts_elogs[i]])
+                check_call(scp_cmd + [self.remote_addr + ':' +
+                                      self.ts_ilogs[i], self.ts_ilogs[i]])
+                check_call(scp_cmd + [self.remote_addr + ':' +
+                                      self.ts_elogs[i], self.ts_elogs[i]])
 
             tun_datalink_log = '/tmp/tun_datalink%s.log' % (i + 1)
             tun_acklink_log = '/tmp/tun_acklink%s.log' % (i + 1)
@@ -251,7 +305,7 @@ class TestCongestionControl(unittest.TestCase):
         check_call(combine_acklink_cmd, shell=True)
 
     def run_congestion_control(self):
-        self.run_with_tunnel() if self.flows > 0 else self.run_without_tunnel()
+        self.run_with_tunnel() if self.flows else self.run_without_tunnel()
 
     def gen_results(self, tun=''):
         datalink_throughput_svg = path.join(
@@ -309,13 +363,6 @@ class TestCongestionControl(unittest.TestCase):
 
     # congestion control test
     def test_congestion_control(self):
-        self.test_dir = path.abspath(path.dirname(__file__))
-        src_dir = path.abspath(path.join(self.test_dir, '../src'))
-        self.src_file = path.join(src_dir, self.cc + '.py')
-
-        # record who goes first
-        self.who_goes_first()
-
         # local or remote setup before running tests
         self.setup()
 
