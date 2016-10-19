@@ -4,7 +4,7 @@ import os
 import sys
 import time
 import usage
-from subprocess import check_call, check_output, PIPE, Popen, CalledProcessError
+from subprocess import check_call, check_output, PIPE, Popen
 from get_open_port import get_open_udp_port
 
 
@@ -12,7 +12,7 @@ def xvfb_in_use(display):
     try:
         cmd = 'xdpyinfo -display :%d >/dev/null 2>&1' % display
         check_call(cmd, shell=True)
-    except CalledProcessError:
+    except subprocess.CalledProcessError:
         return 0
     else:
         return 1
@@ -47,7 +47,8 @@ def main():
         md5_out = md5_proc.communicate()[0]
 
         if md5_proc.returncode != 0 or md5_out.split()[0] != video_md5:
-            video_url = 'https://media.xiph.org/video/derf/y4m/blue_sky_1080p25.y4m'
+            video_url = (
+                'https://media.xiph.org/video/derf/y4m/blue_sky_1080p25.y4m')
             cmd = ['wget', '-O', video_file, video_url]
             check_call(cmd)
 
