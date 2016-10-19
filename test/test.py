@@ -5,30 +5,9 @@ import sys
 import unittest
 import time
 import signal
-import argparse
+from parse_arguments import parse_arguments
 from os import path
 from subprocess import Popen, PIPE, check_call, check_output
-
-
-def parse_arguments():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('cc', metavar='congestion-control', type=str,
-                        help='name of a congestion control scheme')
-    parser.add_argument('-f', action='store', dest='flows', type=int,
-                        default=1, help='number of flows '
-                        '(mm-tunnelclient/mm-tunnelserver pairs)')
-    parser.add_argument('-r', action='store', dest='remote', type=str,
-                        help='remote pantheon directory: [user@]hostname:dir')
-    parser.add_argument('-i', action='store', dest='private_key', type=str,
-                        help='identity file (private key) for ssh/scp to use')
-    args = parser.parse_args()
-
-    if args.flows == 0 and args.remote:
-        sys.stderr.write('Remote test must run at least one flow '
-                         '(one pair of mm-tunnelclient/mm-tunnelserver)\n')
-        sys.exit(1)
-
-    return args
 
 
 class TestCongestionControl(unittest.TestCase):
@@ -379,7 +358,7 @@ class TestCongestionControl(unittest.TestCase):
 
 
 def main():
-    args = parse_arguments()
+    args = parse_arguments(path.basename(__file__))
 
     # create test suite to run
     suite = unittest.TestSuite()

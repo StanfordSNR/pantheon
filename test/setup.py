@@ -3,22 +3,9 @@
 import os
 import sys
 import unittest
-import argparse
 from os import path
+from parse_arguments import parse_arguments
 from subprocess import check_call, check_output
-
-
-def parse_arguments():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('cc', metavar='congestion-control', type=str,
-                        help='name of a congestion control scheme')
-    parser.add_argument('-r', action='store', dest='remote', type=str,
-                        help='remote pantheon directory: [user@]hostname:dir')
-    parser.add_argument('-i', action='store', dest='private_key', type=str,
-                        help='identity file (private key) for ssh/scp to use')
-    args = parser.parse_args()
-
-    return args
 
 
 class TestCongestionControl(unittest.TestCase):
@@ -102,7 +89,7 @@ class TestCongestionControl(unittest.TestCase):
 
 
 def main():
-    args = parse_arguments()
+    args = parse_arguments(path.basename(__file__))
 
     # create test suite to run
     suite = unittest.TestSuite()
