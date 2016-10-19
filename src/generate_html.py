@@ -16,17 +16,17 @@ def generate_html(size):
         if exception.errno != errno.EEXIST:
             raise
 
-    head_text = "HTTP/1.1 200 OK\n"\
-            "X-Original-Url: https://www.example.org/\n"\
-            "\n"\
-            "<!DOCTYPE html>\n"\
-            "<html>\n"\
-            "<body>\n"\
-            "<p>\n"
+    head_text = ('HTTP/1.1 200 OK\n'
+                 'X-Original-Url: https://www.example.org/\n'
+                 '\n'
+                 '<!DOCTYPE html>\n'
+                 '<html>\n'
+                 '<body>\n'
+                 '<p>\n')
 
-    foot_text = "</p>\n"\
-            "</body>\n"\
-            "</html>\n"
+    foot_text = ('</p>\n'
+                 '</body>\n'
+                 '</html>\n')
 
     i = len(head_text) + len(foot_text)
     # check we can actually write something
