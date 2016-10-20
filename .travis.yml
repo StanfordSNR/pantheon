@@ -24,6 +24,14 @@ install:
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 99
 
 script:
+  - git clone -b mm-tunnelshell https://github.com/francisyyan/mahimahi.git
+  - cd mahimahi
+  - ./autogen.sh
+  - ./configure
+  - make -j
+  - sudo make install
+  - cd ../test
+  - ./run.py -f 2 -t 10
 
 after_script:
   - tar caf test/pantheon-packet-logs.xz test/*.log
