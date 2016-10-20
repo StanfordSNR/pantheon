@@ -14,6 +14,21 @@ addons:
     - mahimahi-traces
     - inkscape
     - texlive
+    - latex-xcolor
+    - protobuf-compiler
+    - libprotobuf-dev
+    - autotools-dev
+    - dh-autoreconf
+    - iptables
+    - pkg-config
+    - dnsmasq-base
+    - apache2-dev
+    - debhelper
+    - libssl-dev
+    - ssl-cert
+    - libxcb-present-dev
+    - libcairo2-dev
+    - libpango1.0-dev
   artifacts:
     paths:
     - test/pantheon-report.pdf
