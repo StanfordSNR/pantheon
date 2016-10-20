@@ -22,6 +22,8 @@ script:
 
 env:
     matrix:
+        - CC_SCHEME='quic'
+        - CC_SCHEME='webrtc'
         - CC_SCHEME='default_tcp'
         - CC_SCHEME='vegas'
         - CC_SCHEME='koho_cc'
@@ -29,9 +31,7 @@ env:
         - CC_SCHEME='pcc'
         - CC_SCHEME='verus'
         - CC_SCHEME='scream'
-        - CC_SCHEME='webrtc'
         - CC_SCHEME='sprout'
-        - CC_SCHEME='quic'
 
 notifications:
   slack: keithw:WjjCMz8yip3iQrHKBmkFGI1u
