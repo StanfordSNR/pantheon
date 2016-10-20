@@ -49,6 +49,7 @@ def main():
         sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
         check_call(cmd)
 
+    '''
     cmd = ['perl', summary_plot_src, 'pantheon_summary.pdf'] + cc_schemes
     sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
     check_call(cmd)
@@ -56,6 +57,7 @@ def main():
     cmd = ['python', combine_report_src] + cc_schemes
     sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
     check_call(cmd)
+    '''
 
 
 if __name__ == '__main__':
