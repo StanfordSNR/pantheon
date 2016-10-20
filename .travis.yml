@@ -13,12 +13,6 @@ addons:
     - mahimahi-traces
     - inkscape
     - texlive
-    - latex-xcolor
-  artifacts:
-    paths:
-    - test/pantheon-report.pdf
-    - test/pantheon-packet-logs.xz
-    debug: true
 
 install:
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 99
@@ -26,8 +20,18 @@ install:
 script:
   - ./test/run.py -f 2 -t 10
 
-after_script:
-  - tar caf test/pantheon-packet-logs.xz test/*.log
+env:
+    matrix:
+        - CC_SCHEME='default_tcp'
+        - CC_SCHEME='vegas'
+        - CC_SCHEME='koho_cc'
+        - CC_SCHEME='ledbat'
+        - CC_SCHEME='pcc'
+        - CC_SCHEME='verus'
+        - CC_SCHEME='scream'
+        - CC_SCHEME='webrtc'
+        - CC_SCHEME='sprout'
+        - CC_SCHEME='quic'
 
 notifications:
   slack: keithw:WjjCMz8yip3iQrHKBmkFGI1u
