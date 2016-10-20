@@ -6,13 +6,8 @@ addons:
   apt:
     sources:
     - sourceline: 'ppa:ubuntu-toolchain-r/test'
-    - sourceline: 'ppa:inkscape.dev/stable'
     packages:
     - g++-4.9
-    - mahimahi
-    - mahimahi-traces
-    - inkscape
-    - texlive
 
 install:
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 99
