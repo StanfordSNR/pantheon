@@ -11,7 +11,8 @@ def main():
     args = parse_arguments(path.basename(__file__))
     remote = args.remote
     private_key = args.private_key
-    flows = str(args.flows)
+    flows = str(args.flows) if args.flows else None
+    runtime = str(args.runtime) if args.runtime else None
 
     test_dir = path.abspath(path.dirname(__file__))
     setup_src = path.join(test_dir, 'setup.py')
@@ -23,24 +24,30 @@ def main():
     cc_schemes = ['default_tcp', 'vegas', 'koho_cc', 'ledbat', 'pcc', 'verus',
                   'scream', 'sprout', 'webrtc', 'quic']
 
+    setup_cmd = ['python', setup_src]
+    test_cmd = ['python', test_src]
+
+    if remote:
+        setup_cmd += ['-r', remote]
+        test_cmd += ['-r', remote]
+        if private_key:
+            setup_cmd += ['-i', private_key]
+            test_cmd += ['-i', private_key]
+
+    if flows:
+        test_cmd += ['-f', flows]
+
+    if runtime:
+        test_cmd += ['-t', runtime]
+
     for cc in cc_schemes:
-        if remote:
-            cmd = ['python', setup_src, '-r', remote, '-i', private_key, cc]
-            sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
-            check_call(cmd)
+        cmd = setup_cmd + [cc]
+        sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
+        check_call(cmd)
 
-            cmd = ['python', test_src, '-r', remote, '-i', private_key,
-                   '-f', flows, cc]
-            sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
-            check_call(cmd)
-        else:
-            cmd = ['python', setup_src, cc]
-            sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
-            check_call(cmd)
-
-            cmd = ['python', test_src, '-f', flows, cc]
-            sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
-            check_call(cmd)
+        cmd = test_cmd + [cc]
+        sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
+        check_call(cmd)
 
     cmd = ['perl', summary_plot_src, 'pantheon_summary.pdf'] + cc_schemes
     sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
