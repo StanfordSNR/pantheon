@@ -16,6 +16,7 @@ class TestCongestionControl(unittest.TestCase):
         self.cc = args.cc.lower()
         self.flows = args.flows
         self.remote = args.remote
+        self.runtime = args.runtime
         self.private_key = args.private_key
 
     def timeout_handler(signum, frame):
@@ -40,7 +41,6 @@ class TestCongestionControl(unittest.TestCase):
                               else 'receiver')
 
     def setup(self):
-        self.test_runtime = 60
         self.first_to_run_setup_time = 1
 
         self.test_dir = path.abspath(path.dirname(__file__))
@@ -119,7 +119,7 @@ class TestCongestionControl(unittest.TestCase):
         proc_second = Popen(cmd, stdout=PIPE, shell=True, preexec_fn=os.setsid)
 
         signal.signal(signal.SIGALRM, self.timeout_handler)
-        signal.alarm(self.test_runtime)
+        signal.alarm(self.runtime)
 
         try:
             proc_second.communicate()
@@ -231,7 +231,7 @@ class TestCongestionControl(unittest.TestCase):
                 sys.stderr.write('(tsm) ' + recv_cmd)
                 ts_manager_proc.stdin.write(recv_cmd)
 
-        time.sleep(self.test_runtime)
+        time.sleep(self.runtime)
 
         sys.stderr.write('(tsm) halt\n')
         ts_manager_proc.stdin.write('halt\n')
