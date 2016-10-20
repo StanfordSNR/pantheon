@@ -14,6 +14,8 @@ def parse_arguments(filename):
         parser.add_argument('-f', action='store', dest='flows', type=int,
                             default=1, help='number of flows '
                             '(mm-tunnelclient/mm-tunnelserver pairs)')
+        parser.add_argument('-t', action='store', dest='runtime', type=int,
+                            default=60, help='running time of each test')
 
     if filename != 'run.py':
         parser.add_argument('cc', metavar='congestion-control', type=str,
