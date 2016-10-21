@@ -33,30 +33,22 @@ for my $scheme ( @ARGV ) {
   my %row;
   $row{ username } = prettify( $scheme );
 
-  my $line_num = 0;
-
+  my $seen_data_link = 0;
   LINE: while ( <$file> ) {
     chomp;
-    $line_num++;
 
-    if ( $line_num == 1 and not m{Data link statistics:} ) {
-      last;
+    if ( m{Data link statistics} ) {
+      $seen_data_link = 1;
     }
 
-    if ( $line_num == 2 and not m{Total:} ) {
-      last;
-    }
-
-    if ( m{Flow} ) {
-      last;
-    }
-
-    if ( m{^Average throughput: (.*?) Mbits} ) {
-      die if exists $row{ throughput };
-      $row{ throughput } = $1;
-    } elsif ( m{^95th percentile signal delay: (.*?) ms} ) {
-      die if exists $row{ delay };
-      $row{ delay } = $1;
+    if ( $seen_data_link ) {
+      if ( m{^Average throughput: (.*?) Mbits} ) {
+        die if exists $row{ throughput };
+        $row{ throughput } = $1;
+      } elsif ( m{^95th percentile signal delay: (.*?) ms} ) {
+        die if exists $row{ delay };
+        $row{ delay } = $1;
+      }
     }
 
     if (defined $row{ throughput } and defined $row{ delay }) {
