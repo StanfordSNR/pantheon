@@ -9,7 +9,7 @@ from subprocess import Popen, PIPE, STDOUT
 
 def destroy(procs):
     for proc in procs.itervalues():
-        os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+        os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
 
     sys.exit(0)
 
