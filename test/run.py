@@ -40,6 +40,12 @@ def main():
     if runtime:
         test_cmd += ['-t', runtime]
 
+    # setup mahimahi on both local and remote sides
+    cmd = setup_cmd + ['mahimahi']
+    sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
+    check_call(cmd)
+
+    # setup and run each congestion control
     for cc in cc_schemes:
         cmd = setup_cmd + [cc]
         sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
