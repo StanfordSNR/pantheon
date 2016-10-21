@@ -4,7 +4,8 @@ use strict;
 
 my ( $output_filename ) = shift @ARGV;
 
-open GNUPLOT, qq{| gnuplot | inkscape -A $output_filename -z -b white /dev/stdin} or die;
+open GNUPLOT, qq{| gnuplot | inkscape -A $output_filename} .
+              qq{ -z -b white /dev/stdin >/dev/null 2>&1} or die;
 
 my $points;
 
