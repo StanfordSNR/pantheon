@@ -85,17 +85,17 @@ sub relative_difference {
 
 for my $elem1 ( @data ) {
   POSSIBLE_COLLISION: for my $elem2 ( @data ) {
-      next POSSIBLE_COLLISION if $elem1 == $elem2;
+    next POSSIBLE_COLLISION if $elem1 == $elem2;
 
-      if ( relative_difference( $elem1->{ throughput }, $elem2->{ throughput },
-				$tput_max, $tput_min ) < 0.1 ) {
-	if ( relative_difference( $elem1->{ delay }, $elem2->{ delay },
-				  $delay_min, $delay_max ) < 0.1 ) {
-	  my $orient = $elem1->{ delay } < $elem2->{ delay };
-	  $elem1->{ side } = $orient ? "left" : "right";
-	  $elem2->{ side } = $orient ? "right" : "left";
-	}
+    if ( relative_difference( $elem1->{ throughput }, $elem2->{ throughput },
+                              $tput_max, $tput_min ) < 0.1 ) {
+      if ( relative_difference( $elem1->{ delay }, $elem2->{ delay },
+           $delay_min, $delay_max ) < 0.1 ) {
+        my $orient = $elem1->{ delay } < $elem2->{ delay };
+        $elem1->{ side } = $orient ? "left" : "right";
+        $elem2->{ side } = $orient ? "right" : "left";
       }
+    }
   }
 }
 
