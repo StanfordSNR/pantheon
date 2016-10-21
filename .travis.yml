@@ -11,9 +11,7 @@ addons:
 
 install:
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 99
-
-script:
-  - ./test/run.py -f 2 -t 10
+  - test/setup.py mahimahi
 
 env:
     matrix:
@@ -27,6 +25,10 @@ env:
         - CC_SCHEME='verus'
         - CC_SCHEME='scream'
         - CC_SCHEME='sprout'
+
+script:
+  - test/setup.py $CC_SCHEME
+  - test/test.py -f 2 -t 10 $CC_SCHEME
 
 notifications:
   slack: keithw:WjjCMz8yip3iQrHKBmkFGI1u
