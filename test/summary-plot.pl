@@ -88,6 +88,11 @@ sub relative_difference {
   my ( $a, $b, $min, $max ) = @_;
   my $diff = abs( $a - $b );
   my $overall_diff = abs( $max - $min );
+
+  if ( $overall_diff == 0 ) {
+    return 0;
+  }
+
   my $rdif = $diff / $overall_diff;
   return $rdif;
 }
