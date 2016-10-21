@@ -43,6 +43,15 @@ def svg2png(test_dir, cc):
                 break
 
 
+def prettify(cc):
+    pretty_name = {
+        'default_tcp': 'TCP Cubic', 'vegas': 'TCP Vegas',
+        'koho_cc': 'KohoCC', 'ledbat': 'LEDBAT', 'sprout': 'Sprout',
+        'pcc': 'PCC', 'verus': 'Verus', 'scream': 'SCReAM',
+        'webrtc': 'WebRTC media', 'quic': 'QUIC Cubic (toy)'}
+    return pretty_name[cc]
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('cc_schemes', metavar='congestion-control', type=str,
@@ -54,41 +63,39 @@ def main():
 
     latex.write('\\documentclass{article}\n'
                 '\\usepackage{pdfpages, graphicx}\n'
-                '\\usepackage{float}\n'
-                '\\begin{document}\n')
-
-    latex.write('\\includepdf[fitpaper]{pantheon_summary.pdf}\n')
+                '\\usepackage{float}\n\n'
+                '\\begin{document}\n'
+                '\\includepdf[fitpaper]{pantheon_summary.pdf}\n\n')
 
     for cc in args.cc_schemes:
         svg2png(test_dir, cc)
 
-        latex.write('Congestion Control Report of %s --- Data Link\n\n' %
-                    string.replace(cc, '_', '\_'))
+        str_dict = {'cc_pretty_name': prettify(cc), 'cc': cc}
 
-        latex.write('\\begin{figure}[H]\n\\centering\n')
-        latex.write('\\includegraphics[width=\\textwidth]'
-                    '{/tmp/%s_datalink_throughput.png}\n' % cc)
-        latex.write('\\end{figure}\n\n')
-
-        latex.write('\\begin{figure}[H]\n\\centering\n')
-        latex.write('\\includegraphics[width=\\textwidth]'
-                    '{/tmp/%s_datalink_delay.png}\n' % cc)
-        latex.write('\\end{figure}\n\n')
-
-        latex.write('\\newpage\n\n')
-
-        latex.write('Congestion Control Report of %s --- ACK Link\n\n' %
-                    string.replace(cc, '_', '\_'))
-
-        latex.write('\\begin{figure}[H]\n\\centering\n')
-        latex.write('\\includegraphics[width=\\textwidth]'
-                    '{/tmp/%s_acklink_throughput.png}\n' % cc)
-        latex.write('\\end{figure}\n\n')
-
-        latex.write('\\begin{figure}[H]\n\\centering\n')
-        latex.write('\\includegraphics[width=\\textwidth]'
-                    '{/tmp/%s_acklink_delay.png}\n' % cc)
-        latex.write('\\end{figure}\n\n')
+        latex.write(
+            'Congestion Control Report of %(cc_pretty_name)s --- Data Link\n\n'
+            '\\begin{figure}[H]\n'
+            '\\centering\n'
+            '\\includegraphics[width=\\textwidth]'
+            '{/tmp/%(cc)s_datalink_throughput.png}\n'
+            '\\end{figure}\n\n'
+            '\\begin{figure}[H]\n'
+            '\\centering\n'
+            '\\includegraphics[width=\\textwidth]'
+            '{/tmp/%(cc)s_datalink_delay.png}\n'
+            '\\end{figure}\n\n'
+            '\\newpage\n\n'
+            'Congestion Control Report of %(cc_pretty_name)s --- ACK Link\n\n'
+            '\\begin{figure}[H]\n'
+            '\\centering\n'
+            '\\includegraphics[width=\\textwidth]'
+            '{/tmp/%(cc)s_acklink_throughput.png}\n'
+            '\\end{figure}\n\n'
+            '\\begin{figure}[H]\n'
+            '\\centering\n'
+            '\\includegraphics[width=\\textwidth]'
+            '{/tmp/%(cc)s_acklink_delay.png}\n'
+            '\\end{figure}\n\n' % str_dict)
 
         if cc != args.cc_schemes[-1]:
             latex.write('\\newpage\n\n')
