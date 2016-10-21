@@ -170,6 +170,7 @@ class TestCongestionControl(unittest.TestCase):
 
         for i in xrange(self.flows):
             tun_id = i + 1
+            readline_cmd = 'tunnel %s readline\n' % tun_id
 
             # run mm-tunnelserver
             ts_cmd = ('mm-tunnelserver --ingress-log=%s --egress-log=%s' %
@@ -180,7 +181,9 @@ class TestCongestionControl(unittest.TestCase):
             ts_manager_proc.stdin.write(ts_cmd)
 
             # read the command for mm-tunnelclient to run
-            ts_manager_proc.stdin.write('tunnel %s readline\n' % tun_id)
+            sys.stderr.write('(tsm) ' + readline_cmd)
+            ts_manager_proc.stdin.write(readline_cmd)
+
             cmd = ts_manager_proc.stdout.readline().split()
             cmd[1] = self.remote_ip
             tc_private_ip = cmd[3]  # client private IP
@@ -190,11 +193,9 @@ class TestCongestionControl(unittest.TestCase):
             tc_cmd = ('%s --ingress-log=%s --egress-log=%s' %
                       (' '.join(cmd), self.tc_ilogs[i], self.tc_elogs[i]))
             tc_cmd = 'tunnel %s %s\n' % (tun_id, tc_cmd)
-
             sys.stderr.write('(tcm) ' + tc_cmd)
             tc_manager_proc.stdin.write(tc_cmd)
 
-            readline_cmd = 'tunnel %s readline\n' % tun_id
             if self.first_to_run == 'receiver':
                 recv_cmd = ('tunnel %s python %s receiver\n' %
                             (tun_id, self.remote_src_file))
