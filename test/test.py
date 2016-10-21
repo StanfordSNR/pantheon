@@ -104,7 +104,9 @@ class TestCongestionControl(unittest.TestCase):
         proc_first = Popen(cmd, stdout=PIPE, preexec_fn=os.setsid)
 
         # find port printed
-        port = self.get_port(proc_first)
+        port = None
+        while not port:
+            port = self.get_port(proc_first)
 
         # sleep just in case the process isn't quite listening yet
         # the cleaner approach might be to try to verify the socket is open
