@@ -34,16 +34,16 @@ for my $scheme ( @ARGV ) {
   LINE: while ( <$file> ) {
     chomp;
 
-    if ( $file->input_line_number() > 4 ) {
-      last LINE; # we only want the "data link", which is first in the file
-    }
-
     if ( m{^Average throughput: (.*?) Mbits} ) {
       die if exists $row{ throughput };
       $row{ throughput } = $1;
     } elsif ( m{^95th percentile signal delay: (.*?) ms} ) {
       die if exists $row{ delay };
       $row{ delay } = $1;
+    }
+
+    if (defined $row{ throughput } and defined $row{ delay }) {
+      last;
     }
   }
 
