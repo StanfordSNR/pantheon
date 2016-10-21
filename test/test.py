@@ -320,13 +320,14 @@ class TestCongestionControl(unittest.TestCase):
 
         sys.stderr.write('\n')
         # Data link
-        sys.stderr.write('* Data link statistics:\n')
-
         # throughput
         datalink_throughput = open(datalink_throughput_svg, 'w')
         cmd = [throughput_cmd, '500', datalink_log]
 
         sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
+        sys.stderr.write('* Data link statistics:\n')
+        stats.write('* Data link statistics:\n')
+
         proc = Popen(cmd, stdout=datalink_throughput, stderr=PIPE)
         datalink_results = proc.communicate()[1]
         sys.stderr.write(datalink_results)
@@ -346,14 +347,16 @@ class TestCongestionControl(unittest.TestCase):
         datalink_delay.close()
         self.assertEqual(proc.returncode, 0)
 
+        sys.stderr.write('\n')
         # ACK link
-        sys.stderr.write('* ACK link statistics:\n')
-
         # throughput
         acklink_throughput = open(acklink_throughput_svg, 'w')
         cmd = [throughput_cmd, '500', acklink_log]
 
         sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
+        sys.stderr.write('* ACK link statistics:\n')
+        stats.write('* ACK link statistics:\n')
+
         proc = Popen(cmd, stdout=acklink_throughput, stderr=PIPE)
         acklink_results = proc.communicate()[1]
         sys.stderr.write(acklink_results)
