@@ -15,7 +15,7 @@ def main():
     submodule_dir = os.path.abspath(
         os.path.join(src_dir, '../third_party/libutp'))
     src_file = os.path.join(submodule_dir, 'ucat-static')
-    DEVNULL = open(os.devnull, 'wb')
+    DEVNULL = open(os.devnull, 'w')
 
     # build dependencies
     if option == 'deps':

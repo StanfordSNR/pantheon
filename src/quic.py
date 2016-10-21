@@ -21,7 +21,7 @@ def main():
     quic_client = path.join(submodule_dir, 'src/out/Release/quic_client')
 
     cert_dir = path.abspath(path.join(path.dirname(__file__), 'certs'))
-    DEVNULL = open(os.devnull, 'wb')
+    DEVNULL = open(os.devnull, 'w')
 
     # build dependencies
     if option == 'deps':
