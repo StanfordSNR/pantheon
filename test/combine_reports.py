@@ -3,13 +3,8 @@
 import os
 import sys
 import string
+import argparse
 from subprocess import check_call, PIPE, Popen
-
-
-def usage():
-    print 'Usage:'
-    print sys.argv[0] + ' <congestion-control-1> [<congestion-control-2> ...]'
-    sys.exit(1)
 
 
 def svg2png(test_dir, cc):
@@ -49,8 +44,10 @@ def svg2png(test_dir, cc):
 
 
 def main():
-    if len(sys.argv) <= 1:
-        usage()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('cc_schemes', metavar='congestion-control', type=str,
+                        nargs='+', help='congestion control schemes')
+    args = parser.parse_args()
 
     test_dir = os.path.abspath(os.path.dirname(__file__))
     latex = open('/tmp/pantheon-report.tex', 'wb')
@@ -62,8 +59,7 @@ def main():
 
     latex.write('\\includepdf[fitpaper]{pantheon_summary.pdf}\n')
 
-    for i in range(1, len(sys.argv)):
-        cc = sys.argv[i]
+    for cc in args.cc_schemes:
         svg2png(test_dir, cc)
 
         stats_log = '%s/%s_stats.log' % (test_dir, cc)
@@ -103,7 +99,7 @@ def main():
                     '{/tmp/%s_acklink_delay.png}\n' % cc)
         latex.write('\\end{figure}\n\n')
 
-        if i < len(sys.argv) - 1:
+        if cc != args.cc_schemes[-1]:
             latex.write('\\newpage\n\n')
 
         stats.close()
