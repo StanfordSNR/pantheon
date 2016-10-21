@@ -19,10 +19,11 @@ class TestCongestionControl(unittest.TestCase):
     def setup_mahimahi(self):
         # install mahimahi
         mm_deps = (
-            'protobuf-compiler libprotobuf-dev autotools-dev '
-            'dh-autoreconf iptables pkg-config dnsmasq-base '
-            'apache2-dev debhelper libssl-dev ssl-cert '
-            'libxcb-present-dev libcairo2-dev libpango1.0-dev')
+            'debhelper autotools-dev dh-autoreconf iptables protobuf-compiler '
+            'libprotobuf-dev pkg-config libssl-dev dnsmasq-base ssl-cert '
+            'libxcb-present-dev libcairo2-dev libpango1.0-dev iproute2 '
+            'apache2-dev apache2-bin iptables dnsmasq-base gnuplot iproute2')
+
         cmd = 'sudo apt-get -yq --force-yes install ' + mm_deps
         sys.stderr.write('+ ' + cmd + '\n')
         check_call(cmd, shell=True)
