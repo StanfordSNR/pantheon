@@ -14,30 +14,38 @@ class TestCongestionControl(unittest.TestCase):
         self.cc = args.cc.lower()
         self.remote = args.remote
         self.private_key = args.private_key
+        self.test_dir = path.abspath(path.dirname(__file__))
+
+    def setup_mahimahi(self):
+        # install mahimahi
+        mm_deps = (
+            'protobuf-compiler libprotobuf-dev autotools-dev '
+            'dh-autoreconf iptables pkg-config dnsmasq-base '
+            'apache2-dev debhelper libssl-dev ssl-cert '
+            'libxcb-present-dev libcairo2-dev libpango1.0-dev')
+        cmd = 'sudo apt-get -yq --force-yes install ' + mm_deps
+        sys.stderr.write('+ ' + cmd + '\n')
+        check_call(cmd, shell=True)
+
+        mm_dir = path.join(self.test_dir, '../third_party/mahimahi')
+        cmd = ('cd %s && ./autogen.sh && ./configure && make && '
+               'sudo make install' % mm_dir)
+        sys.stderr.write('+ ' + cmd + '\n')
+        check_call(cmd, shell=True)
+
+        # Enable IP forwarding
+        cmd = 'sudo sysctl -w net.ipv4.ip_forward=1'
+        sys.stderr.write('+ ' + cmd + '\n')
+        check_call(cmd, shell=True)
 
     def setup(self):
-        self.test_dir = path.abspath(path.dirname(__file__))
         src_dir = path.abspath(path.join(self.test_dir, '../src'))
         self.src_file = path.join(src_dir, self.cc + '.py')
 
         if self.remote:
-            (self.remote_addr, self.remote_dir) = self.remote.split(':')
-
-            self.ssh_cmd = ['ssh']
-            if self.private_key:
-                self.ssh_cmd += ['-i', self.private_key]
-            self.ssh_cmd.append(self.remote_addr)
-
             self.remote_ip = self.remote_addr.split('@')[-1]
             remote_src_dir = path.join(self.remote_dir, 'src')
             self.src_file = path.join(remote_src_dir, self.cc + '.py')
-
-        # Enable IP forwarding
-        sysctl_cmd = 'sudo sysctl -w net.ipv4.ip_forward=1'
-        if self.remote:
-            sysctl_cmd = ' '.join(self.ssh_cmd) + ' ' + sysctl_cmd
-        sys.stderr.write('+ ' + sysctl_cmd + '\n')
-        check_call(sysctl_cmd, shell=True)
 
     def install(self):
         deps_cmd = ['python', self.src_file, 'deps']
@@ -75,7 +83,29 @@ class TestCongestionControl(unittest.TestCase):
 
     # congestion control setup
     def test_congestion_control_setup(self):
-        # local or remote setup before running setup tests
+        # run remote setup.py
+        if self.remote:
+            (remote_addr, remote_dir) = self.remote.split(':')
+            ssh_cmd = ['ssh']
+            if self.private_key:
+                ssh_cmd += ['-i', self.private_key]
+            ssh_cmd.append(remote_addr)
+
+            # os.path.join evaluate path locally only
+            if remote_dir[-1] != '/':
+                remote_dir += '/'
+            remote_setup = remote_dir + 'test/setup.py'
+            ssh_cmd += ['python', remote_setup, self.cc]
+            sys.stderr.write('+ ' + ' '.join(ssh_cmd) + '\n')
+            check_call(ssh_cmd)
+            return
+
+        # setup mahimahi
+        if self.cc == 'mahimahi':
+            self.setup_mahimahi()
+            return
+
+        # setup congestion control scheme
         self.setup()
 
         # get build dependencies
