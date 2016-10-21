@@ -62,14 +62,8 @@ def main():
     for cc in args.cc_schemes:
         svg2png(test_dir, cc)
 
-        stats_log = '%s/%s_stats.log' % (test_dir, cc)
-        stats = open(stats_log, 'r')
-
         latex.write('Congestion Control Report of %s --- Data Link\n\n' %
                     string.replace(cc, '_', '\_'))
-        for j in range(0, 4):
-            line = stats.readline()
-            latex.write(string.replace(line, '%', '\%') + '\n')
 
         latex.write('\\begin{figure}[H]\n\\centering\n')
         latex.write('\\includegraphics[width=\\textwidth]'
@@ -85,9 +79,6 @@ def main():
 
         latex.write('Congestion Control Report of %s --- ACK Link\n\n' %
                     string.replace(cc, '_', '\_'))
-        for j in range(0, 4):
-            line = stats.readline()
-            latex.write(string.replace(line, '%', '\%') + '\n')
 
         latex.write('\\begin{figure}[H]\n\\centering\n')
         latex.write('\\includegraphics[width=\\textwidth]'
@@ -101,8 +92,6 @@ def main():
 
         if cc != args.cc_schemes[-1]:
             latex.write('\\newpage\n\n')
-
-        stats.close()
 
     latex.write('\\end{document}')
     latex.close()
