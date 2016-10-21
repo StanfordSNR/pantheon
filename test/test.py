@@ -203,6 +203,7 @@ class TestCongestionControl(unittest.TestCase):
                             (tun_id, self.remote_src_file))
                 sys.stderr.write('(tsm) ' + recv_cmd)
                 ts_manager_proc.stdin.write(recv_cmd)
+                time.sleep(self.first_to_run_setup_time)
 
                 # find printed port
                 port = None
@@ -220,6 +221,7 @@ class TestCongestionControl(unittest.TestCase):
                             (tun_id, self.src_file))
                 sys.stderr.write('(tcm) ' + send_cmd)
                 tc_manager_proc.stdin.write(send_cmd)
+                time.sleep(self.first_to_run_setup_time)
 
                 # find printed port
                 port = None
