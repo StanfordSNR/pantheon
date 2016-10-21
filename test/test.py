@@ -61,20 +61,18 @@ class TestCongestionControl(unittest.TestCase):
                                              '_tun_acklink.log')
 
         if not self.remote:  # local setup
-            traces_dir = '/usr/share/mahimahi/traces/'
+            self.uplink_trace = os.path.join(self.test_dir, '12mbps_trace')
+            self.downlink_trace = os.path.join(self.test_dir, '12mbps_trace')
+
             if self.first_to_run == 'receiver' or self.flows:
-                self.uplink_trace = traces_dir + 'Verizon-LTE-short.up'
-                self.downlink_trace = traces_dir + 'Verizon-LTE-short.down'
                 self.uplink_log = self.datalink_log
                 self.downlink_log = self.acklink_log
             else:
-                self.uplink_trace = traces_dir + 'Verizon-LTE-short.down'
-                self.downlink_trace = traces_dir + 'Verizon-LTE-short.up'
                 self.uplink_log = self.acklink_log
                 self.downlink_log = self.datalink_log
 
             self.mm_link_cmd = [
-                'mm-link', self.uplink_trace, self.downlink_trace, '--once',
+                'mm-link', self.uplink_trace, self.downlink_trace,
                 '--uplink-log=' + self.uplink_log,
                 '--downlink-log=' + self.downlink_log]
             self.remote_ip = '$MAHIMAHI_BASE'
