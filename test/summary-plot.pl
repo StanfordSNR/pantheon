@@ -2,7 +2,7 @@
 
 use strict;
 
-my ( $output_filename ) = shift @ARGV;
+my $output_filename = 'pantheon_summary.pdf';
 
 open GNUPLOT, qq{| gnuplot | inkscape -A $output_filename} .
               qq{ -z -b white /dev/stdin >/dev/null 2>&1} or die;

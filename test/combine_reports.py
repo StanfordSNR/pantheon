@@ -59,7 +59,7 @@ def main():
     args = parser.parse_args()
 
     test_dir = os.path.abspath(os.path.dirname(__file__))
-    latex = open('/tmp/pantheon-report.tex', 'w')
+    latex = open('/tmp/pantheon_report.tex', 'w')
 
     latex.write('\\documentclass{article}\n'
                 '\\usepackage{pdfpages, graphicx}\n'
@@ -103,7 +103,7 @@ def main():
     latex.write('\\end{document}')
     latex.close()
 
-    cmd = 'pdflatex -output-directory %s /tmp/pantheon-report.tex' % test_dir
+    cmd = 'pdflatex -output-directory %s /tmp/pantheon_report.tex' % test_dir
     sys.stderr.write('+ ' + cmd + '\n')
     check_call(cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
 
