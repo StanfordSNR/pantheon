@@ -32,8 +32,24 @@ for my $scheme ( @ARGV ) {
 
   my %row;
   $row{ username } = prettify( $scheme );
+
+  my $line_num = 0;
+
   LINE: while ( <$file> ) {
     chomp;
+    $line_num++;
+
+    if ( $line_num == 1 and not m{Data link statistics:} ) {
+      last;
+    }
+
+    if ( $line_num == 2 and not m{Total:} ) {
+      last;
+    }
+
+    if ( m{Flow} ) {
+      last;
+    }
 
     if ( m{^Average throughput: (.*?) Mbits} ) {
       die if exists $row{ throughput };
