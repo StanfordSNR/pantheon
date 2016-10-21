@@ -15,7 +15,7 @@ def main():
         os.path.join(src_dir, '../third_party/pcc'))
     recv_dir = os.path.join(submodule_dir, 'receiver')
     send_dir = os.path.join(submodule_dir, 'sender')
-    DEVNULL = open(os.devnull, 'wb')
+    DEVNULL = open(os.devnull, 'w')
 
     # build dependencies
     if option == 'deps':

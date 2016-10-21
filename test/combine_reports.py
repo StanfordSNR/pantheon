@@ -50,7 +50,7 @@ def main():
     args = parser.parse_args()
 
     test_dir = os.path.abspath(os.path.dirname(__file__))
-    latex = open('/tmp/pantheon-report.tex', 'wb')
+    latex = open('/tmp/pantheon-report.tex', 'w')
 
     latex.write('\\documentclass{article}\n'
                 '\\usepackage{pdfpages, graphicx}\n'
@@ -63,7 +63,7 @@ def main():
         svg2png(test_dir, cc)
 
         stats_log = '%s/%s_stats.log' % (test_dir, cc)
-        stats = open(stats_log, 'rb')
+        stats = open(stats_log, 'r')
 
         latex.write('Congestion Control Report of %s --- Data Link\n\n' %
                     string.replace(cc, '_', '\_'))
@@ -112,6 +112,6 @@ def main():
 
 
 if __name__ == '__main__':
-    DEVNULL = open(os.devnull, 'wb')
+    DEVNULL = open(os.devnull, 'w')
     main()
     DEVNULL.close()

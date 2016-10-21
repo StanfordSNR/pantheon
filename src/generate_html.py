@@ -32,7 +32,7 @@ def generate_html(size):
     # check we can actually write something
     assert (size >= i)
 
-    f = open(file_name, 'wb')
+    f = open(file_name, 'w')
     f.write(head_text)
 
     block_size = 1024
