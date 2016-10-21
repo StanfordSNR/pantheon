@@ -38,47 +38,44 @@ class TestCongestionControl(unittest.TestCase):
         sys.stderr.write('+ ' + cmd + '\n')
         check_call(cmd, shell=True)
 
-    def setup(self):
+    def setup_congestion_control(self):
         src_dir = path.abspath(path.join(self.test_dir, '../src'))
         self.src_file = path.join(src_dir, self.cc + '.py')
 
-        if self.remote:
-            self.remote_ip = self.remote_addr.split('@')[-1]
-            remote_src_dir = path.join(self.remote_dir, 'src')
-            self.src_file = path.join(remote_src_dir, self.cc + '.py')
+        # get build dependencies
+        self.install()
+
+        # run build commands
+        self.build()
+
+        # run initialize commands
+        self.initialize()
 
     def install(self):
-        deps_cmd = ['python', self.src_file, 'deps']
-        if self.remote:
-            deps_cmd = self.ssh_cmd + deps_cmd
-        sys.stderr.write('+ ' + ' '.join(deps_cmd) + '\n')
-        deps_needed = check_output(deps_cmd)
+        cmd = ['python', self.src_file, 'deps']
+        sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
+        deps = check_output(cmd)
 
-        if deps_needed:
+        if deps:
             sys.stderr.write('Installing dependencies...\n')
-            sys.stderr.write(deps_needed)
-            install_cmd = 'sudo apt-get -yq --force-yes install ' + deps_needed
-            if self.remote:
-                install_cmd = ' '.join(self.ssh_cmd) + ' ' + install_cmd
-            check_call(install_cmd, shell=True)
+            sys.stderr.write(deps)
+            cmd = 'sudo apt-get -yq --force-yes install ' + deps
+            sys.stderr.write('+ %s\n' % cmd)
+            check_call(cmd, shell=True)
         sys.stderr.write('Done\n')
 
     def build(self):
-        build_cmd = ['python', self.src_file, 'build']
-        if self.remote:
-            build_cmd = self.ssh_cmd + build_cmd
-        sys.stderr.write('+ ' + ' '.join(build_cmd) + '\n')
+        cmd = ['python', self.src_file, 'build']
+        sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
         sys.stderr.write('Building...\n')
-        check_call(build_cmd)
+        check_call(cmd)
         sys.stderr.write('Done\n')
 
     def initialize(self):
-        init_cmd = ['python', self.src_file, 'initialize']
-        if self.remote:
-            init_cmd = self.ssh_cmd + init_cmd
-        sys.stderr.write('+ ' + ' '.join(init_cmd) + '\n')
+        cmd = ['python', self.src_file, 'initialize']
+        sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
         sys.stderr.write('Performing intialization commands...\n')
-        check_call(init_cmd)
+        check_call(cmd)
         sys.stderr.write('Done\n')
 
     # congestion control setup
@@ -106,16 +103,7 @@ class TestCongestionControl(unittest.TestCase):
             return
 
         # setup congestion control scheme
-        self.setup()
-
-        # get build dependencies
-        self.install()
-
-        # run build commands
-        self.build()
-
-        # run initialize commands
-        self.initialize()
+        self.setup_congestion_control()
 
 
 def main():
