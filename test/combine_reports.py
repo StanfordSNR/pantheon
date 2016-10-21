@@ -97,7 +97,8 @@ def main():
     latex.close()
 
     cmd = 'pdflatex -output-directory %s /tmp/pantheon-report.tex' % test_dir
-    check_call(cmd, shell=True)
+    sys.stderr.write('+ ' + cmd + '\n')
+    check_call(cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
 
 
 if __name__ == '__main__':
