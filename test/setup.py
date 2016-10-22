@@ -96,8 +96,8 @@ class TestCongestionControl(unittest.TestCase):
             ssh_cmd += ['python', remote_setup, self.cc]
             sys.stderr.write('+ ' + ' '.join(ssh_cmd) + '\n')
             check_call(ssh_cmd)
-            return
 
+        # run local setup.py (even when self.remote exists)
         # setup mahimahi
         if self.cc == 'mahimahi':
             self.setup_mahimahi()
