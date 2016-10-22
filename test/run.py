@@ -11,8 +11,8 @@ def main():
     args = parse_arguments(path.basename(__file__))
     remote = args.remote
     private_key = args.private_key
-    flows = str(args.flows) if args.flows else None
-    runtime = str(args.runtime) if args.runtime else None
+    flows = str(args.flows)
+    runtime = str(args.runtime)
 
     test_dir = path.abspath(path.dirname(__file__))
     setup_src = path.join(test_dir, 'setup.py')
@@ -34,11 +34,7 @@ def main():
             setup_cmd += ['-i', private_key]
             test_cmd += ['-i', private_key]
 
-    if flows:
-        test_cmd += ['-f', flows]
-
-    if runtime:
-        test_cmd += ['-t', runtime]
+    test_cmd += ['-f', flows, '-t', runtime]
 
     # setup mahimahi on both local and remote sides
     cmd = setup_cmd + ['mahimahi']
