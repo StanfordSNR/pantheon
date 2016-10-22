@@ -24,6 +24,9 @@ def parse_arguments(filename):
         parser.add_argument(
             'cc', metavar='mahimahi|congestion-control', type=str,
             help='setup mahimahi before setup any congestion control')
+    elif filename == 'run.py':
+        parser.add_argument('--no-setup', action='store_true', dest='no_setup',
+                            default=False, help='run tests only without setup')
 
     args = parser.parse_args()
 
