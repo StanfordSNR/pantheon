@@ -93,8 +93,6 @@ def main():
         cmd = 'chromium-browser --app=http://%s:%s/receiver ' \
               '--user-data-dir=/tmp/nonexistent$(date +%%s%%N)' % (ip, port)
 
-        # wait until the sender has communicated with the signaling server
-        time.sleep(3)
         check_call(cmd, shell=True)
 
 
