@@ -41,7 +41,7 @@ class TestCongestionControl(unittest.TestCase):
                               else 'receiver')
 
     def setup(self):
-        self.first_to_run_setup_time = 1
+        self.first_to_run_setup_time = 2
 
         self.test_dir = path.abspath(path.dirname(__file__))
         src_dir = path.abspath(path.join(self.test_dir, '../src'))
