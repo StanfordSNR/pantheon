@@ -22,7 +22,7 @@ def main():
         pass
 
     # commands to be run after building and before running
-    if option == 'initialize':
+    if option == 'init':
         pass
 
     # who goes first

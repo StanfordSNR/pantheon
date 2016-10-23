@@ -35,7 +35,7 @@ def main():
         check_call(cmd, shell=True)
 
     # commands to be run after building and before running
-    if option == 'initialize':
+    if option == 'init':
         # initialize NSS Shared DB
         home_dir = path.abspath(path.expanduser('~'))
         nssdb_dir = path.join(home_dir, '.pki/nssdb')

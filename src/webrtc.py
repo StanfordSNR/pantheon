@@ -41,7 +41,7 @@ def main():
         check_call(cmd, shell=True)
 
     # commands to be run after building and before running
-    if option == 'initialize':
+    if option == 'init':
         # check if video already exists and if its md5 checksum is correct
         cmd = ['md5sum', video_file]
         md5_proc = Popen(cmd, stdout=PIPE)

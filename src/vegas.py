@@ -22,7 +22,7 @@ def main():
         pass
 
     # commands to be run after building and before running
-    if option == 'initialize':
+    if option == 'init':
         cmd = 'sudo modprobe tcp_vegas'
         check_call(cmd, shell=True)
         cmd = 'echo "vegas" | ' \
