@@ -10,20 +10,23 @@ def parse_arguments(filename):
     parser.add_argument('-r', action='store', dest='remote', type=str,
                         help='remote pantheon directory: [user@]hostname:dir')
 
-    if filename == 'run.py' or filename == 'test.py':
+    if filename == 'test.py' or filename == 'run.py':
         parser.add_argument('-f', action='store', dest='flows', type=int,
                             default=1, help='number of flows '
                             '(mm-tunnelclient/mm-tunnelserver pairs)')
         parser.add_argument('-t', action='store', dest='runtime', type=int,
-                            default=60, help='running time of each test')
+                            default=60, help='total runtime of test')
+        parser.add_argument(
+            '--interval', action='store', dest='interval', type=int,
+            default=0, help='interval time between two consecutive flows')
 
-    if filename == 'test.py':
-        parser.add_argument('cc', metavar='congestion-control', type=str,
-                            help='name of a congestion control scheme')
-    elif filename == 'setup.py':
+    if filename == 'setup.py':
         parser.add_argument(
             'cc', metavar='mahimahi|congestion-control', type=str,
             help='setup mahimahi before setup any congestion control')
+    elif filename == 'test.py':
+        parser.add_argument('cc', metavar='congestion-control', type=str,
+                            help='name of a congestion control scheme')
     elif filename == 'run.py':
         parser.add_argument('--no-setup', action='store_true', dest='no_setup',
                             default=False, help='run tests only without setup')
