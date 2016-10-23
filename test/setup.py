@@ -73,7 +73,7 @@ class TestCongestionControl(unittest.TestCase):
         sys.stderr.write('Done\n')
 
     def initialize(self):
-        cmd = ['python', self.src_file, 'initialize']
+        cmd = ['python', self.src_file, 'init']
         sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
         sys.stderr.write('Performing intialization commands...\n')
         check_call(cmd)
