@@ -5,17 +5,20 @@ import sys
 def parse_arguments(filename):
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-i', action='store', dest='private_key', type=str,
-                        help='identity file (private key) for ssh/scp to use')
-    parser.add_argument('-r', action='store', dest='remote', type=str,
-                        help='remote pantheon directory: [user@]hostname:dir')
+    parser.add_argument(
+        '-i', metavar='IDENTITY-FILE', action='store', dest='private_key',
+        type=str, help='identity file (private key) for ssh/scp to use')
+    parser.add_argument(
+        '-r', metavar='REMOTE:DIR', action='store', dest='remote', type=str,
+        help='remote pantheon directory: [user@]hostname:dir')
 
     if filename == 'test.py' or filename == 'run.py':
-        parser.add_argument('-f', action='store', dest='flows', type=int,
-                            default=1, help='number of flows '
-                            '(mm-tunnelclient/mm-tunnelserver pairs)')
-        parser.add_argument('-t', action='store', dest='runtime', type=int,
-                            default=60, help='total runtime of test')
+        parser.add_argument(
+            '-f', action='store', dest='flows', type=int, default=1,
+            help='number of flows (mm-tunnelclient/mm-tunnelserver pairs)')
+        parser.add_argument(
+            '-t', action='store', dest='runtime', type=int, default=60,
+            help='total runtime of test')
         parser.add_argument(
             '--interval', action='store', dest='interval', type=int,
             default=0, help='interval time between two consecutive flows')
@@ -28,8 +31,9 @@ def parse_arguments(filename):
         parser.add_argument('cc', metavar='congestion-control', type=str,
                             help='name of a congestion control scheme')
     elif filename == 'run.py':
-        parser.add_argument('--no-setup', action='store_true', dest='no_setup',
-                            default=False, help='run tests only without setup')
+        parser.add_argument(
+            '--no-setup', action='store_true', dest='no_setup', default=False,
+            help='run tests only without running setup')
 
     args = parser.parse_args()
 
