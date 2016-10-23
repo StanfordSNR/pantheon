@@ -15,9 +15,10 @@ class TestCongestionControl(unittest.TestCase):
         super(TestCongestionControl, self).__init__(test_name)
         self.cc = args.cc.lower()
         self.flows = args.flows
-        self.remote = args.remote
         self.runtime = args.runtime
+        self.remote = args.remote
         self.private_key = args.private_key
+        self.interval = args.interval
 
     def timeout_handler(signum, frame):
         raise
@@ -168,6 +169,7 @@ class TestCongestionControl(unittest.TestCase):
         tc_manager_proc = Popen(tc_manager_cmd, stdin=PIPE,
                                 stdout=PIPE, preexec_fn=os.setsid)
 
+        second_cmds = []
         for i in xrange(self.flows):
             tun_id = i + 1
             readline_cmd = 'tunnel %s readline\n' % tun_id
@@ -197,11 +199,10 @@ class TestCongestionControl(unittest.TestCase):
             tc_manager_proc.stdin.write(tc_cmd)
 
             if self.first_to_run == 'receiver':
-                recv_cmd = ('tunnel %s python %s receiver\n' %
-                            (tun_id, self.remote_src_file))
-                sys.stderr.write('(tsm) ' + recv_cmd)
-                ts_manager_proc.stdin.write(recv_cmd)
-                time.sleep(self.first_to_run_setup_time)
+                first_cmd = ('tunnel %s python %s receiver\n' %
+                             (tun_id, self.remote_src_file))
+                sys.stderr.write('(tsm) ' + first_cmd)
+                ts_manager_proc.stdin.write(first_cmd)
 
                 # find printed port
                 port = None
@@ -210,16 +211,14 @@ class TestCongestionControl(unittest.TestCase):
                     ts_manager_proc.stdin.write(readline_cmd)
                     port = self.get_port(ts_manager_proc)
 
-                send_cmd = ('tunnel %s python %s sender %s %s\n' %
-                            (tun_id, self.src_file, ts_private_ip, port))
-                sys.stderr.write('(tcm) ' + send_cmd)
-                tc_manager_proc.stdin.write(send_cmd)
+                second_cmd = ('tunnel %s python %s sender %s %s\n' %
+                              (tun_id, self.src_file, ts_private_ip, port))
+                second_cmds.append(second_cmd)
             else:
-                send_cmd = ('tunnel %s python %s sender\n' %
-                            (tun_id, self.src_file))
-                sys.stderr.write('(tcm) ' + send_cmd)
-                tc_manager_proc.stdin.write(send_cmd)
-                time.sleep(self.first_to_run_setup_time)
+                first_cmd = ('tunnel %s python %s sender\n' %
+                             (tun_id, self.src_file))
+                sys.stderr.write('(tcm) ' + first_cmd)
+                tc_manager_proc.stdin.write(first_cmd)
 
                 # find printed port
                 port = None
@@ -228,17 +227,31 @@ class TestCongestionControl(unittest.TestCase):
                     tc_manager_proc.stdin.write(readline_cmd)
                     port = self.get_port(tc_manager_proc)
 
-                recv_cmd = (
+                second_cmd = (
                     'tunnel %s python %s receiver %s %s\n' %
                     (tun_id, self.remote_src_file, tc_private_ip, port))
-                sys.stderr.write('(tsm) ' + recv_cmd)
-                ts_manager_proc.stdin.write(recv_cmd)
+                second_cmds.append(second_cmd)
 
-        time.sleep(self.runtime)
+        time.sleep(self.first_to_run_setup_time)
 
+        start_time = time.time()
+        # start each flow self.interval seconds after the previous one
+        for second_cmd in second_cmds:
+            if self.first_to_run == 'receiver':
+               sys.stderr.write('(tcm) ' + second_cmd)
+               tc_manager_proc.stdin.write(second_cmd)
+            else:
+               sys.stderr.write('(tsm) ' + second_cmd)
+               ts_manager_proc.stdin.write(second_cmd)
+            time.sleep(self.interval)
+        elapsed_time = time.time() - start_time
+        self.assertTrue(self.runtime > elapsed_time,
+                        'Interval time between flows is too long')
+        time.sleep(self.runtime - elapsed_time)
+
+        # stop all the running flows
         sys.stderr.write('(tsm) halt\n')
         ts_manager_proc.stdin.write('halt\n')
-
         sys.stderr.write('(tcm) halt\n')
         tc_manager_proc.stdin.write('halt\n')
 
