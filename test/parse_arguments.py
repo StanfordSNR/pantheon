@@ -42,6 +42,9 @@ def parse_arguments(filename):
     args = parser.parse_args()
 
     # arguments validation
+    assert not (args.flows == 0 and args.remote), (
+        'Remote test must run at least one flow (one tunnel)')
+
     if args.remote:
         assert ':' in args.remote, '-r must be followed by [user@]hostname:dir'
 
