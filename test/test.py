@@ -239,14 +239,16 @@ class TestCongestionControl(unittest.TestCase):
 
         start_time = time.time()
         # start each flow self.interval seconds after the previous one
-        for second_cmd in second_cmds:
+        for i in xrange(len(second_cmds)):
+            if i != 0:
+                time.sleep(self.interval)
+            second_cmd = second_cmds[i]
             if self.first_to_run == 'receiver':
                 sys.stderr.write('(tcm) ' + second_cmd)
                 tc_manager_proc.stdin.write(second_cmd)
             else:
                 sys.stderr.write('(tsm) ' + second_cmd)
                 ts_manager_proc.stdin.write(second_cmd)
-            time.sleep(self.interval)
         elapsed_time = time.time() - start_time
         self.assertTrue(self.runtime > elapsed_time,
                         'Interval time between flows is too long')
