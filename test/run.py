@@ -28,15 +28,15 @@ def main():
     test_cmd = ['python', test_src]
 
     if remote:
-        setup_cmd += ['-r', remote]
-        test_cmd += ['-r', remote]
         if private_key:
             setup_cmd += ['-i', private_key]
             test_cmd += ['-i', private_key]
+        setup_cmd += ['-r', remote]
+        test_cmd += ['-r', remote]
 
     test_cmd += ['-f', flows, '-t', runtime]
 
-    if not args.no_setup:
+    if not args.test_only:
         # setup mahimahi on both local and remote sides
         cmd = setup_cmd + ['mahimahi']
         sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
@@ -44,22 +44,24 @@ def main():
 
     # setup and run each congestion control
     for cc in cc_schemes:
-        if not args.no_setup:
+        if not args.test_only:
             cmd = setup_cmd + [cc]
             sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
             check_call(cmd)
 
-        cmd = test_cmd + [cc]
+        if not args.setup_only:
+            cmd = test_cmd + [cc]
+            sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
+            check_call(cmd)
+
+    if not args.setup_only:
+        cmd = ['perl', summary_plot_src] + cc_schemes
         sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
         check_call(cmd)
 
-    cmd = ['perl', summary_plot_src] + cc_schemes
-    sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
-    check_call(cmd)
-
-    cmd = ['python', combine_report_src] + cc_schemes
-    sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
-    check_call(cmd)
+        cmd = ['python', combine_report_src] + cc_schemes
+        sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
+        check_call(cmd)
 
 
 if __name__ == '__main__':

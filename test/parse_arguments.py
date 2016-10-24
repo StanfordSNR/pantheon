@@ -31,9 +31,13 @@ def parse_arguments(filename):
         parser.add_argument('cc', metavar='congestion-control', type=str,
                             help='name of a congestion control scheme')
     elif filename == 'run.py':
-        parser.add_argument(
-            '--no-setup', action='store_true', dest='no_setup', default=False,
-            help='run tests only without running setup')
+        group = parser.add_mutually_exclusive_group()
+        group.add_argument(
+            '--test-only', action='store_true', dest='test_only',
+            default=False, help='run test only without running setup')
+        group.add_argument(
+            '--setup-only', action='store_true', dest='setup_only',
+            default=False, help='run setup only without running test')
 
     args = parser.parse_args()
 
