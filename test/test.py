@@ -98,6 +98,8 @@ class TestCongestionControl(unittest.TestCase):
     def run_without_tunnel(self):
         # run the side specified by self.first_to_run
         cmd = ['python', self.remote_src_file, self.first_to_run]
+        if self.remote:
+            cmd = self.ssh_cmd + cmd
         sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
         sys.stderr.write('Running %s %s...\n' % (self.cc, self.first_to_run))
         proc_first = Popen(cmd, stdout=PIPE, preexec_fn=os.setsid)
@@ -112,9 +114,10 @@ class TestCongestionControl(unittest.TestCase):
         time.sleep(self.first_to_run_setup_time)
 
         # run the other side specified by self.second_to_run
-        cmd = ' '.join(self.mm_link_cmd)
-        cmd += (" -- sh -c 'python %s %s %s %s'" %
-                (self.src_file, self.second_to_run, self.remote_ip, port))
+        cmd = ('python %s %s %s %s' %
+               (self.src_file, self.second_to_run, self.remote_ip, port))
+        if not self.remote:
+            cmd = ' '.join(self.mm_link_cmd) + " -- sh -c '%s'" % cmd
         sys.stderr.write('+ ' + cmd + '\n')
         sys.stderr.write('Running %s %s...\n' % (self.cc, self.second_to_run))
         proc_second = Popen(cmd, stdout=PIPE, shell=True, preexec_fn=os.setsid)
@@ -238,11 +241,11 @@ class TestCongestionControl(unittest.TestCase):
         # start each flow self.interval seconds after the previous one
         for second_cmd in second_cmds:
             if self.first_to_run == 'receiver':
-               sys.stderr.write('(tcm) ' + second_cmd)
-               tc_manager_proc.stdin.write(second_cmd)
+                sys.stderr.write('(tcm) ' + second_cmd)
+                tc_manager_proc.stdin.write(second_cmd)
             else:
-               sys.stderr.write('(tsm) ' + second_cmd)
-               ts_manager_proc.stdin.write(second_cmd)
+                sys.stderr.write('(tsm) ' + second_cmd)
+                ts_manager_proc.stdin.write(second_cmd)
             time.sleep(self.interval)
         elapsed_time = time.time() - start_time
         self.assertTrue(self.runtime > elapsed_time,

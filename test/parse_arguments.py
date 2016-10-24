@@ -39,11 +39,6 @@ def parse_arguments(filename):
 
     # arguments validation
     if filename == 'test.py' or filename == 'run.py':
-        if args.flows == 0 and args.remote:
-            sys.stderr.write('Remote test must run at least one flow '
-                             '(one pair of mm-tunnelclient/mm-tunnelserver)\n')
-            sys.exit(1)
-
         if args.runtime > 60:
             sys.stderr.write('Runtime cannot be greater than 60 seconds\n')
             sys.exit(1)
