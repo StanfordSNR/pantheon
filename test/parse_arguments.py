@@ -38,14 +38,12 @@ def parse_arguments(filename):
     args = parser.parse_args()
 
     # arguments validation
-    if filename == 'test.py' or filename == 'run.py':
-        if args.runtime > 60:
-            sys.stderr.write('Runtime cannot be greater than 60 seconds\n')
-            sys.exit(1)
+    if args.remote:
+        assert ':' in args.remote, '-r must be followed by [user@]hostname:dir'
 
-        if (args.flows - 1) * args.interval >= args.runtime:
-            sys.stderr.write('Interval time between flows is too long '
-                             'to fit in total runtime\n')
-            sys.exit(1)
+    if filename == 'test.py' or filename == 'run.py':
+        assert args.runtime <= 60, 'Runtime cannot be greater than 60 seconds'
+        assert (args.flows - 1) * args.interval < args.runtime, (
+            'Interval time between flows is too long to be fit in runtime')
 
     return args
