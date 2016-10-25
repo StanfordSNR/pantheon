@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import argparse
+import dpkt
 
 
 def parse_arguments():
@@ -19,6 +20,10 @@ def parse_arguments():
     return parser.parse_args()
 
 
+def merge_pcap(send_pcap, recv_pcap, output_log):
+    pass
+
+
 def main():
     args = parse_arguments()
 
@@ -27,6 +32,16 @@ def main():
     else:
         output_log = sys.stdout
 
+    sender_pcap = open(args.sender_pcap)
+    send_pcap = dpkt.pcap.Reader(sender_pcap)
+
+    receiver_pcap = open(args.receiver_pcap)
+    recv_pcap = dpkt.pcap.Reader(receiver_pcap)
+
+    merge_pcap(send_pcap, recv_pcap, output_log)
+
+    sender_pcap.close()
+    receiver_pcap.close()
 
 if __name__ == '__main__':
     main()
