@@ -42,13 +42,12 @@ def parse_arguments(filename):
     args = parser.parse_args()
 
     # arguments validation
-    assert not (args.flows == 0 and args.remote), (
-        'Remote test must run at least one flow (one tunnel)')
-
     if args.remote:
         assert ':' in args.remote, '-r must be followed by [user@]hostname:dir'
 
     if filename == 'test.py' or filename == 'run.py':
+        assert not (args.flows == 0 and args.remote), (
+            'Remote test must run at least one flow (one tunnel)')
         assert args.runtime <= 60, 'Runtime cannot be greater than 60 seconds'
         assert (args.flows - 1) * args.interval < args.runtime, (
             'Interval time between flows is too long to be fit in runtime')
