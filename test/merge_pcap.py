@@ -16,11 +16,14 @@ def parse_arguments():
     parser.add_argument(
         '-o', metavar='OUTPUT-LOG', action='store', dest='output_log',
         help='log file merged from sender and receiver pcap files')
+    parser.add_argument(
+        'cc', metavar='congestion-control',
+        help='congestion control scheme that generated the pcap files')
 
     return parser.parse_args()
 
 
-def merge_pcap(send_pcap, recv_pcap, output_log):
+def merge_pcap(send_pcap, recv_pcap, output_log, cc):
     pass
 
 
@@ -38,7 +41,7 @@ def main():
     receiver_pcap = open(args.receiver_pcap)
     recv_pcap = dpkt.pcap.Reader(receiver_pcap)
 
-    merge_pcap(send_pcap, recv_pcap, output_log)
+    merge_pcap(send_pcap, recv_pcap, output_log, args.cc)
 
     sender_pcap.close()
     receiver_pcap.close()
