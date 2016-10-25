@@ -54,7 +54,7 @@ def prettify(cc):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('cc_schemes', metavar='congestion-control', type=str,
+    parser.add_argument('cc_schemes', metavar='congestion-control',
                         nargs='+', help='congestion control schemes')
     args = parser.parse_args()
 

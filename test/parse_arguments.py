@@ -7,9 +7,9 @@ def parse_arguments(filename):
 
     parser.add_argument(
         '-i', metavar='IDENTITY-FILE', action='store', dest='private_key',
-        type=str, help='identity file (private key) for ssh/scp to use')
+        help='identity file (private key) for ssh/scp to use')
     parser.add_argument(
-        '-r', metavar='REMOTE:DIR', action='store', dest='remote', type=str,
+        '-r', metavar='REMOTE:DIR', action='store', dest='remote',
         help='remote pantheon directory: [user@]hostname:dir')
 
     if filename == 'test.py' or filename == 'run.py':
@@ -25,10 +25,10 @@ def parse_arguments(filename):
 
     if filename == 'setup.py':
         parser.add_argument(
-            'cc', metavar='mahimahi|congestion-control', type=str,
+            'cc', metavar='mahimahi|congestion-control',
             help='setup mahimahi before setup any congestion control')
     elif filename == 'test.py':
-        parser.add_argument('cc', metavar='congestion-control', type=str,
+        parser.add_argument('cc', metavar='congestion-control',
                             help='name of a congestion control scheme')
     elif filename == 'run.py':
         group = parser.add_mutually_exclusive_group()
