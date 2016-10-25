@@ -45,7 +45,7 @@ for my $scheme ( @ARGV ) {
       if ( m{^Average throughput: (.*?) Mbits} ) {
         die if exists $row{ throughput };
         $row{ throughput } = $1;
-      } elsif ( m{^95th percentile signal delay: (.*?) ms} ) {
+      } elsif ( m{^95th percentile .* delay: (.*?) ms} ) {
         die if exists $row{ delay };
         $row{ delay } = $1;
       }
