@@ -37,8 +37,16 @@ def main():
 
     is_server = args.role == 'server'
     init_ts = -1
+
     pcap = pyshark.FileCapture(os.path.abspath(args.pcap))
     for pkt in pcap:
+        src_port = int(pkt.udp.srcport)
+        dst_port = int(pkt.udp.dstport)
+
+        is_destined_for_server = dst_port == args.server_port
+        if not is_destined_for_server and not src_port == args.server_port:
+            continue
+
         ts = int(round(float(pkt.sniff_timestamp) * 1000))
         if init_ts == -1:
             init_ts = ts
@@ -47,13 +55,6 @@ def main():
 
         ts -= init_ts
         size = int(pkt.ip.len)
-
-        src_port = int(pkt.udp.srcport)
-        dst_port = int(pkt.udp.dstport)
-
-        is_destined_for_server = dst_port == args.server_port
-        if not is_destined_for_server:
-            assert src_port == args.server_port
 
         uid = hashlib.sha256(str(pkt.layers[-1])).hexdigest()
         line = '%s - %s - %s\n' % (ts, uid, size)
