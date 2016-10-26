@@ -30,6 +30,14 @@ def parse_arguments():
     return parser.parse_args()
 
 
+def get_ingress_uid(pkt, cc, role):
+    pass
+
+
+def get_egress_uid(pkt, cc, role):
+    pass
+
+
 def main():
     args = parse_arguments()
 
@@ -42,15 +50,26 @@ def main():
         ts = int(round(float(pkt.sniff_timestamp) * 1000))
         if init_ts == -1:
             init_ts = ts
+            ingress_log.write('# ingress: %s\n' % init_ts)
+            egress_log.write('# egress: %s\n' % init_ts)
+
         ts -= init_ts
         size = int(pkt.ip.len)
+
         src_port = int(pkt.udp.srcport)
         dst_port = int(pkt.udp.dstport)
-        pprint(vars(pkt.udp))
-        break
+        if (args.role == 'client' and src_port == server_port or
+                args.role == 'server' and dst_port == server_port):
+            uid = get_ingress_uid(pkt, args.cc, args.role)
+            ingress_log.write('%s - %s - %s\n' % (ts, uid, size))
+        elif (args.role == 'server' and src_port == server_port or
+                args.role == 'client' and dst_port == server_port):
+            uid = get_egress_uid(pkt, args.cc, args.role)
+            egress_log.write('%s - %s - %s\n' % (ts, uid, size))
 
     ingress_log.close()
     egress_log.close()
+
 
 if __name__ == '__main__':
     main()
