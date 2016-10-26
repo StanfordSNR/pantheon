@@ -12,8 +12,8 @@ def get_open_port_helper(socket_type):
 
 
 def get_open_udp_port():
-    return get_open_port_helper(socket.SOCK_DGRAM)
+    return str(10000)
 
 
 def get_open_tcp_port():
-    return get_open_port_helper(socket.SOCK_STREAM)
+    return str(10000)
