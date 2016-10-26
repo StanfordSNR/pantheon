@@ -1,8 +1,9 @@
 #!/usr/bin/python
 
+import os
+import sys
 import argparse
 import pyshark
-import os
 from pprint import pprint
 
 
@@ -30,20 +31,26 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def get_ingress_uid(pkt, cc, role):
-    pass
-
-
-def get_egress_uid(pkt, cc, role):
-    pass
+def get_uid(pkt, cc):
+    if cc == 'pcc':
+        return 0
 
 
 def main():
     args = parse_arguments()
 
+    receiver_first_schemes = [
+        'default_tcp', 'koho_cc', 'ledbat', 'pcc', 'scream', 'sprout', 'vegas']
+    sender_first_schemes = ['quic', 'verus', 'webrtc']
+
+    is_receiver_first = args.cc in receiver_first_schemes
+    if not is_receiver_first:
+        assert args.cc in sender_first_schemes
+
     ingress_log = open(args.ingress_log, 'w')
     egress_log = open(args.egress_log, 'w')
 
+    is_server = args.role == 'server'
     init_ts = -1
     pcap = pyshark.FileCapture(os.path.abspath(args.pcap))
     for pkt in pcap:
@@ -58,14 +65,18 @@ def main():
 
         src_port = int(pkt.udp.srcport)
         dst_port = int(pkt.udp.dstport)
-        if (args.role == 'client' and src_port == server_port or
-                args.role == 'server' and dst_port == server_port):
-            uid = get_ingress_uid(pkt, args.cc, args.role)
-            ingress_log.write('%s - %s - %s\n' % (ts, uid, size))
-        elif (args.role == 'server' and src_port == server_port or
-                args.role == 'client' and dst_port == server_port):
-            uid = get_egress_uid(pkt, args.cc, args.role)
-            egress_log.write('%s - %s - %s\n' % (ts, uid, size))
+
+        is_destined_for_server = dst_port == args.server_port
+        if not is_destined_for_server:
+            assert src_port == args.server_port
+
+        uid = get_uid(pkt, args.cc)
+        line = '%s - %s - %s\n' % (ts, uid, size)
+
+        if is_server == is_destined_for_server:
+            ingress_log.write(line)
+        else:
+            egress_log.write(line)
 
     ingress_log.close()
     egress_log.close()
