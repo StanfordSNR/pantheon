@@ -14,11 +14,8 @@ def parse_arguments():
     parser.add_argument(
         'pcap', help='pcap file captured by tcpdump')
     parser.add_argument(
-        'cc', metavar='congestion-control',
-        help='congestion control scheme that generated the pcap files')
-    parser.add_argument(
         'role', choices=['server', 'client'],
-        help='server or client')
+        help='server or client that generated the pcap file')
     parser.add_argument(
         'server_port', metavar='server-port', type=int,
         help='the port that server is listening to')
@@ -34,14 +31,6 @@ def parse_arguments():
 
 def main():
     args = parse_arguments()
-
-    receiver_first_schemes = [
-        'default_tcp', 'koho_cc', 'ledbat', 'pcc', 'scream', 'sprout', 'vegas']
-    sender_first_schemes = ['quic', 'verus', 'webrtc']
-
-    is_receiver_first = args.cc in receiver_first_schemes
-    if not is_receiver_first:
-        assert args.cc in sender_first_schemes
 
     ingress_log = open(args.ingress_log, 'w')
     egress_log = open(args.egress_log, 'w')
@@ -73,7 +62,6 @@ def main():
             ingress_log.write(line)
         else:
             egress_log.write(line)
-        break
 
     ingress_log.close()
     egress_log.close()
