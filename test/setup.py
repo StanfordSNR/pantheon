@@ -16,6 +16,14 @@ class TestCongestionControl(unittest.TestCase):
         self.private_key = args.private_key
         self.test_dir = path.abspath(path.dirname(__file__))
 
+    def sanity_check_gitmodules(self):
+        third_party_dir = os.path.join(self.test_dir, '../third_party')
+        for submodule in os.listdir(third_party_dir):
+            path = os.path.join(third_party_dir, submodule)
+            if os.path.isdir(path):
+                assert os.listdir(path), 'Folder third_party/%s empty, make \
+                    sure to initialize git submodules' % submodule
+
     def setup_mahimahi(self):
         # install mahimahi
         mm_deps = (
@@ -81,6 +89,7 @@ class TestCongestionControl(unittest.TestCase):
 
     # congestion control setup
     def test_congestion_control_setup(self):
+        self.sanity_check_gitmodules()
         # run remote setup.py
         if self.remote:
             (remote_addr, remote_dir) = self.remote.split(':')
