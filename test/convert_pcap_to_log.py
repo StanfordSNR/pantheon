@@ -4,6 +4,7 @@ import os
 import sys
 import argparse
 import pyshark
+import hashlib
 from pprint import pprint
 
 
@@ -29,11 +30,6 @@ def parse_arguments():
         required=True, help='egress log to save')
 
     return parser.parse_args()
-
-
-def get_uid(pkt, cc):
-    if cc == 'pcc':
-        return 0
 
 
 def main():
@@ -70,13 +66,14 @@ def main():
         if not is_destined_for_server:
             assert src_port == args.server_port
 
-        uid = get_uid(pkt, args.cc)
+        uid = hashlib.sha256(str(pkt.layers[-1])).hexdigest()
         line = '%s - %s - %s\n' % (ts, uid, size)
 
         if is_server == is_destined_for_server:
             ingress_log.write(line)
         else:
             egress_log.write(line)
+        break
 
     ingress_log.close()
     egress_log.close()
