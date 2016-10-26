@@ -3,6 +3,7 @@
 import argparse
 import pyshark
 import os
+from pprint import pprint
 
 
 def parse_arguments():
@@ -39,6 +40,8 @@ def main():
     pcap = pyshark.FileCapture(os.path.abspath(args.pcap))
     for pkt in pcap:
         size = int(pkt.ip.len)
+        pprint(vars(pkt))
+        break
 
     data_log.close()
     ack_log.close()
