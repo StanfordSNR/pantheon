@@ -15,8 +15,11 @@ def parse_arguments():
         'cc', metavar='congestion-control',
         help='congestion control scheme that generated the pcap files')
     parser.add_argument(
-        'role', choices=['sender', 'receiver'],
-        help='sender or receiver that generated the pcap file')
+        'role', choices=['server', 'client'],
+        help='server or client')
+    parser.add_argument(
+        'server_port', metavar='server-port', type=int,
+        help='the port that server is listening to')
     parser.add_argument(
         '-i', metavar='INGRESS-LOG', action='store', dest='ingress_log',
         required=True, help='ingress log to save')
@@ -30,21 +33,24 @@ def parse_arguments():
 def main():
     args = parse_arguments()
 
-    if args.role == 'sender':
-        data_log = open(args.egress_log, 'w')
-        ack_log = open(args.ingress_log, 'w')
-    else:
-        data_log = open(args.ingress_log, 'w')
-        ack_log = open(args.egress_log, 'w')
+    ingress_log = open(args.ingress_log, 'w')
+    egress_log = open(args.egress_log, 'w')
 
+    init_ts = -1
     pcap = pyshark.FileCapture(os.path.abspath(args.pcap))
     for pkt in pcap:
+        ts = int(round(float(pkt.sniff_timestamp) * 1000))
+        if init_ts == -1:
+            init_ts = ts
+        ts -= init_ts
         size = int(pkt.ip.len)
-        pprint(vars(pkt))
+        src_port = int(pkt.udp.srcport)
+        dst_port = int(pkt.udp.dstport)
+        pprint(vars(pkt.udp))
         break
 
-    data_log.close()
-    ack_log.close()
+    ingress_log.close()
+    egress_log.close()
 
 if __name__ == '__main__':
     main()
