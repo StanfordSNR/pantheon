@@ -4,7 +4,7 @@ import os
 import sys
 import argparse
 from os import path
-from subprocess import check_call, check_output
+from subprocess import check_call, check_output, Popen, PIPE
 
 
 def parse_arguments():
@@ -77,6 +77,80 @@ def main():
     sys.stderr.write('+ ' + ' '.join(acklink_cmd) + '\n')
     check_call(acklink_cmd)
 
+    # generate statistical results
+    throughput_cmd = 'mm-tunnel-throughput'
+    delay_cmd = 'mm-tunnel-delay'
+
+    datalink_throughput_svg = path.join(
+        test_dir, '%s_raw_data_tput.svg' % args.cc)
+    datalink_delay_svg = path.join(
+        test_dir, '%s_raw_data_delay.svg' % args.cc)
+    acklink_throughput_svg = path.join(
+        test_dir, '%s_raw_ack_tput.svg' % args.cc)
+    acklink_delay_svg = path.join(
+        test_dir, '%s_raw_ack_delay.svg' % args.cc)
+
+    stats_log = path.join(test_dir, '%s_raw_stats.log' % args.cc)
+    stats = open(stats_log, 'w')
+
+    sys.stderr.write('\n')
+    # Data link
+    # throughput
+    datalink_throughput = open(datalink_throughput_svg, 'w')
+    cmd = [throughput_cmd, '500', datalink_log]
+
+    sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
+    sys.stderr.write('* Data link statistics:\n')
+    stats.write('* Data link statistics:\n')
+
+    proc = Popen(cmd, stdout=datalink_throughput, stderr=PIPE)
+    datalink_results = proc.communicate()[1]
+    sys.stderr.write(datalink_results)
+    stats.write(datalink_results)
+
+    datalink_throughput.close()
+
+    # delay
+    datalink_delay = open(datalink_delay_svg, 'w')
+    cmd = [delay_cmd, datalink_log]
+
+    sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
+    proc = Popen(cmd, stdout=datalink_delay, stderr=DEVNULL)
+    proc.communicate()
+
+    datalink_delay.close()
+
+    sys.stderr.write('\n')
+    # ACK link
+    # throughput
+    acklink_throughput = open(acklink_throughput_svg, 'w')
+    cmd = [throughput_cmd, '500', acklink_log]
+
+    sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
+    sys.stderr.write('* ACK link statistics:\n')
+    stats.write('* ACK link statistics:\n')
+
+    proc = Popen(cmd, stdout=acklink_throughput, stderr=PIPE)
+    acklink_results = proc.communicate()[1]
+    sys.stderr.write(acklink_results)
+    stats.write(acklink_results)
+
+    acklink_throughput.close()
+
+    # delay
+    acklink_delay = open(acklink_delay_svg, 'w')
+    cmd = [delay_cmd, acklink_log]
+
+    sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
+    proc = Popen(cmd, stdout=acklink_delay, stderr=DEVNULL)
+    proc.communicate()
+
+    acklink_delay.close()
+
+    stats.close()
+
 
 if __name__ == '__main__':
+    DEVNULL = open(os.devnull, 'w')
     main()
+    DEVNULL.close()
