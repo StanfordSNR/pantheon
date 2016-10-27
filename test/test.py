@@ -98,7 +98,7 @@ class TestCongestionControl(unittest.TestCase):
     def run_without_tunnel(self):
         # run the side specified by self.first_to_run
         cmd = ['python', self.remote_src_file, self.first_to_run]
-        if self.remote:
+        if self.remote and self.first_to_run == 'receiver':
             cmd = self.ssh_cmd + cmd
         sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
         sys.stderr.write('Running %s %s...\n' % (self.cc, self.first_to_run))
@@ -118,6 +118,9 @@ class TestCongestionControl(unittest.TestCase):
                (self.src_file, self.second_to_run, self.remote_ip, port))
         if not self.remote:
             cmd = ' '.join(self.mm_link_cmd) + " -- sh -c '%s'" % cmd
+        elif self.first_to_run == 'sender':
+            cmd = self.ssh_cmd + cmd
+
         sys.stderr.write('+ ' + cmd + '\n')
         sys.stderr.write('Running %s %s...\n' % (self.cc, self.second_to_run))
         proc_second = Popen(cmd, stdout=PIPE, shell=True, preexec_fn=os.setsid)
