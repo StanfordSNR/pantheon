@@ -56,6 +56,27 @@ def main():
     sys.stderr.write('+ ' + ' '.join(convert_cmd) + '\n')
     check_call(convert_cmd)
 
+    # generate "raw" (without tunnel) datalink and acklink log
+    datalink_log = path.join(test_dir, args.cc + '_raw_datalink.log')
+    acklink_log = path.join(test_dir, args.cc + '_raw_acklink.log')
+
+    if first_to_run == 'receiver':
+        datalink_cmd = ['mm-tunnel-merge-logs', 'single', '-i', server_ilog,
+                        '-e', client_elog, '-o', datalink_log]
+        acklink_cmd = ['mm-tunnel-merge-logs', 'single', '-i', client_ilog,
+                       '-e', server_elog, '-o', acklink_log]
+    else:
+        datalink_cmd = ['mm-tunnel-merge-logs', 'single', '-i', client_ilog,
+                        '-e', server_elog, '-o', datalink_log]
+        acklink_cmd = ['mm-tunnel-merge-logs', 'single', '-i', server_ilog,
+                       '-e', client_elog, '-o', acklink_log]
+
+    sys.stderr.write('+ ' + ' '.join(datalink_cmd) + '\n')
+    check_call(datalink_cmd)
+
+    sys.stderr.write('+ ' + ' '.join(acklink_cmd) + '\n')
+    check_call(acklink_cmd)
+
 
 if __name__ == '__main__':
     main()
