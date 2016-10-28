@@ -22,6 +22,11 @@ def main():
 
     # build
     if option == 'build':
+        # apply patch to reduce MTU size
+        patch = os.path.join(src_dir, 'koho_cc_mtu.patch')
+        cmd = 'cd %s && git apply %s' % (submodule_dir, patch)
+        check_call(cmd, shell=True)
+
         cmd = 'cd %s && ./autogen.sh && ./configure && make -j' % submodule_dir
         check_call(cmd, shell=True)
 
