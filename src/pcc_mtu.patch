@@ -1,0 +1,52 @@
+diff --git a/receiver/src/buffer.h b/receiver/src/buffer.h
+index 4377e79..56c460e 100644
+--- a/receiver/src/buffer.h
++++ b/receiver/src/buffer.h
+@@ -50,7 +50,7 @@ written by
+ class CSndBuffer
+ {
+ public:
+-   CSndBuffer(int size = 32, int mss = 1500);
++   CSndBuffer(int size = 32, int mss = 1464);
+    ~CSndBuffer();
+ 
+       // Functionality:
+diff --git a/receiver/src/core.cpp b/receiver/src/core.cpp
+index d83dd2b..588444a 100644
+--- a/receiver/src/core.cpp
++++ b/receiver/src/core.cpp
+@@ -99,7 +99,7 @@ CUDT::CUDT()
+    initSynch();
+ 
+    // Default UDT configurations
+-   m_iMSS = 1500;
++   m_iMSS = 1464;
+    m_bSynSending = true;
+    m_bSynRecving = true;
+    m_iFlightFlagSize = 100000;
+diff --git a/sender/src/buffer.h b/sender/src/buffer.h
+index 25efaa1..627487f 100644
+--- a/sender/src/buffer.h
++++ b/sender/src/buffer.h
+@@ -50,7 +50,7 @@ written by
+ class CSndBuffer
+ {
+ public:
+-   CSndBuffer(const int& size = 64, const int& mss = 1500);
++   CSndBuffer(const int& size = 64, const int& mss = 1464);
+    ~CSndBuffer();
+ 
+       // Functionality:
+diff --git a/sender/src/core.cpp b/sender/src/core.cpp
+index 38d8df9..eadf251 100644
+--- a/sender/src/core.cpp
++++ b/sender/src/core.cpp
+@@ -101,7 +101,7 @@ CUDT::CUDT()
+ 
+ 
+ 	// Default UDT configurations
+-	m_iMSS = 1500;
++	m_iMSS = 1464;
+ 	m_bSynSending = true;
+ 	m_bSynRecving = true;
+ 	m_iFlightFlagSize = 100000;
