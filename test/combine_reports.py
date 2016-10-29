@@ -4,7 +4,7 @@ import os
 import sys
 import string
 import argparse
-from subprocess import check_call, PIPE, Popen
+from subprocess import call, check_call, PIPE, Popen
 
 
 def svg2png(test_dir, cc):
@@ -59,6 +59,10 @@ def main():
     args = parser.parse_args()
 
     test_dir = os.path.abspath(os.path.dirname(__file__))
+
+    assert call(['which', 'pdflatex']) is 0, "pdflatex not installed"
+    assert call(['which', 'inkscape']) is 0, "inkscape not installed"
+
     latex = open('/tmp/pantheon_report.tex', 'w')
 
     latex.write('\\documentclass{article}\n'
