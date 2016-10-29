@@ -21,8 +21,9 @@ class TestCongestionControl(unittest.TestCase):
         for submodule in os.listdir(third_party_dir):
             path = os.path.join(third_party_dir, submodule)
             if os.path.isdir(path):
-                assert os.listdir(path), 'Folder third_party/%s empty, make \
-                    sure to initialize git submodules' % submodule
+                assert os.listdir(path), 'Folder third_party/%s empty: make ' \
+                    'sure to initialize git submodules with \"git submodule ' \
+                    'update --init\"' % submodule
 
     def setup_mahimahi(self):
         # install mahimahi
