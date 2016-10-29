@@ -3,7 +3,7 @@
 import os
 import sys
 import usage
-from subprocess import check_call
+from subprocess import check_call, CalledProcessError
 from get_open_port import get_open_udp_port
 
 
@@ -26,7 +26,10 @@ def main():
         # apply patch to reduce MTU size
         patch = os.path.join(src_dir, 'verus_mtu.patch')
         cmd = 'cd %s && git apply %s' % (submodule_dir, patch)
-        check_call(cmd, shell=True)
+        try:
+            check_call(cmd, shell=True)
+        except CalledProcessError:
+            pass
 
         cmd = 'cd %s && ./bootstrap.sh && ./configure && make -j' % \
               submodule_dir
