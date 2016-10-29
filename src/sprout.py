@@ -3,7 +3,7 @@
 import os
 import sys
 import usage
-from subprocess import check_call
+from subprocess import check_call, CalledProcessError
 
 
 def main():
@@ -25,7 +25,10 @@ def main():
         # apply patch to reduce MTU size
         patch = os.path.join(src_dir, 'sprout_mtu.patch')
         cmd = 'cd %s && git apply %s' % (submodule_dir, patch)
-        check_call(cmd, shell=True)
+        try:
+            check_call(cmd, shell=True)
+        except CalledProcessError:
+            pass
 
         cmd = 'cd %s && ./autogen.sh && ./configure --enable-examples && ' \
               'make -j' % submodule_dir
