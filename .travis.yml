@@ -28,6 +28,7 @@ env:
 
 script:
   - test/setup.py $CC_SCHEME
+  - test/setup.py $CC_SCHEME
   - test/test.py -f 2 -t 10 $CC_SCHEME
 
 notifications:
