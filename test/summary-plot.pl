@@ -2,10 +2,9 @@
 
 use strict;
 
-my $output_filename = 'pantheon_summary.pdf';
+my $output_filename = 'pantheon_summary.png';
 
-open GNUPLOT, qq{| gnuplot | inkscape -A $output_filename} .
-              qq{ -z -b white /dev/stdin >/dev/null 2>&1} or die;
+open GNUPLOT, qq{| gnuplot} or die;
 
 my $points;
 
@@ -75,13 +74,14 @@ my $tput_max = (sort { $a->{ throughput } <=> $b->{ throughput } } @data)[ -1 ]-
 print GNUPLOT <<END;
 set xlabel "95th percentile of signal delay (ms)"
 set ylabel "throughput (Mbit/s)"
-set terminal svg size 1024,768 fixed fsize 20 rounded solid
+set terminal png size 1024,768 font Arial 16 enhanced
 set logscale x
 unset key
 set title "Summary of results"
 set xrange [$delay_max:$delay_min] reverse
 set yrange [*:*]
 set xtics 2
+set output "$output_filename"
 END
 
 sub relative_difference {
