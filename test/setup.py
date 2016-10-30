@@ -5,7 +5,7 @@ import sys
 import unittest
 from os import path
 from parse_arguments import parse_arguments
-from subprocess import check_call, check_output
+from subprocess import call, check_call, check_output
 
 
 class TestCongestionControl(unittest.TestCase):
@@ -26,7 +26,20 @@ class TestCongestionControl(unittest.TestCase):
                     'update --init\"' % submodule
 
     def setup_mahimahi(self):
+        # Enable IP forwarding
+        cmd = 'sudo sysctl -w net.ipv4.ip_forward=1'
+        sys.stderr.write('+ ' + cmd + '\n')
+        check_call(cmd, shell=True)
+
         # install mahimahi
+
+        mm_dir = path.join(self.test_dir, '../third_party/mahimahi')
+        # make install alone sufficient if autogen.sh and configure already run
+        cmd = 'cd %s && sudo make install' % mm_dir
+        sys.stderr.write('+ ' + cmd + '\n')
+        if call(cmd, stdout=DEVNULL, shell=True) is 0:
+            return
+
         mm_deps = (
             'debhelper autotools-dev dh-autoreconf iptables protobuf-compiler '
             'libprotobuf-dev pkg-config libssl-dev dnsmasq-base ssl-cert '
@@ -37,14 +50,8 @@ class TestCongestionControl(unittest.TestCase):
         sys.stderr.write('+ ' + cmd + '\n')
         check_call(cmd, shell=True)
 
-        mm_dir = path.join(self.test_dir, '../third_party/mahimahi')
         cmd = ('cd %s && ./autogen.sh && ./configure && make && '
                'sudo make install' % mm_dir)
-        sys.stderr.write('+ ' + cmd + '\n')
-        check_call(cmd, shell=True)
-
-        # Enable IP forwarding
-        cmd = 'sudo sysctl -w net.ipv4.ip_forward=1'
         sys.stderr.write('+ ' + cmd + '\n')
         check_call(cmd, shell=True)
 
@@ -128,4 +135,6 @@ def main():
 
 
 if __name__ == '__main__':
+    DEVNULL = open(os.devnull, 'w')
     main()
+    DEVNULL.close()
