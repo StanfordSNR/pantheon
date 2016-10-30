@@ -115,10 +115,9 @@ class TestCongestionControl(unittest.TestCase):
             check_call(ssh_cmd)
 
         # run local setup.py (even when self.remote exists)
-        # setup mahimahi
-        if self.cc == 'mahimahi':
-            self.setup_mahimahi()
-            return
+
+        # always setup mahimahi (fine to run multiple times)
+        self.setup_mahimahi()
 
         # setup congestion control scheme
         self.setup_congestion_control()
