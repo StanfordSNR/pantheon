@@ -27,12 +27,12 @@ def main():
         os.path.join(src_dir, '../third_party/webrtc'))
     src_file = os.path.join(submodule_dir, 'app.js')
     video_file = os.path.abspath('/tmp/video.y4m')
-    video_md5 = "a4ef8836e546bbef4276346d0b86e81b"
+    video_md5 = 'a4ef8836e546bbef4276346d0b86e81b'
 
     # build dependencies
     if option == 'deps':
-        deps_list = 'chromium-browser nodejs npm xvfb xfonts-100dpi ' \
-                    'xfonts-75dpi xfonts-cyrillic xorg dbus-x11'
+        deps_list = ('chromium-browser nodejs npm xvfb xfonts-100dpi '
+                     'xfonts-75dpi xfonts-cyrillic xorg dbus-x11')
         print deps_list
 
     # build
@@ -73,12 +73,12 @@ def main():
         print 'Listening on port: %s' % port
         sys.stdout.flush()
 
-        cmd = 'chromium-browser --app=http://localhost:%s/sender ' \
-              '--use-fake-ui-for-media-stream ' \
-              '--use-fake-device-for-media-stream ' \
-              '--use-file-for-fake-video-capture=%s ' \
-              '--user-data-dir=/tmp/nonexistent$(date +%%s%%N)' \
-              % (port, video_file)
+        cmd = ('chromium-browser --app=http://localhost:%s/sender '
+               '--use-fake-ui-for-media-stream '
+               '--use-fake-device-for-media-stream '
+               '--use-file-for-fake-video-capture=%s '
+               '--user-data-dir=/tmp/nonexistent$(date +%%s%%N)'
+               % (port, video_file))
         check_call(cmd, shell=True)
 
     # receiver
@@ -90,8 +90,8 @@ def main():
 
         ip = sys.argv[2]
         port = sys.argv[3]
-        cmd = 'chromium-browser --app=http://%s:%s/receiver ' \
-              '--user-data-dir=/tmp/nonexistent$(date +%%s%%N)' % (ip, port)
+        cmd = ('chromium-browser --app=http://%s:%s/receiver '
+               '--user-data-dir=/tmp/nonexistent$(date +%%s%%N)' % (ip, port))
 
         check_call(cmd, shell=True)
 

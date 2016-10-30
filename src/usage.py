@@ -5,17 +5,17 @@ SEND_FIRST = 1
 
 
 def print_usage(name, order):
-    print "Usage:"
-    print "./%s deps" % name
-    print "./%s build" % name
-    print "./%s init" % name
-    print "./%s who_goes_first" % name
+    print 'Usage:'
+    print './%s deps' % name
+    print './%s build' % name
+    print './%s init' % name
+    print './%s who_goes_first' % name
     if order == RECV_FIRST:
-        print "./%s receiver" % name
-        print "./%s sender IP port" % name
+        print './%s receiver' % name
+        print './%s sender IP port' % name
     elif order == SEND_FIRST:
-        print "./%s sender" % name
-        print "./%s receiver IP port" % name
+        print './%s sender' % name
+        print './%s receiver IP port' % name
     sys.exit(1)
 
 

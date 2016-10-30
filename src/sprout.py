@@ -16,8 +16,8 @@ def main():
 
     # build dependencies
     if option == 'deps':
-        deps_list = 'libboost-math-dev libssl-dev ' \
-                    'libprotobuf-dev protobuf-compiler libncurses5-dev'
+        deps_list = ('libboost-math-dev libssl-dev '
+                     'libprotobuf-dev protobuf-compiler libncurses5-dev')
         print deps_list
 
     # build
@@ -28,15 +28,14 @@ def main():
         try:
             check_call(cmd, shell=True)
         except CalledProcessError:
-            sys.stderr.write("patch apply failed but assuming things okay "
-                             "(patch applied previously?)\n")
-            pass
+            sys.stderr.write('patch apply failed but assuming things okay '
+                             '(patch applied previously?)\n')
 
         # make alone sufficient if autogen.sh and configure already run
         cmd = 'cd %s && make -j' % submodule_dir
         if call(cmd, shell=True) is not 0:
-            cmd = 'cd %s && ./autogen.sh && ./configure --enable-examples &&' \
-                  ' make -j' % submodule_dir
+            cmd = ('cd %s && ./autogen.sh && ./configure --enable-examples && '
+                   'make -j' % submodule_dir)
             check_call(cmd, shell=True)
 
     # commands to be run after building and before running
