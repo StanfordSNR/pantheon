@@ -23,6 +23,7 @@ def main():
     args = parser.parse_args()
 
     test_dir = os.path.abspath(os.path.dirname(__file__))
+    pantheon_summary_png = os.path.join(test_dir, 'pantheon_summary.png')
 
     assert call(['which', 'pdflatex']) is 0, "pdflatex not installed"
 
@@ -36,9 +37,9 @@ def main():
                 '\\begin{figure}[H]\n'
                 '\\centering\n'
                 '\\includegraphics[width=\\textwidth]'
-                '{pantheon_summary.png}\n'
+                '{%s}\n'
                 '\\end{figure}\n\n'
-                '\\newpage\n\n')
+                '\\newpage\n\n' % pantheon_summary_png)
 
     for cc in args.cc_schemes:
         datalink_throughput_png = os.path.join(
