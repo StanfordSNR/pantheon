@@ -11,7 +11,6 @@ addons:
 
 install:
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 99
-  - test/setup.py mahimahi
 
 env:
     matrix:
