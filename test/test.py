@@ -321,14 +321,14 @@ class TestCongestionControl(unittest.TestCase):
             throughput_cmd = 'mm-throughput-graph'
             delay_cmd = 'mm-delay-graph'
 
-        datalink_throughput_svg = path.join(
-            self.test_dir, '%s_datalink_throughput.svg' % self.cc)
-        datalink_delay_svg = path.join(
-            self.test_dir, '%s_datalink_delay.svg' % self.cc)
-        acklink_throughput_svg = path.join(
-            self.test_dir, '%s_acklink_throughput.svg' % self.cc)
-        acklink_delay_svg = path.join(
-            self.test_dir, '%s_acklink_delay.svg' % self.cc)
+        datalink_throughput_png = path.join(
+            self.test_dir, '%s_datalink_throughput.png' % self.cc)
+        datalink_delay_png = path.join(
+            self.test_dir, '%s_datalink_delay.png' % self.cc)
+        acklink_throughput_png = path.join(
+            self.test_dir, '%s_acklink_throughput.png' % self.cc)
+        acklink_delay_png = path.join(
+            self.test_dir, '%s_acklink_delay.png' % self.cc)
 
         stats_log = path.join(self.test_dir, '%s_stats.log' % self.cc)
         stats = open(stats_log, 'w')
@@ -336,7 +336,7 @@ class TestCongestionControl(unittest.TestCase):
         sys.stderr.write('\n')
         # Data link
         # throughput
-        datalink_throughput = open(datalink_throughput_svg, 'w')
+        datalink_throughput = open(datalink_throughput_png, 'w')
         cmd = [throughput_cmd, '500', datalink_log]
 
         sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
@@ -352,7 +352,7 @@ class TestCongestionControl(unittest.TestCase):
         self.assertEqual(proc.returncode, 0)
 
         # delay
-        datalink_delay = open(datalink_delay_svg, 'w')
+        datalink_delay = open(datalink_delay_png, 'w')
         cmd = [delay_cmd, datalink_log]
 
         sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
@@ -365,7 +365,7 @@ class TestCongestionControl(unittest.TestCase):
         sys.stderr.write('\n')
         # ACK link
         # throughput
-        acklink_throughput = open(acklink_throughput_svg, 'w')
+        acklink_throughput = open(acklink_throughput_png, 'w')
         cmd = [throughput_cmd, '500', acklink_log]
 
         sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
@@ -381,7 +381,7 @@ class TestCongestionControl(unittest.TestCase):
         self.assertEqual(proc.returncode, 0)
 
         # delay
-        acklink_delay = open(acklink_delay_svg, 'w')
+        acklink_delay = open(acklink_delay_png, 'w')
         cmd = [delay_cmd, acklink_log]
 
         sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
