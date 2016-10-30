@@ -310,16 +310,15 @@ class TestCongestionControl(unittest.TestCase):
         self.run_with_tunnel() if self.flows else self.run_without_tunnel()
 
     def gen_results(self):
+        throughput_cmd = 'mm-tunnel-throughput'
+        delay_cmd = 'mm-tunnel-delay'
+
         if self.flows:
             datalink_log = self.tun_datalink_log
             acklink_log = self.tun_acklink_log
-            throughput_cmd = 'mm-tunnel-throughput'
-            delay_cmd = 'mm-tunnel-delay'
         else:
             datalink_log = self.datalink_log
             acklink_log = self.acklink_log
-            throughput_cmd = 'mm-throughput-graph'
-            delay_cmd = 'mm-delay-graph'
 
         datalink_throughput_png = path.join(
             self.test_dir, '%s_datalink_throughput.png' % self.cc)
