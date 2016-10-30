@@ -24,7 +24,9 @@ def main():
     # build
     if option == 'build':
         cmd = 'cd %s && ./autogen.sh && ./configure && make -j' % submodule_dir
-        cmd += ' && cd %s && ./autogen.sh && ./configure && make -j' % code_dir
+        check_call(cmd, shell=True)
+
+        cmd = 'cd %s && ./autogen.sh && ./configure && make -j' % code_dir
         check_call(cmd, shell=True)
 
     # commands to be run after building and before running
