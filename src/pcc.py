@@ -29,9 +29,8 @@ def main():
         try:
             check_call(cmd, shell=True)
         except CalledProcessError:
-            sys.stderr.write("patch apply failed but assuming things okay "
-                             "(patch applied previously?)\n")
-            pass
+            sys.stderr.write('patch apply failed but assuming things okay '
+                             '(patch applied previously?)\n')
 
         cmd = 'cd %s && make && cd %s && make' % (send_dir, recv_dir)
         check_call(cmd, shell=True)

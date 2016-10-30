@@ -29,12 +29,11 @@ def main():
         try:
             check_call(cmd, shell=True)
         except CalledProcessError:
-            sys.stderr.write("patch apply failed but assuming things okay "
-                             "(patch applied previously?)\n")
-            pass
+            sys.stderr.write('patch apply failed but assuming things okay '
+                             '(patch applied previously?)\n')
 
-        cmd = 'cd %s && ./bootstrap.sh && ./configure && make -j' % \
-              submodule_dir
+        cmd = ('cd %s && ./bootstrap.sh && ./configure && make -j' %
+               submodule_dir)
         check_call(cmd, shell=True)
 
     # commands to be run after building and before running

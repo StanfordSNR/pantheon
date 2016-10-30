@@ -25,8 +25,8 @@ def main():
     if option == 'init':
         cmd = 'sudo modprobe tcp_vegas'
         check_call(cmd, shell=True)
-        cmd = 'echo "vegas" | ' \
-              'sudo tee /proc/sys/net/ipv4/tcp_allowed_congestion_control'
+        cmd = ('echo "vegas" | '
+               'sudo tee /proc/sys/net/ipv4/tcp_allowed_congestion_control')
         check_call(cmd, shell=True)
 
     # who goes first

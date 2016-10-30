@@ -30,8 +30,8 @@ def main():
     # build
     if option == 'build':
         os.environ['PATH'] += ':%s/depot_tools' % submodule_dir
-        cmd = 'cd %s && gclient runhooks && ninja -C out/Release ' \
-              'quic_client quic_server' % path.join(submodule_dir, 'src')
+        cmd = ('cd %s && gclient runhooks && ninja -C out/Release '
+               'quic_client quic_server' % path.join(submodule_dir, 'src'))
         check_call(cmd, shell=True)
 
     # commands to be run after building and before running
