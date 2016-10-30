@@ -23,11 +23,7 @@ def parse_arguments(filename):
             '--interval', action='store', dest='interval', type=int,
             default=0, help='interval time between two consecutive flows')
 
-    if filename == 'setup.py':
-        parser.add_argument(
-            'cc', metavar='mahimahi|congestion-control',
-            help='setup mahimahi before setup any congestion control')
-    elif filename == 'test.py':
+    if filename == 'setup.py' or filename == 'test.py':
         parser.add_argument('cc', metavar='congestion-control',
                             help='name of a congestion control scheme')
     elif filename == 'run.py':

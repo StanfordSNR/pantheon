@@ -20,19 +20,16 @@ sudo apt-get install texlive
 ```
 
 ## Setup
-Set up mahimahi before any congestion control schemes. Currently the supported
-`congestion-control` is `default_tcp`, `vegas`, `ledbat`, `pcc`, `scream`,
-`sprout`, `verus`, `koho_cc`, `webrtc` and `quic`.
+Currently the supported `congestion-control` is `default_tcp`, `vegas`,
+`ledbat`, `pcc`, `scream`, `sprout`, `verus`, `koho_cc`, `webrtc` and `quic`.
 
 ```
-./test/setup.py mahimahi
 ./test/setup.py congestion-control
 ```
 
-or set up mahimahi on both local and remote machines in one command:
+or set up on both local and remote machines in one command:
 
 ```
-./test/setup.py [-i IDENTITY-FILE] -r REMOTE:DIR mahimahi
 ./test/setup.py [-i IDENTITY-FILE] -r REMOTE:DIR congestion-control
 ```
 
