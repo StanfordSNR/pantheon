@@ -13,12 +13,10 @@ git clone https://github.com/StanfordLPNG/pantheon.git
 git submodule update --init
 ```
 
-Then get inkscape and texlive for report generation:
+Then get texlive for report generation:
 
 ```
-sudo add-apt-repository ppa:inkscape.dev/stable
-sudo apt-get update
-sudo apt-get install inkscape texlive
+sudo apt-get install texlive
 ```
 
 ## Setup
