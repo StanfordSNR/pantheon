@@ -25,7 +25,6 @@ def main():
     test_dir = os.path.abspath(os.path.dirname(__file__))
 
     assert call(['which', 'pdflatex']) is 0, "pdflatex not installed"
-    assert call(['which', 'inkscape']) is 0, "inkscape not installed"
 
     latex = open('/tmp/pantheon_report.tex', 'w')
 
