@@ -3,7 +3,7 @@
 import os
 import sys
 import usage
-from subprocess import check_call, CalledProcessError
+from subprocess import call, check_call, CalledProcessError
 from get_open_port import get_open_udp_port
 
 
@@ -32,8 +32,12 @@ def main():
                              "(patch applied previously?)\n")
             pass
 
-        cmd = 'cd %s && ./autogen.sh && ./configure && make -j' % submodule_dir
-        check_call(cmd, shell=True)
+        # make alone sufficient if autogen.sh and configure already run
+        cmd = 'cd %s && make -j' % submodule_dir
+        if call(cmd, shell=True) is not 0:
+            cmd = 'cd %s && ./autogen.sh && ./configure && make -j' \
+                    % submodule_dir
+            check_call(cmd, shell=True)
 
     # commands to be run after building and before running
     if option == 'init':
