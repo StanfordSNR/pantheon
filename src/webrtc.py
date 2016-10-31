@@ -26,7 +26,7 @@ def main():
     submodule_dir = os.path.abspath(
         os.path.join(src_dir, '../third_party/webrtc'))
     src_file = os.path.join(submodule_dir, 'app.js')
-    video_file = os.path.abspath('/tmp/video.y4m')
+    video_file = os.path.join(submodule_dir, 'video.y4m')
     video_md5 = 'a4ef8836e546bbef4276346d0b86e81b'
 
     # build dependencies
@@ -55,6 +55,8 @@ def main():
 
             cmd = ['md5sum', video_file]
             assert(check_output(cmd).split()[0] == video_md5)
+        else:
+            sys.stderr.write('video already exists\n')
 
     # who goes first
     if option == 'who_goes_first':
