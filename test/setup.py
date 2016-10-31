@@ -70,11 +70,11 @@ class TestCongestionControl(unittest.TestCase):
     def install(self):
         cmd = ['python', self.src_file, 'deps']
         sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
-        deps = check_output(cmd)
+        deps = check_output(cmd).strip()
 
         if deps:
             sys.stderr.write('Installing dependencies...\n')
-            sys.stderr.write(deps)
+            sys.stderr.write(deps + '\n')
             cmd = 'sudo apt-get -yq --force-yes install ' + deps
             sys.stderr.write('+ %s\n' % cmd)
             check_call(cmd, shell=True)
