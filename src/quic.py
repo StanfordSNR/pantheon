@@ -21,6 +21,7 @@ def main():
     quic_client = path.join(submodule_dir, 'src/out/Release/quic_client')
 
     cert_dir = path.abspath(path.join(path.dirname(__file__), 'certs'))
+    html_dir = path.join(submodule_dir, 'www.example.org')
     DEVNULL = open(os.devnull, 'w')
 
     # build dependencies
@@ -61,7 +62,7 @@ def main():
         check_call(cmd, shell=True)
 
         # generate a html of size that can be transferred longer than 60 s
-        generate_html(50000000)
+        generate_html(html_dir, 50000000)
 
     # who goes first
     if option == 'who_goes_first':
@@ -73,7 +74,7 @@ def main():
         print 'Listening on port: %s' % port
         sys.stdout.flush()
         cmd = [quic_server, '--port=%s' % port,
-               '--quic_in_memory_cache_dir=/tmp/quic-data/www.example.org',
+               '--quic_in_memory_cache_dir=%s' % html_dir,
                '--certificate_file=%s' % path.join(cert_dir, 'leaf_cert.pem'),
                '--key_file=%s' % path.join(cert_dir, 'leaf_cert.pkcs8')]
         check_call(cmd)
