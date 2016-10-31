@@ -5,16 +5,20 @@ import string
 import random
 
 
-def generate_html(size):
-    file_name = '/tmp/quic-data/www.example.org/index.html'
-    file_dir = os.path.dirname(file_name)
+def generate_html(output_dir, size):
+    file_name = os.path.join(output_dir, 'index.html')
 
     # create file directory if it doesn't exist
     try:
-        os.makedirs(file_dir)
+        os.makedirs(output_dir)
     except OSError as exception:
         if exception.errno != errno.EEXIST:
             raise
+
+    # check if index.html already exists
+    if os.path.isfile(file_name) and os.path.getsize(file_name) > size:
+        sys.stderr.write('index.html already exists\n')
+        return
 
     head_text = ('HTTP/1.1 200 OK\n'
                  'X-Original-Url: https://www.example.org/\n'
@@ -28,24 +32,14 @@ def generate_html(size):
                  '</body>\n'
                  '</html>\n')
 
-    i = len(head_text) + len(foot_text)
-    # check we can actually write something
-    assert (size >= i)
-
     f = open(file_name, 'w')
     f.write(head_text)
 
     block_size = 1024
-    while i < size:
-        if i + block_size <= size:
-            block = ''.join(
-                random.choice(string.letters) for _ in range(block_size))
-            f.write(block)
-            i += block_size
-        else:
-            f.write(random.choice(string.letters))
-            i += 1
+    for i in xrange(size / block_size + 1):
+        block = ''.join(
+            random.choice(string.letters) for _ in xrange(block_size))
+        f.write(block + '\n')
 
     f.write(foot_text)
-
     f.close()
