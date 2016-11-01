@@ -43,9 +43,11 @@ def main():
     test_cmd += ['--sender-side', args.sender_side]
 
     if args.local_if:
+        setup_cmd += ['--local-interface', args.local_if]
         test_cmd += ['--local-interface', args.local_if]
 
     if args.remote_if:
+        setup_cmd += ['--remote-interface', args.remote_if]
         test_cmd += ['--remote-interface', args.remote_if]
 
     # setup and run each congestion control
