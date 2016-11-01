@@ -24,13 +24,13 @@ def parse_arguments(filename):
             '--interval', action='store', dest='interval', type=int, default=0,
             help='interval in seconds between two flows (default 0)')
         parser.add_argument(
-            '--server-side', action='store', dest='server_side',
+            '--tunnel-server', action='store', dest='server_side',
             choices=['local', 'remote'], default='remote',
             help='the side to run mm-tunnelserver on (default "remote")')
         parser.add_argument(
             '--local-addr', action='store', dest='local_addr', metavar='ADDR',
             help='local address (IP/hostname that can be reached by the other '
-            'side if --server-side=local')
+            'side if --tunnel-server=local)')
         parser.add_argument(
             '--sender-side', action='store', dest='sender_side',
             choices=['local', 'remote'], default='local',
@@ -77,6 +77,6 @@ def parse_arguments(filename):
         if args.server_side == 'local':
             assert args.local_addr, (
                 'Must provide local address that can be reached by the other '
-                'side if --server-side=local')
+                'side if --tunnel-server=local')
 
     return args

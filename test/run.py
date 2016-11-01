@@ -36,7 +36,7 @@ def main():
 
     test_cmd += ['-f', flows, '-t', runtime, '--interval', str(args.interval)]
 
-    test_cmd += ['--server-side', args.server_side]
+    test_cmd += ['--tunnel-server', args.server_side]
     if args.server_side == 'local':
         test_cmd += ['--local-addr', args.local_addr]
 
