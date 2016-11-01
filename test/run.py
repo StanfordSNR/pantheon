@@ -34,7 +34,13 @@ def main():
         setup_cmd += ['-r', remote]
         test_cmd += ['-r', remote]
 
-    test_cmd += ['-f', flows, '-t', runtime]
+    test_cmd += ['-f', flows, '-t', runtime, '--interval', str(args.interval)]
+
+    test_cmd += ['--server-side', args.server_side]
+    if args.server_side == 'local':
+        test_cmd += ['--local-addr', args.local_addr]
+
+    test_cmd += ['--sender-side', args.sender_side]
 
     if args.server_if:
         test_cmd += ['--server-interface', args.server_if]
