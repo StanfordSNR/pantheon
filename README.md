@@ -39,14 +39,14 @@ Run `./test/setup.py -h` for detailed usage.
 On local machine:
 
 ```
-./test/test.py [-f FLOWS] [-t RUNTIME] [--interval INTERVAL] congestion-control
+./test/test.py [-f FLOWS] [-t RUNTIME] congestion-control
 ```
 
 or between local machine and remote machine:
 
 ```
 ./test/test.py [-i IDENTITY-FILE] -r REMOTE:DIR [-f FLOWS] [-t RUNTIME]
-               [--interval INTERVAL] congestion-control
+               congestion-control
 ```
 
 `FLOWS=0` indicates that no tunnels would be created in the tests; otherwise,
@@ -57,13 +57,13 @@ Alternatively, run
 
 ```
 ./test/run.py [-i IDENTITY-FILE] [-r REMOTE:DIR] [-f FLOWS] [-t RUNTIME]
-              [--interval INTERVAL]
 ```
 
 to set up and test all congestion control schemes. In addition, a summary
 report `test/pantheon_report.pdf` of the results will be generated.
 
-Run `./test/test.py -h` and `./test/run.py -h` for detailed usage.
+Run `./test/test.py -h` and `./test/run.py -h` for detailed usage, including
+more optional arguments.
 
 ## Usage of Individual Scheme
 
