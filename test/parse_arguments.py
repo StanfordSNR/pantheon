@@ -22,6 +22,12 @@ def parse_arguments(filename):
         parser.add_argument(
             '--interval', action='store', dest='interval', type=int,
             default=0, help='interval time between two consecutive flows')
+        parser.add_argument(
+            '--server-interface', action='store', dest='server_if',
+            metavar='INTERFACE', help='interface to run mm-tunnelserver')
+        parser.add_argument(
+            '--client-interface', action='store', dest='client_if',
+            metavar='INTERFACE', help='interface to run mm-tunnelclient')
 
     if filename == 'setup.py' or filename == 'test.py':
         parser.add_argument('cc', metavar='congestion-control',
