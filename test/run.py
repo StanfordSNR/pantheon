@@ -42,11 +42,11 @@ def main():
 
     test_cmd += ['--sender-side', args.sender_side]
 
-    if args.server_if:
-        test_cmd += ['--server-interface', args.server_if]
+    if args.local_if:
+        test_cmd += ['--local-interface', args.local_if]
 
-    if args.client_if:
-        test_cmd += ['--client-interface', args.client_if]
+    if args.remote_if:
+        test_cmd += ['--remote-interface', args.remote_if]
 
     # setup and run each congestion control
     for cc in cc_schemes:

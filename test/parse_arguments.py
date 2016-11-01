@@ -36,11 +36,11 @@ def parse_arguments(filename):
             choices=['local', 'remote'], default='local',
             help='the side to be data sender (default "local")')
         parser.add_argument(
-            '--server-interface', action='store', dest='server_if',
-            metavar='INTERFACE', help='interface to run mm-tunnelserver on')
+            '--local-interface', action='store', dest='local_if',
+            metavar='INTERFACE', help='local interface to run tunnel on')
         parser.add_argument(
-            '--client-interface', action='store', dest='client_if',
-            metavar='INTERFACE', help='interface to run mm-tunnelclient on')
+            '--remote-interface', action='store', dest='remote_if',
+            metavar='INTERFACE', help='remote interface to run tunnel on')
 
     if filename == 'setup.py' or filename == 'test.py':
         parser.add_argument('cc', metavar='congestion-control',
@@ -70,8 +70,8 @@ def parse_arguments(filename):
         assert (args.flows - 1) * args.interval < args.runtime, (
             'Interval time between flows is too long to be fit in runtime')
 
-        if args.private_key or args.server_if or args.client_if:
-            assert args.remote, ('-i, --server-interface, --client-interface '
+        if args.private_key or args.local_if or args.remote_if:
+            assert args.remote, ('-i, --local-interface, --remote-interface '
                                  'must run along with -r')
 
         if args.server_side == 'local':
