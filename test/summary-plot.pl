@@ -23,6 +23,7 @@ sub prettify { # maybe this should be every driver's responsibility too!
   return $scheme;
 }
 
+my $delay_name = undef;
 my @data;
 for my $scheme ( @ARGV ) {
   my $filename = $scheme . q{_stats.log};
@@ -44,9 +45,12 @@ for my $scheme ( @ARGV ) {
       if ( m{^Average throughput: (.*?) Mbits} ) {
         die if exists $row{ throughput };
         $row{ throughput } = $1;
-      } elsif ( m{^95th percentile .* delay: (.*?) ms} ) {
+      } elsif ( m{^95th percentile (.*) delay: (.*?) ms} ) {
         die if exists $row{ delay };
-        $row{ delay } = $1;
+        if (not defined $delay_name) {
+          $delay_name = $1;
+        }
+        $row{ delay } = $2;
       }
     }
 
@@ -72,7 +76,7 @@ my $tput_min = (sort { $a->{ throughput } <=> $b->{ throughput } } @data)[ 0 ]->
 my $tput_max = (sort { $a->{ throughput } <=> $b->{ throughput } } @data)[ -1 ]->{ throughput };
 
 print GNUPLOT <<END;
-set xlabel "95th percentile of signal delay (ms)"
+set xlabel "95th percentile of $delay_name delay (ms)"
 set ylabel "throughput (Mbit/s)"
 set terminal png size 1024,768 font Arial 16 enhanced
 set logscale x
