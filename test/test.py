@@ -19,6 +19,9 @@ class TestCongestionControl(unittest.TestCase):
         self.remote = args.remote
         self.private_key = args.private_key
         self.interval = args.interval
+        self.server_side = args.server_side
+        self.local_addr = args.local_addr
+        self.sender_side = args.sender_side
         self.server_if = args.server_if
         self.client_if = args.client_if
 
@@ -144,33 +147,52 @@ class TestCongestionControl(unittest.TestCase):
         self.tc_elogs = []
 
         for i in xrange(self.flows):
-            self.ts_ilogs.append('/tmp/ts%s.ingress.log' % (i + 1))
-            self.ts_elogs.append('/tmp/ts%s.egress.log' % (i + 1))
-            self.tc_ilogs.append('/tmp/tc%s.ingress.log' % (i + 1))
-            self.tc_elogs.append('/tmp/tc%s.egress.log' % (i + 1))
+            self.ts_ilogs.append('/tmp/server%s.ingress.log' % (i + 1))
+            self.ts_elogs.append('/tmp/server%s.egress.log' % (i + 1))
+            self.tc_ilogs.append('/tmp/client%s.ingress.log' % (i + 1))
+            self.tc_elogs.append('/tmp/client%s.egress.log' % (i + 1))
 
         # run mm-tunnelserver manager
         if self.remote:
-            ts_manager_cmd = self.ssh_cmd + ['python',
-                                             self.remote_tunnel_manager]
+            if self.server_side == 'local':
+                ts_manager_cmd = ['python', self.tunnel_manager]
+            else:
+                ts_manager_cmd = self.ssh_cmd + ['python',
+                                                 self.remote_tunnel_manager]
         else:
             ts_manager_cmd = ['python', self.tunnel_manager]
 
-        sys.stderr.write('tunnel server manager (tsm) ' +
-                         ' '.join(ts_manager_cmd) + '\n')
-        ts_manager_proc = Popen(ts_manager_cmd, stdin=PIPE,
-                                stdout=PIPE, preexec_fn=os.setsid)
+        sys.stderr.write('+ server: ' + ' '.join(ts_manager_cmd) + '\n')
+        ts_manager = Popen(ts_manager_cmd, stdin=PIPE,
+                           stdout=PIPE, preexec_fn=os.setsid)
 
         # run mm-tunnelclient manager
-        tc_manager_cmd = ['python', self.tunnel_manager]
-        if not self.remote:
-            tc_manager_cmd = self.mm_link_cmd + tc_manager_cmd
+        if self.remote:
+            if self.server_side == 'local':
+                tc_manager_cmd = self.ssh_cmd + ['python',
+                                                 self.remote_tunnel_manager]
+            else:
+                tc_manager_cmd = ['python', self.tunnel_manager]
+        else:
+            tc_manager_cmd = self.mm_link_cmd + ['python', self.tunnel_manager]
 
-        sys.stderr.write('tunnel client manager (tcm) ' +
-                         ' '.join(tc_manager_cmd) + '\n')
-        tc_manager_proc = Popen(tc_manager_cmd, stdin=PIPE,
-                                stdout=PIPE, preexec_fn=os.setsid)
+        sys.stderr.write('+ client: ' + ' '.join(tc_manager_cmd) + '\n')
+        tc_manager = Popen(tc_manager_cmd, stdin=PIPE,
+                           stdout=PIPE, preexec_fn=os.setsid)
 
+        # create alias for ts_manager and tc_manager using sender or receiver
+        if self.sender_side == self.server_side:
+            send_manager = ts_manager
+            recv_manager = tc_manager
+            send_prompt = '(server) '
+            recv_prompt = '(client) '
+        else:
+            send_manager = tc_manager
+            recv_manager = ts_manager
+            send_prompt = '(client) '
+            recv_prompt = '(server) '
+
+        # run each flow
         second_cmds = []
         for i in xrange(self.flows):
             tun_id = i + 1
@@ -183,17 +205,27 @@ class TestCongestionControl(unittest.TestCase):
                 ts_cmd += ' --interface=' + self.server_if
             ts_cmd = 'tunnel %s %s\n' % (tun_id, ts_cmd)
 
-            sys.stderr.write('(tsm) ' + ts_cmd)
-            ts_manager_proc.stdin.write(ts_cmd)
+            sys.stderr.write('(server) ' + ts_cmd)
+            ts_manager.stdin.write(ts_cmd)
 
-            # read the command for mm-tunnelclient to run
-            sys.stderr.write('(tsm) ' + readline_cmd)
-            ts_manager_proc.stdin.write(readline_cmd)
+            # read the command from mm-tunnelserver to run mm-tunnelclient
+            sys.stderr.write('(server) ' + readline_cmd)
+            ts_manager.stdin.write(readline_cmd)
 
-            cmd = ts_manager_proc.stdout.readline().split()
-            cmd[1] = self.remote_ip
-            tc_private_ip = cmd[3]  # client private IP
-            ts_private_ip = cmd[4]  # server private IP
+            cmd = ts_manager.stdout.readline().split()
+            if self.server_side == 'remote':
+                cmd[1] = self.remote_ip
+            else:
+                cmd[1] = self.local_addr
+            tc_pri_ip = cmd[3]  # tunnel client private IP
+            ts_pri_ip = cmd[4]  # tunnel server private IP
+
+            if self.sender_side == self.server_side:
+                send_pri_ip = ts_pri_ip
+                recv_pri_ip = tc_pri_ip
+            else:
+                send_pri_ip = tc_pri_ip
+                recv_pri_ip = ts_pri_ip
 
             # run mm-tunnelclient
             tc_cmd = ('%s --ingress-log=%s --egress-log=%s' %
@@ -201,41 +233,58 @@ class TestCongestionControl(unittest.TestCase):
             if self.client_if:
                 tc_cmd += ' --interface=' + self.client_if
             tc_cmd = 'tunnel %s %s\n' % (tun_id, tc_cmd)
-            sys.stderr.write('(tcm) ' + tc_cmd)
-            tc_manager_proc.stdin.write(tc_cmd)
+            sys.stderr.write('(client) ' + tc_cmd)
+            tc_manager.stdin.write(tc_cmd)
 
             if self.first_to_run == 'receiver':
+                if self.sender_side == 'local':
+                    first_src_file = self.remote_src_file
+                    second_src_file = self.src_file
+                else:
+                    first_src_file = self.src_file
+                    second_src_file = self.remote_src_file
+
                 first_cmd = ('tunnel %s python %s receiver\n' %
-                             (tun_id, self.remote_src_file))
-                sys.stderr.write('(tsm) ' + first_cmd)
-                ts_manager_proc.stdin.write(first_cmd)
+                             (tun_id, first_src_file))
+                second_cmd = ('tunnel %s python %s sender %s' %
+                              (tun_id, second_src_file, recv_pri_ip))
+
+                sys.stderr.write(recv_prompt + first_cmd)
+                recv_manager.stdin.write(first_cmd)
 
                 # find printed port
                 port = None
                 while not port:
-                    sys.stderr.write('(tsm) ' + readline_cmd)
-                    ts_manager_proc.stdin.write(readline_cmd)
-                    port = self.get_port(ts_manager_proc)
+                    sys.stderr.write(recv_prompt + readline_cmd)
+                    recv_manager.stdin.write(readline_cmd)
+                    port = self.get_port(recv_manager)
 
-                second_cmd = ('tunnel %s python %s sender %s %s\n' %
-                              (tun_id, self.src_file, ts_private_ip, port))
+                second_cmd += ' %s\n' % port
                 second_cmds.append(second_cmd)
-            else:
+            else:  # self.first_to_run == 'sender'
+                if self.sender_side == 'local':
+                    first_src_file = self.src_file
+                    second_src_file = self.remote_src_file
+                else:
+                    first_src_file = self.remote_src_file
+                    second_src_file = self.src_file
+
                 first_cmd = ('tunnel %s python %s sender\n' %
-                             (tun_id, self.src_file))
-                sys.stderr.write('(tcm) ' + first_cmd)
-                tc_manager_proc.stdin.write(first_cmd)
+                             (tun_id, first_src_file))
+                second_cmd = ('tunnel %s python %s receiver %s' %
+                              (tun_id, second_src_file, send_pri_ip))
+
+                sys.stderr.write(send_prompt + first_cmd)
+                send_manager.stdin.write(first_cmd)
 
                 # find printed port
                 port = None
                 while not port:
-                    sys.stderr.write('(tcm) ' + readline_cmd)
-                    tc_manager_proc.stdin.write(readline_cmd)
-                    port = self.get_port(tc_manager_proc)
+                    sys.stderr.write(send_prompt + readline_cmd)
+                    send_manager.stdin.write(readline_cmd)
+                    port = self.get_port(send_manager)
 
-                second_cmd = (
-                    'tunnel %s python %s receiver %s %s\n' %
-                    (tun_id, self.remote_src_file, tc_private_ip, port))
+                second_cmd += ' %s\n' % port
                 second_cmds.append(second_cmd)
 
         time.sleep(self.first_to_run_setup_time)
@@ -247,21 +296,21 @@ class TestCongestionControl(unittest.TestCase):
                 time.sleep(self.interval)
             second_cmd = second_cmds[i]
             if self.first_to_run == 'receiver':
-                sys.stderr.write('(tcm) ' + second_cmd)
-                tc_manager_proc.stdin.write(second_cmd)
+                sys.stderr.write(send_prompt + second_cmd)
+                send_manager.stdin.write(second_cmd)
             else:
-                sys.stderr.write('(tsm) ' + second_cmd)
-                ts_manager_proc.stdin.write(second_cmd)
+                sys.stderr.write(recv_prompt + second_cmd)
+                recv_manager.stdin.write(second_cmd)
         elapsed_time = time.time() - start_time
         self.assertTrue(self.runtime > elapsed_time,
                         'Interval time between flows is too long')
         time.sleep(self.runtime - elapsed_time)
 
         # stop all the running flows
-        sys.stderr.write('(tsm) halt\n')
-        ts_manager_proc.stdin.write('halt\n')
-        sys.stderr.write('(tcm) halt\n')
-        tc_manager_proc.stdin.write('halt\n')
+        sys.stderr.write('(server) halt\n')
+        ts_manager.stdin.write('halt\n')
+        sys.stderr.write('(client) halt\n')
+        tc_manager.stdin.write('halt\n')
 
         self.merge_tunnel_logs()
         sys.stderr.write('Done\n')
@@ -277,21 +326,33 @@ class TestCongestionControl(unittest.TestCase):
                 if self.private_key:
                     scp_cmd += ['-i', self.private_key]
 
-                check_call(scp_cmd + [self.remote_addr + ':' +
-                                      self.ts_ilogs[i], self.ts_ilogs[i]])
-                check_call(scp_cmd + [self.remote_addr + ':' +
-                                      self.ts_elogs[i], self.ts_elogs[i]])
+                if self.server_side == 'remote':
+                    check_call(scp_cmd + [self.remote_addr + ':' +
+                                          self.ts_ilogs[i], self.ts_ilogs[i]])
+                    check_call(scp_cmd + [self.remote_addr + ':' +
+                                          self.ts_elogs[i], self.ts_elogs[i]])
+                else:
+                    check_call(scp_cmd + [self.remote_addr + ':' +
+                                          self.tc_ilogs[i], self.tc_ilogs[i]])
+                    check_call(scp_cmd + [self.remote_addr + ':' +
+                                          self.tc_elogs[i], self.tc_elogs[i]])
 
             tun_datalink_log = '/tmp/tun_datalink%s.log' % (i + 1)
             tun_acklink_log = '/tmp/tun_acklink%s.log' % (i + 1)
+            if self.sender_side == self.server_side:
+                s2c_log = tun_datalink_log
+                c2s_log = tun_acklink_log
+            else:
+                s2c_log = tun_acklink_log
+                c2s_log = tun_datalink_log
 
             cmd = ['mm-tunnel-merge-logs', 'single', '-i', self.ts_ilogs[i],
-                   '-e', self.tc_elogs[i], '-o', tun_datalink_log]
+                   '-e', self.tc_elogs[i], '-o', c2s_log]
             sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
             check_call(cmd)
 
             cmd = ['mm-tunnel-merge-logs', 'single', '-i', self.tc_ilogs[i],
-                   '-e', self.ts_elogs[i], '-o', tun_acklink_log]
+                   '-e', self.ts_elogs[i], '-o', s2c_log]
             sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
             check_call(cmd)
 
