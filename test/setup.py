@@ -14,22 +14,44 @@ class TestCongestionControl(unittest.TestCase):
         self.cc = args.cc.lower()
         self.remote = args.remote
         self.private_key = args.private_key
+        self.local_if = args.local_if
+        self.remote_if = args.remote_if
         self.test_dir = path.abspath(path.dirname(__file__))
 
     def sanity_check_gitmodules(self):
         third_party_dir = os.path.join(self.test_dir, '../third_party')
-        for submodule in os.listdir(third_party_dir):
-            path = os.path.join(third_party_dir, submodule)
+        for module in os.listdir(third_party_dir):
+            path = os.path.join(third_party_dir, module)
             if os.path.isdir(path):
-                assert os.listdir(path), 'Folder third_party/%s empty: make ' \
-                    'sure to initialize git submodules with \"git submodule ' \
-                    'update --init\"' % submodule
+                assert os.listdir(path), (
+                    'Folder third_party/%s empty: make sure to initialize git '
+                    'submodules with "git submodule update --init"' % module)
 
     def setup_mahimahi(self):
         # Enable IP forwarding
         cmd = 'sudo sysctl -w net.ipv4.ip_forward=1'
         sys.stderr.write('+ ' + cmd + '\n')
         check_call(cmd, shell=True)
+
+        # Disable Reverse Path Filter
+        cmd_str = 'echo 0 | sudo tee /proc/sys/net/ipv4/conf/%s/rp_filter'
+        if self.local_if:
+            cmd = cmd_str % 'all'
+            sys.stderr.write('+ ' + cmd + '\n')
+            check_call(cmd, shell=True)
+
+            cmd = cmd_str % self.local_if
+            sys.stderr.write('+ ' + cmd + '\n')
+            check_call(cmd, shell=True)
+
+        if self.remote_if:
+            cmd = ' '.join(self.ssh_cmd) + ' "%s"' % (cmd_str % 'all')
+            sys.stderr.write('+ ' + cmd + '\n')
+            check_call(cmd, shell=True)
+
+            cmd = ' '.join(self.ssh_cmd) + ' "%s"' % (cmd_str % self.remote_if)
+            sys.stderr.write('+ ' + cmd + '\n')
+            check_call(cmd, shell=True)
 
         # install mahimahi
         mm_dir = path.join(self.test_dir, '../third_party/mahimahi')
@@ -100,18 +122,18 @@ class TestCongestionControl(unittest.TestCase):
         # run remote setup.py
         if self.remote:
             (remote_addr, remote_dir) = self.remote.split(':')
-            ssh_cmd = ['ssh']
+            self.ssh_cmd = ['ssh']
             if self.private_key:
-                ssh_cmd += ['-i', self.private_key]
-            ssh_cmd.append(remote_addr)
+                self.ssh_cmd += ['-i', self.private_key]
+            self.ssh_cmd.append(remote_addr)
 
             # os.path.join evaluate path locally only
             if remote_dir[-1] != '/':
                 remote_dir += '/'
             remote_setup = remote_dir + 'test/setup.py'
-            ssh_cmd += ['python', remote_setup, self.cc]
-            sys.stderr.write('+ ' + ' '.join(ssh_cmd) + '\n')
-            check_call(ssh_cmd)
+            remote_setup_cmd = self.ssh_cmd + ['python', remote_setup, self.cc]
+            sys.stderr.write('+ ' + ' '.join(remote_setup_cmd) + '\n')
+            check_call(remote_setup_cmd)
 
         # run local setup.py (even when self.remote exists)
 
