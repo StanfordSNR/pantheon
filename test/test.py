@@ -19,6 +19,8 @@ class TestCongestionControl(unittest.TestCase):
         self.remote = args.remote
         self.private_key = args.private_key
         self.interval = args.interval
+        self.server_if = args.server_if
+        self.client_if = args.client_if
 
     def timeout_handler(signum, frame):
         raise
@@ -177,6 +179,8 @@ class TestCongestionControl(unittest.TestCase):
             # run mm-tunnelserver
             ts_cmd = ('mm-tunnelserver --ingress-log=%s --egress-log=%s' %
                       (self.ts_ilogs[i], self.ts_elogs[i]))
+            if self.server_if:
+                ts_cmd += ' --interface=' + self.server_if
             ts_cmd = 'tunnel %s %s\n' % (tun_id, ts_cmd)
 
             sys.stderr.write('(tsm) ' + ts_cmd)
@@ -194,6 +198,8 @@ class TestCongestionControl(unittest.TestCase):
             # run mm-tunnelclient
             tc_cmd = ('%s --ingress-log=%s --egress-log=%s' %
                       (' '.join(cmd), self.tc_ilogs[i], self.tc_elogs[i]))
+            if self.client_if:
+                tc_cmd += ' --interface=' + self.client_if
             tc_cmd = 'tunnel %s %s\n' % (tun_id, tc_cmd)
             sys.stderr.write('(tcm) ' + tc_cmd)
             tc_manager_proc.stdin.write(tc_cmd)

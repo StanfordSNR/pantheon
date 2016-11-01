@@ -36,6 +36,12 @@ def main():
 
     test_cmd += ['-f', flows, '-t', runtime]
 
+    if args.server_if:
+        test_cmd += ['--server-interface', args.server_if]
+
+    if args.client_if:
+        test_cmd += ['--client-interface', args.client_if]
+
     # setup and run each congestion control
     for cc in cc_schemes:
         if not args.test_only:
