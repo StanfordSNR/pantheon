@@ -53,5 +53,7 @@ def parse_arguments(filename):
         assert args.runtime <= 60, 'Runtime cannot be greater than 60 seconds'
         assert (args.flows - 1) * args.interval < args.runtime, (
             'Interval time between flows is too long to be fit in runtime')
+        if args.server_if or args.client_if:
+            assert args.remote
 
     return args
