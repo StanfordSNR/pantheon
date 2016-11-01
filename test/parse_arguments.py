@@ -23,11 +23,21 @@ def parse_arguments(filename):
             '--interval', action='store', dest='interval', type=int,
             default=0, help='interval time between two consecutive flows')
         parser.add_argument(
+            '--server-side', action='store', dest='server_side',
+            choices=['local', 'remote'], default='remote',
+            help='the side on which to run mm-tunnelserver')
+        parser.add_argument(
+            '--sender-side', action='store', dest='sender_side',
+            choices=['local', 'remote'], default='local',
+            help='the side to be data sender')
+        parser.add_argument(
             '--server-interface', action='store', dest='server_if',
-            metavar='INTERFACE', help='interface to run mm-tunnelserver')
+            metavar='INTERFACE', help='the interface on which to run '
+            'mm-tunnelserver')
         parser.add_argument(
             '--client-interface', action='store', dest='client_if',
-            metavar='INTERFACE', help='interface to run mm-tunnelclient')
+            metavar='INTERFACE', help='the interface on which to run '
+            'mm-tunnelclient')
 
     if filename == 'setup.py' or filename == 'test.py':
         parser.add_argument('cc', metavar='congestion-control',
@@ -48,12 +58,15 @@ def parse_arguments(filename):
         assert ':' in args.remote, '-r must be followed by [user@]hostname:dir'
 
     if filename == 'test.py' or filename == 'run.py':
-        assert not (args.flows == 0 and args.remote), (
-            'Remote test must run at least one flow (one tunnel)')
+        if args.remote:
+            assert args.flows > 0, 'Remote test must run at least one flow'
+
         assert args.runtime <= 60, 'Runtime cannot be greater than 60 seconds'
         assert (args.flows - 1) * args.interval < args.runtime, (
             'Interval time between flows is too long to be fit in runtime')
-        if args.server_if or args.client_if:
-            assert args.remote
+
+        if args.private_key or args.server_if or args.client_if:
+            assert args.remote, ('-i, --server-interface, --client-interface '
+                                 'must run along with -r')
 
     return args
