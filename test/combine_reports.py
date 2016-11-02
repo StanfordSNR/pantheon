@@ -4,6 +4,7 @@ import os
 import sys
 import string
 import argparse
+from parse_arguments import parse_arguments
 from subprocess import call, check_call, PIPE, Popen
 
 
@@ -17,10 +18,7 @@ def prettify(cc):
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('cc_schemes', metavar='congestion-control',
-                        nargs='+', help='congestion control schemes')
-    args = parser.parse_args()
+    args = parse_arguments(os.path.basename(__file__))
 
     test_dir = os.path.abspath(os.path.dirname(__file__))
     pantheon_summary_png = os.path.join(test_dir, 'pantheon_summary.png')

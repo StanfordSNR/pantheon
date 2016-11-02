@@ -14,6 +14,13 @@ def main():
     flows = str(args.flows)
     runtime = str(args.runtime)
 
+    run_setup = True
+    run_test = True
+    if args.run_only == 'setup':
+        run_test = False
+    elif args.run_only == 'test':
+        run_setup = False
+
     test_dir = path.abspath(path.dirname(__file__))
     setup_src = path.join(test_dir, 'setup.py')
     test_src = path.join(test_dir, 'test.py')
@@ -52,17 +59,17 @@ def main():
 
     # setup and run each congestion control
     for cc in cc_schemes:
-        if not args.test_only:
+        if run_setup:
             cmd = setup_cmd + [cc]
             sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
             check_call(cmd)
 
-        if not args.setup_only:
+        if run_test:
             cmd = test_cmd + [cc]
             sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
             check_call(cmd)
 
-    if not args.setup_only:
+    if run_test:
         cmd = ['perl', summary_plot_src] + cc_schemes
         sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
         check_call(cmd)

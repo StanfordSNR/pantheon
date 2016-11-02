@@ -2,82 +2,191 @@ import argparse
 import sys
 
 
+def build_arg_dict():
+    arg_dict = {}
+
+    arg_dict['-i'] = {
+        'metavar': 'IDENTITY-FILE',
+        'action': 'store',
+        'dest': 'private_key',
+        'help': 'identity file (private key) for ssh/scp to use',
+    }
+
+    arg_dict['-r'] = {
+        'metavar': 'REMOTE:DIR',
+        'action': 'store',
+        'dest': 'remote',
+        'help': 'remote pantheon directory: [user@]hostname:dir',
+    }
+
+    arg_dict['-f'] = {
+        'metavar': 'FLOWS',
+        'action': 'store',
+        'dest': 'flows',
+        'type': int,
+        'default': 1,
+        'help': 'number of flows (default 1)',
+    }
+
+    arg_dict['-t'] = {
+        'metavar': 'RUNTIME',
+        'action': 'store',
+        'dest': 'runtime',
+        'type': int,
+        'default': 30,
+        'help': 'total runtime in seconds (default 30)',
+    }
+
+    arg_dict['--interval'] = {
+        'metavar': 'INTERVAL',
+        'action': 'store',
+        'dest': 'interval',
+        'type': int,
+        'default': 0,
+        'help': 'interval in seconds between two flows (default 0)',
+    }
+
+    arg_dict['--tunnel-server'] = {
+        'choices': ['local', 'remote'],
+        'action': 'store',
+        'dest': 'server_side',
+        'default': 'remote',
+        'help': 'the side to run mm-tunnelserver on (default remote)',
+    }
+
+    arg_dict['--local-addr'] = {
+        'metavar': 'ADDR',
+        'action': 'store',
+        'dest': 'local_addr',
+        'help': 'local address (IP/hostname); if "--tunnel-server local" is '
+                'given, the remote side must be able to reach this address',
+    }
+
+    arg_dict['--sender-side'] = {
+        'choices': ['local', 'remote'],
+        'action': 'store',
+        'dest': 'sender_side',
+        'default': 'local',
+        'help': 'the side to be data sender (default local)',
+    }
+
+    arg_dict['--local-interface'] = {
+        'metavar': 'INTERFACE',
+        'action': 'store',
+        'dest': 'local_if',
+        'help': 'local interface to run tunnel on',
+    }
+
+    arg_dict['--remote-interface'] = {
+        'metavar': 'INTERFACE',
+        'action': 'store',
+        'dest': 'remote_if',
+        'help': 'remote interface to run tunnel on',
+    }
+
+    arg_dict['--local-info'] = {
+        'metavar': 'INFO',
+        'action': 'store',
+        'dest': 'local_info',
+        'help': 'extra information about the local side',
+    }
+
+    arg_dict['--remote-info'] = {
+        'metavar': 'INFO',
+        'action': 'store',
+        'dest': 'remote_info',
+        'help': 'extra information about the remote side',
+    }
+
+    arg_dict['--metadata-file'] = {
+        'metavar': 'FILENAME',
+        'action': 'store',
+        'dest': 'metadata_file',
+        'help': 'file containing metadata to be included in pantheon report',
+    }
+
+    arg_dict['--run-only'] = {
+        'choices': ['setup', 'test'],
+        'action': 'store',
+        'dest': 'run_only',
+        'help': 'run setup or test only',
+    }
+
+    arg_dict['cc'] = {
+        'metavar': 'congestion-control',
+        'help': 'a congestion control scheme in default_tcp, koho_cc, ledbat, '
+                'pcc, quic, scream, sprout, vegas, verus, webrtc',
+    }
+
+    arg_dict['cc_schemes'] = {
+        'metavar': 'congestion-control',
+        'nargs': '+',
+        'help': 'congestion control schemes',
+    }
+
+    return arg_dict
+
+
+def add_arg_list(parser, arg_dict, arg_list):
+    for arg in arg_list:
+        assert arg in arg_dict, '%s has not been defined' % arg
+        parser.add_argument(arg, **arg_dict[arg])
+
+
+def validate_args(args):
+    private_key = getattr(args, 'private_key', None)
+    remote = getattr(args, 'remote', None)
+    flows = getattr(args, 'flows', None)
+    runtime = getattr(args, 'runtime', None)
+    interval = getattr(args, 'interval', None)
+    server_side = getattr(args, 'server_side', None)
+    local_addr = getattr(args, 'local_addr', None)
+    remote_if = getattr(args, 'remote_if', None)
+
+    if private_key or remote_if:
+        print private_key
+        print remote_if
+        assert remote, '-i, --remote-interface must run along with -r'
+
+    if remote:
+        assert ':' in remote, '-r must be followed by [user@]hostname:dir'
+        if flows:
+            assert flows >= 1, 'remote test must run at least one flow'
+
+    if runtime:
+        assert runtime <= 60, 'runtime cannot be greater than 60 seconds'
+        if flows and interval:
+            assert (flows - 1) * interval < runtime, (
+                'interval time between flows is too long to be fit in runtime')
+
+    if server_side == 'local':
+        assert local_addr, (
+            'must provide local address that can be reached by the other '
+            'side if "--tunnel-server local"')
+
+
 def parse_arguments(filename):
     parser = argparse.ArgumentParser()
+    arg_dict = build_arg_dict()
 
-    parser.add_argument(
-        '-i', metavar='IDENTITY-FILE', action='store', dest='private_key',
-        help='identity file (private key) for ssh/scp to use')
-    parser.add_argument(
-        '-r', metavar='REMOTE:DIR', action='store', dest='remote',
-        help='remote pantheon directory: [user@]hostname:dir')
-
-    if filename == 'test.py' or filename == 'run.py':
-        parser.add_argument(
-            '-f', action='store', dest='flows', type=int, default=1,
-            help='number of flows (mm-tunnelclient/mm-tunnelserver pairs, '
-                 'default 1)')
-        parser.add_argument(
-            '-t', action='store', dest='runtime', type=int, default=30,
-            help='total runtime of test (default 30)')
-        parser.add_argument(
-            '--interval', action='store', dest='interval', type=int, default=0,
-            help='interval in seconds between two flows (default 0)')
-        parser.add_argument(
-            '--tunnel-server', action='store', dest='server_side',
-            choices=['local', 'remote'], default='remote',
-            help='the side to run mm-tunnelserver on (default "remote")')
-        parser.add_argument(
-            '--local-addr', action='store', dest='local_addr', metavar='ADDR',
-            help='local address (IP/hostname that can be reached by the other '
-            'side if --tunnel-server=local)')
-        parser.add_argument(
-            '--sender-side', action='store', dest='sender_side',
-            choices=['local', 'remote'], default='local',
-            help='the side to be data sender (default "local")')
-
-    parser.add_argument(
-        '--local-interface', action='store', dest='local_if',
-        metavar='INTERFACE', help='local interface to run tunnel on')
-    parser.add_argument(
-        '--remote-interface', action='store', dest='remote_if',
-        metavar='INTERFACE', help='remote interface to run tunnel on')
-
-    if filename == 'setup.py' or filename == 'test.py':
-        parser.add_argument('cc', metavar='congestion-control',
-                            help='name of a congestion control scheme')
+    if filename == 'setup.py':
+        add_arg_list(parser, arg_dict, [
+            '-i', '-r', '--local-interface', '--remote-interface', 'cc'])
+    elif filename == 'test.py':
+        add_arg_list(parser, arg_dict, [
+            '-i', '-r', '-f', '-t', '--interval', '--tunnel-server',
+            '--local-addr', '--sender-side', '--local-interface',
+            '--remote-interface', 'cc'])
+    elif filename == 'combine_reports.py':
+        add_arg_list(parser, arg_dict, ['--metadata-file', 'cc_schemes'])
     elif filename == 'run.py':
-        group = parser.add_mutually_exclusive_group()
-        group.add_argument(
-            '--test-only', action='store_true', dest='test_only',
-            default=False, help='run test only without running setup '
-            '(default False)')
-        group.add_argument(
-            '--setup-only', action='store_true', dest='setup_only',
-            default=False, help='run setup only without running test '
-            '(default False)')
+        add_arg_list(parser, arg_dict, [
+            '-i', '-r', '-f', '-t', '--interval', '--tunnel-server',
+            '--local-addr', '--sender-side', '--local-interface',
+            '--remote-interface', '--local-info', '--remote-info',
+            '--run-only'])
 
     args = parser.parse_args()
-
-    # arguments validation
-    if args.remote:
-        assert ':' in args.remote, '-r must be followed by [user@]hostname:dir'
-
-    if filename == 'test.py' or filename == 'run.py':
-        if args.remote:
-            assert args.flows > 0, 'Remote test must run at least one flow'
-
-        assert args.runtime <= 60, 'Runtime cannot be greater than 60 seconds'
-        assert (args.flows - 1) * args.interval < args.runtime, (
-            'Interval time between flows is too long to be fit in runtime')
-
-        if args.private_key or args.remote_if:
-            assert args.remote, (
-                '-i, --remote-interface must run along with -r')
-
-        if args.server_side == 'local':
-            assert args.local_addr, (
-                'Must provide local address that can be reached by the other '
-                'side if --tunnel-server=local')
+    validate_args(args)
 
     return args
