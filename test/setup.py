@@ -34,22 +34,16 @@ class TestCongestionControl(unittest.TestCase):
         check_call(cmd, shell=True)
 
         # Disable Reverse Path Filter
-        cmd_str = 'echo 0 | sudo tee /proc/sys/net/ipv4/conf/%s/rp_filter'
+        cmd_str = 'echo 0 | sudo tee -a '
+        filter_path = '/proc/sys/net/ipv4/conf/%s/rp_filter '
         if self.local_if:
-            cmd = cmd_str % 'all'
-            sys.stderr.write('+ ' + cmd + '\n')
-            check_call(cmd, shell=True)
-
-            cmd = cmd_str % self.local_if
+            cmd = cmd_str + filter_path % 'all' + filter_path % self.local_if
             sys.stderr.write('+ ' + cmd + '\n')
             check_call(cmd, shell=True)
 
         if self.remote_if:
-            cmd = ' '.join(self.ssh_cmd) + ' "%s"' % (cmd_str % 'all')
-            sys.stderr.write('+ ' + cmd + '\n')
-            check_call(cmd, shell=True)
-
-            cmd = ' '.join(self.ssh_cmd) + ' "%s"' % (cmd_str % self.remote_if)
+            cmd = cmd_str + filter_path % 'all' + filter_path % self.remote_if
+            cmd = ' '.join(self.ssh_cmd) + cmd
             sys.stderr.write('+ ' + cmd + '\n')
             check_call(cmd, shell=True)
 
