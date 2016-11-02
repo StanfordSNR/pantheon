@@ -18,8 +18,8 @@ def parse_arguments(filename):
             help='number of flows (mm-tunnelclient/mm-tunnelserver pairs, '
                  'default 1)')
         parser.add_argument(
-            '-t', action='store', dest='runtime', type=int, default=60,
-            help='total runtime of test (default 60)')
+            '-t', action='store', dest='runtime', type=int, default=30,
+            help='total runtime of test (default 30)')
         parser.add_argument(
             '--interval', action='store', dest='interval', type=int, default=0,
             help='interval in seconds between two flows (default 0)')
