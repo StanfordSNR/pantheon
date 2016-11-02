@@ -43,7 +43,7 @@ class TestCongestionControl(unittest.TestCase):
 
         if self.remote_if:
             cmd = cmd_str + filter_path % 'all' + filter_path % self.remote_if
-            cmd = ' '.join(self.ssh_cmd) + ' ' + cmd
+            cmd = ' '.join(self.ssh_cmd) + ' "%s"' % cmd
             sys.stderr.write('+ ' + cmd + '\n')
             check_call(cmd, shell=True)
 
