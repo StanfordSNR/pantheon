@@ -34,8 +34,8 @@ class TestCongestionControl(unittest.TestCase):
         check_call(cmd, shell=True)
 
         # Disable Reverse Path Filter
-        cmd_str = 'echo 0 | sudo tee -a '
-        filter_path = '/proc/sys/net/ipv4/conf/%s/rp_filter '
+        cmd_str = 'echo 0 | sudo tee'
+        filter_path = ' /proc/sys/net/ipv4/conf/%s/rp_filter'
         if self.local_if:
             cmd = cmd_str + filter_path % 'all' + filter_path % self.local_if
             sys.stderr.write('+ ' + cmd + '\n')
