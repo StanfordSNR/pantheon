@@ -45,6 +45,7 @@ def main():
         '\\usepackage{pdfpages, graphicx}\n'
         '\\usepackage{float}\n\n'
         '\\begin{document}\n\n'
+        '\\begin{verbatim}'
         'Pantheon Summary (%s)\n\n' % curr_time)
 
     time_info = 'Ran %s flow' % metadata['flows']
@@ -58,8 +59,8 @@ def main():
     latex.write(time_info)
 
     local_side = ''
-    if 'local_info' in metadata:
-        local_side += ' %s' % metadata['local_info']
+    if 'local_information' in metadata:
+        local_side += ' %s' % metadata['local_information']
 
     if 'local_address' in metadata:
         local_side += ' %s' % metadata['local_address']
@@ -71,8 +72,8 @@ def main():
         latex.write('\n\nLocal side:' + local_side)
 
     remote_side = ''
-    if 'remote_info' in metadata:
-        remote_side += ' %s' % metadata['remote_info']
+    if 'remote_information' in metadata:
+        remote_side += ' %s' % metadata['remote_information']
 
     if 'remote_address' in metadata:
         remote_side += ' %s' % metadata['remote_address']
@@ -82,6 +83,8 @@ def main():
 
     if remote_side:
         latex.write('\n\nRemote side:' + remote_side)
+
+    latex.write('\\end{verbatim}\n')
 
     latex.write('\n\n\\begin{figure}[H]\n'
                 '\\centering\n'
