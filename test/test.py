@@ -23,6 +23,7 @@ class TestCongestionControl(unittest.TestCase):
         self.sender_side = args.sender_side
         self.remote_if = args.remote_if
         self.local_if = args.local_if
+        self.run_id = args.run_id
 
     def timeout_handler(signum, frame):
         raise
@@ -57,37 +58,37 @@ class TestCongestionControl(unittest.TestCase):
         self.who_goes_first()
 
         # prepare output logs
-        self.datalink_log = path.join(self.test_dir, self.cc + '_datalink.log')
-        self.acklink_log = path.join(self.test_dir, self.cc + '_acklink.log')
-        if self.flows:
-            self.tun_datalink_log = path.join(self.test_dir, self.cc +
-                                              '_tun_datalink.log')
-            self.tun_acklink_log = path.join(self.test_dir, self.cc +
-                                             '_tun_acklink.log')
+        datalink_log = self.cc + '_datalink_run%s.log' % self.run_id
+        acklink_log = self.cc + '_acklink_run%s.log' % self.run_id
+        self.datalink_log = path.join(self.test_dir, datalink_log)
+        self.acklink_log = path.join(self.test_dir, acklink_log)
 
         if not self.remote:  # local setup
-            self.uplink_trace = os.path.join(self.test_dir, '12mbps_trace')
-            self.downlink_trace = os.path.join(self.test_dir, '12mbps_trace')
+            uplink_trace = os.path.join(self.test_dir, '12mbps_trace')
+            downlink_trace = os.path.join(self.test_dir, '12mbps_trace')
+
+            mm_datalink_log = self.cc + '_mm_datalink_run%s.log' % self.run_id
+            mm_acklink_log = self.cc + '_mm_acklink_run%s.log' % self.run_id
+            self.mm_datalink_log = path.join(self.test_dir, mm_datalink_log)
+            self.mm_acklink_log = path.join(self.test_dir, mm_acklink_log)
 
             if self.first_to_run == 'receiver' or self.flows:
-                self.uplink_log = self.datalink_log
-                self.downlink_log = self.acklink_log
+                uplink_log = self.mm_datalink_log
+                downlink_log = self.mm_acklink_log
             else:
-                self.uplink_log = self.acklink_log
-                self.downlink_log = self.datalink_log
+                uplink_log = self.mm_acklink_log
+                downlink_log = self.mm_datalink_log
 
             self.mm_link_cmd = [
-                'mm-link', self.uplink_trace, self.downlink_trace,
-                '--uplink-log=' + self.uplink_log,
-                '--downlink-log=' + self.downlink_log]
+                'mm-link', uplink_trace, downlink_trace,
+                '--uplink-log=' + uplink_log, '--downlink-log=' + downlink_log]
             self.remote_ip = '$MAHIMAHI_BASE'
             self.remote_src_file = self.src_file
         else:  # remote setup
             (self.remote_addr, self.remote_dir) = self.remote.split(':')
-
             self.ssh_cmd = ['ssh', self.remote_addr]
-
             self.remote_ip = self.remote_addr.split('@')[-1]
+
             remote_src_dir = path.join(self.remote_dir, 'src')
             self.remote_src_file = path.join(remote_src_dir, self.cc + '.py')
 
@@ -143,10 +144,11 @@ class TestCongestionControl(unittest.TestCase):
         self.tc_elogs = []
 
         for i in xrange(self.flows):
-            self.ts_ilogs.append('/tmp/server%s.ingress.log' % (i + 1))
-            self.ts_elogs.append('/tmp/server%s.egress.log' % (i + 1))
-            self.tc_ilogs.append('/tmp/client%s.ingress.log' % (i + 1))
-            self.tc_elogs.append('/tmp/client%s.egress.log' % (i + 1))
+            tun_id = i + 1
+            self.ts_ilogs.append('/tmp/tunserver%s_ingress.log' % tun_id)
+            self.ts_elogs.append('/tmp/tunserver%s_egress.log' % tun_id)
+            self.tc_ilogs.append('/tmp/tunclient%s_ingress.log' % tun_id)
+            self.tc_elogs.append('/tmp/tunclient%s_egress.log' % tun_id)
 
         # run mm-tunnelserver manager
         if self.remote:
@@ -311,7 +313,7 @@ class TestCongestionControl(unittest.TestCase):
                 recv_manager.stdin.write(second_cmd)
         elapsed_time = time.time() - start_time
         self.assertTrue(self.runtime > elapsed_time,
-                        'Interval time between flows is too long')
+                        'interval time between flows is too long')
         time.sleep(self.runtime - elapsed_time)
 
         # stop all the running flows
@@ -324,10 +326,11 @@ class TestCongestionControl(unittest.TestCase):
         sys.stderr.write('Done\n')
 
     def merge_tunnel_logs(self):
-        tun_datalink_logs = []
-        tun_acklink_logs = []
+        datalink_tun_logs = []
+        acklink_tun_logs = []
 
         for i in xrange(self.flows):
+            tun_id = i + 1
             if self.remote:
                 # download logs from remote side
                 scp_cmd = 'scp %s:' % self.remote_addr
@@ -340,14 +343,14 @@ class TestCongestionControl(unittest.TestCase):
                     check_call(scp_cmd % {'log': self.tc_ilogs[i]}, shell=True)
                     check_call(scp_cmd % {'log': self.tc_elogs[i]}, shell=True)
 
-            tun_datalink_log = '/tmp/tun_datalink%s.log' % (i + 1)
-            tun_acklink_log = '/tmp/tun_acklink%s.log' % (i + 1)
+            datalink_tun_log = '/tmp/datalink_tun%s.log' % tun_id
+            acklink_tun_log = '/tmp/acklink_tun%s.log' % tun_id
             if self.sender_side == self.server_side:
-                s2c_log = tun_datalink_log
-                c2s_log = tun_acklink_log
+                s2c_log = datalink_tun_log
+                c2s_log = acklink_tun_log
             else:
-                s2c_log = tun_acklink_log
-                c2s_log = tun_datalink_log
+                s2c_log = acklink_tun_log
+                c2s_log = datalink_tun_log
 
             cmd = ['mm-tunnel-merge-logs', 'single', '-i', self.ts_ilogs[i],
                    '-e', self.tc_elogs[i], '-o', c2s_log]
@@ -359,20 +362,20 @@ class TestCongestionControl(unittest.TestCase):
             sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
             check_call(cmd)
 
-            tun_datalink_logs.append(tun_datalink_log)
-            tun_acklink_logs.append(tun_acklink_log)
+            datalink_tun_logs.append(datalink_tun_log)
+            acklink_tun_logs.append(acklink_tun_log)
 
-        cmd = ['mm-tunnel-merge-logs', 'multiple', '-o', self.tun_datalink_log]
+        cmd = ['mm-tunnel-merge-logs', 'multiple', '-o', self.datalink_log]
         if not self.remote:
-            cmd += ['--link-log', self.datalink_log]
-        cmd += tun_datalink_logs
+            cmd += ['--link-log', self.mm_datalink_log]
+        cmd += datalink_tun_logs
         sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
         check_call(cmd)
 
-        cmd = ['mm-tunnel-merge-logs', 'multiple', '-o', self.tun_acklink_log]
+        cmd = ['mm-tunnel-merge-logs', 'multiple', '-o', self.acklink_log]
         if not self.remote:
-            cmd += ['--link-log', self.acklink_log]
-        cmd += tun_acklink_logs
+            cmd += ['--link-log', self.mm_acklink_log]
+        cmd += acklink_tun_logs
         sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
         check_call(cmd)
 
@@ -384,22 +387,27 @@ class TestCongestionControl(unittest.TestCase):
         delay_cmd = 'mm-tunnel-delay'
 
         if self.flows:
-            datalink_log = self.tun_datalink_log
-            acklink_log = self.tun_acklink_log
-        else:
             datalink_log = self.datalink_log
             acklink_log = self.acklink_log
+        else:
+            datalink_log = self.mm_datalink_log
+            acklink_log = self.mm_acklink_log
 
         datalink_throughput_png = path.join(
-            self.test_dir, '%s_datalink_throughput.png' % self.cc)
+            self.test_dir,
+            '%s_datalink_throughput_run%s.png' % (self.cc, self.run_id))
         datalink_delay_png = path.join(
-            self.test_dir, '%s_datalink_delay.png' % self.cc)
+            self.test_dir,
+            '%s_datalink_delay_run%s.png' % (self.cc, self.run_id))
         acklink_throughput_png = path.join(
-            self.test_dir, '%s_acklink_throughput.png' % self.cc)
+            self.test_dir,
+            '%s_acklink_throughput_run%s.png' % (self.cc, self.run_id))
         acklink_delay_png = path.join(
-            self.test_dir, '%s_acklink_delay.png' % self.cc)
+            self.test_dir,
+            '%s_acklink_delay_run%s.png' % (self.cc, self.run_id))
 
-        stats_log = path.join(self.test_dir, '%s_stats.log' % self.cc)
+        stats_log = path.join(self.test_dir,
+                              '%s_stats_run%s.log' % (self.cc, self.run_id))
         stats = open(stats_log, 'w')
 
         sys.stderr.write('\n')
