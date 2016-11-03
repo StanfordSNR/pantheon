@@ -6,6 +6,7 @@ import string
 import argparse
 from parse_arguments import parse_arguments
 from subprocess import call, check_call, PIPE, Popen
+from time import gmtime, strftime
 
 
 def prettify(cc):
@@ -34,20 +35,18 @@ def main():
 
     test_dir = os.path.abspath(os.path.dirname(__file__))
     pantheon_summary_png = os.path.join(test_dir, 'pantheon_summary.png')
-
-    assert call(['which', 'pdflatex']) is 0, "pdflatex not installed"
-
     metadata = parse_metadata_file(os.path.join(test_dir, 'pantheon_metadata'))
 
     latex = open('/tmp/pantheon_report.tex', 'w')
 
+    curr_time = strftime("%a, %d %b %Y %H:%M:%S %z")
     latex.write(
         '\\documentclass{article}\n'
         '\\usepackage{pdfpages, graphicx}\n'
         '\\usepackage{float}\n\n'
         '\\begin{document}\n\n'
-        'Pantheon Summary\n\n'
-        'Total runtime %s s; ' % metadata['runtime'])
+        'Pantheon Summary (%s)\n\n'
+        'Total runtime %s s; ' % (curr_time, metadata['runtime']))
 
     latex.write('%s flow' % metadata['flows'])
     if metadata['flows'] != '1':
@@ -133,6 +132,7 @@ def main():
     latex.write('\\end{document}')
     latex.close()
 
+    assert call(['which', 'pdflatex']) is 0, "pdflatex not installed"
     cmd = 'pdflatex -output-directory %s /tmp/pantheon_report.tex' % test_dir
     sys.stderr.write('+ ' + cmd + '\n')
     check_call(cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
