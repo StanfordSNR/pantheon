@@ -174,14 +174,14 @@ def parse_arguments(filename):
             '-i', '-r', '--local-interface', '--remote-interface', 'cc'])
     elif filename == 'test.py':
         add_arg_list(parser, arg_dict, [
-            '-i', '-r', '-f', '-t', '--interval', '--tunnel-server',
+            '-i', '-r', '-t', '-f', '--interval', '--tunnel-server',
             '--local-addr', '--sender-side', '--local-interface',
             '--remote-interface', 'cc'])
     elif filename == 'combine_reports.py':
         add_arg_list(parser, arg_dict, ['--metadata-file', 'cc_schemes'])
     elif filename == 'run.py':
         add_arg_list(parser, arg_dict, [
-            '-i', '-r', '-f', '-t', '--interval', '--tunnel-server',
+            '-i', '-r', '-t', '-f', '--interval', '--tunnel-server',
             '--local-addr', '--sender-side', '--local-interface',
             '--remote-interface', '--local-info', '--remote-info',
             '--run-only'])

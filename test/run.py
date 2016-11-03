@@ -6,26 +6,45 @@ from os import path
 from subprocess import check_call
 
 
+def create_metadata_file(args, metadata_fname):
+    metadata_file = open(metadata_fname, 'w')
+    metadata_file.write(
+        'runtime=%(runtime)s\n'
+        'flows=%(flows)s\n'
+        'interval=%(interval)s\n'
+        'sender_side=%(sender_side)s\n' % vars(args))
+
+    if args.local_info:
+        metadata_file.write('local_information=%s\n' % args.local_info)
+
+    if args.remote_info:
+        metadata_file.write('remote_information=%s\n' % args.remote_info)
+
+    if args.local_if:
+        metadata_file.write('local_interface=%s\n' % args.local_if)
+
+    if args.remote_if:
+        metadata_file.write('remote_interface=%s\n' % args.remote_if)
+
+    if args.local_addr:
+        metadata_file.write('local_address=%s\n' % args.local_addr)
+
+    if args.remote:
+        metadata_file.write('remote_address=%s\n' % remote.split(':')[0])
+
+    metadata_file.close()
+
+
 def main():
     # arguments and source files location setup
     args = parse_arguments(path.basename(__file__))
-    remote = args.remote
-    private_key = args.private_key
-    flows = str(args.flows)
-    runtime = str(args.runtime)
-
-    run_setup = True
-    run_test = True
-    if args.run_only == 'setup':
-        run_test = False
-    elif args.run_only == 'test':
-        run_setup = False
 
     test_dir = path.abspath(path.dirname(__file__))
     setup_src = path.join(test_dir, 'setup.py')
     test_src = path.join(test_dir, 'test.py')
     summary_plot_src = path.join(test_dir, 'summary-plot.pl')
     combine_report_src = path.join(test_dir, 'combine_reports.py')
+    metadata_fname = path.join(test_dir, 'pantheon_metadata')
 
     # test congestion control schemes
     cc_schemes = ['default_tcp', 'vegas', 'koho_cc', 'ledbat', 'pcc', 'verus',
@@ -34,17 +53,18 @@ def main():
     setup_cmd = ['python', setup_src]
     test_cmd = ['python', test_src]
 
-    if remote:
-        if private_key:
-            setup_cmd += ['-i', private_key]
-            test_cmd += ['-i', private_key]
-        setup_cmd += ['-r', remote]
-        test_cmd += ['-r', remote]
+    if args.remote:
+        if args.private_key:
+            setup_cmd += ['-i', args.private_key]
+            test_cmd += ['-i', args.private_key]
+        setup_cmd += ['-r', args.remote]
+        test_cmd += ['-r', args.remote]
 
-    test_cmd += ['-f', flows, '-t', runtime, '--interval', str(args.interval)]
+    test_cmd += [
+        '-t', str(args.runtime), '-f', str(args.flows),
+        '--interval', str(args.interval), '--tunnel-server', args.server_side]
 
-    test_cmd += ['--tunnel-server', args.server_side]
-    if args.server_side == 'local':
+    if args.local_addr:
         test_cmd += ['--local-addr', args.local_addr]
 
     test_cmd += ['--sender-side', args.sender_side]
@@ -56,6 +76,15 @@ def main():
     if args.remote_if:
         setup_cmd += ['--remote-interface', args.remote_if]
         test_cmd += ['--remote-interface', args.remote_if]
+
+    run_setup = True
+    run_test = True
+    if args.run_only == 'setup':
+        run_test = False
+    elif args.run_only == 'test':
+        run_setup = False
+
+    create_metadata_file(args, metadata_fname)
 
     # setup and run each congestion control
     for cc in cc_schemes:
@@ -75,6 +104,7 @@ def main():
         check_call(cmd)
 
         cmd = ['python', combine_report_src] + cc_schemes
+        cmd += ['--metadata-file', metadata_fname]
         sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
         check_call(cmd)
 
