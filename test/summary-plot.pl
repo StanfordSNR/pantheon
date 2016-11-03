@@ -119,7 +119,7 @@ for my $elem1 ( @data ) {
 
 for my $row ( @data ) {
   if ( not defined $row->{ side } ) {
-    if ( log($row->{ delay }) > (log($delay_max) + log($delay_min)) / 2 ) {
+    if ( $row->{ delay } > ( $delay_max + $delay_min ) / 2 ) {
       $row->{ side } = q{left};
     } else {
       $row->{ side } = q{right};
