@@ -27,29 +27,29 @@ class TestCongestionControl(unittest.TestCase):
                     'Folder third_party/%s empty: make sure to initialize git '
                     'submodules with "git submodule update --init"' % module)
 
-    def setup_mahimahi(self):
+    def pre_setup(self):
         # Enable IP forwarding
         cmd = 'sudo sysctl -w net.ipv4.ip_forward=1'
         sys.stderr.write('+ ' + cmd + '\n')
         check_call(cmd, shell=True)
 
         # Disable Reverse Path Filter
-        cmd_str = 'echo 0 | sudo tee'
+        echo_cmd = 'echo 0 | sudo tee'
         filter_path = ' /proc/sys/net/ipv4/conf/%s/rp_filter'
         if self.local_if:
-            cmd = cmd_str + filter_path % 'all' + filter_path % self.local_if
+            cmd = echo_cmd + filter_path % 'all' + filter_path % self.local_if
             sys.stderr.write('+ ' + cmd + '\n')
             check_call(cmd, shell=True)
 
         if self.remote_if:
-            cmd = cmd_str + filter_path % 'all' + filter_path % self.remote_if
+            cmd = echo_cmd + filter_path % 'all' + filter_path % self.remote_if
             cmd = ' '.join(self.ssh_cmd) + ' "%s"' % cmd
             sys.stderr.write('+ ' + cmd + '\n')
             check_call(cmd, shell=True)
 
         # install mahimahi
         mm_dir = path.join(self.test_dir, '../third_party/mahimahi')
-        # make install alone sufficient if autogen.sh and configure already run
+        # make install alone sufficient if autogen.sh, configure already run
         cmd = 'cd %s && sudo make install' % mm_dir
         sys.stderr.write('+ ' + cmd + '\n')
         if call(cmd, stdout=DEVNULL, shell=True) is 0:
@@ -69,19 +69,6 @@ class TestCongestionControl(unittest.TestCase):
                'sudo make install' % mm_dir)
         sys.stderr.write('+ ' + cmd + '\n')
         check_call(cmd, shell=True)
-
-    def setup_congestion_control(self):
-        src_dir = path.abspath(path.join(self.test_dir, '../src'))
-        self.src_file = path.join(src_dir, self.cc + '.py')
-
-        # get build dependencies
-        self.install()
-
-        # run build commands
-        self.build()
-
-        # run initialize commands
-        self.initialize()
 
     def install(self):
         cmd = ['python', self.src_file, 'deps']
@@ -110,6 +97,19 @@ class TestCongestionControl(unittest.TestCase):
         check_call(cmd)
         sys.stderr.write('Done\n')
 
+    def setup_congestion_control(self):
+        src_dir = path.abspath(path.join(self.test_dir, '../src'))
+        self.src_file = path.join(src_dir, self.cc + '.py')
+
+        # get build dependencies
+        self.install()
+
+        # run build commands
+        self.build()
+
+        # run initialize commands
+        self.initialize()
+
     # congestion control setup
     def test_congestion_control_setup(self):
         self.sanity_check_gitmodules()
@@ -131,8 +131,8 @@ class TestCongestionControl(unittest.TestCase):
 
         # run local setup.py (even when self.remote exists)
 
-        # always setup mahimahi (fine to run multiple times)
-        self.setup_mahimahi()
+        # always enable IP forwarding, setup mahimahi and disable rp_filter
+        self.pre_setup()
 
         # setup congestion control scheme
         self.setup_congestion_control()
