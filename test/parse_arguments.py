@@ -159,6 +159,7 @@ def validate_args(args):
     interval = getattr(args, 'interval', None)
     server_side = getattr(args, 'server_side', None)
     local_addr = getattr(args, 'local_addr', None)
+    sender_side = getattr(args, 'sender_side', None)
     remote_if = getattr(args, 'remote_if', None)
 
     if remote_if:
@@ -179,6 +180,10 @@ def validate_args(args):
         assert local_addr, (
             'must provide local address that can be reached by the other '
             'side if "--tunnel-server local"')
+
+    if server_side == 'local' or sender_side == 'remote':
+        assert remote, (
+            'local test can only run tunnel server and sender inside mm-link')
 
 
 def parse_arguments(filename):
