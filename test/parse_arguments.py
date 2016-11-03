@@ -5,13 +5,6 @@ import sys
 def build_arg_dict():
     arg_dict = {}
 
-    arg_dict['-i'] = {
-        'metavar': 'IDENTITY-FILE',
-        'action': 'store',
-        'dest': 'private_key',
-        'help': 'identity file (private key) for ssh/scp to use',
-    }
-
     arg_dict['-r'] = {
         'metavar': 'REMOTE:DIR',
         'action': 'store',
@@ -134,7 +127,6 @@ def add_arg_list(parser, arg_dict, arg_list):
 
 
 def validate_args(args):
-    private_key = getattr(args, 'private_key', None)
     remote = getattr(args, 'remote', None)
     flows = getattr(args, 'flows', None)
     runtime = getattr(args, 'runtime', None)
@@ -143,9 +135,7 @@ def validate_args(args):
     local_addr = getattr(args, 'local_addr', None)
     remote_if = getattr(args, 'remote_if', None)
 
-    if private_key or remote_if:
-        print private_key
-        print remote_if
+    if remote_if:
         assert remote, '-i, --remote-interface must run along with -r'
 
     if remote:
@@ -171,17 +161,17 @@ def parse_arguments(filename):
 
     if filename == 'setup.py':
         add_arg_list(parser, arg_dict, [
-            '-i', '-r', '--local-interface', '--remote-interface', 'cc'])
+            '-r', '--local-interface', '--remote-interface', 'cc'])
     elif filename == 'test.py':
         add_arg_list(parser, arg_dict, [
-            '-i', '-r', '-t', '-f', '--interval', '--tunnel-server',
+            '-r', '-t', '-f', '--interval', '--tunnel-server',
             '--local-addr', '--sender-side', '--local-interface',
             '--remote-interface', 'cc'])
     elif filename == 'combine_reports.py':
         add_arg_list(parser, arg_dict, ['--metadata-file', 'cc_schemes'])
     elif filename == 'run.py':
         add_arg_list(parser, arg_dict, [
-            '-i', '-r', '-t', '-f', '--interval', '--tunnel-server',
+            '-r', '-t', '-f', '--interval', '--tunnel-server',
             '--local-addr', '--sender-side', '--local-interface',
             '--remote-interface', '--local-info', '--remote-info',
             '--run-only'])
