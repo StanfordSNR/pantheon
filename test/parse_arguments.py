@@ -113,6 +113,24 @@ def build_arg_dict():
         'help': 'test congestion control schemes in random order',
     }
 
+    arg_dict['--run-id'] = {
+        'metavar': 'ID',
+        'action': 'store',
+        'dest': 'run_id',
+        'type': int,
+        'default': 1,
+        'help': 'run ID of the test',
+    }
+
+    arg_dict['--run-times'] = {
+        'metavar': 'TIMES',
+        'action': 'store',
+        'dest': 'run_times',
+        'type': int,
+        'default': 1,
+        'help': 'run times of each test',
+    }
+
     arg_dict['cc'] = {
         'metavar': 'congestion-control',
         'help': 'a congestion control scheme in default_tcp, koho_cc, ledbat, '
@@ -174,15 +192,16 @@ def parse_arguments(filename):
         add_arg_list(parser, arg_dict, [
             '-r', '-t', '-f', '--interval', '--tunnel-server',
             '--local-addr', '--sender-side', '--local-interface',
-            '--remote-interface', 'cc'])
+            '--remote-interface', '--run-id', 'cc'])
     elif filename == 'combine_reports.py':
-        add_arg_list(parser, arg_dict, ['--metadata-file', 'cc_schemes'])
+        add_arg_list(parser, arg_dict, [
+            '--metadata-file', '--run-times', 'cc_schemes'])
     elif filename == 'run.py':
         add_arg_list(parser, arg_dict, [
             '-r', '-t', '-f', '--interval', '--tunnel-server',
             '--local-addr', '--sender-side', '--local-interface',
             '--remote-interface', '--local-info', '--remote-info',
-            '--run-only', '--random-order'])
+            '--run-only', '--random-order', '--run-times'])
 
     args = parser.parse_args()
     validate_args(args)
