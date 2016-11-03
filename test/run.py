@@ -49,12 +49,6 @@ def main():
     metadata_fname = path.join(test_dir, 'pantheon_metadata')
 
     # test congestion control schemes
-    cc_schemes = ['default_tcp', 'vegas', 'koho_cc', 'ledbat', 'pcc', 'verus',
-                  'scream', 'sprout', 'webrtc', 'quic']
-
-    if args.random_order:
-        random.shuffle(cc_schemes)
-
     setup_cmd = ['python', setup_src]
     test_cmd = ['python', test_src]
 
@@ -86,27 +80,35 @@ def main():
     elif args.run_only == 'test':
         run_setup = False
 
+    # create metadata file to be used by combine_reports.py
     create_metadata_file(args, metadata_fname)
 
+    cc_schemes = ['default_tcp', 'vegas', 'koho_cc', 'ledbat', 'pcc', 'verus',
+                  'scream', 'sprout', 'webrtc', 'quic']
+
     # setup and run each congestion control
-    for cc in cc_schemes:
-        if run_setup:
+    if run_setup:
+        for cc in cc_schemes:
             cmd = setup_cmd + [cc]
             sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
             check_call(cmd)
 
-        if run_test:
-            cmd = test_cmd + [cc]
+    if run_test:
+        for run_id in xrange(args.run_times):
+            if args.random_order:
+                random.shuffle(cc_schemes)
+
+            cmd = test_cmd + ['--run-id', str(run_id), cc]
             sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
             check_call(cmd)
 
-    if run_test:
-        cmd = ['perl', summary_plot_src] + cc_schemes
+        cmd = ['perl', summary_plot_src,
+               '--run-times', str(args.run_times)] + cc_schemes
         sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
         check_call(cmd)
 
-        cmd = ['python', combine_report_src] + cc_schemes
-        cmd += ['--metadata-file', metadata_fname]
+        cmd = ['python', combine_report_src, '--metadata-file', metadata_fname,
+               '--run-times', str(args.run_times)] + cc_schemes
         sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
         check_call(cmd)
 
