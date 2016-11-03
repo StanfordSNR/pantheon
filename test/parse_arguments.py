@@ -6,10 +6,12 @@ def build_arg_dict():
     arg_dict = {}
 
     arg_dict['-r'] = {
-        'metavar': 'REMOTE:DIR',
+        'metavar': 'REMOTE:PANTHEON-DIR',
         'action': 'store',
         'dest': 'remote',
-        'help': 'remote pantheon directory: [user@]hostname:dir',
+        'help': 'REMOTE: [user@]hostname; PANTHEON-DIR: must be an '
+                'absolute path (can be prefixed by ~) to the pantheon root '
+                'directory on the remote side',
     }
 
     arg_dict['-f'] = {
@@ -48,10 +50,10 @@ def build_arg_dict():
     }
 
     arg_dict['--local-addr'] = {
-        'metavar': 'ADDR',
+        'metavar': 'IP-ADDR',
         'action': 'store',
         'dest': 'local_addr',
-        'help': 'local address (IP/hostname); if "--tunnel-server local" is '
+        'help': 'local IP address; if "--tunnel-server local" is '
                 'given, the remote side must be able to reach this address',
     }
 
@@ -136,7 +138,7 @@ def validate_args(args):
     remote_if = getattr(args, 'remote_if', None)
 
     if remote_if:
-        assert remote, '-i, --remote-interface must run along with -r'
+        assert remote, '--remote-interface must run along with -r'
 
     if remote:
         assert ':' in remote, '-r must be followed by [user@]hostname:dir'
