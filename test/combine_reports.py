@@ -68,13 +68,13 @@ def main():
 
     remote_side = ''
     if 'remote_info' in metadata:
-        latex.write(' %s' % metadata['remote_info'])
+        remote_side += ' %s' % metadata['remote_info']
 
     if 'remote_address' in metadata:
-        latex.write(' %s' % metadata['remote_address'])
+        remote_side += ' %s' % metadata['remote_address']
 
     if 'remote_interface' in metadata:
-        latex.write(' on interface %s' % metadata['remote_interface'])
+        remote_side += ' on interface %s' % metadata['remote_interface']
 
     if remote_side:
         latex.write('\n\nRemote side:' + remote_side)

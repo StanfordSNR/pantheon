@@ -30,7 +30,8 @@ def create_metadata_file(args, metadata_fname):
         metadata_file.write('local_address=%s\n' % args.local_addr)
 
     if args.remote:
-        metadata_file.write('remote_address=%s\n' % args.remote.split(':')[0])
+        remote_addr = args.remote.split(':')[0].split('@')[1]
+        metadata_file.write('remote_address=%s\n' % remote_addr)
 
     metadata_file.close()
 
