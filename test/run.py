@@ -54,9 +54,6 @@ def main():
     test_cmd = ['python', test_src]
 
     if args.remote:
-        if args.private_key:
-            setup_cmd += ['-i', args.private_key]
-            test_cmd += ['-i', args.private_key]
         setup_cmd += ['-r', args.remote]
         test_cmd += ['-r', args.remote]
 

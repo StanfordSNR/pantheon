@@ -13,7 +13,6 @@ class TestCongestionControl(unittest.TestCase):
         super(TestCongestionControl, self).__init__(test_name)
         self.cc = args.cc.lower()
         self.remote = args.remote
-        self.private_key = args.private_key
         self.local_if = args.local_if
         self.remote_if = args.remote_if
         self.test_dir = path.abspath(path.dirname(__file__))
@@ -116,10 +115,7 @@ class TestCongestionControl(unittest.TestCase):
         # run remote setup.py
         if self.remote:
             (remote_addr, remote_dir) = self.remote.split(':')
-            self.ssh_cmd = ['ssh']
-            if self.private_key:
-                self.ssh_cmd += ['-i', self.private_key]
-            self.ssh_cmd.append(remote_addr)
+            self.ssh_cmd = ['ssh', remote_addr]
 
             # os.path.join evaluate path locally only
             if remote_dir[-1] != '/':

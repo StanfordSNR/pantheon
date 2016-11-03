@@ -17,7 +17,6 @@ class TestCongestionControl(unittest.TestCase):
         self.flows = args.flows
         self.runtime = args.runtime
         self.remote = args.remote
-        self.private_key = args.private_key
         self.interval = args.interval
         self.server_side = args.server_side
         self.local_addr = args.local_addr
@@ -86,10 +85,7 @@ class TestCongestionControl(unittest.TestCase):
         else:  # remote setup
             (self.remote_addr, self.remote_dir) = self.remote.split(':')
 
-            self.ssh_cmd = ['ssh']
-            if self.private_key:
-                self.ssh_cmd += ['-i', self.private_key]
-            self.ssh_cmd.append(self.remote_addr)
+            self.ssh_cmd = ['ssh', self.remote_addr]
 
             self.remote_ip = self.remote_addr.split('@')[-1]
             remote_src_dir = path.join(self.remote_dir, 'src')
@@ -334,20 +330,15 @@ class TestCongestionControl(unittest.TestCase):
         for i in xrange(self.flows):
             if self.remote:
                 # download logs from remote side
-                scp_cmd = ['scp']
-                if self.private_key:
-                    scp_cmd += ['-i', self.private_key]
+                scp_cmd = 'scp %s:' % self.remote_addr
+                scp_cmd += '%(log)s %(log)s'
 
                 if self.server_side == 'remote':
-                    check_call(scp_cmd + [self.remote_addr + ':' +
-                                          self.ts_ilogs[i], self.ts_ilogs[i]])
-                    check_call(scp_cmd + [self.remote_addr + ':' +
-                                          self.ts_elogs[i], self.ts_elogs[i]])
+                    check_call(scp_cmd % {'log': self.ts_ilogs[i]}, shell=True)
+                    check_call(scp_cmd % {'log': self.ts_elogs[i]}, shell=True)
                 else:
-                    check_call(scp_cmd + [self.remote_addr + ':' +
-                                          self.tc_ilogs[i], self.tc_ilogs[i]])
-                    check_call(scp_cmd + [self.remote_addr + ':' +
-                                          self.tc_elogs[i], self.tc_elogs[i]])
+                    check_call(scp_cmd % {'log': self.tc_ilogs[i]}, shell=True)
+                    check_call(scp_cmd % {'log': self.tc_elogs[i]}, shell=True)
 
             tun_datalink_log = '/tmp/tun_datalink%s.log' % (i + 1)
             tun_acklink_log = '/tmp/tun_acklink%s.log' % (i + 1)
