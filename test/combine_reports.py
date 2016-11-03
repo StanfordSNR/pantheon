@@ -45,12 +45,17 @@ def main():
         '\\usepackage{pdfpages, graphicx}\n'
         '\\usepackage{float}\n\n'
         '\\begin{document}\n\n'
-        'Pantheon Summary (%s)\n\n'
-        'Total runtime %s s; ' % (curr_time, metadata['runtime']))
+        'Pantheon Summary (%s)\n\n' % curr_time)
 
-    latex.write('%s flow' % metadata['flows'])
+    time_info = 'Ran %s flow' % metadata['flows']
     if metadata['flows'] != '1':
-        latex.write('s with %s s interval' % metadata['interval'])
+        time_info += 's'
+    time_info += ' in %s seconds' % metadata['runtime']
+    if metadata['flows'] != '1':
+        time_info += (' with %s-second interval between two flows'
+                      % metadata['interval'])
+    time_info += '.'
+    latex.write(time_info)
 
     local_side = ''
     if 'local_info' in metadata:
