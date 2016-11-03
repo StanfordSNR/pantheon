@@ -107,6 +107,12 @@ def build_arg_dict():
         'help': 'run setup or test only',
     }
 
+    arg_dict['--random-order'] = {
+        'action': 'store_true',
+        'dest': 'random_order',
+        'help': 'test congestion control schemes in random order',
+    }
+
     arg_dict['cc'] = {
         'metavar': 'congestion-control',
         'help': 'a congestion control scheme in default_tcp, koho_cc, ledbat, '
@@ -176,7 +182,7 @@ def parse_arguments(filename):
             '-r', '-t', '-f', '--interval', '--tunnel-server',
             '--local-addr', '--sender-side', '--local-interface',
             '--remote-interface', '--local-info', '--remote-info',
-            '--run-only'])
+            '--run-only', '--random-order'])
 
     args = parser.parse_args()
     validate_args(args)

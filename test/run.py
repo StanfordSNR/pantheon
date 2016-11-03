@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys
+import random
 from parse_arguments import parse_arguments
 from os import path
 from subprocess import check_call
@@ -50,6 +51,9 @@ def main():
     # test congestion control schemes
     cc_schemes = ['default_tcp', 'vegas', 'koho_cc', 'ledbat', 'pcc', 'verus',
                   'scream', 'sprout', 'webrtc', 'quic']
+
+    if args.random_order:
+        random.shuffle(cc_schemes)
 
     setup_cmd = ['python', setup_src]
     test_cmd = ['python', test_src]
