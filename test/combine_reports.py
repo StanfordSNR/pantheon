@@ -17,6 +17,18 @@ def prettify(cc):
     return pretty_name[cc]
 
 
+def parse_metadata_file(metadata_fname):
+    metadata_file = open(metadata_fname)
+
+    metadata = {}
+    for line in metadata_file:
+        (meta_key, meta_value) = line.split('=')
+        metadata[meta_key] = meta_value.strip()
+
+    metadata_file.close()
+    return metadata
+
+
 def main():
     args = parse_arguments(os.path.basename(__file__))
 
@@ -25,14 +37,49 @@ def main():
 
     assert call(['which', 'pdflatex']) is 0, "pdflatex not installed"
 
+    metadata = parse_metadata_file(os.path.join(test_dir, 'pantheon_metadata'))
+
     latex = open('/tmp/pantheon_report.tex', 'w')
 
-    latex.write('\\documentclass{article}\n'
-                '\\usepackage{pdfpages, graphicx}\n'
-                '\\usepackage{float}\n\n'
-                '\\begin{document}\n\n'
-                'Pantheon Summary\n\n'
-                '\\begin{figure}[H]\n'
+    latex.write(
+        '\\documentclass{article}\n'
+        '\\usepackage{pdfpages, graphicx}\n'
+        '\\usepackage{float}\n\n'
+        '\\begin{document}\n\n'
+        'Pantheon Summary\n\n'
+        'Total runtime %s s; ' % metadata['runtime'])
+
+    latex.write('%s flow' % metadata['flows'])
+    if metadata['flows'] != '1':
+        latex.write('s with %s s interval' % metadata['interval'])
+
+    local_side = ''
+    if 'local_info' in metadata:
+        local_side += ' %s' % metadata['local_info']
+
+    if 'local_address' in metadata:
+        local_side += ' %s' % metadata['local_address']
+
+    if 'local_interface' in metadata:
+        local_side += ' on interface %s' % metadata['local_interface']
+
+    if local_side:
+        latex.write('\n\nLocal side:' + local_side)
+
+    remote_side = ''
+    if 'remote_info' in metadata:
+        latex.write(' %s' % metadata['remote_info'])
+
+    if 'remote_address' in metadata:
+        latex.write(' %s' % metadata['remote_address'])
+
+    if 'remote_interface' in metadata:
+        latex.write(' on interface %s' % metadata['remote_interface'])
+
+    if remote_side:
+        latex.write('\n\nRemote side:' + remote_side)
+
+    latex.write('\n\n\\begin{figure}[H]\n'
                 '\\centering\n'
                 '\\includegraphics[width=\\textwidth]'
                 '{%s}\n'
