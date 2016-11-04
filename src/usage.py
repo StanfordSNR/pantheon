@@ -1,8 +1,5 @@
 import sys
 
-RECV_FIRST = 0
-SEND_FIRST = 1
-
 
 def print_usage(name, order):
     print 'Usage:'
@@ -11,10 +8,10 @@ def print_usage(name, order):
     print './%s init' % name
     print './%s who_goes_first' % name
     print './%s friendly_name' % name
-    if order == RECV_FIRST:
+    if order == 'receiver_first':
         print './%s receiver' % name
         print './%s sender IP port' % name
-    elif order == SEND_FIRST:
+    elif order == 'sender_first':
         print './%s sender' % name
         print './%s receiver IP port' % name
     sys.exit(1)
@@ -32,17 +29,17 @@ def check_args(args, name, order):
             print_usage(name, order)
 
     elif option == 'receiver':
-        if order == RECV_FIRST and len(args) != 2:
+        if order == 'receiver_first' and len(args) != 2:
             print_usage(name, order)
 
-        if order == SEND_FIRST and len(args) != 4:
+        if order == 'sender_first' and len(args) != 4:
             print_usage(name, order)
 
     elif option == 'sender':
-        if order == RECV_FIRST and len(args) != 4:
+        if order == 'receiver_first' and len(args) != 4:
             print_usage(name, order)
 
-        if order == SEND_FIRST and len(args) != 2:
+        if order == 'sender_first' and len(args) != 2:
             print_usage(name, order)
 
     else:

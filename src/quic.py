@@ -11,7 +11,7 @@ from get_open_port import get_open_udp_port
 
 
 def main():
-    usage.check_args(sys.argv, path.basename(__file__), usage.SEND_FIRST)
+    usage.check_args(sys.argv, path.basename(__file__), 'sender_first')
     option = sys.argv[1]
     src_dir = path.abspath(path.dirname(__file__))
     submodule_dir = path.abspath(
