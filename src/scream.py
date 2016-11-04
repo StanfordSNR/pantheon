@@ -8,7 +8,7 @@ from get_open_port import get_open_udp_port
 
 
 def main():
-    usage.check_args(sys.argv, os.path.basename(__file__), usage.RECV_FIRST)
+    usage.check_args(sys.argv, os.path.basename(__file__), 'receiver_first')
     option = sys.argv[1]
     src_dir = os.path.abspath(os.path.dirname(__file__))
     recv_file = os.path.join(src_dir, 'scream/ScreamServer')

@@ -7,7 +7,7 @@ from subprocess import call, check_call, CalledProcessError
 
 
 def main():
-    usage.check_args(sys.argv, os.path.basename(__file__), usage.RECV_FIRST)
+    usage.check_args(sys.argv, os.path.basename(__file__), 'receiver_first')
     option = sys.argv[1]
     src_dir = os.path.abspath(os.path.dirname(__file__))
     submodule_dir = os.path.abspath(
