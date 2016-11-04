@@ -43,6 +43,10 @@ def main():
     if option == 'who_goes_first':
         print 'Receiver first'
 
+    # friendly name
+    if option == 'friendly_name':
+        print 'PCC'
+
     # receiver
     if option == 'receiver':
         port = get_open_udp_port()

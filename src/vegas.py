@@ -33,6 +33,10 @@ def main():
     if option == 'who_goes_first':
         print 'Receiver first'
 
+    # friendly name
+    if option == 'friendly_name':
+        print 'TCP Vegas'
+
     # receiver
     if option == 'receiver':
         port = get_open_tcp_port()
