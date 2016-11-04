@@ -68,6 +68,10 @@ def main():
     if option == 'who_goes_first':
         print 'Sender first'
 
+    # friendly name
+    if option == 'friendly_name':
+        print 'QUIC Cubic (toy)'
+
     # sender
     if option == 'sender':
         port = get_open_udp_port()

@@ -62,6 +62,10 @@ def main():
     if option == 'who_goes_first':
         print 'Sender first'
 
+    # friendly name
+    if option == 'friendly_name':
+        print 'WebRTC media'
+
     # sender
     if option == 'sender':
         if not xvfb_in_use(1):

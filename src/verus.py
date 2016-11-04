@@ -44,6 +44,10 @@ def main():
     if option == 'who_goes_first':
         print 'Sender first'
 
+    # friendly name
+    if option == 'friendly_name':
+        print 'Verus'
+
     # sender
     if option == 'sender':
         port = get_open_udp_port()

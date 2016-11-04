@@ -46,6 +46,10 @@ def main():
     if option == 'who_goes_first':
         print 'Receiver first'
 
+    # friendly name
+    if option == 'friendly_name':
+        print 'Sprout'
+
     # receiver
     if option == 'receiver':
         os.environ['SPROUT_MODEL_IN'] = os.path.join(
