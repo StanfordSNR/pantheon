@@ -45,7 +45,6 @@ def main():
         '\\usepackage{pdfpages, graphicx}\n'
         '\\usepackage{float}\n\n'
         '\\begin{document}\n\n'
-        '\\begin{verbatim}'
         'Pantheon Summary (%s)\n\n' % curr_time)
 
     time_info = 'Ran %s flow' % metadata['flows']
@@ -55,7 +54,6 @@ def main():
     if metadata['flows'] != '1':
         time_info += (' with %s-second interval between two flows'
                       % metadata['interval'])
-    time_info += '.'
     latex.write(time_info)
 
     local_side = ''
@@ -69,7 +67,7 @@ def main():
         local_side += ' on interface %s' % metadata['local_interface']
 
     if local_side:
-        latex.write('\n\nLocal side:' + local_side)
+        latex.write('\n\nLocal side:' + local_side.replace('_', '\\_'))
 
     remote_side = ''
     if 'remote_information' in metadata:
@@ -82,9 +80,7 @@ def main():
         remote_side += ' on interface %s' % metadata['remote_interface']
 
     if remote_side:
-        latex.write('\n\nRemote side:' + remote_side)
-
-    latex.write('\\end{verbatim}\n')
+        latex.write('\n\nRemote side:' + remote_side.replace('_', '\\_'))
 
     latex.write('\n\n\\begin{figure}[H]\n'
                 '\\centering\n'
