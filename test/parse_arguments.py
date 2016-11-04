@@ -201,6 +201,8 @@ def parse_arguments(filename):
     elif filename == 'combine_reports.py':
         add_arg_list(parser, arg_dict, [
             '--metadata-file', '--run-times', 'cc_schemes'])
+    elif filename == 'summary_plot.py':
+        add_arg_list(parser, arg_dict, ['--run-times', 'cc_schemes'])
     elif filename == 'run.py':
         add_arg_list(parser, arg_dict, [
             '-r', '-t', '-f', '--interval', '--tunnel-server',
