@@ -4,18 +4,10 @@ import os
 import sys
 import string
 import argparse
+from os import path
 from parse_arguments import parse_arguments
-from subprocess import call, check_call, PIPE, Popen
+from subprocess import call, check_call, check_output, PIPE, Popen
 from time import gmtime, strftime
-
-
-def prettify(cc):
-    pretty_name = {
-        'default_tcp': 'TCP Cubic', 'vegas': 'TCP Vegas',
-        'koho_cc': 'KohoCC', 'ledbat': 'LEDBAT', 'sprout': 'Sprout',
-        'pcc': 'PCC', 'verus': 'Verus', 'scream': 'SCReAM',
-        'webrtc': 'WebRTC media', 'quic': 'QUIC Cubic (toy)'}
-    return pretty_name[cc]
 
 
 def parse_metadata_file(metadata_fname):
@@ -31,11 +23,12 @@ def parse_metadata_file(metadata_fname):
 
 
 def main():
-    args = parse_arguments(os.path.basename(__file__))
+    args = parse_arguments(path.basename(__file__))
 
-    test_dir = os.path.abspath(os.path.dirname(__file__))
-    pantheon_summary_png = os.path.join(test_dir, 'pantheon_summary.png')
-    metadata = parse_metadata_file(os.path.join(test_dir, 'pantheon_metadata'))
+    test_dir = path.abspath(path.dirname(__file__))
+    src_dir = path.abspath(path.join(test_dir, '../src'))
+    pantheon_summary_png = path.join(test_dir, 'pantheon_summary.png')
+    metadata = parse_metadata_file(path.join(test_dir, 'pantheon_metadata'))
 
     latex = open('/tmp/pantheon_report.tex', 'w')
 
@@ -103,18 +96,25 @@ def main():
                 '\\end{figure}\n\n'
                 '\\newpage\n\n' % pantheon_summary_png)
 
+    pretty_names = {}
     for cc in args.cc_schemes:
+        if cc not in pretty_names:
+            cc_name = check_output(
+                ['python', path.join(src_dir, cc + '.py'), 'friendly_name'])
+            pretty_names[cc] = cc_name if cc_name else cc
+            pretty_names[cc] = pretty_names[cc].strip().replace('_', '\\_')
+
         for run_id in xrange(1, 1 + run_times):
-            datalink_throughput_png = os.path.join(
+            datalink_throughput_png = path.join(
                 test_dir, '%s_datalink_throughput_run%s.png' % (cc, run_id))
-            datalink_delay_png = os.path.join(
+            datalink_delay_png = path.join(
                 test_dir, '%s_datalink_delay_run%s.png' % (cc, run_id))
-            acklink_throughput_png = os.path.join(
+            acklink_throughput_png = path.join(
                 test_dir, '%s_acklink_throughput_run%s.png' % (cc, run_id))
-            acklink_delay_png = os.path.join(
+            acklink_delay_png = path.join(
                 test_dir, '%s_acklink_delay_run%s.png' % (cc, run_id))
 
-            str_dict = {'cc_name': prettify(cc),
+            str_dict = {'cc_name': pretty_names[cc],
                         'run_id': run_id,
                         'datalink_throughput_png': datalink_throughput_png,
                         'datalink_delay_png': datalink_delay_png,
