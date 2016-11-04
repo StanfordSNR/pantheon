@@ -45,16 +45,30 @@ def main():
         '\\usepackage{pdfpages, graphicx}\n'
         '\\usepackage{float}\n\n'
         '\\begin{document}\n\n'
-        'Pantheon Summary (%s)\n\n' % curr_time)
+        '\\textbf{Pantheon Summary} (%s)\n\n' % curr_time)
 
-    time_info = 'Ran %s flow' % metadata['flows']
-    if metadata['flows'] != '1':
-        time_info += 's'
-    time_info += ' in %s seconds' % metadata['runtime']
-    if metadata['flows'] != '1':
-        time_info += (' with %s-second interval between two flows'
-                      % metadata['interval'])
-    latex.write(time_info)
+    if metadata['flows'] == '1':
+        flows_str = '1 flow'
+    else:
+        flows_str = ('%s flows with %s-second interval between two flows' %
+                     (metadata['flows'], metadata['interval']))
+
+    if metadata['runtime'] == '1':
+        seconds_str = '1 second'
+    else:
+        seconds_str = '%s seconds' % metadata['runtime']
+
+    run_times = int(metadata['run_times'])
+    if run_times == 1:
+        times_str = 'once'
+    elif run_times == 2:
+        times_str = 'twice'
+    else:
+        times_str = '%s times' % run_times
+
+    latex.write('Repeated the test of 10 congestion control schemes %s. '
+                'Each test lasted for %s running %s.' %
+                (times_str, seconds_str, flows_str))
 
     local_side = ''
     if 'local_information' in metadata:
@@ -90,56 +104,59 @@ def main():
                 '\\newpage\n\n' % pantheon_summary_png)
 
     for cc in args.cc_schemes:
-        datalink_throughput_png = os.path.join(
-            test_dir, '%s_datalink_throughput.png' % cc)
-        datalink_delay_png = os.path.join(
-            test_dir, '%s_datalink_delay.png' % cc)
-        acklink_throughput_png = os.path.join(
-            test_dir, '%s_acklink_throughput.png' % cc)
-        acklink_delay_png = os.path.join(
-            test_dir, '%s_acklink_delay.png' % cc)
+        for run_id in xrange(1, 1 + run_times):
+            datalink_throughput_png = os.path.join(
+                test_dir, '%s_datalink_throughput_run%s.png' % (cc, run_id))
+            datalink_delay_png = os.path.join(
+                test_dir, '%s_datalink_delay_run%s.png' % (cc, run_id))
+            acklink_throughput_png = os.path.join(
+                test_dir, '%s_acklink_throughput_run%s.png' % (cc, run_id))
+            acklink_delay_png = os.path.join(
+                test_dir, '%s_acklink_delay_run%s.png' % (cc, run_id))
 
-        str_dict = {'cc_pretty_name': prettify(cc),
-                    'datalink_throughput_png': datalink_throughput_png,
-                    'datalink_delay_png': datalink_delay_png,
-                    'acklink_throughput_png': acklink_throughput_png,
-                    'acklink_delay_png': acklink_delay_png}
+            str_dict = {'cc_name': prettify(cc),
+                        'run_id': run_id,
+                        'datalink_throughput_png': datalink_throughput_png,
+                        'datalink_delay_png': datalink_delay_png,
+                        'acklink_throughput_png': acklink_throughput_png,
+                        'acklink_delay_png': acklink_delay_png}
 
-        latex.write(
-            'Congestion Control Report of %(cc_pretty_name)s --- Data Link\n\n'
-            '\\begin{figure}[H]\n'
-            '\\centering\n'
-            '\\includegraphics[width=\\textwidth]'
-            '{%(datalink_throughput_png)s}\n'
-            '\\end{figure}\n\n'
-            '\\begin{figure}[H]\n'
-            '\\centering\n'
-            '\\includegraphics[width=\\textwidth]'
-            '{%(datalink_delay_png)s}\n'
-            '\\end{figure}\n\n'
-            '\\newpage\n\n'
-            'Congestion Control Report of %(cc_pretty_name)s --- ACK Link\n\n'
-            '\\begin{figure}[H]\n'
-            '\\centering\n'
-            '\\includegraphics[width=\\textwidth]'
-            '{%(acklink_throughput_png)s}\n'
-            '\\end{figure}\n\n'
-            '\\begin{figure}[H]\n'
-            '\\centering\n'
-            '\\includegraphics[width=\\textwidth]'
-            '{%(acklink_delay_png)s}\n'
-            '\\end{figure}\n\n' % str_dict)
+            latex.write(
+                'Run %(run_id)s: Report of %(cc_name)s --- Data Link\n\n'
+                '\\begin{figure}[H]\n'
+                '\\centering\n'
+                '\\includegraphics[width=\\textwidth]'
+                '{%(datalink_throughput_png)s}\n'
+                '\\end{figure}\n\n'
+                '\\begin{figure}[H]\n'
+                '\\centering\n'
+                '\\includegraphics[width=\\textwidth]'
+                '{%(datalink_delay_png)s}\n'
+                '\\end{figure}\n\n'
+                '\\newpage\n\n'
+                'Run %(run_id)s: Report of %(cc_name)s --- ACK Link\n\n'
+                '\\begin{figure}[H]\n'
+                '\\centering\n'
+                '\\includegraphics[width=\\textwidth]'
+                '{%(acklink_throughput_png)s}\n'
+                '\\end{figure}\n\n'
+                '\\begin{figure}[H]\n'
+                '\\centering\n'
+                '\\includegraphics[width=\\textwidth]'
+                '{%(acklink_delay_png)s}\n'
+                '\\end{figure}\n\n' % str_dict)
 
-        if cc != args.cc_schemes[-1]:
-            latex.write('\\newpage\n\n')
+            if cc != args.cc_schemes[-1]:
+                latex.write('\\newpage\n\n')
 
     latex.write('\\end{document}')
     latex.close()
 
-    assert call(['which', 'pdflatex']) is 0, "pdflatex not installed"
+    assert call(['which', 'pdflatex'], stdout=DEVNULL) is 0, (
+        'pdflatex not installed')
     cmd = 'pdflatex -output-directory %s /tmp/pantheon_report.tex' % test_dir
     sys.stderr.write('+ ' + cmd + '\n')
-    check_call(cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
+    check_call(cmd, shell=True)
 
 
 if __name__ == '__main__':
