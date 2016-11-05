@@ -45,7 +45,7 @@ def main():
     test_dir = path.abspath(path.dirname(__file__))
     setup_src = path.join(test_dir, 'setup.py')
     test_src = path.join(test_dir, 'test.py')
-    summary_plot_src = path.join(test_dir, 'summary-plot.pl')
+    summary_plot_src = path.join(test_dir, 'summary_plot.py')
     combine_report_src = path.join(test_dir, 'combine_reports.py')
     metadata_fname = path.join(test_dir, 'pantheon_metadata')
 
@@ -103,6 +103,11 @@ def main():
                 cmd = test_cmd + ['--run-id', str(run_id), cc]
                 sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
                 check_call(cmd)
+
+        cmd = ['python', summary_plot_src, '--run-times',
+               str(args.run_times)] + cc_schemes
+        sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
+        check_call(cmd)
 
         cmd = ['python', combine_report_src, '--metadata-file', metadata_fname,
                '--run-times', str(args.run_times)] + cc_schemes
