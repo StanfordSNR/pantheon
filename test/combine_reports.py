@@ -27,7 +27,8 @@ def main():
 
     test_dir = path.abspath(path.dirname(__file__))
     src_dir = path.abspath(path.join(test_dir, '../src'))
-    pantheon_summary_png = path.join(test_dir, 'pantheon_summary.png')
+    raw_summary_png = path.join(test_dir, 'pantheon_summary.png')
+    mean_summary_png = path.join(test_dir, 'pantheon_summary_mean.png')
     metadata = parse_metadata_file(path.join(test_dir, 'pantheon_metadata'))
 
     latex = open('/tmp/pantheon_report.tex', 'w')
@@ -94,7 +95,13 @@ def main():
                 '\\includegraphics[width=\\textwidth]'
                 '{%s}\n'
                 '\\end{figure}\n\n'
-                '\\newpage\n\n' % pantheon_summary_png)
+                '\\newpage\n\n'
+                '\\begin{figure}[H]\n'
+                '\\centering\n'
+                '\\includegraphics[width=\\textwidth]'
+                '{%s}\n'
+                '\\end{figure}\n\n'
+                '\\newpage\n\n' % (mean_summary_png, raw_summary_png))
 
     pretty_names = {}
     for cc in args.cc_schemes:
