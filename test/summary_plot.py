@@ -3,6 +3,7 @@
 import os
 import sys
 import re
+import math
 from os import path
 from parse_arguments import parse_arguments
 from subprocess import check_output
@@ -33,11 +34,12 @@ def get_delay_throughput(log_name):
             break
 
     stats_log.close()
-    return (delay, throughput)
+    return (float(delay), float(throughput))
 
 
 def plot_summary(data, pretty_names, pantheon_summary_png):
     min_delay = None
+    max_delay = None
     color_i = 0
     marker_i = 0
     color_names = colors.cnames.keys()
@@ -56,20 +58,32 @@ def plot_summary(data, pretty_names, pantheon_summary_png):
         if not min_delay or cc_min_delay < min_delay:
             min_delay = cc_min_delay
 
-    axes = plt.gca()
+        cc_max_delay = max(x_data)
+        if not max_delay or cc_max_delay > max_delay:
+            max_delay = cc_max_delay
 
-    xticks = axes.get_xticks()
-    if min_delay >= 0 and xticks[0] <= 0:
-        x_interval = xticks[1] - xticks[0]
-        xmin = -x_interval / 5
-        axes.set_xlim(left=xmin)
+    ax = plt.gca()
+    ax.set_xscale('log', basex=2)
+    ax.invert_xaxis()
+    ax.xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%d'))
 
-    plt.legend(scatterpoints=1, bbox_to_anchor=(1, 0.5), loc='center left')
+    log_min_delay = math.log(float(min_delay), 2)
+    log_max_delay = math.log(float(max_delay), 2)
+    xmin = pow(2, math.floor(log_min_delay))
+    xmax = pow(2, math.ceil(log_max_delay))
+    ax.set_xlim(left=xmax, right=xmin)
+
+    yticks = ax.get_yticks()
+    if yticks[0] < 0:
+        ax.set_ylim(bottom=0)
+
+    lgd = plt.legend(scatterpoints=1, bbox_to_anchor=(1, 0.5),
+                     loc='center left', fontsize=12)
     plt.xlabel('95th percentile of per-packet one-way delay (ms)')
     plt.ylabel('Average throughput (Mbit/s)')
     plt.title('Summary of results')
     plt.grid()
-    plt.savefig(pantheon_summary_png, dpi=300,
+    plt.savefig(pantheon_summary_png, dpi=300, bbox_extra_artists=(lgd,),
                 bbox_inches='tight', pad_inches=0.2)
 
 
