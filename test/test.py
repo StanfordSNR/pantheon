@@ -134,6 +134,16 @@ class TestCongestionControl(unittest.TestCase):
             os.killpg(os.getpgid(proc_first.pid), signal.SIGKILL)
             os.killpg(os.getpgid(proc_second.pid), signal.SIGKILL)
 
+    # read ntpdate offset
+    def read_ntp_offset(self, tun_manager):
+        ntp_cmd = 'ntpdate -quv pool.ntp.org\n'
+        tun_manager.stdin.write(ntp_cmd)
+        offset = tun_manager.stdout.readline().strip()
+        if offset == 'error':
+            return None
+        else:
+            return float(offset) * 1000
+
     # test congestion control using mm-tunnelclient/mm-tunnelserver
     def run_with_tunnel(self):
         # ts: mm-tunnelserver  tc: mm-tunnelclient
@@ -178,6 +188,14 @@ class TestCongestionControl(unittest.TestCase):
         tc_manager = Popen(tc_manager_cmd, stdin=PIPE,
                            stdout=PIPE, preexec_fn=os.setsid)
 
+        # create alias for ts_manager and tc_manager using local or remote
+        if self.server_side == 'local':
+            local_manager = ts_manager
+            remote_manager = tc_manager
+        else:
+            local_manager = tc_manager
+            remote_manager = ts_manager
+
         # create alias for ts_manager and tc_manager using sender or receiver
         if self.sender_side == self.server_side:
             send_manager = ts_manager
@@ -189,6 +207,11 @@ class TestCongestionControl(unittest.TestCase):
             recv_manager = ts_manager
             send_prompt = '(client) '
             recv_prompt = '(server) '
+
+        # read ntpdate offsets
+        if self.remote:
+            self.ofst_local_start = self.read_ntp_offset(local_manager)
+            self.ofst_remote_start = self.read_ntp_offset(remote_manager)
 
         # run each flow
         second_cmds = []
@@ -315,6 +338,11 @@ class TestCongestionControl(unittest.TestCase):
         self.assertTrue(self.runtime > elapsed_time,
                         'interval time between flows is too long')
         time.sleep(self.runtime - elapsed_time)
+
+        # read ntpdate offsets
+        if self.remote:
+            self.ofst_local_end = self.read_ntp_offset(local_manager)
+            self.ofst_remote_end = self.read_ntp_offset(remote_manager)
 
         # stop all the running flows
         sys.stderr.write('(server) halt\n')
@@ -467,6 +495,20 @@ class TestCongestionControl(unittest.TestCase):
 
         acklink_delay.close()
         self.assertEqual(proc.returncode, 0)
+
+        if (self.remote and self.ofst_local_start and self.ofst_local_end and
+                self.ofst_remote_start and self.ofst_remote_end):
+            offset_info = (
+                '* Clock offsets:\n'
+                '-- Before test:\n'
+                'Local clock offset: %s ms\n'
+                'Remote clock offset: %s ms\n'
+                '-- After test:\n'
+                'Local clock offset: %s ms\n'
+                'Remote clock offset: %s ms\n'
+                % (self.ofst_local_start, self.ofst_local_end,
+                   self.ofst_remote_start, self.ofst_remote_end))
+            stats.write(offset_info)
 
         stats.close()
 
