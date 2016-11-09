@@ -97,7 +97,7 @@ def plot_summary(data, worst_offsets, pretty_names,
         xmax = pow(2, math.ceil(log_max_delay))
 
     for fig, ax in [(fig_raw, ax_raw), (fig_mean, ax_mean)]:
-        if min_delay > 0:
+        if min_delay > 0 and xmax > 2 * xmin:
             ax.set_xscale('log', basex=2)
             ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
             ax.set_xlim(left=xmin, right=xmax)
