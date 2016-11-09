@@ -4,7 +4,7 @@ import os
 import sys
 import signal
 import subprocess
-from subprocess import Popen, PIPE, STDOUT
+from subprocess import Popen, PIPE, check_output
 
 
 def destroy(procs):
@@ -41,6 +41,23 @@ def main():
             else:
                 sys.stderr.write('Unknown command: ' + raw_cmd)
                 continue
+        elif cmd[0] == 'ntpdate':
+            if len(cmd) != 3:
+                sys.stderr.write('Unknown command: ' + raw_cmd)
+                continue
+
+            ntp_output = check_output(cmd)
+            offset = ntp_output.rsplit(' ', 2)[-2]
+
+            try:
+                float(offset)
+            except:
+                sys.stderr.write('Failed to get clock offset from ntpdate\n')
+                sys.stderr.write(ntp_output)
+                sys.stdout.write('error\n')
+            else:
+                sys.stdout.write(offset + '\n')
+            sys.stdout.flush()
         elif cmd[0] == 'halt':
             destroy(procs)
         else:
