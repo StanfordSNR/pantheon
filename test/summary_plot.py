@@ -16,29 +16,41 @@ import matplotlib.markers as markers
 import matplotlib.ticker as ticker
 
 
-def get_delay_throughput(log_name):
+def parse_stats(log_name):
     stats_log = open(log_name)
     throughput = None
     delay = None
+    worst_local_offset = None
+    worst_remote_offset = None
 
     for line in stats_log:
         result = re.match(r'Average throughput: (.*?) Mbit/s', line)
-        if result:
-            throughput = result.group(1)
+        if result and not throughput:
+            throughput = float(result.group(1))
 
         result = re.match(r'95th percentile per-packet one-way delay: '
                           '(.*?) ms', line)
-        if result:
-            delay = result.group(1)
+        if result and not delay:
+            delay = float(result.group(1))
 
-        if throughput and delay:
-            break
+        result = re.match(r'Local clock offset: (.*?) ms', line)
+        if result:
+            ofst = float(result.group(1))
+            if not worst_local_offset or abs(ofst) > worst_local_offset:
+                worst_local_offset = ofst
+
+        result = re.match(r'Remote clock offset: (.*?) ms', line)
+        if result:
+            ofst = float(result.group(1))
+            if not worst_remote_offset or abs(ofst) > worst_remote_offset:
+                worst_remote_offset = ofst
 
     stats_log.close()
-    return (float(delay), float(throughput))
+    return (delay, throughput, worst_local_offset, worst_remote_offset)
 
 
-def plot_summary(data, pretty_names, raw_summary_png, mean_summary_png):
+def plot_summary(data, worst_offsets, pretty_names,
+                 raw_summary_png, mean_summary_png):
     min_delay = None
     max_delay = None
     color_i = 0
@@ -93,7 +105,11 @@ def plot_summary(data, pretty_names, raw_summary_png, mean_summary_png):
         if yticks[0] < 0:
             ax.set_ylim(bottom=0)
 
-        ax.set_xlabel('95th percentile of per-packet one-way delay (ms)')
+        xlabel = '95th percentile of per-packet one-way delay (ms)'
+        if worst_offsets[0] and worst_offsets[1]:
+            xlabel += ('\n(worst clock offset: local %s ms, remote %s ms)' %
+                       worst_offsets)
+        ax.set_xlabel(xlabel)
         ax.set_ylabel('Average throughput (Mbit/s)')
         ax.grid()
 
@@ -119,6 +135,8 @@ def main():
 
     pretty_names = {}
     data = {}
+    worst_local_ofst = None
+    worst_remote_ofst = None
     for cc in args.cc_schemes:
         if cc not in pretty_names:
             cc_name = check_output(
@@ -129,9 +147,19 @@ def main():
 
         for run_id in xrange(1, 1 + args.run_times):
             log_name = path.join(test_dir, '%s_stats_run%s.log' % (cc, run_id))
-            data[cc].append(get_delay_throughput(log_name))
+            delay, throughput, local_ofst, remote_ofst = parse_stats(log_name)
+            data[cc].append((delay, throughput))
+            if local_ofst:
+                if not worst_local_ofst or abs(local_ofst) > worst_local_ofst:
+                    worst_local_ofst = local_ofst
+            if remote_ofst:
+                if (not worst_remote_ofst or
+                        abs(remote_ofst) > worst_remote_ofst):
+                    worst_remote_ofst = remote_ofst
 
-    plot_summary(data, pretty_names, raw_summary_png, mean_summary_png)
+    worst_offsets = (worst_local_ofst, worst_remote_ofst)
+    plot_summary(data, worst_offsets, pretty_names,
+                 raw_summary_png, mean_summary_png)
 
 
 if __name__ == '__main__':
