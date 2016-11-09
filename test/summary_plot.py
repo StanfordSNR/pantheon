@@ -90,16 +90,18 @@ def plot_summary(data, worst_offsets, pretty_names,
         marker_i = marker_i + 1 if marker_i < len(marker_names) - 1 else 0
 
     # find min and max of x ticks
-    log_min_delay = math.log(float(min_delay), 2)
-    log_max_delay = math.log(float(max_delay), 2)
-    xmin = pow(2, math.floor(log_min_delay))
-    xmax = pow(2, math.ceil(log_max_delay))
+    if min_delay > 0:
+        log_min_delay = math.log(float(min_delay), 2)
+        log_max_delay = math.log(float(max_delay), 2)
+        xmin = pow(2, math.floor(log_min_delay))
+        xmax = pow(2, math.ceil(log_max_delay))
 
     for fig, ax in [(fig_raw, ax_raw), (fig_mean, ax_mean)]:
-        ax.set_xscale('log', basex=2)
+        if min_delay > 0:
+            ax.set_xscale('log', basex=2)
+            ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
+            ax.set_xlim(left=xmin, right=xmax)
         ax.invert_xaxis()
-        ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
-        ax.set_xlim(left=xmax, right=xmin)
 
         yticks = ax.get_yticks()
         if yticks[0] < 0:
