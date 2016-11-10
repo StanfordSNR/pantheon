@@ -46,7 +46,7 @@ class TestCongestionControl(unittest.TestCase):
         # install mahimahi
         mm_dir = path.join(self.test_dir, '../third_party/mahimahi')
         # make install alone sufficient if autogen.sh, configure already run
-        cmd = 'cd %s && sudo make install' % mm_dir
+        cmd = 'cd %s && sudo make -j install' % mm_dir
         if call(cmd, stdout=DEVNULL, shell=True) is 0:
             return
 
