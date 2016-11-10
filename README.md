@@ -13,86 +13,92 @@ git clone https://github.com/StanfordLPNG/pantheon.git
 git submodule update --init
 ```
 
-Then get texlive for report generation:
+Install dependencies to generate summary plots and reports of experiments:
 
 ```
 sudo apt-get install texlive
+pip install matplotlib
 ```
 
 ## Setup
+First, change directory to `test` and run:
+
+```
+./setup.py congestion-control
+```
+
 Currently the supported `congestion-control` is `default_tcp`, `vegas`,
 `ledbat`, `pcc`, `scream`, `sprout`, `verus`, `koho_cc`, `webrtc` and `quic`.
 
-```
-./test/setup.py congestion-control
-```
-
-or set up on both local and remote machines in one command:
+Alternatively, set up on both local and remote machines in one command:
 
 ```
-./test/setup.py [-i IDENTITY-FILE] -r REMOTE:DIR congestion-control
+./setup.py -r REMOTE:PANTHEON-DIR congestion-control
 ```
 
-Run `./test/setup.py -h` for detailed usage.
+Run `./setup.py -h` for detailed usage.
 
 ## Test
-On local machine:
+Test congestion control schemes on local machine:
 
 ```
-./test/test.py [-f FLOWS] [-t RUNTIME] congestion-control
+./test.py [-t RUNTIME] [-f FLOWS] congestion-control
 ```
 
 or between local machine and remote machine:
 
 ```
-./test/test.py [-i IDENTITY-FILE] -r REMOTE:DIR [-f FLOWS] [-t RUNTIME]
-               congestion-control
+./test.py -r REMOTE:PANTHEON-DIR [-t RUNTIME] [-f FLOWS] congestion-control
 ```
 
-`FLOWS=0` indicates that no tunnels would be created in the tests; otherwise,
+`-f 0` indicates that no tunnels would be created in the tests; otherwise,
 there will be `FLOWS` tunnels created to run a congestion control scheme.
 Notice that if `-r` is given, `FLOWS` must be positive.
 
 Alternatively, run
 
 ```
-./test/run.py [-i IDENTITY-FILE] [-r REMOTE:DIR] [-f FLOWS] [-t RUNTIME]
+./run.py [-r REMOTE:PANTHEON-DIR] [-t RUNTIME] [-f FLOWS]
 ```
 
 to set up and test all congestion control schemes. In addition, a summary
-report `test/pantheon_report.pdf` of the results will be generated.
+report `pantheon_report.pdf` of the experiments will be generated.
 
-Run `./test/test.py -h` and `./test/run.py -h` for detailed usage, including
-more optional arguments.
+Run `./test.py -h` and `./run.py -h` for detailed usage, including more
+optional arguments.
 
 ## Usage of Individual Scheme
+Change directory to `src` first.
 
 ```
 # print the dependencies required to be installed
-./src/<congestion-control>.py deps
+./<congestion-control>.py deps
 
 # perform build commands for scheme
-./src/<congestion-control>.py build
+./<congestion-control>.py build
 
 # run initialize commands after building and before running
-./src/<congestion-control>.py init
+./<congestion-control>.py init
 
 # find running order for scheme
-./src/<congestion-control>.py who_goes_first
+./<congestion-control>.py who_goes_first
+
+# find friendly name of scheme
+./<congestion-control>.py friendly_name
 ```
 
-Depending on the output about running order, run
+Depending on the output of `who_goes_first`, run
 
 ```
 # Receiver first
-./src/<congestion-control>.py receiver
-./src/<congestion-control>.py sender IP port
+./<congestion-control>.py receiver
+./<congestion-control>.py sender IP port
 ```
 
 or
 
 ```
 # Sender first
-./src/<congestion-control>.py sender
-./src/<congestion-control>.py receiver IP port
+./<congestion-control>.py sender
+./<congestion-control>.py receiver IP port
 ```
