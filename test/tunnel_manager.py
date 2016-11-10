@@ -32,7 +32,8 @@ def main():
             cmd_to_run = ' '.join(cmd[2:])
 
             if cmd[2] == 'mm-tunnelclient' or cmd[2] == 'mm-tunnelserver':
-                proc = Popen(cmd_to_run, stdin=PIPE, stdout=PIPE, shell=True,
+                cmd_to_run = os.path.expandvars(cmd_to_run).split()
+                proc = Popen(cmd_to_run, stdin=PIPE, stdout=PIPE,
                              preexec_fn=os.setsid)
                 procs[tun_id] = proc
             elif cmd[2] == 'python':
