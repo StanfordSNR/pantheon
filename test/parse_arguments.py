@@ -143,6 +143,12 @@ def build_arg_dict():
         'help': 'congestion control schemes',
     }
 
+    arg_dict['--no-pre-setup'] = {
+        'action': 'store_true',
+        'dest': 'no_pre_setup',
+        'help': 'skip building mahimahi and setting ip_forwarding/rp_filters',
+    }
+
     return arg_dict
 
 
@@ -192,7 +198,7 @@ def parse_arguments(filename):
 
     if filename == 'setup.py':
         add_arg_list(parser, arg_dict, [
-            '-r', '--local-interface', '--remote-interface', 'cc'])
+            '-r', '--local-interface', '--remote-interface', '--no-pre-setup', 'cc'])
     elif filename == 'test.py':
         add_arg_list(parser, arg_dict, [
             '-r', '-t', '-f', '--interval', '--tunnel-server',
