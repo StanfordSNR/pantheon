@@ -27,6 +27,8 @@ class TestCongestionControl(unittest.TestCase):
                     'submodules with "git submodule update --init"' % module)
 
     def pre_setup(self):
+        self.sanity_check_gitmodules()
+
         # Enable IP forwarding
         cmd = 'sudo sysctl -w net.ipv4.ip_forward=1'
         check_call(cmd, shell=True)
@@ -100,7 +102,6 @@ class TestCongestionControl(unittest.TestCase):
 
     # congestion control setup
     def test_congestion_control_setup(self):
-        self.sanity_check_gitmodules()
         # run remote setup.py
         if self.remote:
             (remote_addr, remote_dir) = self.remote.split(':')
