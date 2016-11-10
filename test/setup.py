@@ -15,6 +15,7 @@ class TestCongestionControl(unittest.TestCase):
         self.remote = args.remote
         self.local_if = args.local_if
         self.remote_if = args.remote_if
+        self.run_pre_setup = not args.no_pre_setup
         self.test_dir = path.abspath(path.dirname(__file__))
 
     def sanity_check_gitmodules(self):
@@ -116,8 +117,9 @@ class TestCongestionControl(unittest.TestCase):
 
         # run local setup.py (even when self.remote exists)
 
-        # always enable IP forwarding, setup mahimahi and disable rp_filter
-        self.pre_setup()
+        if self.run_pre_setup:
+            # enable IP forwarding, setup mahimahi and disable rp_filter
+            self.pre_setup()
 
         # setup congestion control scheme
         self.setup_congestion_control()
