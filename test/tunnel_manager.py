@@ -8,6 +8,7 @@ from subprocess import Popen, PIPE, check_output
 
 
 def destroy(procs):
+    # send SIGTERM signal to all processes and the subprocesses they spawned
     for proc in procs.itervalues():
         os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
 
@@ -15,14 +16,16 @@ def destroy(procs):
 
 
 def main():
-    procs = {}
+    procs = {}  # manage tunnel processes
     prompt = ''
 
     while True:
         raw_cmd = sys.stdin.readline().strip()
+        # print all commands fed to tunnel manager
         sys.stderr.write(prompt + raw_cmd + '\n')
         cmd = raw_cmd.split()
 
+        # manage I/O of multiple tunnels
         if cmd[0] == 'tunnel':
             if len(cmd) < 3:
                 sys.stderr.write('error: usage: tunnel ID CMD...\n')
@@ -37,12 +40,13 @@ def main():
             cmd_to_run = ' '.join(cmd[2:])
 
             if cmd[2] == 'mm-tunnelclient' or cmd[2] == 'mm-tunnelserver':
+                # expand $MAHIMAHI_BASE
                 cmd_to_run = os.path.expandvars(cmd_to_run).split()
                 procs[tun_id] = Popen(cmd_to_run, stdin=PIPE, stdout=PIPE,
                                       preexec_fn=os.setsid)
-            elif cmd[2] == 'python':
+            elif cmd[2] == 'python':  # run python scripts inside tunnel
                 procs[tun_id].stdin.write(cmd_to_run + '\n')
-            elif cmd[2] == 'readline':
+            elif cmd[2] == 'readline':  # readline from stdout of tunnel
                 if len(cmd) != 3:
                     sys.stderr.write('error: usage: tunnel ID readline\n')
                     continue
@@ -53,7 +57,7 @@ def main():
                 sys.stderr.write('unknown command after "tunnel ID": %s\n'
                                  % cmd_to_run)
                 continue
-        elif cmd[0] == 'ntpdate':
+        elif cmd[0] == 'ntpdate':  # run ntpdate command to get time skew
             try:
                 ntp_output = check_output(cmd)
             except:
@@ -71,13 +75,13 @@ def main():
             else:
                 sys.stdout.write(offset + '\n')
             sys.stdout.flush()
-        elif cmd[0] == 'prompt':
+        elif cmd[0] == 'prompt':  # set prompt in front of commands to print
             if len(cmd) != 2:
                 sys.stderr.write('error: usage: prompt PROMPT\n')
                 continue
 
             prompt = cmd[1].strip() + ' '
-        elif cmd[0] == 'halt':
+        elif cmd[0] == 'halt':  # terminate all tunnel processes and quit
             if len(cmd) != 1:
                 sys.stderr.write('error: usage: halt\n')
                 continue
