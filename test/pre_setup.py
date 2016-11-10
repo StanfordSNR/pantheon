@@ -14,12 +14,14 @@ class TestPreSetup(unittest.TestCase):
         self.remote = args.remote
         self.local_if = args.local_if
         self.remote_if = args.remote_if
-        self.third_party_dir = path.abspath(
-            path.join(path.dirname(__file__), '../third_party'))
+        self.pantheon_dir = path.abspath(
+            path.join(path.dirname(__file__), os.pardir))
+        self.third_party_dir = path.join(self.pantheon_dir, 'third_party')
 
     def pre_setup(self):
         # update submodules
-        cmd = 'git submodule update --init --recursive'
+        cmd = ('cd %s && git submodule update --init --recursive' %
+               self.pantheon_dir)
         check_call(cmd, shell=True)
 
         # Enable IP forwarding
@@ -63,10 +65,7 @@ class TestPreSetup(unittest.TestCase):
         # run remote pre_setup.py
         if self.remote:
             (remote_addr, remote_dir) = self.remote.split(':')
-            # can't use os.path.join since it only evaluates path locally
-            if remote_dir[-1] != '/':
-                remote_dir += '/'
-            remote_setup = remote_dir + 'test/pre_setup.py'
+            remote_setup = path.join(remote_dir, 'test/pre_setup.py')
 
             remote_setup_cmd = ['ssh', remote_addr, 'python', remote_setup]
             if self.remote_if:
