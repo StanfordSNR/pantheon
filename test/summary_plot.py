@@ -6,7 +6,7 @@ import re
 import math
 from os import path
 from parse_arguments import parse_arguments
-from subprocess import check_output
+from pantheon_help import check_output
 
 import matplotlib
 matplotlib.use('Agg')

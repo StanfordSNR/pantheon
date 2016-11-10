@@ -5,7 +5,7 @@ import sys
 import unittest
 from os import path
 from parse_arguments import parse_arguments
-from subprocess_wrapper import call, check_call, check_output
+from pantheon_help import call, check_call, check_output, parse_remote
 
 
 class TestSetup(unittest.TestCase):
@@ -23,19 +23,16 @@ class TestSetup(unittest.TestCase):
             sys.stderr.write('Installing dependencies...\n')
             cmd = 'sudo apt-get -yq --force-yes install ' + deps
             check_call(cmd, shell=True)
-        sys.stderr.write('Done\n')
 
     def build(self):
         sys.stderr.write('Building...\n')
         cmd = ['python', self.src_file, 'build']
         check_call(cmd)
-        sys.stderr.write('Done\n')
 
     def initialize(self):
         sys.stderr.write('Performing intialization commands...\n')
         cmd = ['python', self.src_file, 'init']
         check_call(cmd)
-        sys.stderr.write('Done\n')
 
     def setup_congestion_control(self):
         src_dir = path.abspath(path.join(self.test_dir, '../src'))
@@ -56,12 +53,9 @@ class TestSetup(unittest.TestCase):
 
         # run remote setup.py
         if self.remote:
-            (remote_addr, remote_dir) = self.remote.split(':')
-            remote_setup = path.join(remote_dir, 'test/setup.py')
-
-            remote_setup_cmd = ['ssh', remote_addr,
-                                'python', remote_setup, self.cc]
-            check_call(remote_setup_cmd)
+            rd = parse_remote(self.remote)
+            cmd = rd['ssh_cmd'] + ['python', rd['setup'], self.cc]
+            check_call(cmd)
 
 
 def main():
