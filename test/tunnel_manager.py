@@ -16,14 +16,16 @@ def destroy(procs):
 
 def main():
     procs = {}
+    prompt = ''
 
     while True:
-        raw_cmd = sys.stdin.readline()
+        raw_cmd = sys.stdin.readline().strip()
+        sys.stderr.write(prompt + raw_cmd + '\n')
         cmd = raw_cmd.split()
 
         if cmd[0] == 'tunnel':
             if len(cmd) < 3:
-                sys.stderr.write('Unknown command: ' + raw_cmd)
+                sys.stderr.write('Unknown command: %s\n' % raw_cmd)
                 continue
 
             tun_id = int(cmd[1]) - 1
@@ -39,13 +41,9 @@ def main():
                 sys.stdout.write(procs[tun_id].stdout.readline())
                 sys.stdout.flush()
             else:
-                sys.stderr.write('Unknown command: ' + raw_cmd)
+                sys.stderr.write('Unknown command: %s\n' % raw_cmd)
                 continue
         elif cmd[0] == 'ntpdate':
-            if len(cmd) != 3:
-                sys.stderr.write('Unknown command: ' + raw_cmd)
-                continue
-
             ntp_output = check_output(cmd)
             offset = ntp_output.rsplit(' ', 2)[-2]
 
@@ -58,10 +56,15 @@ def main():
             else:
                 sys.stdout.write(offset + '\n')
             sys.stdout.flush()
+        elif cmd[0] == 'prompt':
+            if len(cmd) != 2:
+                sys.stderr.write('Unknown command: %s\n' % raw_cmd)
+
+            prompt = cmd[1].strip() + ' '
         elif cmd[0] == 'halt':
             destroy(procs)
         else:
-            sys.stderr.write('Unknown command: ' + raw_cmd)
+            sys.stderr.write('Unknown command: %s\n' % raw_cmd)
             continue
 
 
