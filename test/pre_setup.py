@@ -32,6 +32,10 @@ class TestPreSetup(unittest.TestCase):
             cmd = 'echo 0 | sudo tee' + rpf % 'all' + rpf % self.local_if
             check_call(cmd, shell=True)
 
+        # install texlive, matplotlib, etc.
+        cmd = 'sudo apt-get -yq --force-yes install texlive python-matplotlib'
+        check_call(cmd, shell=True)
+
         # install mahimahi
         mm_dir = path.join(self.third_party_dir, 'mahimahi')
 
