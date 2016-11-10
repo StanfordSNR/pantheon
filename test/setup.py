@@ -8,63 +8,12 @@ from parse_arguments import parse_arguments
 from subprocess_wrapper import call, check_call, check_output
 
 
-class TestCongestionControl(unittest.TestCase):
+class TestSetup(unittest.TestCase):
     def __init__(self, test_name, args):
-        super(TestCongestionControl, self).__init__(test_name)
+        super(TestSetup, self).__init__(test_name)
         self.cc = args.cc.lower()
         self.remote = args.remote
-        self.local_if = args.local_if
-        self.remote_if = args.remote_if
-        self.run_pre_setup = not args.no_pre_setup
         self.test_dir = path.abspath(path.dirname(__file__))
-
-    def sanity_check_gitmodules(self):
-        third_party_dir = os.path.join(self.test_dir, '../third_party')
-        for module in os.listdir(third_party_dir):
-            path = os.path.join(third_party_dir, module)
-            if os.path.isdir(path):
-                assert os.listdir(path), (
-                    'Folder third_party/%s empty: make sure to initialize git '
-                    'submodules with "git submodule update --init"' % module)
-
-    def pre_setup(self):
-        self.sanity_check_gitmodules()
-
-        # Enable IP forwarding
-        cmd = 'sudo sysctl -w net.ipv4.ip_forward=1'
-        check_call(cmd, shell=True)
-
-        # Disable Reverse Path Filter
-        echo_cmd = 'echo 0 | sudo tee'
-        filter_path = ' /proc/sys/net/ipv4/conf/%s/rp_filter'
-        if self.local_if:
-            cmd = echo_cmd + filter_path % 'all' + filter_path % self.local_if
-            check_call(cmd, shell=True)
-
-        if self.remote_if:
-            cmd = echo_cmd + filter_path % 'all' + filter_path % self.remote_if
-            cmd = ' '.join(self.ssh_cmd) + ' "%s"' % cmd
-            check_call(cmd, shell=True)
-
-        # install mahimahi
-        mm_dir = path.join(self.test_dir, '../third_party/mahimahi')
-        # make install alone sufficient if autogen.sh, configure already run
-        cmd = 'cd %s && sudo make -j install' % mm_dir
-        if call(cmd, stdout=DEVNULL, shell=True) is 0:
-            return
-
-        mm_deps = (
-            'debhelper autotools-dev dh-autoreconf iptables protobuf-compiler '
-            'libprotobuf-dev pkg-config libssl-dev dnsmasq-base ssl-cert '
-            'libxcb-present-dev libcairo2-dev libpango1.0-dev iproute2 '
-            'apache2-dev apache2-bin iptables dnsmasq-base gnuplot iproute2')
-
-        cmd = 'sudo apt-get -yq --force-yes install ' + mm_deps
-        check_call(cmd, shell=True)
-
-        cmd = ('cd %s && ./autogen.sh && ./configure && make && '
-               'sudo make install' % mm_dir)
-        check_call(cmd, shell=True)
 
     def install(self):
         cmd = ['python', self.src_file, 'deps']
@@ -102,27 +51,17 @@ class TestCongestionControl(unittest.TestCase):
         self.initialize()
 
     # congestion control setup
-    def test_congestion_control_setup(self):
+    def test_cc_setup(self):
+        self.setup_congestion_control()
+
         # run remote setup.py
         if self.remote:
             (remote_addr, remote_dir) = self.remote.split(':')
-            self.ssh_cmd = ['ssh', remote_addr]
+            remote_setup = path.join(remote_dir, 'test/setup.py')
 
-            # os.path.join evaluate path locally only
-            if remote_dir[-1] != '/':
-                remote_dir += '/'
-            remote_setup = remote_dir + 'test/setup.py'
-            remote_setup_cmd = self.ssh_cmd + ['python', remote_setup, self.cc]
+            remote_setup_cmd = ['ssh', remote_addr,
+                                'python', remote_setup, self.cc]
             check_call(remote_setup_cmd)
-
-        # run local setup.py (even when self.remote exists)
-
-        if self.run_pre_setup:
-            # enable IP forwarding, setup mahimahi and disable rp_filter
-            self.pre_setup()
-
-        # setup congestion control scheme
-        self.setup_congestion_control()
 
 
 def main():
@@ -130,7 +69,7 @@ def main():
 
     # create test suite to run
     suite = unittest.TestSuite()
-    suite.addTest(TestCongestionControl('test_congestion_control_setup', args))
+    suite.addTest(TestSetup('test_cc_setup', args))
     if not unittest.TextTestRunner().run(suite).wasSuccessful():
         sys.exit(1)
 
