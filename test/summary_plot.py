@@ -11,7 +11,6 @@ from subprocess import check_output
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import matplotlib.colors as colors
 import matplotlib.markers as markers
 import matplotlib.ticker as ticker
 
@@ -55,7 +54,8 @@ def plot_summary(data, worst_offsets, pretty_names,
     max_delay = None
     color_i = 0
     marker_i = 0
-    color_names = colors.cnames.keys()
+    color_names = ['r', 'y', 'b', 'g', 'c', 'm', 'brown', 'orange', 'gray',
+                   'gold', 'skyblue', 'olive', 'lime', 'violet', 'purple']
     marker_names = markers.MarkerStyle.filled_markers
 
     fig_raw, ax_raw = plt.subplots()
