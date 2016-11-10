@@ -4,7 +4,7 @@ import sys
 import random
 from parse_arguments import parse_arguments
 from os import path
-from subprocess_wrapper import check_call
+from pantheon_help import check_call
 
 
 def create_metadata_file(args, metadata_fname):
