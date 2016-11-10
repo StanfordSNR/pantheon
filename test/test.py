@@ -7,7 +7,7 @@ import time
 import signal
 from parse_arguments import parse_arguments
 from os import path
-from subprocess import Popen, PIPE, check_call, check_output
+from subprocess_wrapper import Popen, PIPE, check_call, check_output
 
 
 class TestCongestionControl(unittest.TestCase):
@@ -37,7 +37,6 @@ class TestCongestionControl(unittest.TestCase):
 
     def who_goes_first(self):
         who_goes_first_cmd = ['python', self.src_file, 'who_goes_first']
-        sys.stderr.write('+ ' + ' '.join(who_goes_first_cmd) + '\n')
         who_goes_first_info = check_output(who_goes_first_cmd)
         self.first_to_run = who_goes_first_info.split(' ')[0].lower()
         self.assertTrue(
@@ -100,7 +99,6 @@ class TestCongestionControl(unittest.TestCase):
     def run_without_tunnel(self):
         # run the side specified by self.first_to_run
         cmd = ['python', self.remote_src_file, self.first_to_run]
-        sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
         sys.stderr.write('Running %s %s...\n' % (self.cc, self.first_to_run))
         proc_first = Popen(cmd, stdout=PIPE, preexec_fn=os.setsid)
 
@@ -117,7 +115,6 @@ class TestCongestionControl(unittest.TestCase):
         cmd = ('python %s %s %s %s' %
                (self.src_file, self.second_to_run, self.remote_ip, port))
         cmd = ' '.join(self.mm_link_cmd) + " -- sh -c '%s'" % cmd
-        sys.stderr.write('+ ' + cmd + '\n')
         sys.stderr.write('Running %s %s...\n' % (self.cc, self.second_to_run))
         proc_second = Popen(cmd, stdout=PIPE, shell=True, preexec_fn=os.setsid)
 
@@ -170,7 +167,7 @@ class TestCongestionControl(unittest.TestCase):
         else:
             ts_manager_cmd = ['python', self.tunnel_manager]
 
-        sys.stderr.write('+ server: ' + ' '.join(ts_manager_cmd) + '\n')
+        sys.stderr.write('[tunnel server manager (tsm)] ')
         ts_manager = Popen(ts_manager_cmd, stdin=PIPE,
                            stdout=PIPE, preexec_fn=os.setsid)
 
@@ -184,7 +181,7 @@ class TestCongestionControl(unittest.TestCase):
         else:
             tc_manager_cmd = self.mm_link_cmd + ['python', self.tunnel_manager]
 
-        sys.stderr.write('+ client: ' + ' '.join(tc_manager_cmd) + '\n')
+        sys.stderr.write('[tunnel client manager (tcm)] ')
         tc_manager = Popen(tc_manager_cmd, stdin=PIPE,
                            stdout=PIPE, preexec_fn=os.setsid)
 
@@ -382,12 +379,10 @@ class TestCongestionControl(unittest.TestCase):
 
             cmd = ['mm-tunnel-merge-logs', 'single', '-i', self.ts_ilogs[i],
                    '-e', self.tc_elogs[i], '-o', c2s_log]
-            sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
             check_call(cmd)
 
             cmd = ['mm-tunnel-merge-logs', 'single', '-i', self.tc_ilogs[i],
                    '-e', self.ts_elogs[i], '-o', s2c_log]
-            sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
             check_call(cmd)
 
             datalink_tun_logs.append(datalink_tun_log)
@@ -397,14 +392,12 @@ class TestCongestionControl(unittest.TestCase):
         if not self.remote:
             cmd += ['--link-log', self.mm_datalink_log]
         cmd += datalink_tun_logs
-        sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
         check_call(cmd)
 
         cmd = ['mm-tunnel-merge-logs', 'multiple', '-o', self.acklink_log]
         if not self.remote:
             cmd += ['--link-log', self.mm_acklink_log]
         cmd += acklink_tun_logs
-        sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
         check_call(cmd)
 
     def run_congestion_control(self):
@@ -444,7 +437,6 @@ class TestCongestionControl(unittest.TestCase):
         datalink_throughput = open(datalink_throughput_png, 'w')
         cmd = [throughput_cmd, '500', datalink_log]
 
-        sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
         sys.stderr.write('* Data link statistics:\n')
         stats.write('* Data link statistics:\n')
 
@@ -460,7 +452,6 @@ class TestCongestionControl(unittest.TestCase):
         datalink_delay = open(datalink_delay_png, 'w')
         cmd = [delay_cmd, datalink_log]
 
-        sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
         proc = Popen(cmd, stdout=datalink_delay, stderr=DEVNULL)
         proc.communicate()
 
@@ -473,7 +464,6 @@ class TestCongestionControl(unittest.TestCase):
         acklink_throughput = open(acklink_throughput_png, 'w')
         cmd = [throughput_cmd, '500', acklink_log]
 
-        sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
         sys.stderr.write('* ACK link statistics:\n')
         stats.write('* ACK link statistics:\n')
 
@@ -489,7 +479,6 @@ class TestCongestionControl(unittest.TestCase):
         acklink_delay = open(acklink_delay_png, 'w')
         cmd = [delay_cmd, acklink_log]
 
-        sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
         proc = Popen(cmd, stdout=acklink_delay, stderr=DEVNULL)
         proc.communicate()
 

@@ -5,7 +5,7 @@ import sys
 import unittest
 from os import path
 from parse_arguments import parse_arguments
-from subprocess import call, check_call, check_output
+from subprocess_wrapper import call, check_call, check_output
 
 
 class TestCongestionControl(unittest.TestCase):
@@ -29,7 +29,6 @@ class TestCongestionControl(unittest.TestCase):
     def pre_setup(self):
         # Enable IP forwarding
         cmd = 'sudo sysctl -w net.ipv4.ip_forward=1'
-        sys.stderr.write('+ ' + cmd + '\n')
         check_call(cmd, shell=True)
 
         # Disable Reverse Path Filter
@@ -37,20 +36,17 @@ class TestCongestionControl(unittest.TestCase):
         filter_path = ' /proc/sys/net/ipv4/conf/%s/rp_filter'
         if self.local_if:
             cmd = echo_cmd + filter_path % 'all' + filter_path % self.local_if
-            sys.stderr.write('+ ' + cmd + '\n')
             check_call(cmd, shell=True)
 
         if self.remote_if:
             cmd = echo_cmd + filter_path % 'all' + filter_path % self.remote_if
             cmd = ' '.join(self.ssh_cmd) + ' "%s"' % cmd
-            sys.stderr.write('+ ' + cmd + '\n')
             check_call(cmd, shell=True)
 
         # install mahimahi
         mm_dir = path.join(self.test_dir, '../third_party/mahimahi')
         # make install alone sufficient if autogen.sh, configure already run
         cmd = 'cd %s && sudo make install' % mm_dir
-        sys.stderr.write('+ ' + cmd + '\n')
         if call(cmd, stdout=DEVNULL, shell=True) is 0:
             return
 
@@ -61,38 +57,31 @@ class TestCongestionControl(unittest.TestCase):
             'apache2-dev apache2-bin iptables dnsmasq-base gnuplot iproute2')
 
         cmd = 'sudo apt-get -yq --force-yes install ' + mm_deps
-        sys.stderr.write('+ ' + cmd + '\n')
         check_call(cmd, shell=True)
 
         cmd = ('cd %s && ./autogen.sh && ./configure && make && '
                'sudo make install' % mm_dir)
-        sys.stderr.write('+ ' + cmd + '\n')
         check_call(cmd, shell=True)
 
     def install(self):
         cmd = ['python', self.src_file, 'deps']
-        sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
         deps = check_output(cmd).strip()
 
         if deps:
             sys.stderr.write('Installing dependencies...\n')
-            sys.stderr.write(deps + '\n')
             cmd = 'sudo apt-get -yq --force-yes install ' + deps
-            sys.stderr.write('+ %s\n' % cmd)
             check_call(cmd, shell=True)
         sys.stderr.write('Done\n')
 
     def build(self):
-        cmd = ['python', self.src_file, 'build']
-        sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
         sys.stderr.write('Building...\n')
+        cmd = ['python', self.src_file, 'build']
         check_call(cmd)
         sys.stderr.write('Done\n')
 
     def initialize(self):
-        cmd = ['python', self.src_file, 'init']
-        sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
         sys.stderr.write('Performing intialization commands...\n')
+        cmd = ['python', self.src_file, 'init']
         check_call(cmd)
         sys.stderr.write('Done\n')
 
@@ -122,7 +111,6 @@ class TestCongestionControl(unittest.TestCase):
                 remote_dir += '/'
             remote_setup = remote_dir + 'test/setup.py'
             remote_setup_cmd = self.ssh_cmd + ['python', remote_setup, self.cc]
-            sys.stderr.write('+ ' + ' '.join(remote_setup_cmd) + '\n')
             check_call(remote_setup_cmd)
 
         # run local setup.py (even when self.remote exists)
