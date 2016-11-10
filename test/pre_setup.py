@@ -5,7 +5,7 @@ import sys
 import unittest
 from os import path
 from parse_arguments import parse_arguments
-from subprocess_wrapper import call, check_call, check_output
+from pantheon_help import call, check_call, check_output, parse_remote
 
 
 class TestPreSetup(unittest.TestCase):
@@ -14,14 +14,13 @@ class TestPreSetup(unittest.TestCase):
         self.remote = args.remote
         self.local_if = args.local_if
         self.remote_if = args.remote_if
-        self.pantheon_dir = path.abspath(
-            path.join(path.dirname(__file__), os.pardir))
-        self.third_party_dir = path.join(self.pantheon_dir, 'third_party')
+        self.root_dir = path.abspath(path.join(path.dirname(__file__), '..'))
+        self.third_party_dir = path.join(self.root_dir, 'third_party')
 
     def pre_setup(self):
         # update submodules
         cmd = ('cd %s && git submodule update --init --recursive' %
-               self.pantheon_dir)
+               self.root_dir)
         check_call(cmd, shell=True)
 
         # Enable IP forwarding
@@ -60,17 +59,17 @@ class TestPreSetup(unittest.TestCase):
 
     # congestion control pre-setup
     def test_cc_pre_setup(self):
+        sys.stderr.write('Performing local pre-setup...\n')
         self.pre_setup()
 
         # run remote pre_setup.py
+        sys.stderr.write('\nPerforming remote pre-setup...\n')
         if self.remote:
-            (remote_addr, remote_dir) = self.remote.split(':')
-            remote_setup = path.join(remote_dir, 'test/pre_setup.py')
-
-            remote_setup_cmd = ['ssh', remote_addr, 'python', remote_setup]
+            rd = parse_remote(self.remote)
+            cmd = rd['ssh_cmd'] + ['python', rd['pre_setup']]
             if self.remote_if:
-                remote_setup_cmd += ['--local-interface', self.remote_if]
-            check_call(remote_setup_cmd)
+                cmd += ['--local-interface', self.remote_if]
+            check_call(cmd)
 
 
 def main():
