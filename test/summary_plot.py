@@ -78,12 +78,13 @@ def plot_summary(data, worst_offsets, pretty_names,
 
         # plot raw values
         ax_raw.scatter(x_data, y_data, color=color, marker=marker,
-                       label=cc_name)
+                       label=cc_name, clip_on=False)
 
         # plot the average of raw values
         x_mean = sum(x_data) / len(x_data)
         y_mean = sum(y_data) / len(y_data)
-        ax_mean.scatter(x_mean, y_mean, color=color, marker=marker)
+        ax_mean.scatter(x_mean, y_mean, color=color, marker=marker,
+                        clip_on=False)
         ax_mean.annotate(cc_name, (x_mean, y_mean))
 
         color_i = color_i + 1 if color_i < len(color_names) - 1 else 0
@@ -95,9 +96,11 @@ def plot_summary(data, worst_offsets, pretty_names,
         log_max_delay = math.log(float(max_delay), 2)
         xmin = pow(2, math.floor(log_min_delay))
         xmax = pow(2, math.ceil(log_max_delay))
+        xmin /= math.sqrt(2)
+        xmax *= math.sqrt(2)
 
     for fig, ax in [(fig_raw, ax_raw), (fig_mean, ax_mean)]:
-        if min_delay > 0 and xmax > 2 * xmin:
+        if min_delay > 0 and xmax > 4 * xmin:
             ax.set_xscale('log', basex=2)
             ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
             ax.set_xlim(left=xmin, right=xmax)
