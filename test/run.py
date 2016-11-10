@@ -4,7 +4,7 @@ import sys
 import random
 from parse_arguments import parse_arguments
 from os import path
-from subprocess import check_call
+from subprocess_wrapper import check_call
 
 
 def create_metadata_file(args, metadata_fname):
@@ -94,24 +94,20 @@ def main():
     if run_setup:
         for cc in cc_schemes:
             cmd = setup_cmd + [cc]
-            sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
             check_call(cmd)
 
     if run_test:
         for run_id in xrange(1, 1 + args.run_times):
             for cc in cc_schemes:
                 cmd = test_cmd + ['--run-id', str(run_id), cc]
-                sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
                 check_call(cmd)
 
         cmd = ['python', summary_plot_src, '--run-times',
                str(args.run_times)] + cc_schemes
-        sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
         check_call(cmd)
 
         cmd = ['python', combine_report_src, '--metadata-file', metadata_fname,
                '--run-times', str(args.run_times)] + cc_schemes
-        sys.stderr.write('+ ' + ' '.join(cmd) + '\n')
         check_call(cmd)
 
 

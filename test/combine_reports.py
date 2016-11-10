@@ -6,7 +6,7 @@ import string
 import argparse
 from os import path
 from parse_arguments import parse_arguments
-from subprocess import call, check_call, check_output, PIPE, Popen
+from subprocess_wrapper import call, check_call, check_output, PIPE, Popen
 from time import gmtime, strftime
 
 
@@ -162,7 +162,6 @@ def main():
     assert call(['which', 'pdflatex'], stdout=DEVNULL) is 0, (
         'pdflatex not installed')
     cmd = 'pdflatex -output-directory %s /tmp/pantheon_report.tex' % test_dir
-    sys.stderr.write('+ ' + cmd + '\n')
     check_call(cmd, shell=True)
 
 
