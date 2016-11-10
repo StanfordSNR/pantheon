@@ -345,7 +345,7 @@ class TestCongestionControl(unittest.TestCase):
             tun_id = i + 1
             if self.remote:
                 # download logs from remote side
-                scp_cmd = 'scp %s:' % self.remote_addr
+                scp_cmd = 'scp -C %s:' % self.remote_addr
                 scp_cmd += '%(log)s %(log)s'
 
                 if self.server_side == 'remote':
