@@ -170,6 +170,7 @@ class TestCongestionControl(unittest.TestCase):
         sys.stderr.write('[tunnel server manager (tsm)] ')
         ts_manager = Popen(ts_manager_cmd, stdin=PIPE,
                            stdout=PIPE, preexec_fn=os.setsid)
+        ts_manager.stdin.write('prompt [tsm]\n')
 
         # run mm-tunnelclient manager
         if self.remote:
@@ -184,6 +185,7 @@ class TestCongestionControl(unittest.TestCase):
         sys.stderr.write('[tunnel client manager (tcm)] ')
         tc_manager = Popen(tc_manager_cmd, stdin=PIPE,
                            stdout=PIPE, preexec_fn=os.setsid)
+        tc_manager.stdin.write('prompt [tcm]\n')
 
         # create alias for ts_manager and tc_manager using local or remote
         if self.server_side == 'local':
@@ -197,13 +199,9 @@ class TestCongestionControl(unittest.TestCase):
         if self.sender_side == self.server_side:
             send_manager = ts_manager
             recv_manager = tc_manager
-            send_prompt = '(server) '
-            recv_prompt = '(client) '
         else:
             send_manager = tc_manager
             recv_manager = ts_manager
-            send_prompt = '(client) '
-            recv_prompt = '(server) '
 
         # read ntpdate offsets
         if self.remote:
@@ -229,11 +227,9 @@ class TestCongestionControl(unittest.TestCase):
 
             ts_cmd = 'tunnel %s %s\n' % (tun_id, ts_cmd)
 
-            sys.stderr.write('(server) ' + ts_cmd)
             ts_manager.stdin.write(ts_cmd)
 
             # read the command from mm-tunnelserver to run mm-tunnelclient
-            sys.stderr.write('(server) ' + readline_cmd)
             ts_manager.stdin.write(readline_cmd)
 
             cmd = ts_manager.stdout.readline().split()
@@ -263,7 +259,6 @@ class TestCongestionControl(unittest.TestCase):
                     tc_cmd += ' --interface=' + self.remote_if
 
             tc_cmd = 'tunnel %s %s\n' % (tun_id, tc_cmd)
-            sys.stderr.write('(client) ' + tc_cmd)
             tc_manager.stdin.write(tc_cmd)
 
             if self.first_to_run == 'receiver':
@@ -279,13 +274,11 @@ class TestCongestionControl(unittest.TestCase):
                 second_cmd = ('tunnel %s python %s sender %s' %
                               (tun_id, second_src_file, recv_pri_ip))
 
-                sys.stderr.write(recv_prompt + first_cmd)
                 recv_manager.stdin.write(first_cmd)
 
                 # find printed port
                 port = None
                 while not port:
-                    sys.stderr.write(recv_prompt + readline_cmd)
                     recv_manager.stdin.write(readline_cmd)
                     port = self.get_port(recv_manager)
 
@@ -304,13 +297,11 @@ class TestCongestionControl(unittest.TestCase):
                 second_cmd = ('tunnel %s python %s receiver %s' %
                               (tun_id, second_src_file, send_pri_ip))
 
-                sys.stderr.write(send_prompt + first_cmd)
                 send_manager.stdin.write(first_cmd)
 
                 # find printed port
                 port = None
                 while not port:
-                    sys.stderr.write(send_prompt + readline_cmd)
                     send_manager.stdin.write(readline_cmd)
                     port = self.get_port(send_manager)
 
@@ -326,10 +317,8 @@ class TestCongestionControl(unittest.TestCase):
                 time.sleep(self.interval)
             second_cmd = second_cmds[i]
             if self.first_to_run == 'receiver':
-                sys.stderr.write(send_prompt + second_cmd)
                 send_manager.stdin.write(second_cmd)
             else:
-                sys.stderr.write(recv_prompt + second_cmd)
                 recv_manager.stdin.write(second_cmd)
         elapsed_time = time.time() - start_time
         self.assertTrue(self.runtime > elapsed_time,
@@ -342,9 +331,7 @@ class TestCongestionControl(unittest.TestCase):
             self.ofst_remote_end = self.read_ntp_offset(remote_manager)
 
         # stop all the running flows
-        sys.stderr.write('(server) halt\n')
         ts_manager.stdin.write('halt\n')
-        sys.stderr.write('(client) halt\n')
         tc_manager.stdin.write('halt\n')
 
         self.merge_tunnel_logs()
