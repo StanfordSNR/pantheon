@@ -124,7 +124,8 @@ def plot_summary(data, worst_offsets, pretty_names,
 
     # save pantheon_summary_mean.png
     ax_mean.set_title('Summary of results (average of all runs)')
-    fig_mean.savefig(mean_summary_png, dpi=300)
+    fig_mean.savefig(mean_summary_png, dpi=300,
+                     bbox_inches='tight', pad_inches=0.2)
 
 
 def main():
