@@ -196,9 +196,11 @@ def parse_arguments(filename):
     parser = argparse.ArgumentParser()
     arg_dict = build_arg_dict()
 
-    if filename == 'setup.py':
+    if filename == 'pre_setup.py':
         add_arg_list(parser, arg_dict, [
-            '-r', '--local-interface', '--remote-interface', '--no-pre-setup', 'cc'])
+            '-r', '--local-interface', '--remote-interface'])
+    elif filename == 'setup.py':
+        add_arg_list(parser, arg_dict, ['-r', 'cc'])
     elif filename == 'test.py':
         add_arg_list(parser, arg_dict, [
             '-r', '-t', '-f', '--interval', '--tunnel-server',
