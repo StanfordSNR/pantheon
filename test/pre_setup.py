@@ -14,38 +14,29 @@ class TestPreSetup(unittest.TestCase):
         self.remote = args.remote
         self.local_if = args.local_if
         self.remote_if = args.remote_if
-        self.test_dir = path.abspath(path.dirname(__file__))
-        self.third_party_dir = path.abspath(path.join(self.test_dir,
-                                                      '../third_party'))
-
-    def sanity_check_gitmodules(self):
-        for module in os.listdir(self.third_party_dir):
-            module_path = path.join(self.third_party_dir, module)
-            if path.isdir(module_path):
-                assert os.listdir(module_path), (
-                    'Folder third_party/%s empty: make sure to initialize git '
-                    'submodules with "git submodule update --init"' % module)
+        self.third_party_dir = path.abspath(
+            path.join(path.dirname(__file__), '../third_party'))
 
     def pre_setup(self):
-        # check if submodules are up to date
-        self.sanity_check_gitmodules()
+        # update submodules
+        cmd = 'git submodule update --init --recursive'
+        check_call(cmd, shell=True)
 
         # Enable IP forwarding
         cmd = 'sudo sysctl -w net.ipv4.ip_forward=1'
         check_call(cmd, shell=True)
 
         # Disable Reverse Path Filter
-        echo_cmd = 'echo 0 | sudo tee'
-        filter_path = ' /proc/sys/net/ipv4/conf/%s/rp_filter'
         if self.local_if:
-            cmd = echo_cmd + filter_path % 'all' + filter_path % self.local_if
+            rpf = ' /proc/sys/net/ipv4/conf/%s/rp_filter'
+            cmd = 'echo 0 | sudo tee' + rpf % 'all' + rpf % self.local_if
             check_call(cmd, shell=True)
 
         # install mahimahi
         mm_dir = path.join(self.third_party_dir, 'mahimahi')
-        # make install alone sufficient if autogen.sh, configure already run
+
         cmd = 'cd %s && sudo make install' % mm_dir
-        if call(cmd, stdout=DEVNULL, shell=True) is 0:
+        if call(cmd, stdout=DEVNULL, shell=True) == 0:  # check if sufficient
             return
 
         mm_deps = (
@@ -63,6 +54,8 @@ class TestPreSetup(unittest.TestCase):
 
     # congestion control pre-setup
     def test_cc_pre_setup(self):
+        self.pre_setup()
+
         # run remote pre_setup.py
         if self.remote:
             (remote_addr, remote_dir) = self.remote.split(':')
@@ -75,8 +68,6 @@ class TestPreSetup(unittest.TestCase):
             if self.remote_if:
                 remote_setup_cmd += ['--local-interface', self.remote_if]
             check_call(remote_setup_cmd)
-
-        self.pre_setup()
 
 
 def main():
