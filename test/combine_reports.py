@@ -12,12 +12,11 @@ import json
 
 
 def parse_metadata_file(metadata_fname):
-    f = open(metadata_fname)
+    with open(metadata_fname, 'r') as f:
+        metadata = json.loads(f.readline())
+        assert f.readline() == '', "metadata file should be a single line of \
+                                    json"
 
-    metadata = json.loads(f.readline())
-    assert f.readline() == '', "metadata file should be single line of json"
-
-    f.close()
     return metadata
 
 
@@ -30,7 +29,6 @@ def main():
     mean_summary_png = path.join(test_dir, 'pantheon_summary_mean.png')
     metadata = parse_metadata_file(path.join(test_dir, 'pantheon_metadata'))
 
-    return
     latex = open('/tmp/pantheon_report.tex', 'w')
 
     curr_time = strftime("%a, %d %b %Y %H:%M:%S %z")
