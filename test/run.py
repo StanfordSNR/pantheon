@@ -50,7 +50,7 @@ def main():
     test_src = path.join(test_dir, 'test.py')
     summary_plot_src = path.join(test_dir, 'summary_plot.py')
     combine_report_src = path.join(test_dir, 'combine_reports.py')
-    metadata_fname = path.join(test_dir, 'pantheon_metadata')
+    metadata_fname = path.join(test_dir, 'pantheon_metadata.json')
 
     # test congestion control schemes
     pre_setup_cmd = ['python', pre_setup_src]
