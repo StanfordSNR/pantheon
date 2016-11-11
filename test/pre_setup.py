@@ -53,7 +53,7 @@ class TestPreSetup(unittest.TestCase):
         cmd = 'sudo apt-get -yq --force-yes install ' + mm_deps
         check_call(cmd, shell=True)
 
-        cmd = ('cd %s && ./autogen.sh && ./configure && make && '
+        cmd = ('cd %s && ./autogen.sh && ./configure && make -j && '
                'sudo make install' % mm_dir)
         check_call(cmd, shell=True)
 
