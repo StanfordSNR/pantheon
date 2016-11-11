@@ -5,6 +5,7 @@ import sys
 import unittest
 import time
 import signal
+from time import strftime
 from parse_arguments import parse_arguments
 from os import path
 from pantheon_help import Popen, PIPE, check_call, check_output, parse_remote
@@ -301,6 +302,7 @@ class TestCongestionControl(unittest.TestCase):
         time.sleep(self.first_to_run_setup_time)
 
         start_time = time.time()
+        self.test_start_time = strftime('%H:%M:%S')
         # start each flow self.interval seconds after the previous one
         for i in xrange(len(second_cmds)):
             if i != 0:
@@ -315,14 +317,20 @@ class TestCongestionControl(unittest.TestCase):
                         'interval time between flows is too long')
         time.sleep(self.runtime - elapsed_time)
 
+        # stop all the running flows
+        ts_manager.stdin.write('stop\n')
+        tc_manager.stdin.write('stop\n')
+
+        self.test_end_time = strftime('%H:%M:%S')
+
         # read ntpdate offsets
         if self.remote:
             self.ofst_local_end = self.read_ntp_offset(local_manager)
             self.ofst_remote_end = self.read_ntp_offset(remote_manager)
 
-        # stop all the running flows
-        ts_manager.stdin.write('halt\n')
-        tc_manager.stdin.write('halt\n')
+        # quit tunnel managers
+        ts_manager.stdin.write('quit\n')
+        tc_manager.stdin.write('quit\n')
 
         self.merge_tunnel_logs()
         sys.stderr.write('Done\n')
