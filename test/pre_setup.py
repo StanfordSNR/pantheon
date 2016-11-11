@@ -34,7 +34,7 @@ class TestPreSetup(unittest.TestCase):
             check_call(cmd, shell=True)
 
         # install texlive, matplotlib, etc.
-        cmd = 'sudo apt-get -yq --force-yes install texlive python-matplotlib'
+        cmd = 'sudo apt-get -yq --force-yes install texlive python-matplotlib ntp'
         check_call(cmd, shell=True)
 
         # install mahimahi
