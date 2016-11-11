@@ -4,11 +4,11 @@ import sys
 import random
 from parse_arguments import parse_arguments
 from os import path
-from pantheon_help import check_call
+from pantheon_help import check_call, check_output
 import json
 
 
-def create_metadata_file(args, metadata_fname):
+def create_metadata_file(args, metadata_fname, local_git_info, remote_git_info):
     metadata = dict()
     metadata['runtime'] = args.runtime
     metadata['flows'] = args.flows
@@ -35,8 +35,14 @@ def create_metadata_file(args, metadata_fname):
         remote_addr = args.remote.split(':')[0].split('@')[1]
         metadata['remote_address'] = remote_addr
 
+    if local_git_info:
+        metadata['local_git_info'] = local_git_info
+    if remote_git_info:
+        metadata['remote_git_info'] = remote_git_info
+
     metadata_file = open(metadata_fname, 'w')
     metadata_file.write(json.dumps(metadata))
+
     metadata_file.close()
 
 
@@ -86,6 +92,15 @@ def main():
     elif args.run_only == 'test':
         run_setup = False
 
+    git_info_cmd = "echo -n 'main branch: ' ; git rev-parse --abbrev-ref HEAD | head -c -1; echo -n ' @ '; git rev-parse HEAD; git -C .. submodule foreach --quiet 'echo $path `git rev-parse HEAD`; git status -s --untracked-files=no --porcelain'"
+    local_git_info = check_output(git_info_cmd, shell=True)
+
+    remote_git_info = ''
+    if args.remote:
+        rd = parse_remote(args.remote)
+        cmd = rd['ssh_cmd'] + " cd " + rd['root_dir'] + " && " + git_info_cmd
+        remote_git_info = check_output(cmd)
+
     cc_schemes = ['default_tcp', 'vegas', 'koho_cc', 'ledbat', 'pcc', 'verus',
                   'scream', 'sprout', 'webrtc', 'quic']
 
@@ -101,7 +116,7 @@ def main():
 
     if run_test:
         # create metadata file to be used by combine_reports.py
-        create_metadata_file(args, metadata_fname)
+        create_metadata_file(args, metadata_fname, local_git_info, remote_git_info)
 
         for run_id in xrange(1, 1 + args.run_times):
             for cc in cc_schemes:
