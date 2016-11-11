@@ -12,8 +12,6 @@ def destroy(procs):
     for proc in procs.itervalues():
         os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
 
-    sys.exit(0)
-
 
 def main():
     procs = {}  # manage tunnel processes
@@ -81,12 +79,18 @@ def main():
                 continue
 
             prompt = cmd[1].strip() + ' '
-        elif cmd[0] == 'halt':  # terminate all tunnel processes and quit
+        elif cmd[0] == 'stop':  # terminate all tunnel processes
             if len(cmd) != 1:
-                sys.stderr.write('error: usage: halt\n')
+                sys.stderr.write('error: usage: stop\n')
                 continue
 
             destroy(procs)
+        elif cmd[0] == 'quit':  # quit tunnel manager
+            if len(cmd) != 1:
+                sys.stderr.write('error: usage: quit\n')
+                continue
+
+            sys.exit(0)
         else:
             sys.stderr.write('unknown command: %s\n' % raw_cmd)
             continue
