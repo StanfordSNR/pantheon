@@ -43,6 +43,7 @@ def main():
     args = parse_arguments(path.basename(__file__))
 
     test_dir = path.abspath(path.dirname(__file__))
+    pre_setup_src = path.join(test_dir, 'pre_setup.py')
     setup_src = path.join(test_dir, 'setup.py')
     test_src = path.join(test_dir, 'test.py')
     summary_plot_src = path.join(test_dir, 'summary_plot.py')
@@ -50,10 +51,12 @@ def main():
     metadata_fname = path.join(test_dir, 'pantheon_metadata')
 
     # test congestion control schemes
+    pre_setup_cmd = ['python', pre_setup_src]
     setup_cmd = ['python', setup_src]
     test_cmd = ['python', test_src]
 
     if args.remote:
+        pre_setup_cmd += ['-r', args.remote]
         setup_cmd += ['-r', args.remote]
         test_cmd += ['-r', args.remote]
 
@@ -67,11 +70,11 @@ def main():
     test_cmd += ['--sender-side', args.sender_side]
 
     if args.local_if:
-        setup_cmd += ['--local-interface', args.local_if]
+        pre_setup_cmd += ['--local-interface', args.local_if]
         test_cmd += ['--local-interface', args.local_if]
 
     if args.remote_if:
-        setup_cmd += ['--remote-interface', args.remote_if]
+        pre_setup_cmd += ['--remote-interface', args.remote_if]
         test_cmd += ['--remote-interface', args.remote_if]
 
     run_setup = True
@@ -92,6 +95,7 @@ def main():
 
     # setup and run each congestion control
     if run_setup:
+        check_call(pre_setup_cmd)
         for cc in cc_schemes:
             cmd = setup_cmd + [cc]
             check_call(cmd)
