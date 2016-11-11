@@ -4,11 +4,12 @@ import sys
 import random
 from parse_arguments import parse_arguments
 from os import path
-from pantheon_help import check_call, check_output
+from pantheon_help import check_call, check_output, parse_remote
 import json
 
 
-def create_metadata_file(args, metadata_fname, local_git_info, remote_git_info):
+def create_metadata_file(args, metadata_fname, local_git_info,
+                         remote_git_info):
     metadata = dict()
     metadata['runtime'] = args.runtime
     metadata['flows'] = args.flows
@@ -92,7 +93,13 @@ def main():
     elif args.run_only == 'test':
         run_setup = False
 
-    git_info_cmd = "echo -n 'main branch: ' ; git rev-parse --abbrev-ref HEAD | head -c -1; echo -n ' @ '; git rev-parse HEAD; git -C .. submodule foreach --quiet 'echo $path `git rev-parse HEAD`; git status -s --untracked-files=no --porcelain'"
+    git_info_cmd = "echo -n 'main branch: ' ;" \
+                   "git rev-parse --abbrev-ref HEAD | head -c -1;" \
+                   "echo -n ' @ '; git rev-parse HEAD;" \
+                   "git -C .. submodule foreach --quiet 'echo $path" \
+                   "`git rev-parse HEAD`;" \
+                   "git status -s --untracked-files=no --porcelain'"
+
     local_git_info = check_output(git_info_cmd, shell=True)
 
     remote_git_info = ''
@@ -116,7 +123,8 @@ def main():
 
     if run_test:
         # create metadata file to be used by combine_reports.py
-        create_metadata_file(args, metadata_fname, local_git_info, remote_git_info)
+        create_metadata_file(args, metadata_fname, local_git_info,
+                             remote_git_info)
 
         for run_id in xrange(1, 1 + args.run_times):
             for cc in cc_schemes:

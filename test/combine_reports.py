@@ -90,11 +90,16 @@ def main():
         latex.write('\n\nRemote side:' + remote_side.replace('_', '\\_'))
 
     if 'local_git_info' in metadata:
-        latex.write('\\newpage\n local git  ' + metadata['local_git_info'].replace('_', '\\_').replace('\n', '\n\n'))
+        local_git_info = metadata['local_git_info']
+        local_git_info = local_git_info.replace('_', '\\_')
+        local_git_info = local_git_info.replace('\n', '\n\n')
+        latex.write('\\newpage\n local git ' + local_git_info)
 
     if 'remote_git_info' in metadata:
-        latex.write('\n\n remote git  ' + metadata['local_git_info'].replace('_', '\\_').replace('\n', '\n\n'))
-
+        remote_git_info = metadata['remote_git_info']
+        remote_git_info = remote_git_info.replace('_', '\\_')
+        remote_git_info = remote_git_info.replace('\n', '\n\n')
+        latex.write('\n\n remote git ' + remote_git_info)
 
     latex.write('\n\n\\begin{figure}[H]\n'
                 '\\centering\n'
