@@ -27,7 +27,8 @@ def main():
     src_dir = path.abspath(path.join(test_dir, '../src'))
     raw_summary_png = path.join(test_dir, 'pantheon_summary.png')
     mean_summary_png = path.join(test_dir, 'pantheon_summary_mean.png')
-    metadata = parse_metadata_file(path.join(test_dir, 'pantheon_metadata'))
+    metadata = parse_metadata_file(path.join(test_dir,
+                                             'pantheon_metadata.json'))
 
     latex = open('/tmp/pantheon_report.tex', 'w')
 
