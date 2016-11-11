@@ -123,7 +123,7 @@ class TestCongestionControl(unittest.TestCase):
 
     # read ntpdate offset
     def read_ntp_offset(self, tun_manager):
-        ntp_cmd = 'ntpdate -quv pool.ntp.org\n'
+        ntp_cmd = 'ntpdate -quv time.stanford.edu\n'
         tun_manager.stdin.write(ntp_cmd)
         offset = tun_manager.stdout.readline().strip()
         if offset == 'error':
