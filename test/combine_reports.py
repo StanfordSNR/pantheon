@@ -4,18 +4,18 @@ import os
 import sys
 import string
 import argparse
+import json
 from os import path
 from parse_arguments import parse_arguments
 from pantheon_help import call, check_call, check_output, PIPE, Popen
-from time import gmtime, strftime
-import json
+from time import strftime
 
 
 def parse_metadata_file(metadata_fname):
     with open(metadata_fname, 'r') as f:
         metadata = json.loads(f.readline())
-        assert f.readline() == '', "metadata file should be a single line of \
-                                    json"
+        assert not f.readline(), (
+            'metadata file should be a single line of json')
 
     return metadata
 
@@ -32,7 +32,7 @@ def main():
 
     latex = open('/tmp/pantheon_report.tex', 'w')
 
-    curr_time = strftime("%a, %d %b %Y %H:%M:%S %z")
+    curr_time = strftime('%a, %d %b %Y %H:%M:%S %z')
     latex.write(
         '\\documentclass{article}\n'
         '\\usepackage{pdfpages, graphicx}\n'
