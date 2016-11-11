@@ -84,9 +84,6 @@ def main():
     elif args.run_only == 'test':
         run_setup = False
 
-    # create metadata file to be used by combine_reports.py
-    create_metadata_file(args, metadata_fname)
-
     cc_schemes = ['default_tcp', 'vegas', 'koho_cc', 'ledbat', 'pcc', 'verus',
                   'scream', 'sprout', 'webrtc', 'quic']
 
@@ -101,6 +98,9 @@ def main():
             check_call(cmd)
 
     if run_test:
+        # create metadata file to be used by combine_reports.py
+        create_metadata_file(args, metadata_fname)
+
         for run_id in xrange(1, 1 + args.run_times):
             for cc in cc_schemes:
                 cmd = test_cmd + ['--run-id', str(run_id), cc]
