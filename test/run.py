@@ -2,10 +2,11 @@
 
 import sys
 import random
+import os
+import json
 from parse_arguments import parse_arguments
 from os import path
 from pantheon_help import check_call, check_output, parse_remote
-import json
 
 
 def create_metadata_file(args, metadata_fname, git_info):
@@ -49,6 +50,7 @@ def main():
     args = parse_arguments(path.basename(__file__))
 
     test_dir = path.abspath(path.dirname(__file__))
+    root_dir = path.abspath(path.join(test_dir, os.pardir))
     pre_setup_src = path.join(test_dir, 'pre_setup.py')
     setup_src = path.join(test_dir, 'setup.py')
     test_src = path.join(test_dir, 'test.py')
@@ -90,23 +92,20 @@ def main():
     elif args.run_only == 'test':
         run_setup = False
 
-    git_info_cmd = "echo -n 'main branch: '; " \
-                   "git rev-parse --abbrev-ref HEAD | head -c -1; " \
-                   "echo -n ' @ '; git rev-parse HEAD; " \
-                   "git -C .. submodule foreach --quiet 'echo $path " \
-                   "`git rev-parse HEAD`; " \
-                   "git status -s --untracked-files=no --porcelain'"
+    git_info_cmd = (
+        'echo -n \'git branch: \'; git rev-parse --abbrev-ref @ | head -c -1; '
+        'echo -n \' @ \'; git rev-parse @; git submodule foreach --quiet '
+        '\'echo $path @ `git rev-parse HEAD`; '
+        'git status -s --untracked-files=no --porcelain\'')
 
-    local_git_info = check_output(git_info_cmd, shell=True)
+    local_git_info = check_output(git_info_cmd, shell=True, cwd=root_dir)
 
-    remote_git_info = ''
     if args.remote:
         rd = parse_remote(args.remote)
-        cmd = ' '.join(rd['ssh_cmd']) + " cd " + rd['root_dir'] + " && "
-        cmd += git_info_cmd
-        remote_git_info = check_output(cmd, shell=True)
-        assert local_git_info == remote_git_info, "repository differed between\
-                                                   local and remote sides"
+        cmd = rd['ssh_cmd'] + ["cd %s; %s" % (rd['root_dir'], git_info_cmd)]
+        remote_git_info = check_output(cmd)
+        assert local_git_info == remote_git_info, (
+            'repository differed between local and remote sides')
 
     cc_schemes = ['default_tcp', 'vegas', 'koho_cc', 'ledbat', 'pcc', 'verus',
                   'scream', 'sprout', 'webrtc', 'quic']
