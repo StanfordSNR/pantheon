@@ -102,7 +102,6 @@ def main():
     if run_test:
         # create metadata file to be used by combine_reports.py
         create_metadata_file(args, metadata_fname)
-        return
 
         for run_id in xrange(1, 1 + args.run_times):
             for cc in cc_schemes:
