@@ -8,17 +8,16 @@ from os import path
 from parse_arguments import parse_arguments
 from pantheon_help import call, check_call, check_output, PIPE, Popen
 from time import gmtime, strftime
+import json
 
 
 def parse_metadata_file(metadata_fname):
-    metadata_file = open(metadata_fname)
+    f = open(metadata_fname)
 
-    metadata = {}
-    for line in metadata_file:
-        (meta_key, meta_value) = line.split('=')
-        metadata[meta_key] = meta_value.strip()
+    metadata = json.loads(f.readline())
+    assert f.readline() == '', "metadata file should be single line of json"
 
-    metadata_file.close()
+    f.close()
     return metadata
 
 
@@ -31,6 +30,7 @@ def main():
     mean_summary_png = path.join(test_dir, 'pantheon_summary_mean.png')
     metadata = parse_metadata_file(path.join(test_dir, 'pantheon_metadata'))
 
+    return
     latex = open('/tmp/pantheon_report.tex', 'w')
 
     curr_time = strftime("%a, %d %b %Y %H:%M:%S %z")

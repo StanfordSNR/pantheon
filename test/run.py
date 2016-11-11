@@ -5,36 +5,38 @@ import random
 from parse_arguments import parse_arguments
 from os import path
 from pantheon_help import check_call
+import json
 
 
 def create_metadata_file(args, metadata_fname):
-    metadata_file = open(metadata_fname, 'w')
-    metadata_file.write(
-        'runtime=%(runtime)s\n'
-        'flows=%(flows)s\n'
-        'interval=%(interval)s\n'
-        'sender_side=%(sender_side)s\n'
-        'run_times=%(run_times)s\n' % vars(args))
+    metadata = dict()
+    metadata['runtime'] = args.runtime
+    metadata['flows'] = args.flows
+    metadata['interval'] = args.interval
+    metadata['sender_side'] = args.sender_side
+    metadata['run_times'] = args.run_times
 
     if args.local_info:
-        metadata_file.write('local_information=%s\n' % args.local_info)
+        metadata['local_information'] = args.local_info
 
     if args.remote_info:
-        metadata_file.write('remote_information=%s\n' % args.remote_info)
+        metadata['remote_information'] = args.remote_info
 
     if args.local_if:
-        metadata_file.write('local_interface=%s\n' % args.local_if)
+        metadata['local_interface'] = args.local_if
 
     if args.remote_if:
-        metadata_file.write('remote_interface=%s\n' % args.remote_if)
+        metadata['remote_interface'] = args.remote_if
 
     if args.local_addr:
-        metadata_file.write('local_address=%s\n' % args.local_addr)
+        metadata['local_address'] = args.local_addr
 
     if args.remote:
         remote_addr = args.remote.split(':')[0].split('@')[1]
-        metadata_file.write('remote_address=%s\n' % remote_addr)
+        metadata['remote_address'] = remote_addr
 
+    metadata_file = open(metadata_fname, 'w')
+    metadata_file.write(json.dumps(metadata))
     metadata_file.close()
 
 
@@ -100,6 +102,7 @@ def main():
     if run_test:
         # create metadata file to be used by combine_reports.py
         create_metadata_file(args, metadata_fname)
+        return
 
         for run_id in xrange(1, 1 + args.run_times):
             for cc in cc_schemes:
