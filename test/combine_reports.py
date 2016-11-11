@@ -89,6 +89,13 @@ def main():
     if remote_side:
         latex.write('\n\nRemote side:' + remote_side.replace('_', '\\_'))
 
+    if 'local_git_info' in metadata:
+        latex.write('\\newpage\n local git  ' + metadata['local_git_info'].replace('_', '\\_').replace('\n', '\n\n'))
+
+    if 'remote_git_info' in metadata:
+        latex.write('\n\n remote git  ' + metadata['local_git_info'].replace('_', '\\_').replace('\n', '\n\n'))
+
+
     latex.write('\n\n\\begin{figure}[H]\n'
                 '\\centering\n'
                 '\\includegraphics[width=\\textwidth]'
