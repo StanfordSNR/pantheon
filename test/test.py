@@ -102,6 +102,7 @@ class TestCongestionControl(unittest.TestCase):
         # the cleaner approach might be to try to verify the socket is open
         time.sleep(self.first_to_run_setup_time)
 
+        self.test_start_time = strftime('%a, %d %b %Y %H:%M:%S %z')
         # run the other side specified by self.second_to_run
         cmd = ('python %s %s $MAHIMAHI_BASE %s' %
                (self.src_file, self.second_to_run, port))
@@ -116,6 +117,7 @@ class TestCongestionControl(unittest.TestCase):
             proc_second.communicate()
         except:
             sys.stderr.write('Done\n')
+            self.test_end_time = strftime('%a, %d %b %Y %H:%M:%S %z')
         else:
             self.fail('Test exited before time limit')
         finally:
@@ -302,7 +304,7 @@ class TestCongestionControl(unittest.TestCase):
         time.sleep(self.first_to_run_setup_time)
 
         start_time = time.time()
-        self.test_start_time = strftime('%H:%M:%S')
+        self.test_start_time = strftime('%a, %d %b %Y %H:%M:%S %z')
         # start each flow self.interval seconds after the previous one
         for i in xrange(len(second_cmds)):
             if i != 0:
@@ -321,7 +323,7 @@ class TestCongestionControl(unittest.TestCase):
         ts_manager.stdin.write('stop\n')
         tc_manager.stdin.write('stop\n')
 
-        self.test_end_time = strftime('%H:%M:%S')
+        self.test_end_time = strftime('%a, %d %b %Y %H:%M:%S %z')
 
         # read ntpdate offsets
         if self.remote:
@@ -415,6 +417,13 @@ class TestCongestionControl(unittest.TestCase):
         stats_log = path.join(self.test_dir,
                               '%s_stats_run%s.log' % (self.cc, self.run_id))
         stats = open(stats_log, 'w')
+
+        # save start time and end time of test
+        test_run_duration = (
+            'Start at: %s\nEnd at: %s\n' %
+            (self.test_start_time, self.test_end_time))
+        sys.stderr.write('\n' + test_run_duration)
+        stats.write(test_run_duration)
 
         sys.stderr.write('\n')
         # Data link
