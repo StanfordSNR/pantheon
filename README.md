@@ -16,12 +16,17 @@ git submodule update --init
 Install dependencies to generate summary plots and reports of experiments:
 
 ```
-sudo apt-get install texlive
-pip install matplotlib
+sudo apt-get install texlive python-matplotlib ntp
 ```
 
 ## Setup
 First, change directory to `test` and run:
+
+```
+./pre_setup.py
+```
+
+Then
 
 ```
 ./setup.py congestion-control
@@ -30,9 +35,10 @@ First, change directory to `test` and run:
 Currently the supported `congestion-control` is `default_tcp`, `vegas`,
 `ledbat`, `pcc`, `scream`, `sprout`, `verus`, `koho_cc`, `webrtc` and `quic`.
 
-Alternatively, set up on both local and remote machines in one command:
+Alternatively, set up on both local and remote machines:
 
 ```
+./pre_setup.py -r REMOTE:PANTHEON-DIR
 ./setup.py -r REMOTE:PANTHEON-DIR congestion-control
 ```
 
