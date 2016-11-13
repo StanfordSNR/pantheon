@@ -22,8 +22,7 @@ def parse_stats(log_name):
     end_time = None
     throughput = None
     delay = None
-    worst_local_offset = None
-    worst_remote_offset = None
+    worst_abs_ofst = None
 
     for line in stats_log:
         result = re.match(r'Start at: (.*)', line)
@@ -49,26 +48,16 @@ def parse_stats(log_name):
                 delay = float(result.group(1))
             continue
 
-        result = re.match(r'Local clock offset: (.*?) ms', line)
+        result = re.match(r'\* Worst absolute clock offset: (.*?) ms', line)
         if result:
-            ofst = float(result.group(1))
-            if not worst_local_offset or abs(ofst) > worst_local_offset:
-                worst_local_offset = ofst
-            continue
-
-        result = re.match(r'Remote clock offset: (.*?) ms', line)
-        if result:
-            ofst = float(result.group(1))
-            if not worst_remote_offset or abs(ofst) > worst_remote_offset:
-                worst_remote_offset = ofst
+            worst_abs_ofst = float(result.group(1))
             continue
 
     stats_log.close()
-    return (start_time, end_time, delay, throughput,
-            worst_local_offset, worst_remote_offset)
+    return (start_time, end_time, delay, throughput, worst_abs_ofst)
 
 
-def plot_summary(data, worst_offsets, pretty_names,
+def plot_summary(data, worst_abs_ofst, pretty_names,
                  raw_summary_png, mean_summary_png):
     min_delay = None
     max_delay = None
@@ -131,9 +120,8 @@ def plot_summary(data, worst_offsets, pretty_names,
             ax.set_ylim(bottom=0)
 
         xlabel = '95th percentile of per-packet one-way delay (ms)'
-        if worst_offsets[0] and worst_offsets[1]:
-            xlabel += ('\n(worst clock offset: local %s ms, remote %s ms)' %
-                       worst_offsets)
+        if worst_abs_ofst:
+            xlabel += '\n(worst absolute clock offset: %s ms)' % worst_abs_ofst
         ax.set_xlabel(xlabel)
         ax.set_ylabel('Average throughput (Mbit/s)')
         ax.grid()
@@ -151,54 +139,48 @@ def plot_summary(data, worst_offsets, pretty_names,
                      bbox_inches='tight', pad_inches=0.2)
 
 
-def plot_time_series(data, time, pretty_names, time_series_png):
+def plot_time_series(data, duration, worst_abs_ofst, pretty_names, plot_name):
     pass
 
 
 def main():
     args = parse_arguments(path.basename(__file__))
-
     test_dir = path.abspath(path.dirname(__file__))
     src_dir = path.abspath(path.join(test_dir, '../src'))
-    raw_summary_png = path.join(test_dir, 'pantheon_summary.png')
-    mean_summary_png = path.join(test_dir, 'pantheon_summary_mean.png')
-    time_series_png = path.join(test_dir, 'pantheon_time_series.png')
 
-    pretty_names = {}
     data = {}
-    time = {}
-    worst_local_ofst = None
-    worst_remote_ofst = None
+    duration = {}
+    pretty_names = {}
+    worst_abs_ofst = None
     time_format = '%a, %d %b %Y %H:%M:%S %z'
+
     for cc in args.cc_schemes:
         if cc not in pretty_names:
             cc_name = check_output(
                 ['python', path.join(src_dir, cc + '.py'), 'friendly_name'])
             pretty_names[cc] = cc_name if cc_name else cc
-            pretty_names[cc] = pretty_names[cc].strip().replace('_', '\\_')
             data[cc] = []
+            time[cc] = []
 
         for run_id in xrange(1, 1 + args.run_times):
             log_name = path.join(test_dir, '%s_stats_run%s.log' % (cc, run_id))
-            (start_time, end_time, delay, throughput,
-             local_ofst, remote_ofst) = parse_stats(log_name)
+            (start_t, end_t, delay, throughput, ofst) = parse_stats(log_name)
 
             data[cc].append((delay, throughput))
-            if local_ofst:
-                if not worst_local_ofst or abs(local_ofst) > worst_local_ofst:
-                    worst_local_ofst = local_ofst
-            if remote_ofst:
-                if (not worst_remote_ofst or
-                        abs(remote_ofst) > worst_remote_ofst):
-                    worst_remote_ofst = remote_ofst
+            if ofst:
+                if not worst_abs_ofst or ofst > worst_abs_ofst:
+                    worst_abs_ofst = ofst
 
-            time[cc].append((datetime.strptime(start_time, time_format),
-                             datetime.strptime(end_time, time_format)))
+            time[cc].append((datetime.strptime(start_t, time_format),
+                             datetime.strptime(end_t, time_format)))
 
-    worst_offsets = (worst_local_ofst, worst_remote_ofst)
-    plot_summary(data, worst_offsets, pretty_names,
+    raw_summary_png = path.join(test_dir, 'pantheon_summary.png')
+    mean_summary_png = path.join(test_dir, 'pantheon_summary_mean.png')
+    plot_summary(data, worst_abs_ofst, pretty_names,
                  raw_summary_png, mean_summary_png)
-    plot_time_series(data, time, pretty_names, time_series_png)
+
+    time_series = path.join(test_dir, 'pantheon_time_series.png')
+    plot_time_series(data, duration, worst_abs_ofst, pretty_names, time_series)
 
 
 if __name__ == '__main__':
