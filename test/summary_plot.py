@@ -29,31 +29,39 @@ def parse_stats(log_name):
         result = re.match(r'Start at: (.*)', line)
         if result:
             start_time = result.group(1)
+            continue
 
         result = re.match(r'End at: (.*)', line)
         if result:
             end_time = result.group(1)
+            continue
 
         result = re.match(r'Average throughput: (.*?) Mbit/s', line)
-        if result and not throughput:
-            throughput = float(result.group(1))
+        if result:
+            if not throughput:
+                throughput = float(result.group(1))
+            continue
 
         result = re.match(r'95th percentile per-packet one-way delay: '
                           '(.*?) ms', line)
-        if result and not delay:
-            delay = float(result.group(1))
+        if result:
+            if not delay:
+                delay = float(result.group(1))
+            continue
 
         result = re.match(r'Local clock offset: (.*?) ms', line)
         if result:
             ofst = float(result.group(1))
             if not worst_local_offset or abs(ofst) > worst_local_offset:
                 worst_local_offset = ofst
+            continue
 
         result = re.match(r'Remote clock offset: (.*?) ms', line)
         if result:
             ofst = float(result.group(1))
             if not worst_remote_offset or abs(ofst) > worst_remote_offset:
                 worst_remote_offset = ofst
+            continue
 
     stats_log.close()
     return (start_time, end_time, delay, throughput,
