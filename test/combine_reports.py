@@ -86,8 +86,9 @@ def main():
     if 'git_info' in metadata:
         git_info = metadata['git_info']
         git_info = git_info.replace('_', '\\_')
+        git_info = git_info.replace('\n M ', '\n\\quad M ')
         git_info = git_info.replace('\n', '\n\n')
-        latex.write('\\\\ \n\n git ' + git_info + ' \\newpage')
+        latex.write('\\\\\n\n' + git_info + '\\newpage')
 
     latex.write('\n\n\\begin{figure}[H]\n'
                 '\\centering\n'
