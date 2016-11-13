@@ -57,22 +57,15 @@ def main():
                 continue
         elif cmd[0] == 'ntpdate':  # run ntpdate command to get time skew
             try:
-                ntp_output = check_output(cmd)
-            except:
-                sys.stderr.write('invalid ntpdate command: %s\n' % raw_cmd)
-                continue
-
-            offset = ntp_output.rsplit(' ', 2)[-2]
-
-            try:
-                float(offset)
+                offset_str = check_output(cmd).rsplit(' ', 2)[-2]
+                offset = float(offset_str)
             except:
                 sys.stderr.write('failed to get clock offset from ntpdate\n')
-                sys.stderr.write(ntp_output)
                 sys.stdout.write('error\n')
+                sys.stdout.flush()
             else:
-                sys.stdout.write(offset + '\n')
-            sys.stdout.flush()
+                sys.stdout.write(offset_str + '\n')
+                sys.stdout.flush()
         elif cmd[0] == 'prompt':  # set prompt in front of commands to print
             if len(cmd) != 2:
                 sys.stderr.write('error: usage: prompt PROMPT\n')

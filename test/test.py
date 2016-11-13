@@ -129,13 +129,15 @@ class TestCongestionControl(unittest.TestCase):
     def update_worst_abs_ofst(self, *args):
         for tun_manager in args:
             ntp_cmd = 'ntpdate -quv time.stanford.edu\n'
-            tun_manager.stdin.write(ntp_cmd)
-            ofst = tun_manager.stdout.readline().strip()
+            while True:
+                tun_manager.stdin.write(ntp_cmd)
+                ofst = tun_manager.stdout.readline().strip()
+                if ofst != 'error':
+                    break
 
-            if ofst != 'error':
-                ofst = abs(float(ofst)) * 1000
-                if not self.worst_abs_ofst or ofst > self.worst_abs_ofst:
-                    self.worst_abs_ofst = ofst
+            ofst = abs(float(ofst)) * 1000
+            if not self.worst_abs_ofst or ofst > self.worst_abs_ofst:
+                self.worst_abs_ofst = ofst
 
     # test congestion control using mm-tunnelclient/mm-tunnelserver
     def run_with_tunnel(self):
