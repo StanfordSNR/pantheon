@@ -11,15 +11,6 @@ from pantheon_help import call, check_call, check_output, PIPE, Popen
 from time import strftime
 
 
-def parse_metadata_file(metadata_fname):
-    with open(metadata_fname, 'r') as f:
-        metadata = json.loads(f.readline())
-        assert not f.readline(), (
-            'metadata file should be a single line of json')
-
-    return metadata
-
-
 def main():
     args = parse_arguments(path.basename(__file__))
 
@@ -27,8 +18,11 @@ def main():
     src_dir = path.abspath(path.join(test_dir, '../src'))
     raw_summary_png = path.join(test_dir, 'pantheon_summary.png')
     mean_summary_png = path.join(test_dir, 'pantheon_summary_mean.png')
-    metadata = parse_metadata_file(path.join(test_dir,
-                                             'pantheon_metadata.json'))
+
+    # load pantheon_metadata.json as a dictionary
+    metadata_fname = path.join(test_dir, 'pantheon_metadata.json')
+    with open(metadata_fname) as metadata_file:
+        metadata = json.load(metadata_file)
 
     latex = open('/tmp/pantheon_report.tex', 'w')
 

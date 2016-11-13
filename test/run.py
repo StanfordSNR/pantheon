@@ -39,10 +39,8 @@ def create_metadata_file(args, metadata_fname, git_info):
     if git_info:
         metadata['git_info'] = git_info
 
-    metadata_file = open(metadata_fname, 'w')
-    metadata_file.write(json.dumps(metadata))
-
-    metadata_file.close()
+    with open(metadata_fname, 'w') as metadata_file:
+        json.dump(metadata, metadata_file)
 
 
 def main():
