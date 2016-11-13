@@ -9,7 +9,28 @@ from os import path
 from pantheon_help import check_call, check_output, parse_remote
 
 
-def create_metadata_file(args, metadata_fname, git_info):
+def get_git_info(args, root_dir):
+    git_info_cmd = (
+        'echo -n \'git branch: \'; git rev-parse --abbrev-ref @ | head -c -1; '
+        'echo -n \' @ \'; git rev-parse @; git submodule foreach --quiet '
+        '\'echo $path @ `git rev-parse HEAD`; '
+        'git status -s --untracked-files=no --porcelain\'')
+
+    local_git_info = check_output(git_info_cmd, shell=True, cwd=root_dir)
+
+    if args.remote:
+        rd = parse_remote(args.remote)
+        cmd = rd['ssh_cmd'] + ["cd %s; %s" % (rd['root_dir'], git_info_cmd)]
+        remote_git_info = check_output(cmd)
+        assert local_git_info == remote_git_info, (
+            'Repository differed between local and remote sides.\n'
+            'local git info:\n%s\nremote git info:\n%s\n' %
+            (local_git_info, remote_git_info))
+
+    return local_git_info
+
+
+def create_metadata_file(args, git_info, metadata_fname):
     metadata = dict()
     metadata['runtime'] = args.runtime
     metadata['flows'] = args.flows
@@ -90,21 +111,6 @@ def main():
     elif args.run_only == 'test':
         run_setup = False
 
-    git_info_cmd = (
-        'echo -n \'git branch: \'; git rev-parse --abbrev-ref @ | head -c -1; '
-        'echo -n \' @ \'; git rev-parse @; git submodule foreach --quiet '
-        '\'echo $path @ `git rev-parse HEAD`; '
-        'git status -s --untracked-files=no --porcelain\'')
-
-    local_git_info = check_output(git_info_cmd, shell=True, cwd=root_dir)
-
-    if args.remote:
-        rd = parse_remote(args.remote)
-        cmd = rd['ssh_cmd'] + ["cd %s; %s" % (rd['root_dir'], git_info_cmd)]
-        remote_git_info = check_output(cmd)
-        assert local_git_info == remote_git_info, (
-            'repository differed between local and remote sides')
-
     cc_schemes = ['default_tcp', 'vegas', 'koho_cc', 'ledbat', 'pcc', 'verus',
                   'scream', 'sprout', 'webrtc', 'quic']
 
@@ -118,9 +124,11 @@ def main():
             cmd = setup_cmd + [cc]
             check_call(cmd)
 
+    git_info = get_git_info(args, root_dir)
+
     if run_test:
         # create metadata file to be used by combine_reports.py
-        create_metadata_file(args, metadata_fname, local_git_info)
+        create_metadata_file(args, git_info, metadata_fname)
 
         for run_id in xrange(1, 1 + args.run_times):
             for cc in cc_schemes:
