@@ -89,12 +89,14 @@ def main():
 
     test_cmd += [
         '-t', str(args.runtime), '-f', str(args.flows),
-        '--interval', str(args.interval), '--tunnel-server', args.server_side]
+        '--interval', str(args.interval)]
 
-    if args.local_addr:
-        test_cmd += ['--local-addr', args.local_addr]
+    if args.remote:
+        test_cmd += ['--tunnel-server', args.server_side]
+        if args.local_addr:
+            test_cmd += ['--local-addr', args.local_addr]
 
-    test_cmd += ['--sender-side', args.sender_side]
+        test_cmd += ['--sender-side', args.sender_side]
 
     if args.local_if:
         pre_setup_cmd += ['--local-interface', args.local_if]

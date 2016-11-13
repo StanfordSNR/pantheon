@@ -167,9 +167,13 @@ def validate_args(args):
     local_addr = getattr(args, 'local_addr', None)
     sender_side = getattr(args, 'sender_side', None)
     remote_if = getattr(args, 'remote_if', None)
+    remote_info = getattr(args, 'remote_info', None)
 
     if remote_if:
         assert remote, '--remote-interface must run along with -r'
+
+    if remote_info:
+        assert remote, '--remote-info must run along with -r'
 
     if remote:
         assert ':' in remote, '-r must be followed by [user@]hostname:dir'
