@@ -126,18 +126,23 @@ class TestCongestionControl(unittest.TestCase):
             os.killpg(os.getpgid(proc_second.pid), signal.SIGKILL)
 
     # read and update worst absolute clock offset
-    def update_worst_abs_ofst(self, *args):
-        for tun_manager in args:
-            ntp_cmd = 'ntpdate -quv time.stanford.edu\n'
-            while True:
-                tun_manager.stdin.write(ntp_cmd)
-                ofst = tun_manager.stdout.readline().strip()
-                if ofst != 'error':
-                    break
+    def update_worst_abs_ofst(self):
+        ntp_cmd = [['ntpdate', '-quv', 'time.stanford.edu']]
+        if self.remote:
+            cmd = self.rd['ssh_cmd'] + ntp_cmd[0]
+            ntp_cmd.append(cmd)
 
-            ofst = abs(float(ofst)) * 1000
-            if not self.worst_abs_ofst or ofst > self.worst_abs_ofst:
-                self.worst_abs_ofst = ofst
+        for cmd in ntp_cmd:
+            while True:
+                try:
+                    ofst = check_output(cmd).rsplit(' ', 2)[-2]
+                    ofst = abs(float(ofst)) * 1000
+                except:
+                    sys.stderr.write('failed to get clock offset\n')
+                else:
+                    if not self.worst_abs_ofst or ofst > self.worst_abs_ofst:
+                        self.worst_abs_ofst = ofst
+                    break
 
     # test congestion control using mm-tunnelclient/mm-tunnelserver
     def run_with_tunnel(self):
@@ -193,7 +198,7 @@ class TestCongestionControl(unittest.TestCase):
             send_manager = tc_manager
             recv_manager = ts_manager
 
-        self.update_worst_abs_ofst(ts_manager, tc_manager)
+        self.update_worst_abs_ofst()
 
         # run each flow
         second_cmds = []
@@ -318,7 +323,7 @@ class TestCongestionControl(unittest.TestCase):
         tc_manager.stdin.write('stop\n')
 
         self.test_end_time = strftime('%a, %d %b %Y %H:%M:%S %z')
-        self.update_worst_abs_ofst(ts_manager, tc_manager)
+        self.update_worst_abs_ofst()
 
         # quit tunnel managers
         ts_manager.stdin.write('quit\n')

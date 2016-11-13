@@ -55,17 +55,6 @@ def main():
                 sys.stderr.write('unknown command after "tunnel ID": %s\n'
                                  % cmd_to_run)
                 continue
-        elif cmd[0] == 'ntpdate':  # run ntpdate command to get time skew
-            try:
-                offset_str = check_output(cmd).rsplit(' ', 2)[-2]
-                offset = float(offset_str)
-            except:
-                sys.stderr.write('failed to get clock offset from ntpdate\n')
-                sys.stdout.write('error\n')
-                sys.stdout.flush()
-            else:
-                sys.stdout.write(offset_str + '\n')
-                sys.stdout.flush()
         elif cmd[0] == 'prompt':  # set prompt in front of commands to print
             if len(cmd) != 2:
                 sys.stderr.write('error: usage: prompt PROMPT\n')
