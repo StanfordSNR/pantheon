@@ -28,11 +28,13 @@ def parse_stats(log_name):
         result = re.match(r'Start at: (.*)', line)
         if result:
             start_time = result.group(1)
+            start_time = start_time.rsplit(' ', 1)[0]
             continue
 
         result = re.match(r'End at: (.*)', line)
         if result:
             end_time = result.group(1)
+            end_time = end_time.rsplit(' ', 1)[0]
             continue
 
         result = re.match(r'Average throughput: (.*?) Mbit/s', line)
@@ -152,7 +154,7 @@ def main():
     duration = {}
     pretty_names = {}
     worst_abs_ofst = None
-    time_format = '%a, %d %b %Y %H:%M:%S %z'
+    time_format = '%a, %d %b %Y %H:%M:%S'
 
     for cc in args.cc_schemes:
         if cc not in pretty_names:
@@ -160,7 +162,7 @@ def main():
                 ['python', path.join(src_dir, cc + '.py'), 'friendly_name'])
             pretty_names[cc] = cc_name if cc_name else cc
             data[cc] = []
-            time[cc] = []
+            duration[cc] = []
 
         for run_id in xrange(1, 1 + args.run_times):
             log_name = path.join(test_dir, '%s_stats_run%s.log' % (cc, run_id))
@@ -171,8 +173,8 @@ def main():
                 if not worst_abs_ofst or ofst > worst_abs_ofst:
                     worst_abs_ofst = ofst
 
-            time[cc].append((datetime.strptime(start_t, time_format),
-                             datetime.strptime(end_t, time_format)))
+            duration[cc].append((datetime.strptime(start_t, time_format),
+                                 datetime.strptime(end_t, time_format)))
 
     raw_summary_png = path.join(test_dir, 'pantheon_summary.png')
     mean_summary_png = path.join(test_dir, 'pantheon_summary_mean.png')
