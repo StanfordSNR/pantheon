@@ -20,6 +20,7 @@ def parse_stats(log_name):
     stats_log = open(log_name)
     start_time = None
     end_time = None
+    timezone = None
     throughput = None
     delay = None
     worst_abs_ofst = None
@@ -33,8 +34,10 @@ def parse_stats(log_name):
 
         result = re.match(r'End at: (.*)', line)
         if result:
-            end_time = result.group(1)
-            end_time = end_time.rsplit(' ', 1)[0]
+            end_time = result.group(1).rsplit(' ', 1)
+            if not timezone:
+                timezone = end_time[1]
+            end_time = end_time[0]
             continue
 
         result = re.match(r'Average throughput: (.*?) Mbit/s', line)
@@ -56,7 +59,7 @@ def parse_stats(log_name):
             continue
 
     stats_log.close()
-    return (start_time, end_time, delay, throughput, worst_abs_ofst)
+    return (start_time, end_time, timezone, delay, throughput, worst_abs_ofst)
 
 
 def plot_summary(data, worst_abs_ofst, pretty_names,
@@ -141,8 +144,57 @@ def plot_summary(data, worst_abs_ofst, pretty_names,
                      bbox_inches='tight', pad_inches=0.2)
 
 
-def plot_time_series(data, duration, worst_abs_ofst, pretty_names, plot_name):
-    pass
+def autolabel(rects, ax, pretty_names):
+    i = 0
+    for rect in rects:
+        ax.text(rect.get_x() + rect.get_width() / 2.0, rect.get_height() + 0.2,
+                pretty_names[i], ha='center', va='bottom')
+        i += 1
+
+
+def plot_time_series(time_series_data, timezone, time_series_png):
+    # prepare data for x and y axes to plot
+    time_series_data.sort()
+    init_datetime = time_series_data[0][0]
+    init_time_readable = init_datetime.strftime('%a, %d %b %Y %H:%M:%S')
+    init_time_readable += ' ' + timezone
+
+    x_start_time = []
+    x_end_time = []
+    y_throughput = []
+    label_pretty_names = []
+    for item in time_series_data:
+        x_start_time.append((item[0] - init_datetime).total_seconds())
+        x_end_time.append((item[1] - init_datetime).total_seconds())
+        y_throughput.append(item[3])
+        label_pretty_names.append(item[-1])
+
+    # ticks and labels
+    x_range = range(len(time_series_data))
+    x_ticks = []
+    x_tick_labels = []
+
+    for i in x_range:
+        x_ticks += [i, i + 0.5]
+
+    for pair in zip(x_start_time, x_end_time):
+        x_tick_labels += [pair[0], pair[1]]
+
+    # plot throughput against time
+    fig, ax_tput = plt.subplots()
+
+    rects = ax_tput.bar(x_range, y_throughput, width=0.5, color='grey')
+    ax_tput.set_xlabel('Time (s) since ' + init_time_readable)
+    ax_tput.set_xticks(x_ticks)
+    ax_tput.set_xticklabels(x_tick_labels, rotation=45)
+    ax_tput.set_xlim(left=-0.5)
+    ax_tput.set_ylabel('Average throughput (Mbit/s)')
+    ax_tput.grid()
+    autolabel(rects, ax_tput, label_pretty_names)
+
+    (fig_w, fig_h) = fig.get_size_inches()
+    fig.set_size_inches(1.5 * len(x_range), fig_h)
+    fig.savefig(time_series_png, dpi=300, bbox_inches='tight', pad_inches=0.2)
 
 
 def main():
@@ -151,9 +203,10 @@ def main():
     src_dir = path.abspath(path.join(test_dir, '../src'))
 
     data = {}
-    duration = {}
+    time_series_data = []
     pretty_names = {}
     worst_abs_ofst = None
+    timezone = None
     time_format = '%a, %d %b %Y %H:%M:%S'
 
     for cc in args.cc_schemes:
@@ -162,27 +215,31 @@ def main():
                 ['python', path.join(src_dir, cc + '.py'), 'friendly_name'])
             pretty_names[cc] = cc_name.strip() if cc_name else cc
             data[cc] = []
-            duration[cc] = []
 
         for run_id in xrange(1, 1 + args.run_times):
             log_name = path.join(test_dir, '%s_stats_run%s.log' % (cc, run_id))
-            (start_t, end_t, delay, throughput, ofst) = parse_stats(log_name)
+            (start_t, end_t, tz, delay, tput, ofst) = parse_stats(log_name)
 
-            data[cc].append((delay, throughput))
+            data[cc].append((delay, tput))
             if ofst:
                 if not worst_abs_ofst or ofst > worst_abs_ofst:
                     worst_abs_ofst = ofst
 
-            duration[cc].append((datetime.strptime(start_t, time_format),
-                                 datetime.strptime(end_t, time_format)))
+            start_datetime = datetime.strptime(start_t, time_format)
+            end_datetime = datetime.strptime(end_t, time_format)
+            time_series_data.append((start_datetime, end_datetime, delay,
+                                     tput, pretty_names[cc]))
+
+            if tz and not timezone:
+                timezone = tz
 
     raw_summary_png = path.join(test_dir, 'pantheon_summary.png')
     mean_summary_png = path.join(test_dir, 'pantheon_summary_mean.png')
     plot_summary(data, worst_abs_ofst, pretty_names,
                  raw_summary_png, mean_summary_png)
 
-    time_series = path.join(test_dir, 'pantheon_time_series.png')
-    plot_time_series(data, duration, worst_abs_ofst, pretty_names, time_series)
+    time_series_png = path.join(test_dir, 'pantheon_time_series.png')
+    plot_time_series(time_series_data, timezone, time_series_png)
 
 
 if __name__ == '__main__':
