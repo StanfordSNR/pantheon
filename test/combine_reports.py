@@ -53,8 +53,8 @@ def main():
     else:
         times_str = '%s times' % run_times
 
-    latex.write('Repeated the test of 10 congestion control schemes %s. '
-                'Each test lasted for %s running %s.' %
+    latex.write('Repeated the test of 10 congestion control schemes %s.\n\n'
+                'Each test lasted for %s running %s.\n\n' %
                 (times_str, seconds_str, flows_str))
 
     local_side = ''
@@ -68,7 +68,9 @@ def main():
         local_side += ' on interface %s' % metadata['local_interface']
 
     if local_side:
-        latex.write('\n\nLocal side:' + local_side.replace('_', '\\_'))
+        local_side = local_side.replace('_', '\\_')
+    else:
+        local_side = '\\textit{unknown}'
 
     remote_side = ''
     if 'remote_information' in metadata:
@@ -81,16 +83,25 @@ def main():
         remote_side += ' on interface %s' % metadata['remote_interface']
 
     if remote_side:
-        latex.write('\n\nRemote side:' + remote_side.replace('_', '\\_'))
+        remote_side = remote_side.replace('_', '\\_')
+    else:
+        remote_side = '\\textit{unknown}'
+
+    data_path_info = 'Data path FROM %s TO %s.\\newline\n\n'
+    if metadata['sender_side'] == 'local':
+        data_path_info = data_path_info % (local_side, remote_side)
+    else:
+        data_path_info = data_path_info % (remote_side, local_side)
+    latex.write(data_path_info)
 
     if 'git_info' in metadata:
         git_info = metadata['git_info']
         git_info = git_info.replace('_', '\\_')
         git_info = git_info.replace('\n M ', '\n\\quad M ')
         git_info = git_info.replace('\n', '\n\n')
-        latex.write('\\\\\n\n' + git_info + '\\newpage')
+        latex.write(git_info + '\\newpage\n\n')
 
-    latex.write('\n\n\\begin{figure}[H]\n'
+    latex.write('\\begin{figure}[H]\n'
                 '\\centering\n'
                 '\\includegraphics[width=\\textwidth]'
                 '{%s}\n'
