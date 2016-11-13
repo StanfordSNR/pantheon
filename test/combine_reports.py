@@ -34,18 +34,18 @@ def main():
         '\\begin{document}\n\n'
         '\\textbf{Pantheon Summary} (%s)\n\n' % curr_time)
 
-    if metadata['flows'] == '1':
+    if metadata['flows'] == 1:
         flows_str = '1 flow'
     else:
         flows_str = ('%s flows with %s-second interval between two flows' %
                      (metadata['flows'], metadata['interval']))
 
-    if metadata['runtime'] == '1':
+    if metadata['runtime'] == 1:
         seconds_str = '1 second'
     else:
         seconds_str = '%s seconds' % metadata['runtime']
 
-    run_times = int(metadata['run_times'])
+    run_times = metadata['run_times']
     if run_times == 1:
         times_str = 'once'
     elif run_times == 2:
