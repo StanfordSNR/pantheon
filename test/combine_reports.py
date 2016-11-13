@@ -29,8 +29,13 @@ def main():
     curr_time = strftime('%a, %d %b %Y %H:%M:%S %z')
     latex.write(
         '\\documentclass{article}\n'
-        '\\usepackage{pdfpages, graphicx}\n'
+        '\\usepackage{pdfpages, graphicx, float}\n'
         '\\usepackage{float}\n\n'
+        '\\newcommand{\PantheonFig}[1]{%%\n'
+        '\\begin{figure}[H]\n'
+        '\\centering\n'
+        '\\includegraphics[width=\\textwidth]{#1}\n'
+        '\\end{figure}}\n\n'
         '\\begin{document}\n\n'
         '\\textbf{Pantheon Summary} (%s)\n\n' % curr_time)
 
@@ -101,18 +106,10 @@ def main():
         git_info = git_info.replace('\n', '\n\n')
         latex.write(git_info + '\\newpage\n\n')
 
-    latex.write('\\begin{figure}[H]\n'
-                '\\centering\n'
-                '\\includegraphics[width=\\textwidth]'
-                '{%s}\n'
-                '\\end{figure}\n\n'
-                '\\newpage\n\n'
-                '\\begin{figure}[H]\n'
-                '\\centering\n'
-                '\\includegraphics[width=\\textwidth]'
-                '{%s}\n'
-                '\\end{figure}\n\n'
-                '\\newpage\n\n' % (mean_summary_png, raw_summary_png))
+    latex.write(
+        '\\PantheonFig{%s}\n\n'
+        '\\PantheonFig{%s}\n\n'
+        '\\newpage\n\n' % (mean_summary_png, raw_summary_png))
 
     pretty_names = {}
     for cc in args.cc_schemes:
@@ -141,28 +138,12 @@ def main():
 
             latex.write(
                 'Run %(run_id)s: Report of %(cc_name)s --- Data Link\n\n'
-                '\\begin{figure}[H]\n'
-                '\\centering\n'
-                '\\includegraphics[width=\\textwidth]'
-                '{%(datalink_throughput_png)s}\n'
-                '\\end{figure}\n\n'
-                '\\begin{figure}[H]\n'
-                '\\centering\n'
-                '\\includegraphics[width=\\textwidth]'
-                '{%(datalink_delay_png)s}\n'
-                '\\end{figure}\n\n'
+                '\\PantheonFig{%(datalink_throughput_png)s}\n\n'
+                '\\PantheonFig{%(datalink_delay_png)s}\n\n'
                 '\\newpage\n\n'
                 'Run %(run_id)s: Report of %(cc_name)s --- ACK Link\n\n'
-                '\\begin{figure}[H]\n'
-                '\\centering\n'
-                '\\includegraphics[width=\\textwidth]'
-                '{%(acklink_throughput_png)s}\n'
-                '\\end{figure}\n\n'
-                '\\begin{figure}[H]\n'
-                '\\centering\n'
-                '\\includegraphics[width=\\textwidth]'
-                '{%(acklink_delay_png)s}\n'
-                '\\end{figure}\n\n' % str_dict)
+                '\\PantheonFig{%(acklink_throughput_png)s}\n\n'
+                '\\PantheonFig{%(acklink_delay_png)s}\n\n' % str_dict)
 
             if cc != args.cc_schemes[-1]:
                 latex.write('\\newpage\n\n')
