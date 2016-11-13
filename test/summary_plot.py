@@ -160,7 +160,7 @@ def main():
         if cc not in pretty_names:
             cc_name = check_output(
                 ['python', path.join(src_dir, cc + '.py'), 'friendly_name'])
-            pretty_names[cc] = cc_name if cc_name else cc
+            pretty_names[cc] = cc_name.strip() if cc_name else cc
             data[cc] = []
             duration[cc] = []
 
