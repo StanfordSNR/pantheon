@@ -7,6 +7,7 @@ import math
 from os import path
 from parse_arguments import parse_arguments
 from pantheon_help import check_output
+from datetime import datetime
 
 import matplotlib
 matplotlib.use('Agg')
@@ -17,12 +18,22 @@ import matplotlib.ticker as ticker
 
 def parse_stats(log_name):
     stats_log = open(log_name)
+    start_time = None
+    end_time = None
     throughput = None
     delay = None
     worst_local_offset = None
     worst_remote_offset = None
 
     for line in stats_log:
+        result = re.match(r'Start at: (.*)', line)
+        if result:
+            start_time = result.group(1)
+
+        result = re.match(r'End at: (.*)', line)
+        if result:
+            end_time = result.group(1)
+
         result = re.match(r'Average throughput: (.*?) Mbit/s', line)
         if result and not throughput:
             throughput = float(result.group(1))
@@ -45,7 +56,8 @@ def parse_stats(log_name):
                 worst_remote_offset = ofst
 
     stats_log.close()
-    return (delay, throughput, worst_local_offset, worst_remote_offset)
+    return (start_time, end_time, delay, throughput,
+            worst_local_offset, worst_remote_offset)
 
 
 def plot_summary(data, worst_offsets, pretty_names,
@@ -131,6 +143,10 @@ def plot_summary(data, worst_offsets, pretty_names,
                      bbox_inches='tight', pad_inches=0.2)
 
 
+def plot_time_series(data, time, pretty_names, time_series_png):
+    pass
+
+
 def main():
     args = parse_arguments(path.basename(__file__))
 
@@ -138,11 +154,14 @@ def main():
     src_dir = path.abspath(path.join(test_dir, '../src'))
     raw_summary_png = path.join(test_dir, 'pantheon_summary.png')
     mean_summary_png = path.join(test_dir, 'pantheon_summary_mean.png')
+    time_series_png = path.join(test_dir, 'pantheon_time_series.png')
 
     pretty_names = {}
     data = {}
+    time = {}
     worst_local_ofst = None
     worst_remote_ofst = None
+    time_format = '%a, %d %b %Y %H:%M:%S %z'
     for cc in args.cc_schemes:
         if cc not in pretty_names:
             cc_name = check_output(
@@ -153,7 +172,9 @@ def main():
 
         for run_id in xrange(1, 1 + args.run_times):
             log_name = path.join(test_dir, '%s_stats_run%s.log' % (cc, run_id))
-            delay, throughput, local_ofst, remote_ofst = parse_stats(log_name)
+            (start_time, end_time, delay, throughput,
+             local_ofst, remote_ofst) = parse_stats(log_name)
+
             data[cc].append((delay, throughput))
             if local_ofst:
                 if not worst_local_ofst or abs(local_ofst) > worst_local_ofst:
@@ -163,9 +184,13 @@ def main():
                         abs(remote_ofst) > worst_remote_ofst):
                     worst_remote_ofst = remote_ofst
 
+            time[cc].append((datetime.strptime(start_time, time_format),
+                             datetime.strptime(end_time, time_format)))
+
     worst_offsets = (worst_local_ofst, worst_remote_ofst)
     plot_summary(data, worst_offsets, pretty_names,
                  raw_summary_png, mean_summary_png)
+    plot_time_series(data, time, pretty_names, time_series_png)
 
 
 if __name__ == '__main__':
