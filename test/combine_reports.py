@@ -99,8 +99,8 @@ def main():
         data_path_info = data_path_info % (remote_side, local_side)
     latex.write(data_path_info)
 
-    if 'git_info' in metadata:
-        git_info = metadata['git_info']
+    if 'git_information' in metadata:
+        git_info = metadata['git_information']
         git_info = git_info.replace('_', '\\_')
         git_info = git_info.replace('\n M ', '\n\\quad M ')
         git_info = git_info.replace('\n', '\n\n')

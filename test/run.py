@@ -20,7 +20,7 @@ def get_git_info(args, root_dir):
 
     if args.remote:
         rd = parse_remote(args.remote)
-        cmd = rd['ssh_cmd'] + ["cd %s; %s" % (rd['root_dir'], git_info_cmd)]
+        cmd = rd['ssh_cmd'] + ['cd %s; %s' % (rd['root_dir'], git_info_cmd)]
         remote_git_info = check_output(cmd)
         assert local_git_info == remote_git_info, (
             'Repository differed between local and remote sides.\n'
@@ -58,7 +58,7 @@ def create_metadata_file(args, git_info, metadata_fname):
         metadata['remote_address'] = remote_addr
 
     if git_info:
-        metadata['git_info'] = git_info
+        metadata['git_information'] = git_info
 
     with open(metadata_fname, 'w') as metadata_file:
         json.dump(metadata, metadata_file)
@@ -87,9 +87,10 @@ def main():
         setup_cmd += ['-r', args.remote]
         test_cmd += ['-r', args.remote]
 
-    test_cmd += [
-        '-t', str(args.runtime), '-f', str(args.flows),
-        '--interval', str(args.interval)]
+    test_cmd += ['-t', str(args.runtime), '-f', str(args.flows)]
+
+    if args.flows > 1:
+        test_cmd += ['--interval', str(args.interval)]
 
     if args.remote:
         test_cmd += ['--tunnel-server', args.server_side]
