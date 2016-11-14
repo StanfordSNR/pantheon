@@ -160,6 +160,8 @@ class TestCongestionControl(unittest.TestCase):
             self.tc_ilogs.append('/tmp/tunclient%s_ingress.log' % tun_id)
             self.tc_elogs.append('/tmp/tunclient%s_egress.log' % tun_id)
 
+        self.update_worst_abs_ofst()
+
         # run mm-tunnelserver manager
         if self.remote:
             if self.server_side == 'local':
@@ -197,8 +199,6 @@ class TestCongestionControl(unittest.TestCase):
         else:
             send_manager = tc_manager
             recv_manager = ts_manager
-
-        self.update_worst_abs_ofst()
 
         # run each flow
         second_cmds = []
@@ -323,12 +323,12 @@ class TestCongestionControl(unittest.TestCase):
         tc_manager.stdin.write('stop\n')
 
         self.test_end_time = strftime('%a, %d %b %Y %H:%M:%S %z')
-        self.update_worst_abs_ofst()
 
         # quit tunnel managers
         ts_manager.stdin.write('quit\n')
         tc_manager.stdin.write('quit\n')
 
+        self.update_worst_abs_ofst()
         self.merge_tunnel_logs()
         sys.stderr.write('Done\n')
 
