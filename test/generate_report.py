@@ -130,6 +130,11 @@ class TestGenerateReport(unittest.TestCase):
             cc_name = self.pretty_names[cc].strip().replace('_', '\\_')
 
             for run_id in xrange(1, 1 + self.run_times):
+                fname = '%s_stats_run%s.log' % (cc, run_id)
+                stats_log_path = path.join(self.test_dir, fname)
+                with open(stats_log_path) as stats_log:
+                    stats_info = stats_log.read()
+
                 fname = '%s_datalink_throughput_run%s.png' % (cc, run_id)
                 datalink_throughput = path.join(self.test_dir, fname)
 
@@ -147,9 +152,15 @@ class TestGenerateReport(unittest.TestCase):
                             'datalink_throughput': datalink_throughput,
                             'datalink_delay': datalink_delay,
                             'acklink_throughput': acklink_throughput,
-                            'acklink_delay': acklink_delay}
+                            'acklink_delay': acklink_delay,
+                            'stats_info': stats_info}
 
                 self.latex.write(
+                    '\\begin{verbatim}\n'
+                    'Run %(run_id)s: Statistics of %(cc_name)s\n\n'
+                    '%(stats_info)s'
+                    '\\end{verbatim}\n\n'
+                    '\\newpage\n\n'
                     'Run %(run_id)s: Report of %(cc_name)s --- Data Link\n\n'
                     '\\PantheonFig{%(datalink_throughput)s}\n\n'
                     '\\PantheonFig{%(datalink_delay)s}\n\n'
