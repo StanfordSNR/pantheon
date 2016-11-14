@@ -73,8 +73,8 @@ def main():
     pre_setup_src = path.join(test_dir, 'pre_setup.py')
     setup_src = path.join(test_dir, 'setup.py')
     test_src = path.join(test_dir, 'test.py')
-    summary_plot_src = path.join(test_dir, 'summary_plot.py')
-    combine_report_src = path.join(test_dir, 'combine_reports.py')
+    plot_summary_src = path.join(test_dir, 'plot_summary.py')
+    generate_report_src = path.join(test_dir, 'generate_report.py')
     metadata_fname = path.join(test_dir, 'pantheon_metadata.json')
 
     # test congestion control schemes
@@ -138,12 +138,12 @@ def main():
                 cmd = test_cmd + ['--run-id', str(run_id), cc]
                 check_call(cmd)
 
-        cmd = ['python', summary_plot_src, '--run-times',
+        cmd = ['python', plot_summary_src, '--run-times',
                str(args.run_times)] + cc_schemes
         check_call(cmd)
 
-        cmd = ['python', combine_report_src, '--metadata-file', metadata_fname,
-               '--run-times', str(args.run_times)] + cc_schemes
+        cmd = ['python', generate_report_src, '--run-times',
+               str(args.run_times)] + cc_schemes
         check_call(cmd)
 
 
