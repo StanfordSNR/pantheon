@@ -93,13 +93,6 @@ def build_arg_dict():
         'help': 'extra information about the remote side',
     }
 
-    arg_dict['--metadata-file'] = {
-        'metavar': 'FILENAME',
-        'action': 'store',
-        'dest': 'metadata_file',
-        'help': 'file containing metadata to be included in pantheon report',
-    }
-
     arg_dict['--run-only'] = {
         'choices': ['setup', 'test'],
         'action': 'store',
@@ -210,10 +203,7 @@ def parse_arguments(filename):
             '-r', '-t', '-f', '--interval', '--tunnel-server',
             '--local-addr', '--sender-side', '--local-interface',
             '--remote-interface', '--run-id', 'cc'])
-    elif filename == 'combine_reports.py':
-        add_arg_list(parser, arg_dict, [
-            '--metadata-file', '--run-times', 'cc_schemes'])
-    elif filename == 'summary_plot.py':
+    elif filename == 'plot_summary.py' or filename == 'generate_report.py':
         add_arg_list(parser, arg_dict, ['--run-times', 'cc_schemes'])
     elif filename == 'run.py':
         add_arg_list(parser, arg_dict, [
