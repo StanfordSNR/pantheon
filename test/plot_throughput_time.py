@@ -2,6 +2,11 @@
 
 from os import path
 from parse_arguments import parse_arguments
+from pantheon_help import get_friendly_names
+
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 
 class PlotThroughputTime:
@@ -76,10 +81,23 @@ class PlotThroughputTime:
                 tput_mbps = departures[flow_id].get(bin_id, 0) / us_per_bin
                 throughput[flow_id].append(tput_mbps)
 
-        return clock_time, throughput
-
     def plot_throughput_time(self):
-        pass
+        friendly_names = get_friendly_names(self.cc_schemes)
+
+        fig, ax = plt.subplots()
+        for cc in self.cc_schemes:
+            cc_name = self.friendly_names[cc]
+
+            for run_id in xrange(1, self.run_times + 1):
+                tunnel_log_path = path.join(
+                    self.test_dir, '%s_datalink_run%s.log' % (cc, run_id))
+                clock_time, throughput = self.parse_tunnel_log(tunnel_log_path)
+
+                for flow_id in clock_time:
+                    ax.plot(clock_time[flow_id], throughput[flow_id])
+
+        fig_path = path.join(self.test_dir, 'pantheon_throughput_time.png')
+        fig.savefig(fig_path, dpi=300, bbox_inches='tight', pad_inches=0.2)
 
 
 def main():
