@@ -1,4 +1,6 @@
+import os
 import sys
+import errno
 import subprocess
 from os import path
 from subprocess import PIPE
@@ -53,3 +55,11 @@ def parse_remote(remote, cc=None):
         rd['cc_src'] = path.join(rd['src_dir'], cc + '.py')
 
     return rd
+
+
+def make_sure_path_exists(path):
+    try:
+        os.makedirs(path)
+    except OSError as exception:
+        if exception.errno != errno.EEXIST:
+            raise
