@@ -63,3 +63,13 @@ def make_sure_path_exists(path):
     except OSError as exception:
         if exception.errno != errno.EEXIST:
             raise
+
+
+def get_friendly_names(cc_schemes):
+    friendly_names = {}
+    src_dir = path.abspath(path.join(path.dirname(__file__), '../src'))
+    for cc in cc_schemes:
+        cc_src = path.join(src_dir, cc + '.py')
+        cc_name = check_output(['python', cc_src, 'friendly_name']).strip()
+        friendly_names[cc] = cc_name if cc_name else cc
+    return friendly_names
