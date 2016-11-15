@@ -2,22 +2,20 @@
 
 import os
 import sys
-import unittest
 from os import path
 from parse_arguments import parse_arguments
 from pantheon_help import call, check_call, check_output, parse_remote
 
 
-class TestPreSetup(unittest.TestCase):
-    def __init__(self, test_name, args):
-        super(TestPreSetup, self).__init__(test_name)
+class PreSetup:
+    def __init__(self, args):
         self.remote = args.remote
         self.local_if = args.local_if
         self.remote_if = args.remote_if
         self.root_dir = path.abspath(path.join(path.dirname(__file__), '..'))
         self.third_party_dir = path.join(self.root_dir, 'third_party')
 
-    def pre_setup(self):
+    def local_pre_setup(self):
         # update submodules
         cmd = ('cd %s && git submodule update --init --recursive' %
                self.root_dir)
@@ -59,13 +57,13 @@ class TestPreSetup(unittest.TestCase):
         check_call(cmd, shell=True)
 
     # congestion control pre-setup
-    def test_cc_pre_setup(self):
+    def pre_setup(self):
         sys.stderr.write('Performing local pre-setup...\n')
-        self.pre_setup()
+        self.local_pre_setup()
 
         # run remote pre_setup.py
-        sys.stderr.write('\nPerforming remote pre-setup...\n')
         if self.remote:
+            sys.stderr.write('\nPerforming remote pre-setup...\n')
             rd = parse_remote(self.remote)
             cmd = rd['ssh_cmd'] + ['python', rd['pre_setup']]
             if self.remote_if:
@@ -76,11 +74,8 @@ class TestPreSetup(unittest.TestCase):
 def main():
     args = parse_arguments(path.basename(__file__))
 
-    # create test suite to run
-    suite = unittest.TestSuite()
-    suite.addTest(TestPreSetup('test_cc_pre_setup', args))
-    if not unittest.TextTestRunner().run(suite).wasSuccessful():
-        sys.exit(1)
+    pre_setup = PreSetup(args)
+    pre_setup.pre_setup()
 
 
 if __name__ == '__main__':

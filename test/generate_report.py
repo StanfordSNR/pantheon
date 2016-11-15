@@ -2,16 +2,14 @@
 
 import sys
 import json
-import unittest
 from os import path
 from time import strftime
 from parse_arguments import parse_arguments
 from pantheon_help import check_call, check_output
 
 
-class TestGenerateReport(unittest.TestCase):
-    def __init__(self, test_name, args):
-        super(TestGenerateReport, self).__init__(test_name)
+class GenerateReport:
+    def __init__(self, args):
         self.test_dir = path.abspath(path.dirname(__file__))
         self.src_dir = path.abspath(path.join(self.test_dir, '../src'))
         self.run_times = args.run_times
@@ -174,7 +172,7 @@ class TestGenerateReport(unittest.TestCase):
 
         self.latex.write('\\end{document}')
 
-    def test_generate_report(self):
+    def generate_report(self):
         self.get_pretty_names()
 
         latex_path = '/tmp/pantheon_report.tex'
@@ -190,11 +188,8 @@ class TestGenerateReport(unittest.TestCase):
 def main():
     args = parse_arguments(path.basename(__file__))
 
-    # create test suite to run
-    suite = unittest.TestSuite()
-    suite.addTest(TestGenerateReport('test_generate_report', args))
-    if not unittest.TextTestRunner().run(suite).wasSuccessful():
-        sys.exit(1)
+    generate_report = GenerateReport(args)
+    generate_report.generate_report()
 
 
 if __name__ == '__main__':
