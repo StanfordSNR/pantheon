@@ -61,17 +61,12 @@ def main():
                 continue
 
             prompt = cmd[1].strip() + ' '
-        elif cmd[0] == 'stop':  # terminate all tunnel processes
+        elif cmd[0] == 'halt':  # terminate all tunnel processes and quit
             if len(cmd) != 1:
-                sys.stderr.write('error: usage: stop\n')
+                sys.stderr.write('error: usage: halt\n')
                 continue
 
             destroy(procs)
-        elif cmd[0] == 'quit':  # quit tunnel manager
-            if len(cmd) != 1:
-                sys.stderr.write('error: usage: quit\n')
-                continue
-
             sys.exit(0)
         else:
             sys.stderr.write('unknown command: %s\n' % raw_cmd)

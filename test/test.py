@@ -317,15 +317,11 @@ class Test:
             'interval time between flows is too long')
         time.sleep(self.runtime - elapsed_time)
 
-        # stop all the running flows
-        ts_manager.stdin.write('stop\n')
-        tc_manager.stdin.write('stop\n')
+        # stop all the running flows and quit tunnel managers
+        ts_manager.stdin.write('halt\n')
+        tc_manager.stdin.write('halt\n')
 
         self.test_end_time = strftime('%a, %d %b %Y %H:%M:%S %z')
-
-        # quit tunnel managers
-        ts_manager.stdin.write('quit\n')
-        tc_manager.stdin.write('quit\n')
 
         self.update_worst_abs_ofst()
         self.merge_tunnel_logs()
