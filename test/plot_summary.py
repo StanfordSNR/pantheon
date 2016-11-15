@@ -3,7 +3,6 @@
 import re
 import sys
 import math
-import unittest
 from os import path
 from time import strftime
 from datetime import datetime
@@ -17,9 +16,8 @@ import matplotlib.markers as markers
 import matplotlib.ticker as ticker
 
 
-class TestPlotSummary(unittest.TestCase):
-    def __init__(self, test_name, args):
-        super(TestPlotSummary, self).__init__(test_name)
+class PlotSummary:
+    def __init__(self, args):
         self.test_dir = path.abspath(path.dirname(__file__))
         self.src_dir = path.abspath(path.join(self.test_dir, '../src'))
         self.run_times = args.run_times
@@ -240,7 +238,7 @@ class TestPlotSummary(unittest.TestCase):
         time_series = path.join(self.test_dir, 'pantheon_time_series.png')
         fig.savefig(time_series, dpi=300, bbox_inches='tight', pad_inches=0.2)
 
-    def test_plot_summary(self):
+    def plot_summary(self):
         self.get_pretty_names()
         self.process_stats_logs()
         self.plot_throughput_delay()
@@ -250,11 +248,8 @@ class TestPlotSummary(unittest.TestCase):
 def main():
     args = parse_arguments(path.basename(__file__))
 
-    # create test suite to run
-    suite = unittest.TestSuite()
-    suite.addTest(TestPlotSummary('test_plot_summary', args))
-    if not unittest.TextTestRunner().run(suite).wasSuccessful():
-        sys.exit(1)
+    plot_summary = PlotSummary(args)
+    plot_summary.plot_summary()
 
 
 if __name__ == '__main__':

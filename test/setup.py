@@ -2,15 +2,13 @@
 
 import os
 import sys
-import unittest
 from os import path
 from parse_arguments import parse_arguments
 from pantheon_help import call, check_call, check_output, parse_remote
 
 
-class TestSetup(unittest.TestCase):
-    def __init__(self, test_name, args):
-        super(TestSetup, self).__init__(test_name)
+class Setup:
+    def __init__(self, args):
         self.cc = args.cc.lower()
         self.remote = args.remote
         self.test_dir = path.abspath(path.dirname(__file__))
@@ -48,7 +46,7 @@ class TestSetup(unittest.TestCase):
         self.initialize()
 
     # congestion control setup
-    def test_cc_setup(self):
+    def setup(self):
         self.setup_congestion_control()
 
         # run remote setup.py
@@ -61,11 +59,8 @@ class TestSetup(unittest.TestCase):
 def main():
     args = parse_arguments(path.basename(__file__))
 
-    # create test suite to run
-    suite = unittest.TestSuite()
-    suite.addTest(TestSetup('test_cc_setup', args))
-    if not unittest.TextTestRunner().run(suite).wasSuccessful():
-        sys.exit(1)
+    setup = Setup(args)
+    setup.setup()
 
 
 if __name__ == '__main__':

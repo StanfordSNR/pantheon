@@ -2,7 +2,6 @@
 
 import os
 import sys
-import unittest
 import time
 import signal
 from time import strftime
@@ -11,9 +10,8 @@ from os import path
 from pantheon_help import Popen, PIPE, check_call, check_output, parse_remote
 
 
-class TestCongestionControl(unittest.TestCase):
-    def __init__(self, test_name, args):
-        super(TestCongestionControl, self).__init__(test_name)
+class Test:
+    def __init__(self, args):
         self.cc = args.cc.lower()
         self.flows = args.flows
         self.runtime = args.runtime
@@ -41,9 +39,10 @@ class TestCongestionControl(unittest.TestCase):
         who_goes_first_cmd = ['python', self.src_file, 'who_goes_first']
         who_goes_first_info = check_output(who_goes_first_cmd)
         self.first_to_run = who_goes_first_info.split(' ')[0].lower()
-        self.assertTrue(
-            self.first_to_run == 'receiver' or self.first_to_run == 'sender',
-            msg='Need to specify receiver or sender first')
+
+        cond = self.first_to_run == 'receiver' or self.first_to_run == 'sender'
+        assert cond, 'Need to specify receiver or sender first'
+
         self.second_to_run = ('sender' if self.first_to_run == 'receiver'
                               else 'receiver')
 
@@ -314,8 +313,8 @@ class TestCongestionControl(unittest.TestCase):
             else:
                 recv_manager.stdin.write(second_cmd)
         elapsed_time = time.time() - start_time
-        self.assertTrue(self.runtime > elapsed_time,
-                        'interval time between flows is too long')
+        assert self.runtime > elapsed_time, (
+            'interval time between flows is too long')
         time.sleep(self.runtime - elapsed_time)
 
         # stop all the running flows
@@ -434,7 +433,7 @@ class TestCongestionControl(unittest.TestCase):
         stats.write(datalink_results)
 
         datalink_throughput.close()
-        self.assertEqual(proc.returncode, 0)
+        assert proc.returncode == 0
 
         # delay
         datalink_delay = open(datalink_delay_png, 'w')
@@ -444,7 +443,7 @@ class TestCongestionControl(unittest.TestCase):
         proc.communicate()
 
         datalink_delay.close()
-        self.assertEqual(proc.returncode, 0)
+        assert proc.returncode == 0
 
         # ACK link
         # throughput
@@ -460,7 +459,7 @@ class TestCongestionControl(unittest.TestCase):
         stats.write(acklink_results)
 
         acklink_throughput.close()
-        self.assertEqual(proc.returncode, 0)
+        assert proc.returncode == 0
 
         # delay
         acklink_delay = open(acklink_delay_png, 'w')
@@ -470,7 +469,7 @@ class TestCongestionControl(unittest.TestCase):
         proc.communicate()
 
         acklink_delay.close()
-        self.assertEqual(proc.returncode, 0)
+        assert proc.returncode == 0
 
         if self.worst_abs_ofst:
             offset_info = ('* Worst absolute clock offset: %s ms\n'
@@ -481,7 +480,7 @@ class TestCongestionControl(unittest.TestCase):
         stats.close()
 
     # congestion control test
-    def test_congestion_control(self):
+    def test(self):
         # local or remote setup before running tests
         self.setup()
 
@@ -495,11 +494,8 @@ class TestCongestionControl(unittest.TestCase):
 def main():
     args = parse_arguments(path.basename(__file__))
 
-    # create test suite to run
-    suite = unittest.TestSuite()
-    suite.addTest(TestCongestionControl('test_congestion_control', args))
-    if not unittest.TextTestRunner().run(suite).wasSuccessful():
-        sys.exit(1)
+    test = Test(args)
+    test.test()
 
 
 if __name__ == '__main__':
