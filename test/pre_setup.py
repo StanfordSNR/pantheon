@@ -4,7 +4,7 @@ import os
 import sys
 from os import path
 from parse_arguments import parse_arguments
-from pantheon_help import call, check_call, check_output, parse_remote
+from pantheon_help import call, check_call, parse_remote, make_sure_path_exists
 
 
 class PreSetup:
@@ -20,6 +20,9 @@ class PreSetup:
         cmd = ('cd %s && git submodule update --init --recursive' %
                self.root_dir)
         check_call(cmd, shell=True)
+
+        # prepare /tmp/pantheon-tmp
+        make_sure_path_exists('/tmp/pantheon-tmp')
 
         # Enable IP forwarding
         cmd = 'sudo sysctl -w net.ipv4.ip_forward=1'
