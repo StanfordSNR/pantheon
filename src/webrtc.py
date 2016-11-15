@@ -83,7 +83,7 @@ def main():
                '--use-fake-ui-for-media-stream '
                '--use-fake-device-for-media-stream '
                '--use-file-for-fake-video-capture=%s '
-               '--user-data-dir=/tmp/nonexistent$(date +%%s%%N)'
+               '--user-data-dir=/tmp/pantheon-tmp/nonexistent$(date +%%s%%N)'
                % (port, video_file))
         check_call(cmd, shell=True)
 
@@ -97,7 +97,8 @@ def main():
         ip = sys.argv[2]
         port = sys.argv[3]
         cmd = ('chromium-browser --app=http://%s:%s/receiver '
-               '--user-data-dir=/tmp/nonexistent$(date +%%s%%N)' % (ip, port))
+               '--user-data-dir=/tmp/pantheon-tmp/nonexistent$(date +%%s%%N)'
+               % (ip, port))
 
         check_call(cmd, shell=True)
 

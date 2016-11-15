@@ -158,13 +158,13 @@ class Test:
             uid = uuid.uuid4()
 
             self.ts_ilogs.append(
-                '/tmp/tunserver%s-ingress-%s.log' % (tun_id, uid))
+                '/tmp/pantheon-tmp/tunserver%s-ingress-%s.log' % (tun_id, uid))
             self.ts_elogs.append(
-                '/tmp/tunserver%s-egress-%s.log' % (tun_id, uid))
+                '/tmp/pantheon-tmp/tunserver%s-egress-%s.log' % (tun_id, uid))
             self.tc_ilogs.append(
-                '/tmp/tunclient%s-ingress-%s.log' % (tun_id, uid))
+                '/tmp/pantheon-tmp/tunclient%s-ingress-%s.log' % (tun_id, uid))
             self.tc_elogs.append(
-                '/tmp/tunclient%s-egress-%s.log' % (tun_id, uid))
+                '/tmp/pantheon-tmp/tunclient%s-egress-%s.log' % (tun_id, uid))
 
         self.update_worst_abs_ofst()
 
@@ -353,8 +353,10 @@ class Test:
                     check_call(scp_cmd % {'log': self.tc_elogs[i]}, shell=True)
 
             uid = uuid.uuid4()
-            datalink_tun_log = '/tmp/datalink-tun%s-%s.log' % (tun_id, uid)
-            acklink_tun_log = '/tmp/acklink-tun%s-%s.log' % (tun_id, uid)
+            datalink_tun_log = (
+                '/tmp/pantheon-tmp/datalink-tun%s-%s.log' % (tun_id, uid))
+            acklink_tun_log = (
+                '/tmp/pantheon-tmp/acklink-tun%s-%s.log' % (tun_id, uid))
             if self.sender_side == self.server_side:
                 s2c_log = datalink_tun_log
                 c2s_log = acklink_tun_log

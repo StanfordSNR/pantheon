@@ -175,7 +175,7 @@ class GenerateReport:
     def generate_report(self):
         self.get_pretty_names()
 
-        latex_path = '/tmp/pantheon_report.tex'
+        latex_path = '/tmp/pantheon-tmp/pantheon_report.tex'
         self.latex = open(latex_path, 'w')
         self.include_summary()
         self.include_runs()
