@@ -4,6 +4,7 @@ import os
 import sys
 import time
 import usage
+import uuid
 import subprocess
 from subprocess import check_call, check_output, PIPE, Popen
 from get_open_port import get_open_udp_port
@@ -83,8 +84,8 @@ def main():
                '--use-fake-ui-for-media-stream '
                '--use-fake-device-for-media-stream '
                '--use-file-for-fake-video-capture=%s '
-               '--user-data-dir=/tmp/pantheon-tmp/nonexistent$(date +%%s%%N)'
-               % (port, video_file))
+               '--user-data-dir=/tmp/pantheon-tmp/webrtc-%s'
+               % (port, video_file, uuid.uuid4()))
         check_call(cmd, shell=True)
 
     # receiver
@@ -97,8 +98,8 @@ def main():
         ip = sys.argv[2]
         port = sys.argv[3]
         cmd = ('chromium-browser --app=http://%s:%s/receiver '
-               '--user-data-dir=/tmp/pantheon-tmp/nonexistent$(date +%%s%%N)'
-               % (ip, port))
+               '--user-data-dir=/tmp/pantheon-tmp/webrtc-%s'
+               % (ip, port, uuid.uuid4()))
 
         check_call(cmd, shell=True)
 
