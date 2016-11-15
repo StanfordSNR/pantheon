@@ -124,6 +124,15 @@ def build_arg_dict():
         'help': 'run times of each test',
     }
 
+    arg_dict['--ms-per-bin'] = {
+        'metavar': 'MS',
+        'action': 'store',
+        'dest': 'ms_per_bin',
+        'type': int,
+        'default': 1000,
+        'help': 'ms per bin',
+    }
+
     arg_dict['cc'] = {
         'metavar': 'congestion-control',
         'help': 'a congestion control scheme in default_tcp, koho_cc, ledbat, '
@@ -203,9 +212,11 @@ def parse_arguments(filename):
             '-r', '-t', '-f', '--interval', '--tunnel-server',
             '--local-addr', '--sender-side', '--local-interface',
             '--remote-interface', '--run-id', 'cc'])
-    elif (filename == 'plot_summary.py' or filename == 'generate_report.py' or
-          filename == 'plot_throughput_time.py'):
+    elif filename == 'plot_summary.py' or filename == 'generate_report.py':
         add_arg_list(parser, arg_dict, ['--run-times', 'cc_schemes'])
+    elif filename == 'plot_throughput_time.py':
+        add_arg_list(parser, arg_dict, [
+            '--run-times', '--ms-per-bin', 'cc_schemes'])
     elif filename == 'run.py':
         add_arg_list(parser, arg_dict, [
             '-r', '-t', '-f', '--interval', '--tunnel-server',
