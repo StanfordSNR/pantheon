@@ -4,6 +4,7 @@ import os
 import sys
 import time
 import signal
+import uuid
 from time import strftime
 from parse_arguments import parse_arguments
 from os import path
@@ -154,10 +155,16 @@ class Test:
 
         for i in xrange(self.flows):
             tun_id = i + 1
-            self.ts_ilogs.append('/tmp/tunserver%s_ingress.log' % tun_id)
-            self.ts_elogs.append('/tmp/tunserver%s_egress.log' % tun_id)
-            self.tc_ilogs.append('/tmp/tunclient%s_ingress.log' % tun_id)
-            self.tc_elogs.append('/tmp/tunclient%s_egress.log' % tun_id)
+            uid = uuid.uuid4()
+
+            self.ts_ilogs.append(
+                '/tmp/tunserver%s-ingress-%s.log' % (tun_id, uid))
+            self.ts_elogs.append(
+                '/tmp/tunserver%s-egress-%s.log' % (tun_id, uid))
+            self.tc_ilogs.append(
+                '/tmp/tunclient%s-ingress-%s.log' % (tun_id, uid))
+            self.tc_elogs.append(
+                '/tmp/tunclient%s-egress-%s.log' % (tun_id, uid))
 
         self.update_worst_abs_ofst()
 
@@ -345,8 +352,9 @@ class Test:
                     check_call(scp_cmd % {'log': self.tc_ilogs[i]}, shell=True)
                     check_call(scp_cmd % {'log': self.tc_elogs[i]}, shell=True)
 
-            datalink_tun_log = '/tmp/datalink_tun%s.log' % tun_id
-            acklink_tun_log = '/tmp/acklink_tun%s.log' % tun_id
+            uid = uuid.uuid4()
+            datalink_tun_log = '/tmp/datalink-tun%s-%s.log' % (tun_id, uid)
+            acklink_tun_log = '/tmp/acklink-tun%s-%s.log' % (tun_id, uid)
             if self.sender_side == self.server_side:
                 s2c_log = datalink_tun_log
                 c2s_log = acklink_tun_log
