@@ -5,7 +5,7 @@ import json
 from os import path
 from time import strftime
 from parse_arguments import parse_arguments
-from pantheon_help import check_call, check_output
+from pantheon_help import check_call, check_output, get_friendly_names
 
 
 class GenerateReport:
@@ -14,13 +14,6 @@ class GenerateReport:
         self.src_dir = path.abspath(path.join(self.test_dir, '../src'))
         self.run_times = args.run_times
         self.cc_schemes = args.cc_schemes
-
-    def get_pretty_names(self):
-        self.pretty_names = {}
-        for cc in self.cc_schemes:
-            cc_src = path.join(self.src_dir, cc + '.py')
-            cc_name = check_output(['python', cc_src, 'friendly_name']).strip()
-            self.pretty_names[cc] = cc_name if cc_name else cc
 
     def describe_metadata(self):
         # load pantheon_metadata.json as a dictionary
@@ -125,7 +118,7 @@ class GenerateReport:
 
     def include_runs(self):
         for cc in self.cc_schemes:
-            cc_name = self.pretty_names[cc].strip().replace('_', '\\_')
+            cc_name = self.friendly_names[cc].strip().replace('_', '\\_')
 
             for run_id in xrange(1, 1 + self.run_times):
                 fname = '%s_stats_run%s.log' % (cc, run_id)
@@ -173,7 +166,7 @@ class GenerateReport:
         self.latex.write('\\end{document}')
 
     def generate_report(self):
-        self.get_pretty_names()
+        self.friendly_names = get_friendly_names(self.cc_schemes)
 
         latex_path = '/tmp/pantheon-tmp/pantheon_report.tex'
         self.latex = open(latex_path, 'w')

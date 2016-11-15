@@ -6,7 +6,7 @@ import math
 from os import path
 from time import strftime
 from datetime import datetime
-from pantheon_help import check_output
+from pantheon_help import check_output, get_friendly_names
 from parse_arguments import parse_arguments
 
 import matplotlib
@@ -23,13 +23,6 @@ class PlotSummary:
         self.run_times = args.run_times
         self.cc_schemes = args.cc_schemes
         self.timezone = None
-
-    def get_pretty_names(self):
-        self.pretty_names = {}
-        for cc in self.cc_schemes:
-            cc_src = path.join(self.src_dir, cc + '.py')
-            cc_name = check_output(['python', cc_src, 'friendly_name']).strip()
-            self.pretty_names[cc] = cc_name if cc_name else cc
 
     def parse_stats_log(self, log_name):
         stats_log = open(log_name)
@@ -83,7 +76,7 @@ class PlotSummary:
 
         for cc in self.cc_schemes:
             self.data[cc] = []
-            cc_name = self.pretty_names[cc]
+            cc_name = self.friendly_names[cc]
 
             for run_id in xrange(1, 1 + self.run_times):
                 log = path.join(
@@ -113,7 +106,7 @@ class PlotSummary:
         fig_mean, ax_mean = plt.subplots()
 
         for cc, value in self.data.items():
-            cc_name = self.pretty_names[cc]
+            cc_name = self.friendly_names[cc]
             color = color_names[color_i]
             marker = marker_names[marker_i]
             y_data, x_data = zip(*value)
@@ -184,12 +177,12 @@ class PlotSummary:
         fig_mean.savefig(mean_summary, dpi=300,
                          bbox_inches='tight', pad_inches=0.2)
 
-    def autolabel(self, rects, ax, pretty_names):
+    def autolabel(self, rects, ax, friendly_names):
         i = 0
         for rect in rects:
             ax.text(rect.get_x() + rect.get_width() / 2.0,
                     rect.get_height() + 0.2,
-                    pretty_names[i], ha='center', va='bottom')
+                    friendly_names[i], ha='center', va='bottom')
             i += 1
 
     def plot_throughput_time(self):
@@ -202,12 +195,12 @@ class PlotSummary:
         x_start_time = []
         x_end_time = []
         y_throughput = []
-        label_pretty_names = []
+        label_friendly_names = []
         for item in self.time_series_data:
             x_start_time.append((item[0] - init_datetime).total_seconds())
             x_end_time.append((item[1] - init_datetime).total_seconds())
             y_throughput.append(item[2])
-            label_pretty_names.append(item[-1])
+            label_friendly_names.append(item[-1])
 
         # ticks and labels
         x_range = range(len(self.time_series_data))
@@ -230,7 +223,7 @@ class PlotSummary:
         ax_tput.set_xlim(left=-0.5)
         ax_tput.set_ylabel('Average throughput (Mbit/s)')
         ax_tput.grid()
-        self.autolabel(rects, ax_tput, label_pretty_names)
+        self.autolabel(rects, ax_tput, label_friendly_names)
 
         (fig_w, fig_h) = fig.get_size_inches()
         fig.set_size_inches(1.5 * len(x_range), fig_h)
@@ -239,7 +232,7 @@ class PlotSummary:
         fig.savefig(time_series, dpi=300, bbox_inches='tight', pad_inches=0.2)
 
     def plot_summary(self):
-        self.get_pretty_names()
+        self.friendly_names = get_friendly_names(self.cc_schemes)
         self.process_stats_logs()
         self.plot_throughput_delay()
         self.plot_throughput_time()
