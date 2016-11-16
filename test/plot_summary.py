@@ -185,57 +185,10 @@ class PlotSummary:
                     friendly_names[i], ha='center', va='bottom')
             i += 1
 
-    def plot_throughput_time(self):
-        # prepare data for x and y axes to plot
-        self.time_series_data.sort()
-        init_datetime = self.time_series_data[0][0]
-        init_time_readable = init_datetime.strftime('%a, %d %b %Y %H:%M:%S')
-        init_time_readable += ' ' + self.timezone
-
-        x_start_time = []
-        x_end_time = []
-        y_throughput = []
-        label_friendly_names = []
-        for item in self.time_series_data:
-            x_start_time.append((item[0] - init_datetime).total_seconds())
-            x_end_time.append((item[1] - init_datetime).total_seconds())
-            y_throughput.append(item[2])
-            label_friendly_names.append(item[-1])
-
-        # ticks and labels
-        x_range = range(len(self.time_series_data))
-        x_ticks = []
-        x_tick_labels = []
-
-        for i in x_range:
-            x_ticks += [i, i + 0.5]
-
-        for pair in zip(x_start_time, x_end_time):
-            x_tick_labels += [pair[0], pair[1]]
-
-        # plot throughput against time
-        fig, ax_tput = plt.subplots()
-
-        rects = ax_tput.bar(x_range, y_throughput, width=0.5, color='grey')
-        ax_tput.set_xlabel('Time (s) since ' + init_time_readable)
-        ax_tput.set_xticks(x_ticks)
-        ax_tput.set_xticklabels(x_tick_labels, rotation=45)
-        ax_tput.set_xlim(left=-0.5)
-        ax_tput.set_ylabel('Average throughput (Mbit/s)')
-        ax_tput.grid()
-        self.autolabel(rects, ax_tput, label_friendly_names)
-
-        (fig_w, fig_h) = fig.get_size_inches()
-        fig.set_size_inches(1.5 * len(x_range), fig_h)
-
-        time_series = path.join(self.test_dir, 'pantheon_time_series.png')
-        fig.savefig(time_series, dpi=300, bbox_inches='tight', pad_inches=0.2)
-
     def plot_summary(self):
         self.friendly_names = get_friendly_names(self.cc_schemes)
         self.process_stats_logs()
         self.plot_throughput_delay()
-        self.plot_throughput_time()
 
 
 def main():
