@@ -128,9 +128,8 @@ def main():
             cmd = setup_cmd + [cc]
             check_call(cmd)
 
-    git_info = get_git_info(args, root_dir)
-
     if run_test:
+        git_info = get_git_info(args, root_dir)
         # create metadata file to be used by combine_reports.py
         create_metadata_file(args, git_info, metadata_fname)
 
