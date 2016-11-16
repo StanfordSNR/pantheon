@@ -142,7 +142,7 @@ def main():
                str(args.run_times)] + cc_schemes
         check_call(cmd)
 
-        cmd = ['python', plot_throughput_time, '--run-times',
+        cmd = ['python', plot_throughput_time_src, '--run-times',
                str(args.run_times), '--ms-per-bin', '1000'] + cc_schemes
         check_call(cmd)
 
