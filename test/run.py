@@ -74,6 +74,7 @@ def main():
     setup_src = path.join(test_dir, 'setup.py')
     test_src = path.join(test_dir, 'test.py')
     plot_summary_src = path.join(test_dir, 'plot_summary.py')
+    plot_throughput_time_src = path.join(test_dir, 'plot_throughput_time.py')
     generate_report_src = path.join(test_dir, 'generate_report.py')
     metadata_fname = path.join(test_dir, 'pantheon_metadata.json')
 
@@ -140,6 +141,10 @@ def main():
 
         cmd = ['python', plot_summary_src, '--run-times',
                str(args.run_times)] + cc_schemes
+        check_call(cmd)
+
+        cmd = ['python', plot_throughput_time, '--run-times',
+               str(args.run_times), '--ms-per-bin', '1000'] + cc_schemes
         check_call(cmd)
 
         cmd = ['python', generate_report_src, '--run-times',
