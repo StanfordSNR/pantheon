@@ -30,8 +30,9 @@ def get_git_info(args, root_dir):
     return local_git_info
 
 
-def create_metadata_file(args, git_info, metadata_fname):
+def create_metadata_file(cc_schemes, args, git_info, metadata_fname):
     metadata = dict()
+    metadata['cc_schemes'] = ' '.join(cc_schemes)
     metadata['runtime'] = args.runtime
     metadata['flows'] = args.flows
     metadata['interval'] = args.interval
@@ -131,7 +132,7 @@ def main():
     if run_test:
         git_info = get_git_info(args, root_dir)
         # create metadata file to be used by combine_reports.py
-        create_metadata_file(args, git_info, metadata_fname)
+        create_metadata_file(cc_schemes, args, git_info, metadata_fname)
 
         for run_id in xrange(1, 1 + args.run_times):
             for cc in cc_schemes:
