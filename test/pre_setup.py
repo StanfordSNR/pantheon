@@ -3,8 +3,10 @@
 import os
 import sys
 from os import path
-from parse_arguments import parse_arguments
-from pantheon_help import call, check_call, parse_remote, make_sure_path_exists
+import pantheon_helpers
+from helpers.parse_arguments import parse_arguments
+from helpers.pantheon_help import (call, check_call, parse_remote,
+                                   make_sure_path_exists)
 
 
 class PreSetup:

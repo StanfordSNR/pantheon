@@ -3,8 +3,9 @@
 import os
 import sys
 from os import path
-from parse_arguments import parse_arguments
-from pantheon_help import call, check_call, check_output, parse_remote
+import pantheon_helpers
+from helpers.parse_arguments import parse_arguments
+from helpers.pantheon_help import call, check_call, check_output, parse_remote
 
 
 class Setup:
