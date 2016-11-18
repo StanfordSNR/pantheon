@@ -10,10 +10,10 @@ from pantheon_help import check_output, get_friendly_names
 from parse_arguments import parse_arguments
 
 import matplotlib
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.markers as markers
 import matplotlib.ticker as ticker
+matplotlib.use('Agg')
 
 
 class PlotSummary:
