@@ -6,10 +6,9 @@ from os import path
 from parse_arguments import parse_arguments
 from pantheon_help import get_friendly_names
 
-import matplotlib
+import matplotlib_agg
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-matplotlib.use('Agg')
 
 
 class PlotThroughputTime:
