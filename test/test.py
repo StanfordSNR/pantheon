@@ -6,9 +6,9 @@ import time
 import signal
 import uuid
 from time import strftime
-from parse_arguments import parse_arguments
 from os import path
 import pantheon_helpers
+from helpers.parse_arguments import parse_arguments
 from helpers.pantheon_help import (Popen, PIPE, check_call, check_output,
                                    parse_remote)
 
