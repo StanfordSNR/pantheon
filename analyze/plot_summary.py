@@ -193,6 +193,8 @@ class PlotSummary:
 
 
 def main():
+    parse_arguments(path.basename(__file__))
+
     analysis_dir = path.abspath(path.dirname(__file__))
     # load pantheon_metadata.json as a dictionary
     metadata_fname = path.join(analysis_dir, 'pantheon_metadata.json')

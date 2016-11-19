@@ -9,7 +9,8 @@ from time import strftime
 from parse_arguments import parse_arguments
 from os import path
 import pantheon_helpers
-from helpers.pantheon_help import Popen, PIPE, check_call, check_output, parse_remote
+from helpers.pantheon_help import (Popen, PIPE, check_call, check_output,
+                                   parse_remote)
 
 
 class Test:
@@ -391,30 +392,7 @@ class Test:
     def run_congestion_control(self):
         self.run_with_tunnel() if self.flows else self.run_without_tunnel()
 
-    def gen_results(self):
-        throughput_cmd = 'mm-tunnel-throughput'
-        delay_cmd = 'mm-tunnel-delay'
-
-        if self.flows:
-            datalink_log = self.datalink_log
-            acklink_log = self.acklink_log
-        else:
-            datalink_log = self.mm_datalink_log
-            acklink_log = self.mm_acklink_log
-
-        datalink_throughput_png = path.join(
-            self.test_dir,
-            '%s_datalink_throughput_run%s.png' % (self.cc, self.run_id))
-        datalink_delay_png = path.join(
-            self.test_dir,
-            '%s_datalink_delay_run%s.png' % (self.cc, self.run_id))
-        acklink_throughput_png = path.join(
-            self.test_dir,
-            '%s_acklink_throughput_run%s.png' % (self.cc, self.run_id))
-        acklink_delay_png = path.join(
-            self.test_dir,
-            '%s_acklink_delay_run%s.png' % (self.cc, self.run_id))
-
+    def record_time_stats(self):
         stats_log = path.join(self.test_dir,
                               '%s_stats_run%s.log' % (self.cc, self.run_id))
         stats = open(stats_log, 'w')
@@ -425,58 +403,6 @@ class Test:
             (self.test_start_time, self.test_end_time))
         sys.stderr.write('\n' + test_run_duration)
         stats.write(test_run_duration)
-
-        # Data link
-        # throughput
-        datalink_throughput = open(datalink_throughput_png, 'w')
-        cmd = [throughput_cmd, '500', datalink_log]
-
-        sys.stderr.write('* Data link statistics:\n')
-        stats.write('* Data link statistics:\n')
-
-        proc = Popen(cmd, stdout=datalink_throughput, stderr=PIPE)
-        datalink_results = proc.communicate()[1]
-        sys.stderr.write(datalink_results)
-        stats.write(datalink_results)
-
-        datalink_throughput.close()
-        assert proc.returncode == 0
-
-        # delay
-        datalink_delay = open(datalink_delay_png, 'w')
-        cmd = [delay_cmd, datalink_log]
-
-        proc = Popen(cmd, stdout=datalink_delay, stderr=DEVNULL)
-        proc.communicate()
-
-        datalink_delay.close()
-        assert proc.returncode == 0
-
-        # ACK link
-        # throughput
-        acklink_throughput = open(acklink_throughput_png, 'w')
-        cmd = [throughput_cmd, '500', acklink_log]
-
-        sys.stderr.write('* ACK link statistics:\n')
-        stats.write('* ACK link statistics:\n')
-
-        proc = Popen(cmd, stdout=acklink_throughput, stderr=PIPE)
-        acklink_results = proc.communicate()[1]
-        sys.stderr.write(acklink_results)
-        stats.write(acklink_results)
-
-        acklink_throughput.close()
-        assert proc.returncode == 0
-
-        # delay
-        acklink_delay = open(acklink_delay_png, 'w')
-        cmd = [delay_cmd, acklink_log]
-
-        proc = Popen(cmd, stdout=acklink_delay, stderr=DEVNULL)
-        proc.communicate()
-
-        acklink_delay.close()
-        assert proc.returncode == 0
 
         if self.worst_abs_ofst:
             offset_info = ('* Worst absolute clock offset: %s ms\n'
@@ -494,8 +420,8 @@ class Test:
         # run receiver and sender
         self.run_congestion_control()
 
-        # generate results, including statistics and graphs
-        self.gen_results()
+        # write runtimes and clock offsets to file
+        self.record_time_stats()
 
 
 def main():

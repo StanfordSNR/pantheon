@@ -6,7 +6,8 @@ from os import path
 from time import strftime
 import pantheon_helpers
 from helpers.parse_arguments import parse_arguments
-from helpers.pantheon_help import check_call, check_output, get_friendly_names
+from helpers.pantheon_help import (check_call, check_output,
+                                   get_friendly_names, Popen, PIPE)
 
 
 class GenerateReport:
@@ -15,6 +16,7 @@ class GenerateReport:
         self.src_dir = path.abspath(path.join(self.analysis_dir, '../src'))
         self.run_times = metadata_dict['run_times']
         self.cc_schemes = metadata_dict['cc_schemes'].split()
+        self.flows = int(metadata_dict['flows'])
 
     def describe_metadata(self):
         # load pantheon_metadata.json as a dictionary
@@ -117,6 +119,32 @@ class GenerateReport:
             '\\newpage\n\n'
             % (curr_time, metadata_desc, mean_summary, raw_summary))
 
+    def gen_graph(self, gtype, cc, run_id, direction):
+        assert gtype == 'throughput' or gtype == 'delay'
+        assert direction == 'data' or direction == 'ack'
+
+        if gtype == 'throughput':
+            cmd = ['mm-tunnel-throughput', '500']
+        else:
+            cmd = ['mm-tunnel-delay']
+
+        log_name = cc
+        if self.flows == 0:
+            log_name += '_mm'
+        log_name += '_%slink_run%s.log' % (direction, run_id)
+
+        cmd.append(log_name)
+
+        graph_name = cc + '_%slink_%s_run%s.png' % (direction, gtype, run_id)
+
+        graph_file = open(graph_name, 'w')
+        proc = Popen(cmd, stdout=graph_file, stderr=PIPE)
+        results = proc.communicate()[1]
+        graph_file.close()
+        assert proc.returncode == 0
+
+        return (graph_name, results)
+
     def include_runs(self):
         for cc in self.cc_schemes:
             cc_name = self.friendly_names[cc].strip().replace('_', '\\_')
@@ -127,16 +155,20 @@ class GenerateReport:
                 with open(stats_log_path) as stats_log:
                     stats_info = stats_log.read()
 
-                fname = '%s_datalink_throughput_run%s.png' % (cc, run_id)
+                (fname, datalink_tput_stats) = self.gen_graph('throughput', cc,
+                                                              run_id, 'data')
                 datalink_throughput = path.join(self.analysis_dir, fname)
 
-                fname = '%s_datalink_delay_run%s.png' % (cc, run_id)
+                (fname, datalink_delay_stats) = self.gen_graph('delay', cc,
+                                                               run_id, 'data')
                 datalink_delay = path.join(self.analysis_dir, fname)
 
-                fname = '%s_acklink_throughput_run%s.png' % (cc, run_id)
+                (fname, acklink_tput_stats) = self.gen_graph('throughput', cc,
+                                                             run_id, 'ack')
                 acklink_throughput = path.join(self.analysis_dir, fname)
 
-                fname = '%s_acklink_delay_run%s.png' % (cc, run_id)
+                (fname, acklink_delay_stats) = self.gen_graph('delay', cc,
+                                                              run_id, 'ack')
                 acklink_delay = path.join(self.analysis_dir, fname)
 
                 str_dict = {'cc_name': cc_name,
@@ -145,12 +177,20 @@ class GenerateReport:
                             'datalink_delay': datalink_delay,
                             'acklink_throughput': acklink_throughput,
                             'acklink_delay': acklink_delay,
-                            'stats_info': stats_info}
+                            'stats_info': stats_info,
+                            'datalink_throughput_stats': datalink_tput_stats,
+                            'datalink_delay_stats': datalink_delay_stats,
+                            'acklink_throughput_stats': acklink_tput_stats,
+                            'acklink_delay_stats': acklink_delay_stats}
 
                 self.latex.write(
                     '\\begin{verbatim}\n'
                     'Run %(run_id)s: Statistics of %(cc_name)s\n\n'
                     '%(stats_info)s'
+                    '%(datalink_throughput_stats)s'
+                    '%(datalink_delay_stats)s'
+                    '%(acklink_throughput_stats)s'
+                    '%(acklink_delay_stats)s'
                     '\\end{verbatim}\n\n'
                     '\\newpage\n\n'
                     'Run %(run_id)s: Report of %(cc_name)s --- Data Link\n\n'
@@ -180,6 +220,8 @@ class GenerateReport:
 
 
 def main():
+    parse_arguments(path.basename(__file__))
+
     analysis_dir = path.abspath(path.dirname(__file__))
     # load pantheon_metadata.json as a dictionary
     metadata_fname = path.join(analysis_dir, 'pantheon_metadata.json')

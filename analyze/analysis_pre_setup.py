@@ -17,6 +17,7 @@ def main():
            'texlive python-matplotlib')
     check_call(cmd, shell=True)
 
+    # TODO install mahimahi
 
 if __name__ == '__main__':
     main()

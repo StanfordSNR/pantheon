@@ -213,10 +213,9 @@ def parse_arguments(filename):
             '--local-addr', '--sender-side', '--local-interface',
             '--remote-interface', '--run-id', 'cc'])
     elif filename == 'plot_summary.py' or filename == 'generate_report.py':
-        add_arg_list(parser, arg_dict, ['--run-times', 'cc_schemes'])
+        add_arg_list(parser, arg_dict, [])
     elif filename == 'plot_throughput_time.py':
-        add_arg_list(parser, arg_dict, [
-            '--run-times', '--ms-per-bin', 'cc_schemes'])
+        add_arg_list(parser, arg_dict, ['--ms-per-bin'])
     elif filename == 'run.py':
         add_arg_list(parser, arg_dict, [
             '-r', '-t', '-f', '--interval', '--tunnel-server',
