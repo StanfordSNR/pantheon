@@ -13,12 +13,12 @@ import matplotlib.ticker as ticker
 
 
 class PlotThroughputTime:
-    def __init__(self, args):
-        self.test_dir = path.abspath(path.dirname(__file__))
-        self.src_dir = path.abspath(path.join(self.test_dir, '../src'))
-        self.run_times = args.run_times
-        self.cc_schemes = args.cc_schemes
-        self.ms_per_bin = args.ms_per_bin
+    def __init__(self, analysis_dir, metadata_dict, ms_per_bin):
+        self.analysis_dir = analysis_dir
+        self.src_dir = path.abspath(path.join(self.analysis_dir, '../src'))
+        self.run_times = metadata_dict['run_times']
+        self.cc_schemes = metadata_dict['cc_schemes'].split()
+        self.ms_per_bin = ms_per_bin
 
     def ms_to_bin(self, ts, flow_base_ts):
         return (ts - flow_base_ts) / self.ms_per_bin
@@ -97,7 +97,7 @@ class PlotThroughputTime:
 
             for run_id in xrange(1, self.run_times + 1):
                 tunnel_log_path = path.join(
-                    self.test_dir, '%s_datalink_run%s.log' % (cc, run_id))
+                    self.analysis_dir, '%s_datalink_run%s.log' % (cc, run_id))
                 clock_time, throughput = self.parse_tunnel_log(tunnel_log_path)
 
                 min_time = None
@@ -140,14 +140,20 @@ class PlotThroughputTime:
         ax.set_xlabel('Time (s) since ' + start_datetime)
         ax.set_ylabel('Throughput (Mbit/s)')
 
-        fig_path = path.join(self.test_dir, 'pantheon_throughput_time.png')
+        fig_path = path.join(self.analysis_dir, 'pantheon_throughput_time.png')
         fig.savefig(fig_path, bbox_inches='tight', pad_inches=0.2)
 
 
 def main():
     args = parse_arguments(path.basename(__file__))
+    analysis_dir = path.abspath(path.dirname(__file__))
+    # load pantheon_metadata.json as a dictionary
+    metadata_fname = path.join(analysis_dir, 'pantheon_metadata.json')
+    with open(metadata_fname) as metadata_file:
+        metadata_dict = json.load(metadata_file)
 
-    plot_throughput_time = PlotThroughputTime(args)
+    plot_throughput_time = PlotThroughputTime(analysis_dir, metadata_dict,
+                                              args.ms_per_bin)
     plot_throughput_time.plot_throughput_time()
 
 

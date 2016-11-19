@@ -10,15 +10,15 @@ from helpers.pantheon_help import check_call, check_output, get_friendly_names
 
 
 class GenerateReport:
-    def __init__(self, args):
-        self.test_dir = path.abspath(path.dirname(__file__))
-        self.src_dir = path.abspath(path.join(self.test_dir, '../src'))
-        self.run_times = args.run_times
-        self.cc_schemes = args.cc_schemes
+    def __init__(self, analysis_dir, metadata_dict):
+        self.analysis_dir = analysis_dir
+        self.src_dir = path.abspath(path.join(self.analysis_dir, '../src'))
+        self.run_times = metadata_dict['run_times']
+        self.cc_schemes = metadata_dict['cc_schemes'].split()
 
     def describe_metadata(self):
         # load pantheon_metadata.json as a dictionary
-        metadata_fname = path.join(self.test_dir, 'pantheon_metadata.json')
+        metadata_fname = path.join(self.analysis_dir, 'pantheon_metadata.json')
         with open(metadata_fname) as metadata_file:
             metadata = json.load(metadata_file)
 
@@ -95,9 +95,9 @@ class GenerateReport:
 
     def include_summary(self):
         curr_time = strftime('%a, %d %b %Y %H:%M:%S %z')
-        raw_summary = path.join(self.test_dir, 'pantheon_summary.png')
+        raw_summary = path.join(self.analysis_dir, 'pantheon_summary.png')
         mean_summary = path.join(
-            self.test_dir, 'pantheon_summary_mean.png')
+            self.analysis_dir, 'pantheon_summary_mean.png')
         metadata_desc = self.describe_metadata()
 
         self.latex.write(
@@ -123,21 +123,21 @@ class GenerateReport:
 
             for run_id in xrange(1, 1 + self.run_times):
                 fname = '%s_stats_run%s.log' % (cc, run_id)
-                stats_log_path = path.join(self.test_dir, fname)
+                stats_log_path = path.join(self.analysis_dir, fname)
                 with open(stats_log_path) as stats_log:
                     stats_info = stats_log.read()
 
                 fname = '%s_datalink_throughput_run%s.png' % (cc, run_id)
-                datalink_throughput = path.join(self.test_dir, fname)
+                datalink_throughput = path.join(self.analysis_dir, fname)
 
                 fname = '%s_datalink_delay_run%s.png' % (cc, run_id)
-                datalink_delay = path.join(self.test_dir, fname)
+                datalink_delay = path.join(self.analysis_dir, fname)
 
                 fname = '%s_acklink_throughput_run%s.png' % (cc, run_id)
-                acklink_throughput = path.join(self.test_dir, fname)
+                acklink_throughput = path.join(self.analysis_dir, fname)
 
                 fname = '%s_acklink_delay_run%s.png' % (cc, run_id)
-                acklink_delay = path.join(self.test_dir, fname)
+                acklink_delay = path.join(self.analysis_dir, fname)
 
                 str_dict = {'cc_name': cc_name,
                             'run_id': run_id,
@@ -175,14 +175,18 @@ class GenerateReport:
         self.include_runs()
         self.latex.close()
 
-        cmd = ['pdflatex', '-output-directory', self.test_dir, latex_path]
+        cmd = ['pdflatex', '-output-directory', self.analysis_dir, latex_path]
         check_call(cmd)
 
 
 def main():
-    args = parse_arguments(path.basename(__file__))
+    analysis_dir = path.abspath(path.dirname(__file__))
+    # load pantheon_metadata.json as a dictionary
+    metadata_fname = path.join(analysis_dir, 'pantheon_metadata.json')
+    with open(metadata_fname) as metadata_file:
+        metadata_dict = json.load(metadata_file)
 
-    generate_report = GenerateReport(args)
+    generate_report = GenerateReport(analysis_dir, metadata_dict)
     generate_report.generate_report()
 
 

@@ -3,6 +3,7 @@
 import re
 import sys
 import math
+import json
 from os import path
 from time import strftime
 from datetime import datetime
@@ -17,11 +18,11 @@ import matplotlib.ticker as ticker
 
 
 class PlotSummary:
-    def __init__(self, args):
-        self.test_dir = path.abspath(path.dirname(__file__))
-        self.src_dir = path.abspath(path.join(self.test_dir, '../src'))
-        self.run_times = args.run_times
-        self.cc_schemes = args.cc_schemes
+    def __init__(self, analysis_dir, metadata_dict):
+        self.analysis_dir = analysis_dir
+        self.src_dir = path.abspath(path.join(self.analysis_dir, '../src'))
+        self.run_times = metadata_dict['run_times']
+        self.cc_schemes = metadata_dict['cc_schemes'].split()
         self.timezone = None
 
     def parse_stats_log(self, log_name):
@@ -80,7 +81,7 @@ class PlotSummary:
 
             for run_id in xrange(1, 1 + self.run_times):
                 log = path.join(
-                    self.test_dir, '%s_stats_run%s.log' % (cc, run_id))
+                    self.analysis_dir, '%s_stats_run%s.log' % (cc, run_id))
                 (start_t, end_t, tput, delay, ofst) = self.parse_stats_log(log)
 
                 self.data[cc].append((tput, delay))
@@ -166,14 +167,14 @@ class PlotSummary:
         ax_raw.set_title('Summary of results')
         lgd = ax_raw.legend(scatterpoints=1, bbox_to_anchor=(1, 0.5),
                             loc='center left', fontsize=12)
-        raw_summary = path.join(self.test_dir, 'pantheon_summary.png')
+        raw_summary = path.join(self.analysis_dir, 'pantheon_summary.png')
         fig_raw.savefig(raw_summary, dpi=300, bbox_extra_artists=(lgd,),
                         bbox_inches='tight', pad_inches=0.2)
 
         # save pantheon_summary_mean.png
         ax_mean.set_title('Summary of results (average of all runs)')
         mean_summary = path.join(
-            self.test_dir, 'pantheon_summary_mean.png')
+            self.analysis_dir, 'pantheon_summary_mean.png')
         fig_mean.savefig(mean_summary, dpi=300,
                          bbox_inches='tight', pad_inches=0.2)
 
@@ -192,9 +193,13 @@ class PlotSummary:
 
 
 def main():
-    args = parse_arguments(path.basename(__file__))
+    analysis_dir = path.abspath(path.dirname(__file__))
+    # load pantheon_metadata.json as a dictionary
+    metadata_fname = path.join(analysis_dir, 'pantheon_metadata.json')
+    with open(metadata_fname) as metadata_file:
+        metadata_dict = json.load(metadata_file)
 
-    plot_summary = PlotSummary(args)
+    plot_summary = PlotSummary(analysis_dir, metadata_dict)
     plot_summary.plot_summary()
 
 
