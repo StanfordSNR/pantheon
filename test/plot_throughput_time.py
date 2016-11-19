@@ -3,8 +3,9 @@
 import math
 import time
 from os import path
-from parse_arguments import parse_arguments
-from pantheon_help import get_friendly_names
+import pantheon_helpers
+from helpers.parse_arguments import parse_arguments
+from helpers.pantheon_help import get_friendly_names
 
 import matplotlib_agg
 import matplotlib.pyplot as plt

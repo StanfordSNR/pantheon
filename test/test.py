@@ -8,7 +8,8 @@ import uuid
 from time import strftime
 from parse_arguments import parse_arguments
 from os import path
-from pantheon_help import Popen, PIPE, check_call, check_output, parse_remote
+import pantheon_helpers
+from helpers.pantheon_help import Popen, PIPE, check_call, check_output, parse_remote
 
 
 class Test:

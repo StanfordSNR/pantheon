@@ -4,9 +4,10 @@ import sys
 import random
 import os
 import json
-from parse_arguments import parse_arguments
 from os import path
-from pantheon_help import check_call, check_output, parse_remote
+import pantheon_helpers
+from helpers.pantheon_help import check_call, check_output, parse_remote
+from helpers.parse_arguments import parse_arguments
 
 
 def get_git_info(args, root_dir):

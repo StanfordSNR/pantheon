@@ -6,8 +6,9 @@ import math
 from os import path
 from time import strftime
 from datetime import datetime
-from pantheon_help import check_output, get_friendly_names
-from parse_arguments import parse_arguments
+import pantheon_helpers
+from helpers.pantheon_help import check_output, get_friendly_names
+from helpers.parse_arguments import parse_arguments
 
 import matplotlib_agg
 import matplotlib.pyplot as plt
