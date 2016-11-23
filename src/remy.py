@@ -49,8 +49,9 @@ def main():
         ip = sys.argv[2]
         port = sys.argv[3]
         sender_file = os.path.join(submodule_dir, 'sender')
-        cmd = "%s serverip=127.0.0.1 if=%s offduration=1 onduration=1000000 traffic_params=deterministic,num_cycles=1" % rat_file
-        check_call(cmd)
+        cmd = "export MIN_RTT=1000000 && %s serverip=%s serverport=%s if=%s offduration=1 onduration=1000000 traffic_params=deterministic,num_cycles=1" % (sender_file, ip, port, rat_file)
+        print cmd
+        check_call(cmd, shell=True)
 
 
 if __name__ == '__main__':
