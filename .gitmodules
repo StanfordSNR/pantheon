@@ -38,3 +38,7 @@
   path = third_party/mahimahi
   url = https://github.com/StanfordLPNG/mahimahi.git
   ignore = dirty
+[submodule "third_party/genericCC"]
+	path = third_party/genericCC
+	url = https://github.com/venkatarun95/genericCC/
+  ignore = dirty
