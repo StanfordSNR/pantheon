@@ -412,6 +412,19 @@ class Test:
 
         stats.close()
 
+    def print_datalink_stats(self):
+        if self.flows > 0:
+            datalink_log = self.datalink_log
+        else:
+            datalink_log = self.mm_datalink_log
+
+        cmd = ['mm-tunnel-throughput', '500', datalink_log]
+        proc = Popen(cmd, stdout=DEVNULL, stderr=PIPE)
+        datalink_results = proc.communicate()[1]
+        sys.stderr.write('* Data link statistics:\n')
+        sys.stderr.write(datalink_results)
+        assert proc.returncode == 0
+
     # congestion control test
     def test(self):
         # local or remote setup before running tests
@@ -422,6 +435,9 @@ class Test:
 
         # write runtimes and clock offsets to file
         self.record_time_stats()
+
+        # print throughput and delay of datalink
+        self.print_datalink_stats()
 
 
 def main():
