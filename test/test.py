@@ -259,6 +259,13 @@ class Test:
             tc_cmd = 'tunnel %s %s\n' % (tun_id, tc_cmd)
             tc_manager.stdin.write(tc_cmd)
 
+            # tunnel is established if "got connection" is seen
+            while True:
+                ts_manager.stdin.write(readline_cmd)
+                got_connection = ts_manager.stdout.readline()
+                if 'got connection' in got_connection:
+                    break
+
             if self.first_to_run == 'receiver':
                 if self.sender_side == 'local':
                     first_src_file = self.rd.get('cc_src', self.src_file)
