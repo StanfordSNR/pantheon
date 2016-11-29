@@ -134,7 +134,14 @@ class Test:
             ntp_cmd.append(cmd)
 
         for cmd in ntp_cmd:
+            max_run = 5
+            curr_run = 0
             while True:
+                curr_run += 1
+                if curr_run > max_run:
+                    sys.stderr.write('failed after 5 attempts\n')
+                    exit(1)
+
                 try:
                     ofst = check_output(cmd).rsplit(' ', 2)[-2]
                     ofst = abs(float(ofst)) * 1000
