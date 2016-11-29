@@ -120,6 +120,7 @@ class Test:
             sys.stderr.write('Done\n')
             self.test_end_time = strftime('%a, %d %b %Y %H:%M:%S %z')
         else:
+            signal.alarm(0)
             self.fail('Test exited before time limit')
         finally:
             os.killpg(os.getpgid(proc_first.pid), signal.SIGKILL)
@@ -257,13 +258,31 @@ class Test:
                     tc_cmd += ' --interface=' + self.remote_if
 
             tc_cmd = 'tunnel %s %s\n' % (tun_id, tc_cmd)
-            tc_manager.stdin.write(tc_cmd)
 
-            # tunnel is established if "got connection" is seen
+            # re-run mm-tunnelclient every 3s for at most 10 times
+            max_run = 10
+            curr_run = 0
             while True:
-                ts_manager.stdin.write(readline_cmd)
-                got_connection = ts_manager.stdout.readline()
-                if 'got connection' in got_connection:
+                curr_run += 1
+                if curr_run > max_run:
+                    sys.stderr.write('cannot establish tunnel\n')
+                    exit(1)
+
+                signal.signal(signal.SIGALRM, self.timeout_handler)
+                signal.alarm(3)
+
+                tc_manager.stdin.write(tc_cmd)
+                try:
+                    while True:
+                        ts_manager.stdin.write(readline_cmd)
+                        got_connection = ts_manager.stdout.readline()
+                        if 'got connection' in got_connection:
+                            break
+                except:
+                    sys.stderr.write('mm-tunnelclient timeout\n')
+                    pass
+                else:
+                    signal.alarm(0)
                     break
 
             if self.first_to_run == 'receiver':
