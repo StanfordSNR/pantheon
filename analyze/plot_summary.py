@@ -4,11 +4,11 @@ import re
 import sys
 import math
 import json
-from os import path
+from os import path, devnull
 from time import strftime
 from datetime import datetime
 import pantheon_helpers
-from helpers.pantheon_help import check_output, get_friendly_names
+from helpers.pantheon_help import check_output, get_friendly_names, Popen, PIPE
 from helpers.parse_arguments import parse_arguments
 
 import matplotlib_agg
@@ -25,7 +25,7 @@ class PlotSummary:
         self.cc_schemes = metadata_dict['cc_schemes'].split()
         self.timezone = None
 
-    def parse_stats_log(self, log_name):
+    def parse_stats_log(self, log_name, datalink_logname):
         stats_log = open(log_name)
 
         start_time = None
@@ -48,25 +48,35 @@ class PlotSummary:
                 end_time = ret.group(1).rsplit(' ', 1)[0]
                 continue
 
-            ret = re.match(r'Average throughput: (.*?) Mbit/s', line)
-            if ret:
-                if not throughput:
-                    throughput = float(ret.group(1))
-                continue
-
-            ret = re.match(r'95th percentile per-packet one-way delay: '
-                           '(.*?) ms', line)
-            if ret:
-                if not delay:
-                    delay = float(ret.group(1))
-                continue
-
             ret = re.match(r'\* Worst absolute clock offset: (.*?) ms', line)
             if ret:
                 worst_abs_ofst = float(ret.group(1))
                 continue
 
         stats_log.close()
+
+        cmd = ['mm-tunnel-throughput', '500', datalink_logname]
+        proc = Popen(cmd, stdout=DEVNULL, stderr=PIPE)
+        results = proc.communicate()[1]
+        assert proc.returncode == 0
+
+        ret = re.search(r'Average throughput: (.*?) Mbit/s', results)
+
+        assert ret
+        if not throughput:
+            throughput = float(ret.group(1))
+
+        cmd = ['mm-tunnel-delay', datalink_logname]
+        proc = Popen(cmd, stdout=DEVNULL, stderr=PIPE)
+        results = proc.communicate()[1]
+        assert proc.returncode == 0
+
+        ret = re.search(r'95th percentile per-packet one-way delay: '
+                        '(.*?) ms', results)
+        assert ret
+        if not delay:
+            delay = float(ret.group(1))
+
         return (start_time, end_time, throughput, delay, worst_abs_ofst)
 
     def process_stats_logs(self):
@@ -82,7 +92,10 @@ class PlotSummary:
             for run_id in xrange(1, 1 + self.run_times):
                 log = path.join(
                     self.analysis_dir, '%s_stats_run%s.log' % (cc, run_id))
-                (start_t, end_t, tput, delay, ofst) = self.parse_stats_log(log)
+                datalink_log = path.join(
+                    self.analysis_dir, '%s_datalink_run%s.log' % (cc, run_id))
+                (start_t, end_t, tput, delay, ofst) = self.parse_stats_log(
+                                                         log, datalink_log)
 
                 self.data[cc].append((tput, delay))
                 if ofst:
@@ -206,4 +219,6 @@ def main():
 
 
 if __name__ == '__main__':
+    DEVNULL = open(devnull, 'w')
     main()
+    DEVNULL.close()
