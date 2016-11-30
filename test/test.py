@@ -268,31 +268,32 @@ class Test:
 
             tc_cmd = 'tunnel %s %s\n' % (tun_id, tc_cmd)
 
-            # re-run mm-tunnelclient every 3s for at most 10 times
+            # re-run mm-tunnelclient every 5s for at most 10 times
             max_run = 10
             curr_run = 0
-            while True:
+            got_connection = ''
+            while 'got connection' not in got_connection:
                 curr_run += 1
                 if curr_run > max_run:
                     sys.stderr.write('cannot establish tunnel\n')
                     exit(1)
 
-                signal.signal(signal.SIGALRM, self.timeout_handler)
-                signal.alarm(3)
-
                 tc_manager.stdin.write(tc_cmd)
-                try:
-                    while True:
-                        ts_manager.stdin.write(readline_cmd)
+                while True:
+                    ts_manager.stdin.write(readline_cmd)
+
+                    signal.signal(signal.SIGALRM, self.timeout_handler)
+                    signal.alarm(5)
+
+                    try:
                         got_connection = ts_manager.stdout.readline()
+                    except:
+                        sys.stderr.write('mm-tunnelclient timeout\n')
+                        break
+                    else:
+                        signal.alarm(0)
                         if 'got connection' in got_connection:
                             break
-                except:
-                    sys.stderr.write('mm-tunnelclient timeout\n')
-                    pass
-                else:
-                    signal.alarm(0)
-                    break
 
             if self.first_to_run == 'receiver':
                 if self.sender_side == 'local':
