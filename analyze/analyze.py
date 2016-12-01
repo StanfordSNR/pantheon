@@ -27,14 +27,12 @@ def main():
     # prepare scripts path
     analyze_pre_setup = path.join(analyze_dir, 'analysis_pre_setup.py')
     plot_summary = path.join(analyze_dir, 'plot_summary.py')
-    plot_throughput_time = path.join(analyze_dir, 'plot_throughput_time.py')
     generate_report = path.join(analyze_dir, 'generate_report.py')
 
     if not args.no_pre_setup:
         check_call(['python', analyze_pre_setup])
 
     check_call(['python', plot_summary])
-    check_call(['python', plot_throughput_time])
     check_call(['python', generate_report])
 
 
