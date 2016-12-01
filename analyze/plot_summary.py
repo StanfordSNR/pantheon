@@ -55,7 +55,7 @@ class PlotSummary:
                 end_time = ret.group(1).rsplit(' ', 1)[0]
                 continue
 
-            ret = re.match(r'\* Worst absolute clock offset: (.*?) ms', line)
+            ret = re.match(r'Worst absolute clock offset: (.*?) ms', line)
             if ret:
                 worst_abs_ofst = float(ret.group(1))
                 continue
