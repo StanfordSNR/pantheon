@@ -30,10 +30,11 @@ class PlotSummary:
 
         self.run_times = metadata_dict['run_times']
         self.cc_schemes = metadata_dict['cc_schemes'].split()
+        self.flows = int(metadata_dict['flows'])
         self.timezone = None
 
-    def parse_stats_log(self, log_name, datalink_logname):
-        stats_log = open(log_name)
+    def parse_logs(self, stats_logname, datalink_logname):
+        stats_log = open(stats_logname)
 
         start_time = None
         end_time = None
@@ -86,33 +87,32 @@ class PlotSummary:
 
         return (start_time, end_time, throughput, delay, worst_abs_ofst)
 
-    def process_stats_logs(self):
+    def generate_data(self):
         self.data = {}
-        self.time_series_data = []
         self.worst_abs_ofst = None
         time_format = '%a, %d %b %Y %H:%M:%S'
+
+        if self.flows > 0:
+            datalink_fmt_str = '%s_datalink_run%s.log'
+        else:
+            datalink_fmt_str = '%s_mm_datalink_run%s.log'
 
         for cc in self.cc_schemes:
             self.data[cc] = []
             cc_name = self.friendly_names[cc]
 
             for run_id in xrange(1, 1 + self.run_times):
-                log = path.join(
+                stats_log = path.join(
                     self.data_dir, '%s_stats_run%s.log' % (cc, run_id))
                 datalink_log = path.join(
-                    self.data_dir, '%s_datalink_run%s.log' % (cc, run_id))
-                (start_t, end_t, tput, delay, ofst) = self.parse_stats_log(
-                                                         log, datalink_log)
+                    self.data_dir, datalink_fmt_str % (cc, run_id))
+                (start_t, end_t, tput, delay, ofst) = self.parse_logs(
+                                                      stats_log, datalink_log)
 
                 self.data[cc].append((tput, delay))
                 if ofst:
                     if not self.worst_abs_ofst or ofst > self.worst_abs_ofst:
                         self.worst_abs_ofst = ofst
-
-                start_datetime = datetime.strptime(start_t, time_format)
-                end_datetime = datetime.strptime(end_t, time_format)
-                self.time_series_data.append(
-                    (start_datetime, end_datetime, tput, delay, cc_name))
 
     def plot_throughput_delay(self):
         min_delay = None
@@ -208,7 +208,7 @@ class PlotSummary:
 
     def plot_summary(self):
         self.friendly_names = get_friendly_names(self.cc_schemes)
-        self.process_stats_logs()
+        self.generate_data()
         self.plot_throughput_delay()
 
 
