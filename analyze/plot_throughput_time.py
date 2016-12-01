@@ -25,6 +25,7 @@ class PlotThroughputTime:
 
         self.run_times = metadata_dict['run_times']
         self.cc_schemes = metadata_dict['cc_schemes'].split()
+        self.flows = int(metadata_dict['flows'])
         self.ms_per_bin = args.ms_per_bin
 
     def ms_to_bin(self, ts, flow_base_ts):
@@ -58,7 +59,11 @@ class PlotThroughputTime:
 
             ts = int(items[0])
             num_bits = int(items[2]) * 8
-            flow_id = int(items[-1])
+
+            if self.flows > 0:
+                flow_id = int(items[-1])
+            else:
+                flow_id = 0
 
             if event_type == '+':
                 if flow_id not in flow_base_ts:
@@ -99,12 +104,18 @@ class PlotThroughputTime:
         fig, ax = plt.subplots()
         total_min_time = None
         total_max_time = None
+
+        if self.flows > 0:
+            datalink_fmt_str = '%s_datalink_run%s.log'
+        else:
+            datalink_fmt_str = '%s_mm_datalink_run%s.log'
+
         for cc in self.cc_schemes:
             cc_name = friendly_names[cc]
 
             for run_id in xrange(1, self.run_times + 1):
                 tunnel_log_path = path.join(
-                    self.data_dir, '%s_datalink_run%s.log' % (cc, run_id))
+                    self.data_dir, datalink_fmt_str % (cc, run_id))
                 clock_time, throughput = self.parse_tunnel_log(tunnel_log_path)
 
                 min_time = None
