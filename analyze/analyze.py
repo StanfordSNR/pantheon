@@ -31,7 +31,7 @@ def main():
     generate_report = path.join(analyze_dir, 'generate_report.py')
 
     if not args.no_pre_setup:
-        check_call(['python', analysis_pre_setup])
+        check_call(['python', analyze_pre_setup])
 
     check_call(['python', plot_summary])
     check_call(['python', plot_throughput_time])
