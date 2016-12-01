@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import re
 import sys
 import math
@@ -9,7 +10,7 @@ import matplotlib_agg
 import matplotlib.pyplot as plt
 import matplotlib.markers as markers
 import matplotlib.ticker as ticker
-from os import path, devnull
+from os import path
 from time import strftime
 from datetime import datetime
 from helpers.pantheon_help import check_output, get_friendly_names, Popen, PIPE
@@ -17,9 +18,16 @@ from helpers.parse_arguments import parse_arguments
 
 
 class PlotSummary:
-    def __init__(self, analysis_dir, metadata_dict):
-        self.analysis_dir = analysis_dir
-        self.src_dir = path.abspath(path.join(self.analysis_dir, '../src'))
+    def __init__(self, args):
+        self.data_dir = path.abspath(args.data_dir)
+        analyze_dir = path.dirname(__file__)
+        self.src_dir = path.abspath(path.join(analyze_dir, '../src'))
+
+        # load pantheon_metadata.json as a dictionary
+        metadata_fname = path.join(self.data_dir, 'pantheon_metadata.json')
+        with open(metadata_fname) as metadata_file:
+            metadata_dict = json.load(metadata_file)
+
         self.run_times = metadata_dict['run_times']
         self.cc_schemes = metadata_dict['cc_schemes'].split()
         self.timezone = None
@@ -90,9 +98,9 @@ class PlotSummary:
 
             for run_id in xrange(1, 1 + self.run_times):
                 log = path.join(
-                    self.analysis_dir, '%s_stats_run%s.log' % (cc, run_id))
+                    self.data_dir, '%s_stats_run%s.log' % (cc, run_id))
                 datalink_log = path.join(
-                    self.analysis_dir, '%s_datalink_run%s.log' % (cc, run_id))
+                    self.data_dir, '%s_datalink_run%s.log' % (cc, run_id))
                 (start_t, end_t, tput, delay, ofst) = self.parse_stats_log(
                                                          log, datalink_log)
 
@@ -179,14 +187,14 @@ class PlotSummary:
         ax_raw.set_title('Summary of results')
         lgd = ax_raw.legend(scatterpoints=1, bbox_to_anchor=(1, 0.5),
                             loc='center left', fontsize=12)
-        raw_summary = path.join(self.analysis_dir, 'pantheon_summary.png')
+        raw_summary = path.join(self.data_dir, 'pantheon_summary.png')
         fig_raw.savefig(raw_summary, dpi=300, bbox_extra_artists=(lgd,),
                         bbox_inches='tight', pad_inches=0.2)
 
         # save pantheon_summary_mean.png
         ax_mean.set_title('Summary of results (average of all runs)')
         mean_summary = path.join(
-            self.analysis_dir, 'pantheon_summary_mean.png')
+            self.data_dir, 'pantheon_summary_mean.png')
         fig_mean.savefig(mean_summary, dpi=300,
                          bbox_inches='tight', pad_inches=0.2)
 
@@ -205,19 +213,13 @@ class PlotSummary:
 
 
 def main():
-    parse_arguments(path.basename(__file__))
+    args = parse_arguments(path.basename(__file__))
 
-    analysis_dir = path.abspath(path.dirname(__file__))
-    # load pantheon_metadata.json as a dictionary
-    metadata_fname = path.join(analysis_dir, 'pantheon_metadata.json')
-    with open(metadata_fname) as metadata_file:
-        metadata_dict = json.load(metadata_file)
-
-    plot_summary = PlotSummary(analysis_dir, metadata_dict)
+    plot_summary = PlotSummary(args)
     plot_summary.plot_summary()
 
 
 if __name__ == '__main__':
-    DEVNULL = open(devnull, 'w')
+    DEVNULL = open(os.devnull, 'w')
     main()
     DEVNULL.close()
