@@ -3,11 +3,11 @@
 import os
 import sys
 import time
-import signal
 import uuid
+import signal
+import pantheon_helpers
 from time import strftime
 from os import path
-import pantheon_helpers
 from helpers.parse_arguments import parse_arguments
 from helpers.pantheon_help import (Popen, PIPE, check_call, check_output,
                                    parse_remote)

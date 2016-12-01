@@ -3,14 +3,13 @@
 import math
 import time
 import json
-from os import path
 import pantheon_helpers
-from helpers.parse_arguments import parse_arguments
-from helpers.pantheon_help import get_friendly_names
-
 import matplotlib_agg
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+from os import path
+from helpers.parse_arguments import parse_arguments
+from helpers.pantheon_help import get_friendly_names
 
 
 class PlotThroughputTime:

@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-import sys
-import random
 import os
+import sys
 import json
-from os import path
+import random
 import pantheon_helpers
+from os import path
 from helpers.pantheon_help import check_call, check_output, parse_remote
 from helpers.parse_arguments import parse_arguments
 
