@@ -2,8 +2,8 @@
 
 import os
 import sys
-from os import path
 import pantheon_helpers
+from os import path
 from helpers.parse_arguments import parse_arguments
 from helpers.pantheon_help import check_call, make_sure_path_exists
 

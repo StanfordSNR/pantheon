@@ -2,9 +2,9 @@
 
 import sys
 import json
+import pantheon_helpers
 from os import path
 from time import strftime
-import pantheon_helpers
 from helpers.parse_arguments import parse_arguments
 from helpers.pantheon_help import (check_call, check_output,
                                    get_friendly_names, Popen, PIPE)
