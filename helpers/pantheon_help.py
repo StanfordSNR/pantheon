@@ -73,3 +73,29 @@ def get_friendly_names(cc_schemes):
         cc_name = check_output(['python', cc_src, 'friendly_name']).strip()
         friendly_names[cc] = cc_name if cc_name else cc
     return friendly_names
+
+
+def install_mahimahi():
+    third_party_dir = path.abspath(path.join(path.dirname(__file__),
+                                             '../third_party'))
+    mm_dir = path.join(third_party_dir, 'mahimahi')
+    DEVNULL = open(os.devnull, 'w')
+
+    cmd = 'cd %s && sudo make install' % mm_dir
+    if call(cmd, stdout=DEVNULL, shell=True) == 0:  # check if sufficient
+        return
+
+    mm_deps = (
+        'debhelper autotools-dev dh-autoreconf iptables protobuf-compiler '
+        'libprotobuf-dev pkg-config libssl-dev dnsmasq-base ssl-cert '
+        'libxcb-present-dev libcairo2-dev libpango1.0-dev iproute2 '
+        'apache2-dev apache2-bin iptables dnsmasq-base gnuplot iproute2')
+
+    cmd = 'sudo apt-get -yq --force-yes install ' + mm_deps
+    check_call(cmd, shell=True)
+
+    cmd = ('cd %s && ./autogen.sh && ./configure && make -j && '
+           'sudo make install' % mm_dir)
+    check_call(cmd, shell=True)
+
+    DEVNULL.close()
