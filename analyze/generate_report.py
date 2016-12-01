@@ -164,13 +164,13 @@ class GenerateReport:
                 (datalink_throughput, datalink_tput_stats) = self.gen_graph(
                         'throughput', cc, run_id, 'data')
 
-                (datalink_delay, datalink_delay_stats) = self.gen_graph(
+                (datalink_delay, _) = self.gen_graph(
                         'delay', cc, run_id, 'data')
 
                 (acklink_throughput, acklink_tput_stats) = self.gen_graph(
                         'throughput', cc, run_id, 'ack')
 
-                (acklink_delay, acklink_delay_stats) = self.gen_graph(
+                (acklink_delay, _) = self.gen_graph(
                         'delay', cc, run_id, 'ack')
 
                 str_dict = {'cc_name': cc_name,
@@ -181,9 +181,7 @@ class GenerateReport:
                             'acklink_delay': acklink_delay,
                             'stats_info': stats_info,
                             'datalink_throughput_stats': datalink_tput_stats,
-                            'datalink_delay_stats': datalink_delay_stats,
-                            'acklink_throughput_stats': acklink_tput_stats,
-                            'acklink_delay_stats': acklink_delay_stats}
+                            'acklink_throughput_stats': acklink_tput_stats}
 
                 self.latex.write(
                     '\\begin{verbatim}\n'
@@ -191,10 +189,8 @@ class GenerateReport:
                     '%(stats_info)s'
                     '* Data link statistics:\n'
                     '%(datalink_throughput_stats)s'
-                    '%(datalink_delay_stats)s'
                     '* ACK link statistics:\n'
                     '%(acklink_throughput_stats)s'
-                    '%(acklink_delay_stats)s'
                     '\\end{verbatim}\n\n'
                     '\\newpage\n\n'
                     'Run %(run_id)s: Report of %(cc_name)s --- Data Link\n\n'
