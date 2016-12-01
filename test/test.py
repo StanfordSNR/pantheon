@@ -447,7 +447,7 @@ class Test:
         stats.close()
 
     def print_datalink_stats(self):
-        if self.flows > 0:
+        if self.remote:
             datalink_log = self.datalink_log
         else:
             datalink_log = self.mm_datalink_log
