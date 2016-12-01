@@ -81,10 +81,6 @@ def install_mahimahi():
     mm_dir = path.join(third_party_dir, 'mahimahi')
     DEVNULL = open(os.devnull, 'w')
 
-    cmd = 'cd %s && sudo make install' % mm_dir
-    if call(cmd, stdout=DEVNULL, shell=True) == 0:  # check if sufficient
-        return
-
     mm_deps = (
         'debhelper autotools-dev dh-autoreconf iptables protobuf-compiler '
         'libprotobuf-dev pkg-config libssl-dev dnsmasq-base ssl-cert '
