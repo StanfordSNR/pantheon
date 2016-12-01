@@ -6,7 +6,7 @@ import pantheon_helpers
 from os import path
 from helpers.parse_arguments import parse_arguments
 from helpers.pantheon_help import (call, check_call, parse_remote,
-                                   make_sure_path_exists)
+                                   make_sure_path_exists, install_mahimahi)
 
 
 class PreSetup:
@@ -41,25 +41,7 @@ class PreSetup:
                'texlive python-matplotlib ntp ntpdate')
         check_call(cmd, shell=True)
 
-        # install mahimahi
-        mm_dir = path.join(self.third_party_dir, 'mahimahi')
-
-        cmd = 'cd %s && sudo make install' % mm_dir
-        if call(cmd, stdout=DEVNULL, shell=True) == 0:  # check if sufficient
-            return
-
-        mm_deps = (
-            'debhelper autotools-dev dh-autoreconf iptables protobuf-compiler '
-            'libprotobuf-dev pkg-config libssl-dev dnsmasq-base ssl-cert '
-            'libxcb-present-dev libcairo2-dev libpango1.0-dev iproute2 '
-            'apache2-dev apache2-bin iptables dnsmasq-base gnuplot iproute2')
-
-        cmd = 'sudo apt-get -yq --force-yes install ' + mm_deps
-        check_call(cmd, shell=True)
-
-        cmd = ('cd %s && ./autogen.sh && ./configure && make -j && '
-               'sudo make install' % mm_dir)
-        check_call(cmd, shell=True)
+        install_mahimahi()
 
     # congestion control pre-setup
     def pre_setup(self):
