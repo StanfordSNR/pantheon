@@ -19,17 +19,14 @@ class GenerateReport:
         # load pantheon_metadata.json as a dictionary
         metadata_fname = path.join(args.data_dir, 'pantheon_metadata.json')
         with open(metadata_fname) as metadata_file:
-            metadata_dict = json.load(metadata_file)
+            self.metadata_dict = json.load(metadata_file)
 
-        self.run_times = metadata_dict['run_times']
-        self.cc_schemes = metadata_dict['cc_schemes'].split()
-        self.flows = int(metadata_dict['flows'])
+        self.run_times = self.metadata_dict['run_times']
+        self.cc_schemes = self.metadata_dict['cc_schemes'].split()
+        self.flows = int(self.metadata_dict['flows'])
 
     def describe_metadata(self):
-        # load pantheon_metadata.json as a dictionary
-        metadata_fname = path.join(self.data_dir, 'pantheon_metadata.json')
-        with open(metadata_fname) as metadata_file:
-            metadata = json.load(metadata_file)
+        metadata = self.metadata_dict
 
         if metadata['flows'] == 1:
             flows = '1 flow'
