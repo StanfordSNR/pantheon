@@ -133,6 +133,11 @@ def build_arg_dict():
         'help': 'ms per bin',
     }
 
+    arg_dict['data_dir'] = {
+        'metavar': 'DATA-DIR',
+        'help': 'directory containing logs and metadata',
+    }
+
     arg_dict['cc'] = {
         'metavar': 'congestion-control',
         'help': 'a congestion control scheme in default_tcp, koho_cc, ledbat, '
@@ -213,9 +218,9 @@ def parse_arguments(filename):
             '--local-addr', '--sender-side', '--local-interface',
             '--remote-interface', '--run-id', 'cc'])
     elif filename == 'plot_summary.py' or filename == 'generate_report.py':
-        add_arg_list(parser, arg_dict, [])
+        add_arg_list(parser, arg_dict, ['data_dir'])
     elif filename == 'plot_throughput_time.py':
-        add_arg_list(parser, arg_dict, ['--ms-per-bin'])
+        add_arg_list(parser, arg_dict, ['--ms-per-bin', 'data_dir'])
     elif filename == 'run.py':
         add_arg_list(parser, arg_dict, [
             '-r', '-t', '-f', '--interval', '--tunnel-server',
