@@ -439,7 +439,7 @@ class Test:
         stats.write(test_run_duration)
 
         if self.worst_abs_ofst:
-            offset_info = ('* Worst absolute clock offset: %s ms\n'
+            offset_info = ('Worst absolute clock offset: %s ms\n'
                            % self.worst_abs_ofst)
             sys.stderr.write(offset_info)
             stats.write(offset_info)
