@@ -138,7 +138,22 @@ def build_arg_dict():
         'action': 'store',
         'dest': 'data_dir',
         'default': '.',
-        'help': 'directory containing logs and metadata (default .)',
+        'help': 'directory containing logs for analysis (default .)',
+    }
+
+    arg_dict['--s3-link'] = {
+        'metavar': 'URL',
+        'action': 'store',
+        'dest': 's3_link',
+        'help': 'URL to download logs from S3',
+    }
+
+    arg_dict['--s3-dir-prefix'] = {
+        'metavar': 'DIR',
+        'action': 'store',
+        'dest': 's3_dir_prefix',
+        'default': '.',
+        'help': 'directory to save downloaded logs from S3 (default .)',
     }
 
     arg_dict['cc'] = {
@@ -156,7 +171,7 @@ def build_arg_dict():
     arg_dict['--no-pre-setup'] = {
         'action': 'store_true',
         'dest': 'no_pre_setup',
-        'help': 'skip building mahimahi and setting ip_forwarding/rp_filters',
+        'help': 'skip pre setup',
     }
 
     return arg_dict
@@ -224,6 +239,9 @@ def parse_arguments(filename):
         add_arg_list(parser, arg_dict, ['--data-dir'])
     elif filename == 'plot_throughput_time.py':
         add_arg_list(parser, arg_dict, ['--ms-per-bin', '--data-dir'])
+    elif filename == 'analyze.py':
+        add_arg_list(parser, arg_dict, [
+            '--s3-link', '--s3-dir-prefix', '--data-dir', '--no-pre-setup'])
     elif filename == 'run.py':
         add_arg_list(parser, arg_dict, [
             '-r', '-t', '-f', '--interval', '--tunnel-server',
