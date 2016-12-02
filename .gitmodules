@@ -40,5 +40,5 @@
   ignore = dirty
 [submodule "third_party/genericCC"]
 	path = third_party/genericCC
-	url = https://github.com/venkatarun95/genericCC/
+	url = https://github.com/StanfordLPNG/genericCC
   ignore = dirty
