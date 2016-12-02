@@ -32,7 +32,7 @@ def main():
             sys.stderr.write('patch apply failed but assuming things okay '
                              '(patch applied previously?)\n')
 
-        cmd = ('cd %s && ./bootstrap.sh && ./configure && make -j' %
+        cmd = ('cd %s && ./bootstrap.sh && ./configure && make -j4' %
                submodule_dir)
         check_call(cmd, shell=True)
 

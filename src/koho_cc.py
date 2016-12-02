@@ -32,9 +32,9 @@ def main():
                              '(patch applied previously?)\n')
 
         # make alone sufficient if autogen.sh and configure already run
-        cmd = 'cd %s && make -j' % submodule_dir
+        cmd = 'cd %s && make -j4' % submodule_dir
         if call(cmd, shell=True) is not 0:
-            cmd = ('cd %s && ./autogen.sh && ./configure && make -j' %
+            cmd = ('cd %s && ./autogen.sh && ./configure && make -j4' %
                    submodule_dir)
             check_call(cmd, shell=True)
 
