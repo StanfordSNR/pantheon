@@ -90,7 +90,7 @@ def install_mahimahi():
     cmd = 'sudo apt-get -yq --force-yes install ' + mm_deps
     check_call(cmd, shell=True)
 
-    cmd = ('cd %s && ./autogen.sh && ./configure && make -j && '
+    cmd = ('cd %s && ./autogen.sh && ./configure && make -j4 && '
            'sudo make install' % mm_dir)
     check_call(cmd, shell=True)
 

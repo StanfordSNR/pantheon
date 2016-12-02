@@ -25,9 +25,9 @@ def main():
     if option == 'build':
         for d in [submodule_dir, code_dir]:
             # make alone sufficient if autogen.sh and configure already run
-            cmd = 'cd %s && make -j' % d
+            cmd = 'cd %s && make -j4' % d
             if call(cmd, shell=True) is not 0:
-                cmd = 'cd %s && ./autogen.sh && ./configure && make -j' % d
+                cmd = 'cd %s && ./autogen.sh && ./configure && make -j4' % d
                 check_call(cmd, shell=True)
 
     # commands to be run after building and before running

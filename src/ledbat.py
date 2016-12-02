@@ -23,7 +23,7 @@ def main():
 
     # build commands
     if option == 'build':
-        cmd = 'cd %s && make -j' % submodule_dir
+        cmd = 'cd %s && make -j4' % submodule_dir
         check_call(cmd, shell=True)
 
     # commands to be run after building and before running
