@@ -24,7 +24,7 @@ env:
         - CC_SCHEME='verus'
         - CC_SCHEME='scream'
         - CC_SCHEME='sprout'
-        - CC_SCHEME='remy'
+        - CC_SCHEME='taova'
 
 script:
   - test/pre_setup.py

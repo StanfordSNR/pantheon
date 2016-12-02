@@ -34,7 +34,7 @@ def main():
 
     # friendly name
     if option == 'friendly_name':
-        print 'Remy'
+        print 'TaoVA-100x'
 
     # receiver
     if option == 'receiver':
