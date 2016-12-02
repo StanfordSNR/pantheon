@@ -5,6 +5,15 @@ import subprocess
 from os import path
 from subprocess import PIPE
 
+def sanity_check_gitmodules():
+    third_party_dir = os.path.join(os.path.dirname(__file__), '../third_party')
+    print("GOT THIRD PARTY DIR" + third_party_dir )
+    for module in os.listdir(third_party_dir):
+        path = os.path.join(third_party_dir, module)
+        if os.path.isdir(path):
+            assert os.listdir(path), (
+                    'Folder third_party/%s empty: make sure to initialize git '
+                    'submodules with "git submodule update --init"' % module)
 
 def print_cmd(cmd):
     if type(cmd) == list:

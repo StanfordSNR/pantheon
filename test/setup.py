@@ -5,7 +5,7 @@ import sys
 import pantheon_helpers
 from os import path
 from helpers.parse_arguments import parse_arguments
-from helpers.pantheon_help import call, check_call, check_output, parse_remote
+from helpers.pantheon_help import call, check_call, check_output, parse_remote, sanity_check_gitmodules
 
 
 class Setup:
@@ -13,6 +13,7 @@ class Setup:
         self.cc = args.cc.lower()
         self.remote = args.remote
         self.test_dir = path.abspath(path.dirname(__file__))
+        sanity_check_gitmodules()
 
     def install(self):
         cmd = ['python', self.src_file, 'deps']
