@@ -6,7 +6,7 @@ import pantheon_helpers
 from os import path
 from helpers.parse_arguments import parse_arguments
 from helpers.pantheon_help import (check_call, make_sure_path_exists,
-                                   install_mahimahi)
+                                   install_pantheon_tunnel)
 
 
 def main():
@@ -18,7 +18,7 @@ def main():
            'texlive python-matplotlib')
     check_call(cmd, shell=True)
 
-    install_mahimahi()
+    install_pantheon_tunnel()
 
 
 if __name__ == '__main__':

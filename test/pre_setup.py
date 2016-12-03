@@ -6,7 +6,7 @@ import pantheon_helpers
 from os import path
 from helpers.parse_arguments import parse_arguments
 from helpers.pantheon_help import (call, check_call, parse_remote,
-                                   make_sure_path_exists, install_mahimahi)
+                                   make_sure_path_exists, install_pantheon_tunnel)
 
 
 class PreSetup:
@@ -41,7 +41,7 @@ class PreSetup:
                'texlive python-matplotlib ntp ntpdate')
         check_call(cmd, shell=True)
 
-        install_mahimahi()
+        install_pantheon_tunnel()
 
     # congestion control pre-setup
     def pre_setup(self):
