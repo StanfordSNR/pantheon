@@ -34,9 +34,9 @@
   path = third_party/koho_cc
   url = https://github.com/greghill/koho_cc.git
   ignore = dirty
-[submodule "third_party/mahimahi"]
-  path = third_party/mahimahi
-  url = https://github.com/StanfordLPNG/mahimahi.git
+[submodule "third_party/pantheon-tunnel"]
+  path = third_party/pantheon-tunnel
+  url = https://github.com/StanfordLPNG/pantheon-tunnel.git
   ignore = dirty
 [submodule "third_party/genericCC"]
 	path = third_party/genericCC

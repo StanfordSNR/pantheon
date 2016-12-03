@@ -85,17 +85,17 @@ def get_friendly_names(cc_schemes):
     return friendly_names
 
 
-def install_mahimahi():
+def install_pantheon_tunnel():
     third_party_dir = path.abspath(path.join(path.dirname(__file__),
                                              '../third_party'))
-    mm_dir = path.join(third_party_dir, 'mahimahi')
+    mm_dir = path.join(third_party_dir, 'pantheon-tunnel')
     DEVNULL = open(os.devnull, 'w')
 
     mm_deps = (
-        'debhelper autotools-dev dh-autoreconf iptables protobuf-compiler '
-        'libprotobuf-dev pkg-config libssl-dev dnsmasq-base ssl-cert '
-        'libxcb-present-dev libcairo2-dev libpango1.0-dev iproute2 '
-        'apache2-dev apache2-bin iptables dnsmasq-base gnuplot iproute2')
+        'debhelper autotools-dev dh-autoreconf iptables '
+        'pkg-config '
+        'iproute2 '
+        'iptables iproute2')
 
     cmd = 'sudo apt-get -yq --force-yes install ' + mm_deps
     check_call(cmd, shell=True)
