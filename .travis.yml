@@ -6,6 +6,7 @@ addons:
   apt:
     sources:
     - sourceline: 'ppa:ubuntu-toolchain-r/test'
+    - sourceline: 'ppa:keithw/mahimahi'
     packages:
     - g++-4.9
     - mahimahi
