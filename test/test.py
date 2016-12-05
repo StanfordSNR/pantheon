@@ -176,7 +176,8 @@ class Test:
             self.tc_elogs.append(
                 '/tmp/pantheon-tmp/tunclient%s-egress-%s.log' % (tun_id, uid))
 
-        self.update_worst_abs_ofst()
+        if self.remote:
+            self.update_worst_abs_ofst()
 
         # run mm-tunnelserver manager
         if self.remote:
@@ -366,7 +367,9 @@ class Test:
 
         self.test_end_time = strftime('%a, %d %b %Y %H:%M:%S %z')
 
-        self.update_worst_abs_ofst()
+        if self.remote:
+            self.update_worst_abs_ofst()
+
         self.merge_tunnel_logs()
         sys.stderr.write('Done\n')
 
