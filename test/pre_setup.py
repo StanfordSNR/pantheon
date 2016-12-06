@@ -36,9 +36,12 @@ class PreSetup:
             cmd = 'echo 0 | sudo tee' + rpf % 'all' + rpf % self.local_if
             check_call(cmd, shell=True)
 
+        # update mahimahi source line
+        cmd = ('sudo add-apt-repository -u ppa:keithw/mahimahi')
+
         # install texlive, matplotlib, etc.
         cmd = ('sudo apt-get -yq --force-yes install '
-               'texlive python-matplotlib ntp ntpdate')
+               'texlive python-matplotlib ntp ntpdate mahimahi')
         check_call(cmd, shell=True)
 
         install_pantheon_tunnel()
