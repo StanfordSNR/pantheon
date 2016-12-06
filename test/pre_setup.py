@@ -37,7 +37,8 @@ class PreSetup:
             check_call(cmd, shell=True)
 
         # update mahimahi source line
-        cmd = ('sudo add-apt-repository -u ppa:keithw/mahimahi')
+        cmd = ('sudo add-apt-repository -yu ppa:keithw/mahimahi')
+        check_call(cmd, shell=True)
 
         # install texlive, matplotlib, etc.
         cmd = ('sudo apt-get -yq --force-yes install '
