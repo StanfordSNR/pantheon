@@ -5,7 +5,8 @@ import sys
 import pantheon_helpers
 from os import path
 from helpers.parse_arguments import parse_arguments
-from helpers.pantheon_help import call, check_call, check_output, parse_remote, sanity_check_gitmodules
+from helpers.pantheon_help import (call, check_call, check_output,
+                                   parse_remote, sanity_check_gitmodules)
 
 
 class Setup:

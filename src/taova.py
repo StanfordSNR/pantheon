@@ -17,13 +17,15 @@ def main():
 
     # build dependencies
     if option == 'deps':
-        print "makepp libboost-dev libprotobuf-dev protobuf-c-compiler protobuf-compiler libjemalloc-dev"
+        print ('makepp libboost-dev libprotobuf-dev protobuf-c-compiler '
+               'protobuf-compiler libjemalloc-dev')
 
     # build commands
     if option == 'build':
-        cmd = 'cd %s && makepp && cp %s %s' % (submodule_dir, rat_file, submodule_dir)
+        cmd = 'cd %s && makepp && cp %s %s' % (submodule_dir, rat_file,
+                                               submodule_dir)
         check_call(cmd, shell=True)
-        
+
     # commands to be run after building and before running
     if option == 'init':
         pass
@@ -49,7 +51,9 @@ def main():
         ip = sys.argv[2]
         port = sys.argv[3]
         sender_file = os.path.join(submodule_dir, 'sender')
-        cmd = "export MIN_RTT=1000000 && %s serverip=%s serverport=%s if=%s offduration=1 onduration=1000000 traffic_params=deterministic,num_cycles=1" % (sender_file, ip, port, rat_file)
+        cmd = ('export MIN_RTT=1000000 && %s serverip=%s serverport=%s if=%s '
+               'offduration=1 onduration=1000000 traffic_params=deterministic,'
+               'num_cycles=1' % (sender_file, ip, port, rat_file))
         print cmd
         check_call(cmd, shell=True)
 
