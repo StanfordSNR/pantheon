@@ -100,11 +100,13 @@ class GenerateReport:
         return desc
 
     def include_summary(self):
-        curr_time = strftime('%a, %d %b %Y %H:%M:%S %z')
+        curr_time = strftime('%a, %d %b %Y %H:%M %z')
         raw_summary = path.join(self.data_dir, 'pantheon_summary.png')
         mean_summary = path.join(
             self.data_dir, 'pantheon_summary_mean.png')
         metadata_desc = self.describe_metadata()
+
+        analysis_git_head = check_output(['git', 'rev-parse', 'HEAD'])
 
         self.latex.write(
             '\\documentclass{article}\n'
@@ -116,12 +118,14 @@ class GenerateReport:
             '\\includegraphics[width=\\textwidth]{#1}\n'
             '\\end{figure}}\n\n'
             '\\begin{document}\n\n'
-            '\\textbf{Pantheon Summary} (%s)\n\n'
+            '\\textbf{Pantheon Summary} '
+            '(Generated on %s with pantheon version %s)\n\n'
             '%s'
             '\\PantheonFig{%s}\n\n'
             '\\PantheonFig{%s}\n\n'
             '\\newpage\n\n'
-            % (curr_time, metadata_desc, mean_summary, raw_summary))
+            % (curr_time, analysis_git_head, metadata_desc, mean_summary,
+               raw_summary))
 
     def gen_graph(self, gtype, cc, run_id, direction):
         assert gtype == 'throughput' or gtype == 'delay'
