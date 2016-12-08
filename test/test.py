@@ -272,8 +272,8 @@ class Test:
 
             tc_cmd = 'tunnel %s %s\n' % (tun_id, tc_cmd)
 
-            # re-run mm-tunnelclient every 5s for at most 10 times
-            max_run = 10
+            # re-run mm-tunnelclient every 12s for at most 2 times
+            max_run = 2
             curr_run = 0
             got_connection = ''
             while 'got connection' not in got_connection:
@@ -287,7 +287,7 @@ class Test:
                     ts_manager.stdin.write(readline_cmd)
 
                     signal.signal(signal.SIGALRM, self.timeout_handler)
-                    signal.alarm(5)
+                    signal.alarm(12)
 
                     try:
                         got_connection = ts_manager.stdout.readline()
