@@ -122,6 +122,7 @@ def main():
 
     # setup and run each congestion control
     if run_setup:
+        get_git_info(args, root_dir)  # use as check for version mismatch
         check_call(pre_setup_cmd)
         for cc in cc_schemes:
             cmd = setup_cmd + [cc]
