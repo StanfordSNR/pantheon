@@ -60,6 +60,9 @@ class Test:
         # record who goes first
         self.who_goes_first()
 
+        # prepare /tmp/pantheon-tmp
+        make_sure_path_exists('/tmp/pantheon-tmp')
+
         # prepare output logs
         datalink_log = self.cc + '_datalink_run%s.log' % self.run_id
         acklink_log = self.cc + '_acklink_run%s.log' % self.run_id
@@ -87,9 +90,6 @@ class Test:
                 '--uplink-log=' + uplink_log, '--downlink-log=' + downlink_log]
             self.rd = {}
         else:  # remote setup
-            # prepare /tmp/pantheon-tmp
-            make_sure_path_exists('/tmp/pantheon-tmp')
-
             self.rd = parse_remote(self.remote, self.cc)
 
     # test congestion control without running mm-tunnelclient/mm-tunnelserver
