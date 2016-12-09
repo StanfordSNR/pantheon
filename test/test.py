@@ -87,6 +87,9 @@ class Test:
                 '--uplink-log=' + uplink_log, '--downlink-log=' + downlink_log]
             self.rd = {}
         else:  # remote setup
+            # prepare /tmp/pantheon-tmp
+            make_sure_path_exists('/tmp/pantheon-tmp')
+
             self.rd = parse_remote(self.remote, self.cc)
 
     # test congestion control without running mm-tunnelclient/mm-tunnelserver
