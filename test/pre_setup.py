@@ -23,6 +23,9 @@ class PreSetup:
                self.root_dir)
         check_call(cmd, shell=True)
 
+        # prepare /tmp/pantheon-tmp
+        make_sure_path_exists('/tmp/pantheon-tmp')
+
         # Enable IP forwarding
         cmd = 'sudo sysctl -w net.ipv4.ip_forward=1'
         check_call(cmd, shell=True)
