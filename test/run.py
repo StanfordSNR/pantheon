@@ -137,7 +137,11 @@ def main():
         create_metadata_file(args, cc_schemes, git_info, metadata_fname)
 
         for run_id in xrange(1, 1 + args.run_times):
+            i = 0
             for cc in cc_schemes:
+                i += 1
+                sys.stderr.write('Running scheme %d of %d.\n'
+                                 % (i, len(cc_schemes)))
                 cmd = test_cmd + ['--run-id', str(run_id), cc]
                 check_call(cmd)
 
