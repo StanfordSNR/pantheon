@@ -88,14 +88,15 @@ class GenerateReport:
             git_info = metadata['git_information']
 
         desc = (
-            'Repeated the test of 10 congestion control schemes %s.\n\n'
+            'Repeated the test of %d congestion control schemes %s.\n\n'
             'Each test lasted for %s running %s.\n\n'
             'Data path FROM %s TO %s.\\newline\n\n'
             '\\begin{verbatim}\n'
             '%s'
             '\\end{verbatim}\n\n'
             '\\newpage\n\n'
-            % (times, runtime, flows, send_side, recv_side, git_info))
+            % (len(self.cc_schemes), times, runtime, flows, send_side,
+               recv_side, git_info))
 
         return desc
 
