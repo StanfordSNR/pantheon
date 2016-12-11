@@ -26,6 +26,8 @@ class Test:
         self.remote_if = args.remote_if
         self.local_if = args.local_if
         self.run_id = args.run_id
+        self.downlink_trace = args.downlink_trace
+        self.uplink_trace = args.uplink_trace
         self.worst_abs_ofst = None
 
     def timeout_handler(signum, frame):
@@ -67,8 +69,8 @@ class Test:
         self.acklink_log = path.join(self.test_dir, acklink_log)
 
         if not self.remote:  # local setup
-            uplink_trace = os.path.join(self.test_dir, '12mbps_trace')
-            downlink_trace = os.path.join(self.test_dir, '12mbps_trace')
+            uplink_trace = os.path.join(self.test_dir, self.uplink_trace)
+            downlink_trace = os.path.join(self.test_dir, self.downlink_trace)
 
             mm_datalink_log = self.cc + '_mm_datalink_run%s.log' % self.run_id
             mm_acklink_log = self.cc + '_mm_acklink_run%s.log' % self.run_id
