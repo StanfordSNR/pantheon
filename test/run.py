@@ -58,6 +58,8 @@ def create_metadata_file(args, cc_schemes, git_info, metadata_fname):
     if args.remote:
         remote_addr = args.remote.split(':')[0].split('@')[1]
         metadata['remote_address'] = remote_addr
+        if args.ntp_addr:
+            metadata['ntp_addr'] = remote_addr
 
     if git_info:
         metadata['git_information'] = git_info
@@ -96,6 +98,8 @@ def main():
         test_cmd += ['--tunnel-server', args.server_side]
         if args.local_addr:
             test_cmd += ['--local-addr', args.local_addr]
+        if args.ntp_addr:
+            test_cmd += ['--ntp-addr', args.ntp_addr]
 
         test_cmd += ['--sender-side', args.sender_side]
 

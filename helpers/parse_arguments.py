@@ -57,6 +57,13 @@ def build_arg_dict():
                 'given, the remote side must be able to reach this address',
     }
 
+    arg_dict['--ntp-addr'] = {
+        'metavar': 'ADDR',
+        'action': 'store',
+        'dest': 'ntp_addr',
+        'help': 'IP address or domain of ntp server to check clock offset with',
+    }
+
     arg_dict['--sender-side'] = {
         'choices': ['local', 'remote'],
         'action': 'store',
@@ -251,7 +258,7 @@ def parse_arguments(filename):
             '-r', '-t', '-f', '--interval', '--tunnel-server',
             '--local-addr', '--sender-side', '--local-interface',
             '--remote-interface', '--run-id', '--downlink-trace',
-            '--uplink-trace', 'cc'])
+            '--uplink-trace', '--ntp-addr', 'cc'])
     elif filename == 'plot_summary.py' or filename == 'generate_report.py':
         add_arg_list(parser, arg_dict, ['--data-dir'])
     elif filename == 'plot_throughput_time.py':
@@ -264,7 +271,7 @@ def parse_arguments(filename):
             '-r', '-t', '-f', '--interval', '--tunnel-server',
             '--local-addr', '--sender-side', '--local-interface',
             '--remote-interface', '--local-info', '--remote-info',
-            '--run-only', '--random-order', '--run-times'])
+            '--run-only', '--random-order', '--run-times', '--ntp-addr'])
 
     args = parser.parse_args()
     validate_args(args)

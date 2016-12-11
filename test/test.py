@@ -29,6 +29,7 @@ class Test:
         self.downlink_trace = args.downlink_trace
         self.uplink_trace = args.uplink_trace
         self.worst_abs_ofst = None
+        self.ntp_addr = args.ntp_addr
 
     def timeout_handler(signum, frame):
         raise
@@ -132,7 +133,7 @@ class Test:
 
     # read and update worst absolute clock offset
     def update_worst_abs_ofst(self):
-        ntp_cmd = [['ntpdate', '-quv', 'time.stanford.edu']]
+        ntp_cmd = [['ntpdate', '-quv', self.ntp_addr]]
         if self.remote:
             cmd = self.rd['ssh_cmd'] + ntp_cmd[0]
             ntp_cmd.append(cmd)
@@ -178,7 +179,7 @@ class Test:
             self.tc_elogs.append(
                 '/tmp/pantheon-tmp/tunclient%s-egress-%s.log' % (tun_id, uid))
 
-        if self.remote:
+        if self.remote and self.ntp_addr:
             self.update_worst_abs_ofst()
 
         # run mm-tunnelserver manager
@@ -369,7 +370,7 @@ class Test:
 
         self.test_end_time = strftime('%a, %d %b %Y %H:%M:%S %z')
 
-        if self.remote:
+        if self.remote and self.ntp_addr:
             self.update_worst_abs_ofst()
 
         self.merge_tunnel_logs()
