@@ -124,6 +124,22 @@ def build_arg_dict():
         'help': 'run times of each test',
     }
 
+    arg_dict['--downlink-trace'] = {
+        'metavar': 'TRACE',
+        'action': 'store',
+        'dest': 'downlink_trace',
+        'default': '12mbps_trace',
+        'help': 'downlink trace (default 12mbps_trace)',
+    }
+
+    arg_dict['--uplink-trace'] = {
+        'metavar': 'TRACE',
+        'action': 'store',
+        'dest': 'uplink_trace',
+        'default': '12mbps_trace',
+        'help': 'uplink trace (default 12mbps_trace)',
+    }
+
     arg_dict['--ms-per-bin'] = {
         'metavar': 'MS',
         'action': 'store',
@@ -234,7 +250,8 @@ def parse_arguments(filename):
         add_arg_list(parser, arg_dict, [
             '-r', '-t', '-f', '--interval', '--tunnel-server',
             '--local-addr', '--sender-side', '--local-interface',
-            '--remote-interface', '--run-id', 'cc'])
+            '--remote-interface', '--run-id', '--downlink-trace',
+            '--uplink-trace', 'cc'])
     elif filename == 'plot_summary.py' or filename == 'generate_report.py':
         add_arg_list(parser, arg_dict, ['--data-dir'])
     elif filename == 'plot_throughput_time.py':
