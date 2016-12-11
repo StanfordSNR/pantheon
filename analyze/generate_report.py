@@ -90,13 +90,19 @@ class GenerateReport:
         desc = (
             'Repeated the test of %d congestion control schemes %s.\n\n'
             'Each test lasted for %s running %s.\n\n'
-            'Data path FROM %s TO %s.\\newline\n\n'
+            'Data path FROM %s TO %s.'
+            % (len(self.cc_schemes), times, runtime, flows, send_side,
+               recv_side))
+        if 'ntp_addr' in metadata:
+            ntp_addr = metadata['ntp_addr']
+            desc += '\n\nNTP offset measured against %s.' % ntp_addr
+
+        desc += (
+            '\\newline\n\n'
             '\\begin{verbatim}\n'
             '%s'
             '\\end{verbatim}\n\n'
-            '\\newpage\n\n'
-            % (len(self.cc_schemes), times, runtime, flows, send_side,
-               recv_side, git_info))
+            '\\newpage\n\n' % git_info)
 
         return desc
 
