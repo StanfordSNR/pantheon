@@ -2,6 +2,7 @@
 
 import sys
 import json
+import uuid
 import pantheon_helpers
 from os import path
 from time import strftime
@@ -137,34 +138,6 @@ class GenerateReport:
             % (curr_time, analysis_git_head, metadata_desc, mean_summary,
                raw_summary))
 
-    def gen_graph(self, gtype, cc, run_id, direction):
-        assert gtype == 'throughput' or gtype == 'delay'
-        assert direction == 'data' or direction == 'ack'
-
-        if gtype == 'throughput':
-            cmd = ['mm-tunnel-throughput', '500']
-        else:
-            cmd = ['mm-tunnel-delay']
-
-        log_name = cc
-        if self.flows == 0:
-            log_name += '_mm'
-        log_name += '_%slink_run%s.log' % (direction, run_id)
-        log_path = path.join(self.data_dir, log_name)
-
-        cmd.append(log_path)
-
-        graph_name = cc + '_%slink_%s_run%s.png' % (direction, gtype, run_id)
-        graph_path = path.join(self.data_dir, graph_name)
-
-        graph_file = open(graph_path, 'w')
-        proc = Popen(cmd, stdout=graph_file, stderr=PIPE)
-        results = proc.communicate()[1]
-        graph_file.close()
-        assert proc.returncode == 0
-
-        return (graph_path, results)
-
     def include_runs(self):
         for cc in self.cc_schemes:
             cc_name = self.friendly_names[cc].strip().replace('_', '\\_')
@@ -175,36 +148,20 @@ class GenerateReport:
                 with open(stats_log_path) as stats_log:
                     stats_info = stats_log.read()
 
-                (datalink_throughput, datalink_tput_stats) = self.gen_graph(
-                        'throughput', cc, run_id, 'data')
-
-                (datalink_delay, _) = self.gen_graph(
-                        'delay', cc, run_id, 'data')
-
-                (acklink_throughput, acklink_tput_stats) = self.gen_graph(
-                        'throughput', cc, run_id, 'ack')
-
-                (acklink_delay, _) = self.gen_graph(
-                        'delay', cc, run_id, 'ack')
-
                 str_dict = {'cc_name': cc_name,
                             'run_id': run_id,
-                            'datalink_throughput': datalink_throughput,
-                            'datalink_delay': datalink_delay,
-                            'acklink_throughput': acklink_throughput,
-                            'acklink_delay': acklink_delay,
-                            'stats_info': stats_info,
-                            'datalink_throughput_stats': datalink_tput_stats,
-                            'acklink_throughput_stats': acklink_tput_stats}
+                            'stats_info': stats_info}
+                for link_t in ['datalink', 'acklink']:
+                    for metric_t in ['throughput', 'delay']:
+                        graph_path = path.join(
+                            self.data_dir, cc + '_%s_%s_run%s' %
+                            (link_t, metric_t, run_id))
+                        str_dict['%s_%s' % (link_t, metric_t)] = graph_path
 
                 self.latex.write(
                     '\\begin{verbatim}\n'
                     'Run %(run_id)s: Statistics of %(cc_name)s\n\n'
                     '%(stats_info)s'
-                    '* Data link statistics:\n'
-                    '%(datalink_throughput_stats)s'
-                    '* ACK link statistics:\n'
-                    '%(acklink_throughput_stats)s'
                     '\\end{verbatim}\n\n'
                     '\\newpage\n\n'
                     'Run %(run_id)s: Report of %(cc_name)s --- Data Link\n\n'
@@ -223,13 +180,14 @@ class GenerateReport:
     def generate_report(self):
         self.friendly_names = get_friendly_names(self.cc_schemes)
 
-        latex_path = '/tmp/pantheon-tmp/pantheon_report.tex'
+        latex_path = '/tmp/pantheon-tmp/pantheon-report-%s.tex' % uuid.uuid4()
         self.latex = open(latex_path, 'w')
         self.include_summary()
         self.include_runs()
         self.latex.close()
 
-        cmd = ['pdflatex', '-output-directory', self.data_dir, latex_path]
+        cmd = ['pdflatex', '-output-directory', self.data_dir,
+               '-jobname', 'pantheon_report', latex_path]
         check_call(cmd)
 
 
