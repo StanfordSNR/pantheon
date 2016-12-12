@@ -13,8 +13,8 @@ from helpers.pantheon_help import (check_call, check_output,
 class GenerateReport:
     def __init__(self, args):
         self.data_dir = path.abspath(args.data_dir)
-        analyze_dir = path.dirname(__file__)
-        self.src_dir = path.abspath(path.join(analyze_dir, '../src'))
+        self.analyze_dir = path.dirname(__file__)
+        self.src_dir = path.abspath(path.join(self.analyze_dir, '../src'))
 
         # load pantheon_metadata.json as a dictionary
         metadata_fname = path.join(args.data_dir, 'pantheon_metadata.json')
@@ -113,7 +113,10 @@ class GenerateReport:
             self.data_dir, 'pantheon_summary_mean.png')
         metadata_desc = self.describe_metadata()
 
-        analysis_git_head = check_output(['git', 'rev-parse', 'HEAD'])
+        # set cwd to a directory in pantheon repository
+        git_proc = Popen(['git', 'rev-parse', 'HEAD'], stdout=PIPE,
+                         cwd=self.analyze_dir)
+        analysis_git_head = git_proc.communicate()[0].strip()
 
         self.latex.write(
             '\\documentclass{article}\n'
