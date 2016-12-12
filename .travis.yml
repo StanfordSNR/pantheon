@@ -14,22 +14,22 @@ install:
 
 env:
     matrix:
-        - CC_SCHEME='quic'
-        - CC_SCHEME='webrtc'
-        - CC_SCHEME='default_tcp'
-        - CC_SCHEME='vegas'
-        - CC_SCHEME='koho_cc'
-        - CC_SCHEME='ledbat'
-        - CC_SCHEME='pcc'
-        - CC_SCHEME='verus'
-        - CC_SCHEME='scream'
-        - CC_SCHEME='sprout'
-        - CC_SCHEME='taova'
+        - CMD='travis_extras/travis_test.sh'
+        - CMD='test/setup.py quic        && test/test.py -f 2 -t 10 quic'
+        - CMD='test/setup.py webrtc      && test/test.py -f 2 -t 10 webrtc'
+        - CMD='test/setup.py default_tcp && test/test.py -f 2 -t 10 default_tcp'
+        - CMD='test/setup.py vegas       && test/test.py -f 2 -t 10 vegas'
+        - CMD='test/setup.py koho_cc     && test/test.py -f 2 -t 10 koho_cc'
+        - CMD='test/setup.py ledbat      && test/test.py -f 2 -t 10 ledbat'
+        - CMD='test/setup.py pcc         && test/test.py -f 2 -t 10 pcc'
+        - CMD='test/setup.py verus       && test/test.py -f 2 -t 10 verus'
+        - CMD='test/setup.py scream      && test/test.py -f 2 -t 10 scream'
+        - CMD='test/setup.py sprout      && test/test.py -f 2 -t 10 sprout'
+        - CMD='test/setup.py taova       && test/test.py -f 2 -t 10 taova'
 
 script:
   - test/pre_setup.py
-  - test/setup.py $CC_SCHEME
-  - test/test.py -f 2 -t 10 $CC_SCHEME
+  - eval $CMD
 
 notifications:
   slack: keithw:WjjCMz8yip3iQrHKBmkFGI1u
