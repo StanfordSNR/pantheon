@@ -194,7 +194,14 @@ class Test:
 
         sys.stderr.write('[tunnel server manager (tsm)] ')
         ts_manager = Popen(ts_manager_cmd, stdin=PIPE,
-                           stdout=PIPE, preexec_fn=os.setsid)
+                           stdout=PIPE, stderr=PIPE, preexec_fn=os.setsid)
+
+        while True:
+            running = ts_manager.stderr.readline()
+            if running == 'tunnel manger is running\n':
+                sys.stderr.write(running)
+                break
+
         ts_manager.stdin.write('prompt [tsm]\n')
 
         # run mm-tunnelclient manager
@@ -209,7 +216,14 @@ class Test:
 
         sys.stderr.write('[tunnel client manager (tcm)] ')
         tc_manager = Popen(tc_manager_cmd, stdin=PIPE,
-                           stdout=PIPE, preexec_fn=os.setsid)
+                           stdout=PIPE, stderr=PIPE, preexec_fn=os.setsid)
+
+        while True:
+            running = tc_manager.stderr.readline()
+            if running == 'tunnel manger is running\n':
+                sys.stderr.write(running)
+                break
+
         tc_manager.stdin.write('prompt [tcm]\n')
 
         # create alias for ts_manager and tc_manager using sender or receiver
