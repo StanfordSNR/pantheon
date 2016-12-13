@@ -162,7 +162,7 @@ class Test:
                     ofst = check_output(cmd).rsplit(' ', 2)[-2]
                     ofst = abs(float(ofst)) * 1000
                 except:
-                    sys.stderr.write('failed to get clock offset\n')
+                    sys.stderr.write('Failed to get clock offset\n')
                 else:
                     if not self.worst_abs_ofst or ofst > self.worst_abs_ofst:
                         self.worst_abs_ofst = ofst
@@ -205,10 +205,10 @@ class Test:
 
         sys.stderr.write('[tunnel server manager (tsm)] ')
         ts_manager = Popen(ts_manager_cmd, stdin=PIPE,
-                           stdout=PIPE, stderr=PIPE, preexec_fn=os.setsid)
+                           stdout=PIPE, preexec_fn=os.setsid)
 
         while True:
-            running = ts_manager.stderr.readline()
+            running = ts_manager.stdout.readline()
             if 'tunnel manager is running' in running:
                 sys.stderr.write(running)
                 break
@@ -227,10 +227,10 @@ class Test:
 
         sys.stderr.write('[tunnel client manager (tcm)] ')
         tc_manager = Popen(tc_manager_cmd, stdin=PIPE,
-                           stdout=PIPE, stderr=PIPE, preexec_fn=os.setsid)
+                           stdout=PIPE, preexec_fn=os.setsid)
 
         while True:
-            running = tc_manager.stderr.readline()
+            running = tc_manager.stdout.readline()
             if 'tunnel manager is running' in running:
                 sys.stderr.write(running)
                 break
