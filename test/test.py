@@ -433,11 +433,18 @@ class Test:
 
             cmd = ['mm-tunnel-merge-logs', 'single', '-i', self.ts_ilogs[i],
                    '-e', self.tc_elogs[i], '-o', c2s_log]
-            check_call(cmd)
+
+            merge_proc = call(cmd)
+            if merge_proc.returncode != 0:
+                sys.stderr.write('Warning: mm-tunnel-merge-log failed\n')
+                exit(0)
 
             cmd = ['mm-tunnel-merge-logs', 'single', '-i', self.tc_ilogs[i],
                    '-e', self.ts_elogs[i], '-o', s2c_log]
-            check_call(cmd)
+            merge_proc = call(cmd)
+            if merge_proc.returncode != 0:
+                sys.stderr.write('Warning: mm-tunnel-merge-log failed\n')
+                exit(0)
 
             datalink_tun_logs.append(datalink_tun_log)
             acklink_tun_logs.append(acklink_tun_log)
@@ -446,13 +453,21 @@ class Test:
         if not self.remote:
             cmd += ['--link-log', self.mm_datalink_log]
         cmd += datalink_tun_logs
-        check_call(cmd)
+
+        merge_proc = call(cmd)
+        if merge_proc.returncode != 0:
+            sys.stderr.write('Warning: mm-tunnel-merge-log failed\n')
+            exit(0)
 
         cmd = ['mm-tunnel-merge-logs', 'multiple', '-o', self.acklink_log]
         if not self.remote:
             cmd += ['--link-log', self.mm_acklink_log]
         cmd += acklink_tun_logs
-        check_call(cmd)
+
+        merge_proc = call(cmd)
+        if merge_proc.returncode != 0:
+            sys.stderr.write('Warning: mm-tunnel-merge-log failed\n')
+            exit(0)
 
     def run_congestion_control(self):
         self.run_with_tunnel() if self.flows else self.run_without_tunnel()
