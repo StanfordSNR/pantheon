@@ -132,19 +132,33 @@ def main():
             cmd = setup_cmd + [cc]
             check_call(cmd)
 
+    error_in_test = False
     if run_test:
         git_info = get_git_info(args, root_dir)
         create_metadata_file(args, cc_schemes, git_info, metadata_fname)
 
+        sys.stderr.write('\n')
         for run_id in xrange(1, 1 + args.run_times):
             i = 0
             for cc in cc_schemes:
                 i += 1
-                sys.stderr.write('Running scheme %d of %d for experiment run '
-                                 '%d of %d.\n' % (i, len(cc_schemes), run_id,
-                                               args.run_times))
+
+                msg = ('Running scheme %d of %d for experiment run %d of %d.\n'
+                       % (i, len(cc_schemes), run_id, args.run_times))
+                sys.stderr.write(msg)
                 cmd = test_cmd + ['--run-id', str(run_id), cc]
-                check_call(cmd)
+
+                try:
+                    check_call(cmd)
+                except:
+                    sys.stderr.write('Error: %s' % msg)
+                    error_in_test = True
+
+    if error_in_test:
+        sys.stderr.write('Error in tests!\n')
+        exit(1)
+    else:
+        sys.stderr.write('All tests done!\n')
 
 
 if __name__ == '__main__':
