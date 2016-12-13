@@ -35,11 +35,21 @@ class Test:
         raise
 
     def get_port(self, process):
-        port_info = process.stdout.readline().split(': ')
-        if port_info[0] == 'Listening on port':
-            return port_info[1].strip()
+        signal.signal(signal.SIGALRM, self.timeout_handler)
+        signal.alarm(20)
+
+        try:
+            port_info = process.stdout.readline().split(': ')
+        except:
+            sys.stderr.write('Cannot get port from sender for 20 seconds\n')
+            exit(0)
         else:
-            return None
+            signal.alarm(0)
+
+            if port_info[0] == 'Listening on port':
+                return port_info[1].strip()
+            else:
+                return None
 
     def who_goes_first(self):
         who_goes_first_cmd = ['python', self.src_file, 'who_goes_first']
@@ -126,7 +136,8 @@ class Test:
             self.test_end_time = strftime('%a, %d %b %Y %H:%M:%S %z')
         else:
             signal.alarm(0)
-            self.fail('Test exited before time limit')
+            self.stderr.write('Test exited before time limit')
+            exit(0)
         finally:
             os.killpg(os.getpgid(proc_first.pid), signal.SIGKILL)
             os.killpg(os.getpgid(proc_second.pid), signal.SIGKILL)
@@ -144,8 +155,8 @@ class Test:
             while True:
                 curr_run += 1
                 if curr_run > max_run:
-                    sys.stderr.write('failed after 5 attempts\n')
-                    exit(1)
+                    sys.stderr.write('Failed after 5 attempts\n')
+                    exit(0)
 
                 try:
                     ofst = check_output(cmd).rsplit(' ', 2)[-2]
@@ -198,7 +209,7 @@ class Test:
 
         while True:
             running = ts_manager.stderr.readline()
-            if running == 'tunnel manger is running\n':
+            if 'tunnel manager is running' in running:
                 sys.stderr.write(running)
                 break
 
@@ -220,7 +231,7 @@ class Test:
 
         while True:
             running = tc_manager.stderr.readline()
-            if running == 'tunnel manger is running\n':
+            if 'tunnel manager is running' in running:
                 sys.stderr.write(running)
                 break
 
@@ -286,15 +297,15 @@ class Test:
 
             tc_cmd = 'tunnel %s %s\n' % (tun_id, tc_cmd)
 
-            # re-run mm-tunnelclient every 12s for at most 2 times
-            max_run = 2
+            # re-run mm-tunnelclient every 12s for at most 5 times
+            max_run = 5
             curr_run = 0
             got_connection = ''
             while 'got connection' not in got_connection:
                 curr_run += 1
                 if curr_run > max_run:
-                    sys.stderr.write('cannot establish tunnel\n')
-                    exit(1)
+                    sys.stderr.write('Cannot establish tunnel\n')
+                    exit(0)
 
                 tc_manager.stdin.write(tc_cmd)
                 while True:
