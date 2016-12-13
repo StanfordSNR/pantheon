@@ -9,7 +9,7 @@ import pantheon_helpers
 from time import strftime
 from os import path
 from helpers.parse_arguments import parse_arguments
-from helpers.pantheon_help import (call, Popen, PIPE, check_call, check_output,
+from helpers.pantheon_help import (Popen, PIPE, check_call, check_output,
                                    parse_remote)
 
 
@@ -434,15 +434,17 @@ class Test:
             cmd = ['mm-tunnel-merge-logs', 'single', '-i', self.ts_ilogs[i],
                    '-e', self.tc_elogs[i], '-o', c2s_log]
 
-            merge_proc = call(cmd)
-            if merge_proc.returncode != 0:
+            try:
+                check_call(cmd)
+            except:
                 sys.stderr.write('Warning: mm-tunnel-merge-log failed\n')
                 exit(0)
 
             cmd = ['mm-tunnel-merge-logs', 'single', '-i', self.tc_ilogs[i],
                    '-e', self.ts_elogs[i], '-o', s2c_log]
-            merge_proc = call(cmd)
-            if merge_proc.returncode != 0:
+            try:
+                check_call(cmd)
+            except:
                 sys.stderr.write('Warning: mm-tunnel-merge-log failed\n')
                 exit(0)
 
@@ -454,8 +456,9 @@ class Test:
             cmd += ['--link-log', self.mm_datalink_log]
         cmd += datalink_tun_logs
 
-        merge_proc = call(cmd)
-        if merge_proc.returncode != 0:
+        try:
+            check_call(cmd)
+        except:
             sys.stderr.write('Warning: mm-tunnel-merge-log failed\n')
             exit(0)
 
@@ -464,8 +467,9 @@ class Test:
             cmd += ['--link-log', self.mm_acklink_log]
         cmd += acklink_tun_logs
 
-        merge_proc = call(cmd)
-        if merge_proc.returncode != 0:
+        try:
+            check_call(cmd)
+        except:
             sys.stderr.write('Warning: mm-tunnel-merge-log failed\n')
             exit(0)
 
