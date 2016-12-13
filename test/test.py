@@ -9,7 +9,7 @@ import pantheon_helpers
 from time import strftime
 from os import path
 from helpers.parse_arguments import parse_arguments
-from helpers.pantheon_help import (Popen, PIPE, check_call, check_output,
+from helpers.pantheon_help import (call, Popen, PIPE, check_call, check_output,
                                    parse_remote)
 
 
