@@ -16,6 +16,7 @@ def destroy(procs):
 def main():
     procs = {}  # manage tunnel processes
     prompt = ''
+    sys.stderr.write('tunnel manager is running\n')
 
     while True:
         raw_cmd = sys.stdin.readline().strip()
