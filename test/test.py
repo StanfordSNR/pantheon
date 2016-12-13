@@ -42,7 +42,7 @@ class Test:
             port_info = process.stdout.readline().split(': ')
         except:
             sys.stderr.write('Cannot get port from sender for 20 seconds\n')
-            exit(0)
+            exit(1)
         else:
             signal.alarm(0)
 
@@ -132,12 +132,11 @@ class Test:
         try:
             proc_second.communicate()
         except:
-            sys.stderr.write('Done\n')
             self.test_end_time = strftime('%a, %d %b %Y %H:%M:%S %z')
         else:
             signal.alarm(0)
             self.stderr.write('Test exited before time limit')
-            exit(0)
+            exit(1)
         finally:
             os.killpg(os.getpgid(proc_first.pid), signal.SIGKILL)
             os.killpg(os.getpgid(proc_second.pid), signal.SIGKILL)
@@ -156,7 +155,6 @@ class Test:
                 curr_run += 1
                 if curr_run > max_run:
                     sys.stderr.write('Failed after 5 attempts\n')
-                    exit(0)
 
                 try:
                     ofst = check_output(cmd).rsplit(' ', 2)[-2]
@@ -297,22 +295,22 @@ class Test:
 
             tc_cmd = 'tunnel %s %s\n' % (tun_id, tc_cmd)
 
-            # re-run mm-tunnelclient every 12s for at most 5 times
-            max_run = 5
+            # re-run mm-tunnelclient after 10s timeout for at most 3 times
+            max_run = 3
             curr_run = 0
             got_connection = ''
             while 'got connection' not in got_connection:
                 curr_run += 1
                 if curr_run > max_run:
                     sys.stderr.write('Cannot establish tunnel\n')
-                    exit(0)
+                    exit(1)
 
                 tc_manager.stdin.write(tc_cmd)
                 while True:
                     ts_manager.stdin.write(readline_cmd)
 
                     signal.signal(signal.SIGALRM, self.timeout_handler)
-                    signal.alarm(12)
+                    signal.alarm(10)
 
                     try:
                         got_connection = ts_manager.stdout.readline()
@@ -399,7 +397,6 @@ class Test:
             self.update_worst_abs_ofst()
 
         self.merge_tunnel_logs()
-        sys.stderr.write('Done\n')
 
     def merge_tunnel_logs(self):
         datalink_tun_logs = []
@@ -433,20 +430,11 @@ class Test:
 
             cmd = ['mm-tunnel-merge-logs', 'single', '-i', self.ts_ilogs[i],
                    '-e', self.tc_elogs[i], '-o', c2s_log]
-
-            try:
-                check_call(cmd)
-            except:
-                sys.stderr.write('Warning: mm-tunnel-merge-log failed\n')
-                exit(0)
+            check_call(cmd)
 
             cmd = ['mm-tunnel-merge-logs', 'single', '-i', self.tc_ilogs[i],
                    '-e', self.ts_elogs[i], '-o', s2c_log]
-            try:
-                check_call(cmd)
-            except:
-                sys.stderr.write('Warning: mm-tunnel-merge-log failed\n')
-                exit(0)
+            check_call(cmd)
 
             datalink_tun_logs.append(datalink_tun_log)
             acklink_tun_logs.append(acklink_tun_log)
@@ -455,23 +443,14 @@ class Test:
         if not self.remote:
             cmd += ['--link-log', self.mm_datalink_log]
         cmd += datalink_tun_logs
-
-        try:
-            check_call(cmd)
-        except:
-            sys.stderr.write('Warning: mm-tunnel-merge-log failed\n')
-            exit(0)
+        check_call(cmd)
 
         cmd = ['mm-tunnel-merge-logs', 'multiple', '-o', self.acklink_log]
         if not self.remote:
             cmd += ['--link-log', self.mm_acklink_log]
         cmd += acklink_tun_logs
 
-        try:
-            check_call(cmd)
-        except:
-            sys.stderr.write('Warning: mm-tunnel-merge-log failed\n')
-            exit(0)
+        check_call(cmd)
 
     def run_congestion_control(self):
         self.run_with_tunnel() if self.flows else self.run_without_tunnel()
@@ -485,7 +464,7 @@ class Test:
         test_run_duration = (
             'Start at: %s\nEnd at: %s\n' %
             (self.test_start_time, self.test_end_time))
-        sys.stderr.write('\n' + test_run_duration)
+        sys.stderr.write(test_run_duration)
         stats.write(test_run_duration)
 
         if self.worst_abs_ofst:
@@ -495,6 +474,8 @@ class Test:
             stats.write(offset_info)
 
         stats.close()
+
+        sys.stderr.write('Done\n\n')
 
     # congestion control test
     def test(self):
