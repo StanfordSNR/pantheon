@@ -126,7 +126,8 @@ class GenerateReport:
             '\\newcommand{\PantheonFig}[1]{%%\n'
             '\\begin{figure}[H]\n'
             '\\centering\n'
-            '\\includegraphics[width=\\textwidth]{#1}\n'
+            '\\IfFileExists{#1}{\includegraphics[width=\\textwidth]{#1}}'
+            '{Figure is missing}\n'
             '\\end{figure}}\n\n'
             '\\begin{document}\n\n'
             '\\textbf{Pantheon Summary} '
@@ -145,8 +146,12 @@ class GenerateReport:
             for run_id in xrange(1, 1 + self.run_times):
                 fname = '%s_stats_run%s.log' % (cc, run_id)
                 stats_log_path = path.join(self.data_dir, fname)
-                with open(stats_log_path) as stats_log:
-                    stats_info = stats_log.read()
+
+                if path.isfile(stats_log_path):
+                    with open(stats_log_path) as stats_log:
+                        stats_info = stats_log.read()
+                else:
+                    stats_info = '%s does not exist\n' % stats_log_path
 
                 str_dict = {'cc_name': cc_name,
                             'run_id': run_id,
@@ -154,7 +159,7 @@ class GenerateReport:
                 for link_t in ['datalink', 'acklink']:
                     for metric_t in ['throughput', 'delay']:
                         graph_path = path.join(
-                            self.data_dir, cc + '_%s_%s_run%s' %
+                            self.data_dir, cc + '_%s_%s_run%s.png' %
                             (link_t, metric_t, run_id))
                         str_dict['%s_%s' % (link_t, metric_t)] = graph_path
 
