@@ -105,3 +105,49 @@ def install_pantheon_tunnel():
     check_call(cmd, shell=True)
 
     DEVNULL.close()
+
+
+def get_color_names(cc_schemes):
+    color_names = {
+        'copa': 'r',
+        'default_tcp': 'y',
+        'koho_cc': 'b',
+        'ledbat': 'g',
+        'pcc': 'c',
+        'quic': 'm',
+        'scream': 'brown',
+        'sprout': 'orange',
+        'taova': 'gray',
+        'vegas': 'gold',
+        'verus': 'skyblue',
+        'webrtc': 'olive',
+    }
+
+    for cc in cc_schemes:
+        if cc not in color_names:
+            color_names[cc] = 'lime'
+
+    return color_names
+
+
+def get_marker_names(cc_schemes):
+    marker_names = {
+        'copa': 'o',
+        'default_tcp': 'v',
+        'koho_cc': '^',
+        'ledbat': '<',
+        'pcc': '>',
+        'quic': '8',
+        'scream': 's',
+        'sprout': 'p',
+        'taova': '*',
+        'vegas': 'h',
+        'verus': 'H',
+        'webrtc': 'D',
+    }
+
+    for cc in cc_schemes:
+        if cc not in marker_names:
+            marker_names[cc] = 'd'
+
+    return marker_names
