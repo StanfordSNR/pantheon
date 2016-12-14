@@ -8,12 +8,12 @@ import json
 import pantheon_helpers
 import matplotlib_agg
 import matplotlib.pyplot as plt
-import matplotlib.markers as markers
 import matplotlib.ticker as ticker
 from os import path
 from time import strftime
 from datetime import datetime
-from helpers.pantheon_help import check_output, get_friendly_names, Popen, PIPE
+from helpers.pantheon_help import (check_output, get_friendly_names, Popen,
+                                   PIPE, get_color_names, get_marker_names)
 from helpers.parse_arguments import parse_arguments
 
 
@@ -140,19 +140,16 @@ class PlotSummary:
 
     def plot_throughput_delay(self):
         min_delay = None
-        color_i = 0
-        marker_i = 0
-        color_names = ['r', 'y', 'b', 'g', 'c', 'm', 'brown', 'orange', 'gray',
-                       'gold', 'skyblue', 'olive', 'lime', 'violet', 'purple']
-        marker_names = markers.MarkerStyle.filled_markers
+        color_names = get_color_names(self.cc_schemes)
+        marker_names = get_marker_names(self.cc_schemes)
 
         fig_raw, ax_raw = plt.subplots()
         fig_mean, ax_mean = plt.subplots()
 
         for cc, value in self.data.items():
             cc_name = self.friendly_names[cc]
-            color = color_names[color_i]
-            marker = marker_names[marker_i]
+            color = color_names[cc]
+            marker = marker_names[cc]
             y_data, x_data = zip(*value)
 
             # find min and max delay
@@ -170,9 +167,6 @@ class PlotSummary:
             ax_mean.scatter(x_mean, y_mean, color=color, marker=marker,
                             clip_on=False)
             ax_mean.annotate(cc_name, (x_mean, y_mean))
-
-            color_i = color_i + 1 if color_i < len(color_names) - 1 else 0
-            marker_i = marker_i + 1 if marker_i < len(marker_names) - 1 else 0
 
         for fig, ax in [(fig_raw, ax_raw), (fig_mean, ax_mean)]:
             if min_delay > 0:
