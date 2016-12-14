@@ -128,7 +128,6 @@ class PlotSummary:
 
     def plot_throughput_delay(self):
         min_delay = None
-        max_delay = None
         color_i = 0
         marker_i = 0
         color_names = ['r', 'y', 'b', 'g', 'c', 'm', 'brown', 'orange', 'gray',
@@ -149,10 +148,6 @@ class PlotSummary:
             if not min_delay or cc_min_delay < min_delay:
                 min_delay = cc_min_delay
 
-            cc_max_delay = max(x_data)
-            if not max_delay or cc_max_delay > max_delay:
-                max_delay = cc_max_delay
-
             # plot raw values
             ax_raw.scatter(x_data, y_data, color=color, marker=marker,
                            label=cc_name, clip_on=False)
@@ -167,20 +162,10 @@ class PlotSummary:
             color_i = color_i + 1 if color_i < len(color_names) - 1 else 0
             marker_i = marker_i + 1 if marker_i < len(marker_names) - 1 else 0
 
-        # find min and max of x ticks
-        if min_delay > 0:
-            log_min_delay = math.log(float(min_delay), 2)
-            log_max_delay = math.log(float(max_delay), 2)
-            xmin = pow(2, math.floor(log_min_delay))
-            xmax = pow(2, math.ceil(log_max_delay))
-            xmin /= math.sqrt(2)
-            xmax *= math.sqrt(2)
-
         for fig, ax in [(fig_raw, ax_raw), (fig_mean, ax_mean)]:
-            if min_delay > 0 and xmax > 4 * xmin:
+            if min_delay > 0:
                 ax.set_xscale('log', basex=2)
                 ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
-                ax.set_xlim(left=xmin, right=xmax)
             ax.invert_xaxis()
 
             yticks = ax.get_yticks()
