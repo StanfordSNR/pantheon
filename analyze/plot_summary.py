@@ -41,10 +41,15 @@ class PlotSummary:
         tput = None
         delay = None
         for_stats = None
+        err_ret = (None, None, None)
 
         for link_t in ['datalink', 'acklink']:
             log_name = log_prefix + '_%s_run%s.log' % (link_t, run_id)
             log_path = path.join(self.data_dir, log_name)
+
+            if not path.isfile(log_path):
+                sys.stderr.write('Warning: %s does not exist\n' % log_path)
+                return err_ret
 
             for metric_t in ['throughput', 'delay']:
                 if metric_t == 'throughput':
@@ -57,25 +62,26 @@ class PlotSummary:
                 graph_path = path.join(self.data_dir, graph_name)
                 graph_file = open(graph_path, 'w')
 
-                proc = Popen(cmd, stdout=graph_file, stderr=PIPE)
-                results = proc.communicate()[1]
+                try:
+                    proc = Popen(cmd, stdout=graph_file, stderr=PIPE)
+                    results = proc.communicate()[1]
+                except:
+                    sys.stderr.write('Warning: "%s" failed\n' % ' '.join(cmd))
+                    return err_ret
 
                 graph_file.close()
-                assert proc.returncode == 0
 
                 if link_t == 'datalink' and metric_t == 'throughput':
                     for_stats = results
 
                     ret = re.search(r'Average throughput: (.*?) Mbit/s',
                                     results)
-                    assert ret
-                    if not tput:
+                    if ret and not tput:
                         tput = float(ret.group(1))
 
                     ret = re.search(r'95th percentile per-packet one-way '
                                     'delay: (.*?) ms', results)
-                    assert ret
-                    if not delay:
+                    if ret and not delay:
                         delay = float(ret.group(1))
 
         return (tput, delay, for_stats)
@@ -83,6 +89,9 @@ class PlotSummary:
     def parse_stats_log(self, cc, run_id, for_stats):
         stats_log_path = path.join(
             self.data_dir, '%s_stats_run%s.log' % (cc, run_id))
+        if not path.isfile(stats_log_path):
+            sys.stderr.write('Warning: %s does not exist\n' % stats_log_path)
+            return None
 
         ofst = None
         stats_log = open(stats_log_path, 'r+')
@@ -120,6 +129,9 @@ class PlotSummary:
             for run_id in xrange(1, 1 + self.run_times):
                 (tput, delay, for_stats) = self.parse_tunnel_log(cc, run_id)
                 ofst = self.parse_stats_log(cc, run_id, for_stats)
+
+                if not tput or not delay:
+                    continue
 
                 self.data[cc].append((tput, delay))
                 if ofst:
