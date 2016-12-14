@@ -150,8 +150,10 @@ def main():
 
                 try:
                     check_call(cmd)
-                except:
-                    sys.stderr.write('Error: %s' % msg)
+                except subprocess.CalledProcessError as e:
+                    sys.stderr.write('run.py returned %d while r%s' %
+                                     (e.returncode, msg[1:]))
+                    sys.stderr.write(e.output)
                     error_in_test = True
 
     if error_in_test:
