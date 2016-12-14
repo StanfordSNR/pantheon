@@ -11,6 +11,7 @@ addons:
 
 install:
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 99
+  - pip install matplotlib
 
 env:
     matrix:
