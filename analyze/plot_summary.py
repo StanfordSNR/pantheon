@@ -146,7 +146,11 @@ class PlotSummary:
         fig_raw, ax_raw = plt.subplots()
         fig_mean, ax_mean = plt.subplots()
 
-        for cc, value in self.data.items():
+        for cc in self.data:
+            if not self.data[cc]:
+                continue
+
+            value = self.data[cc]
             cc_name = self.friendly_names[cc]
             color = color_names[cc]
             marker = marker_names[cc]
