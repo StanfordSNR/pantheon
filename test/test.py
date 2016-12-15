@@ -36,12 +36,12 @@ class Test:
 
     def get_port(self, process):
         signal.signal(signal.SIGALRM, self.timeout_handler)
-        signal.alarm(20)
+        signal.alarm(30)
 
         try:
             port_info = process.stdout.readline().split(': ')
         except:
-            sys.stderr.write('Cannot get port from sender for 20 seconds\n')
+            sys.stderr.write('Cannot get port from sender for 30 seconds\n')
             exit(1)
         else:
             signal.alarm(0)
