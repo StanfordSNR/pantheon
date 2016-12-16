@@ -11,6 +11,6 @@ cp travis_extras/travis_ssh_config ~/.ssh/config
 mkdir -p ~/.ssh/controlmasters
 
 test/run.py --run-only setup
-mm-delay 100 sh -c 'ssh -o "StrictHostKeyChecking=no" $USER@$MAHIMAHI_BASE exit; mm-onoff uplink 5 .1 mm-onoff downlink 5 .1 mm-loss uplink .1 mm-loss downlink .1 test/run.py --run-only test -t 15 -r $USER@$MAHIMAHI_BASE:build/StanfordLPNG/pantheon'
+mm-delay 100 sh -c 'ssh -o "StrictHostKeyChecking=no" $USER@$MAHIMAHI_BASE exit; $EXTRA_MAHIMAHI_SHELLS test/run.py --run-only test -t 15 -r $USER@$MAHIMAHI_BASE:build/StanfordLPNG/pantheon'
 pip install matplotlib
 analyze/analyze.py --data-dir test
