@@ -66,10 +66,17 @@ class PlotSummary:
                     proc = Popen(cmd, stdout=graph_file, stderr=PIPE)
                     results = proc.communicate()[1]
                 except:
-                    sys.stderr.write('Warning: "%s" failed\n' % ' '.join(cmd))
+                    sys.stderr.write('Warning: "%s" failed with an exception.\n' % ' '.join(cmd))
+                    graph_file.close()
+                    os.remove(graph_path)
                     return err_ret
 
                 graph_file.close()
+
+                if proc.returncode > 0:
+                    sys.stderr.write('Warning: "%s" failed with an non-zero return code.\n' % ' '.join(cmd))
+                    os.remove(graph_path)
+                    return err_ret
 
                 if link_t == 'datalink' and metric_t == 'throughput':
                     for_stats = results
