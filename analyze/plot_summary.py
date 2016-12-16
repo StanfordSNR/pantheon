@@ -33,24 +33,29 @@ class PlotSummary:
         self.flows = int(metadata_dict['flows'])
         self.timezone = None
 
-        remote_txt = metadata_dict['remote_information']
-        if 'remote_interface' in metadata_dict:
-            remote_txt += ' ' + metadata_dict['remote_interface']
-        else:
-            remote_txt += ' Ethernet'
+        self.experiment_title = ''
+        if ('remote_information' in metadata_dict and
+                'local_information' in metadata_dict):
 
-        local_txt = metadata_dict['local_information'] + ' Ethernet'
-        if metadata_dict['sender_side'] == 'remote':
-            uploader = remote_txt
-            downloader = local_txt
-        else:
-            uploader = local_txt
-            downloader = remote_txt
+            remote_txt = metadata_dict['remote_information']
+            if 'remote_interface' in metadata_dict:
+                remote_txt += ' ' + metadata_dict['remote_interface']
+            else:
+                remote_txt += ' Ethernet'
 
-        self.experiment_title = ('%s to %s %s runs of %ss each per scheme'
-                                 % (uploader, downloader,
-                                    metadata_dict['run_times'],
-                                    metadata_dict['runtime']))
+            local_txt = metadata_dict['local_information'] + ' Ethernet'
+            if metadata_dict['sender_side'] == 'remote':
+                uploader = remote_txt
+                downloader = local_txt
+            else:
+                uploader = local_txt
+                downloader = remote_txt
+
+            self.experiment_title += '%s to %s ' % (uploader, downloader)
+
+        self.experiment_title += ('%s runs of %ss each per scheme'
+                                  % (metadata_dict['run_times'],
+                                     metadata_dict['runtime']))
 
     def parse_tunnel_log(self, cc, run_id):
         log_prefix = cc
