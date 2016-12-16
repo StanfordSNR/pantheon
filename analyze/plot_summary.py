@@ -41,7 +41,9 @@ class PlotSummary:
         tput = None
         delay = None
         for_stats = None
-        err_ret = (None, None, None)
+
+        procs = []
+        error = False
 
         for link_t in ['datalink', 'acklink']:
             log_name = log_prefix + '_%s_run%s.log' % (link_t, run_id)
@@ -49,7 +51,8 @@ class PlotSummary:
 
             if not path.isfile(log_path):
                 sys.stderr.write('Warning: %s does not exist\n' % log_path)
-                return err_ret
+                error = True
+                continue
 
             for metric_t in ['throughput', 'delay']:
                 if metric_t == 'throughput':
@@ -62,36 +65,42 @@ class PlotSummary:
                 graph_path = path.join(self.data_dir, graph_name)
                 graph_file = open(graph_path, 'w')
 
-                try:
-                    proc = Popen(cmd, stdout=graph_file, stderr=PIPE)
-                    results = proc.communicate()[1]
-                except:
-                    sys.stderr.write('Warning: "%s" failed with an exception.\n' % ' '.join(cmd))
-                    graph_file.close()
-                    os.remove(graph_path)
-                    return err_ret
-
+                proc = Popen(cmd, stdout=graph_file, stderr=PIPE)
+                procs.append((graph_file, graph_path, proc, cmd, link_t, metric_t))
+        for (graph_file, graph_path, proc, cmd, link_t, metric_t) in procs:
+            try:
+                results = proc.communicate()[1]
+            except:
+                sys.stderr.write('Warning: "%s" failed with an exception.\n' % ' '.join(cmd))
                 graph_file.close()
+                os.remove(graph_path)
+                error = True
+                continue
 
-                if proc.returncode > 0:
-                    sys.stderr.write('Warning: "%s" failed with an non-zero return code.\n' % ' '.join(cmd))
-                    os.remove(graph_path)
-                    return err_ret
+            graph_file.close()
 
-                if link_t == 'datalink' and metric_t == 'throughput':
-                    for_stats = results
+            if proc.returncode > 0:
+                sys.stderr.write('Warning: "%s" failed with an non-zero return code.\n' % ' '.join(cmd))
+                os.remove(graph_path)
+                continue
 
-                    ret = re.search(r'Average throughput: (.*?) Mbit/s',
-                                    results)
-                    if ret and not tput:
-                        tput = float(ret.group(1))
+            if link_t == 'datalink' and metric_t == 'throughput':
+                for_stats = results
 
-                    ret = re.search(r'95th percentile per-packet one-way '
-                                    'delay: (.*?) ms', results)
-                    if ret and not delay:
-                        delay = float(ret.group(1))
+                ret = re.search(r'Average throughput: (.*?) Mbit/s',
+                                results)
+                if ret and not tput:
+                    tput = float(ret.group(1))
 
-        return (tput, delay, for_stats)
+                ret = re.search(r'95th percentile per-packet one-way '
+                                'delay: (.*?) ms', results)
+                if ret and not delay:
+                    delay = float(ret.group(1))
+
+        if error:
+            return (None, None, None)
+        else:
+            return (tput, delay, for_stats)
 
     def parse_stats_log(self, cc, run_id, for_stats):
         stats_log_path = path.join(
