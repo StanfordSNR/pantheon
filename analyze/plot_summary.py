@@ -33,6 +33,25 @@ class PlotSummary:
         self.flows = int(metadata_dict['flows'])
         self.timezone = None
 
+        remote_txt = metadata_dict['remote_information'] + ' '
+        if 'remote_interface' in metadata_dict:
+            remote_txt += metadata_dict['remote_interface']
+        else:
+            remote_txt += 'ethernet'
+
+        local_txt = metadata_dict['local_information']
+        if metadata_dict['sender_side'] == 'remote':
+            uploader = remote_txt
+            downloader = local_txt
+        else:
+            uploader = local_txt
+            downloader = remote_txt
+
+        self.experiment_title = ('%s to %s %s runs of %ss each'
+                                 % (uploader, downloader,
+                                    metadata_dict['run_times'],
+                                    metadata_dict['runtime']))
+
     def parse_tunnel_log(self, cc, run_id):
         log_prefix = cc
         if self.flows == 0:
@@ -210,7 +229,7 @@ class PlotSummary:
             ax.grid()
 
         # save pantheon_summary.png
-        ax_raw.set_title('Summary of results')
+        ax_raw.set_title(self.experiment_title)
         lgd = ax_raw.legend(scatterpoints=1, bbox_to_anchor=(1, 0.5),
                             loc='center left', fontsize=12)
         raw_summary = path.join(self.data_dir, 'pantheon_summary.png')
@@ -218,7 +237,8 @@ class PlotSummary:
                         bbox_inches='tight', pad_inches=0.2)
 
         # save pantheon_summary_mean.png
-        ax_mean.set_title('Summary of results (average of all runs)')
+        ax_mean.set_title(self.experiment_title +
+                          '\nmean of all runs by scheme')
         mean_summary = path.join(
             self.data_dir, 'pantheon_summary_mean.png')
         fig_mean.savefig(mean_summary, dpi=300,
