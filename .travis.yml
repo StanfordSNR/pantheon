@@ -14,7 +14,11 @@ install:
 
 env:
     matrix:
-        - CMD='travis_extras/travis_test.sh'
+        - CMD='$EXTRA_MAHIMAHI_SHELLS="mm-onoff uplink 5 .1 mm-onoff downlink 5 .1 mm-loss uplink .1 mm-loss downlink .1"; travis_extras/travis_test.sh'
+        - CMD='$EXTRA_MAHIMAHI_SHELLS="mm-loss uplink .2 mm-loss downlink .2"; travis_extras/travis_test.sh'
+        - CMD='$EXTRA_MAHIMAHI_SHELLS="mm-loss uplink .3 mm-loss downlink .3"; travis_extras/travis_test.sh'
+        - CMD='$EXTRA_MAHIMAHI_SHELLS="mm-onoff uplink 1 1 mm-onoff downlink 1 1"; travis_extras/travis_test.sh'
+        - CMD='$EXTRA_MAHIMAHI_SHELLS="mm-onoff uplink 2 2 mm-onoff downlink 2 2"; travis_extras/travis_test.sh'
         # Run setup twice in a row to check for basic idempotency problems
         - CMD='test/setup.py quic        && test/setup.py quic        && test/test.py -f 2 -t 10 quic'
         - CMD='test/setup.py webrtc      && test/setup.py webrtc      && test/test.py -f 2 -t 10 webrtc'
