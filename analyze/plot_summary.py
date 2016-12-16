@@ -33,13 +33,13 @@ class PlotSummary:
         self.flows = int(metadata_dict['flows'])
         self.timezone = None
 
-        remote_txt = metadata_dict['remote_information'] + ' '
+        remote_txt = metadata_dict['remote_information']
         if 'remote_interface' in metadata_dict:
-            remote_txt += metadata_dict['remote_interface']
+            remote_txt += ' ' + metadata_dict['remote_interface']
         else:
-            remote_txt += 'ethernet'
+            remote_txt += ' Ethernet'
 
-        local_txt = metadata_dict['local_information']
+        local_txt = metadata_dict['local_information'] + ' Ethernet'
         if metadata_dict['sender_side'] == 'remote':
             uploader = remote_txt
             downloader = local_txt
@@ -47,7 +47,7 @@ class PlotSummary:
             uploader = local_txt
             downloader = remote_txt
 
-        self.experiment_title = ('%s to %s %s runs of %ss each'
+        self.experiment_title = ('%s to %s %s runs of %ss each per scheme'
                                  % (uploader, downloader,
                                     metadata_dict['run_times'],
                                     metadata_dict['runtime']))
