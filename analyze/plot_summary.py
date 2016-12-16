@@ -66,12 +66,14 @@ class PlotSummary:
                 graph_file = open(graph_path, 'w')
 
                 proc = Popen(cmd, stdout=graph_file, stderr=PIPE)
-                procs.append((graph_file, graph_path, proc, cmd, link_t, metric_t))
+                procs.append((graph_file, graph_path, proc, cmd, link_t,
+                              metric_t))
         for (graph_file, graph_path, proc, cmd, link_t, metric_t) in procs:
             try:
                 results = proc.communicate()[1]
             except:
-                sys.stderr.write('Warning: "%s" failed with an exception.\n' % ' '.join(cmd))
+                sys.stderr.write('Warning: "%s" failed with an exception.\n'
+                                 % ' '.join(cmd))
                 graph_file.close()
                 os.remove(graph_path)
                 error = True
@@ -80,7 +82,8 @@ class PlotSummary:
             graph_file.close()
 
             if proc.returncode > 0:
-                sys.stderr.write('Warning: "%s" failed with an non-zero return code.\n' % ' '.join(cmd))
+                sys.stderr.write('Warning: "%s" failed with an non-zero return'
+                                 'code.\n' % ' '.join(cmd))
                 os.remove(graph_path)
                 continue
 
