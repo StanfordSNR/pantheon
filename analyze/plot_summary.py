@@ -88,9 +88,8 @@ class PlotSummary:
             cmd = [self.tunnel_graph, '--throughput', tput_graph_path,
                    '--delay', delay_graph_path, '500', log_path]
 
-            proc = Popen(cmd, stderr=PIPE)
-
             try:
+                proc = Popen(cmd, stderr=PIPE)
                 results = proc.communicate()[1]
             except:
                 sys.stderr.write('Warning: "%s" failed with an exception.\n'
