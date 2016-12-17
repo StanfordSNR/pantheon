@@ -90,32 +90,34 @@ class PlotSummary:
                 graph_file = open(graph_path, 'w')
 
                 proc = Popen(cmd, stdout=graph_file, stderr=PIPE)
-                procs.append((graph_file, graph_path, proc, cmd, link_t,
-                              metric_t))
-        for (graph_file, graph_path, proc, cmd, link_t, metric_t) in procs:
+                procs.append((proc, cmd, graph_file, graph_path,
+                              link_t, metric_t))
+
+        for (proc, cmd, graph_file, graph_path, link_t, metric_t) in procs:
             try:
                 results = proc.communicate()[1]
             except:
                 sys.stderr.write('Warning: "%s" failed with an exception.\n'
                                  % ' '.join(cmd))
-                graph_file.close()
-                os.remove(graph_path)
                 error = True
-                continue
+
+            if not error and proc.returncode != 0:
+                sys.stderr.write('Warning: "%s" failed with an non-zero return'
+                                 ' code.\n' % ' '.join(cmd))
+                error = True
 
             graph_file.close()
-
-            if proc.returncode > 0:
-                sys.stderr.write('Warning: "%s" failed with an non-zero return'
-                                 'code.\n' % ' '.join(cmd))
-                os.remove(graph_path)
+            if error:
+                try:
+                    os.remove(graph_path)
+                except:
+                    pass
                 continue
 
             if link_t == 'datalink' and metric_t == 'throughput':
                 for_stats = results
 
-                ret = re.search(r'Average throughput: (.*?) Mbit/s',
-                                results)
+                ret = re.search(r'Average throughput: (.*?) Mbit/s', results)
                 if ret and not tput:
                     tput = float(ret.group(1))
 
