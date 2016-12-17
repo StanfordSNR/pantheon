@@ -15,7 +15,7 @@ def main():
 
     # install texlive, matplotlib, etc.
     cmd = ('sudo apt-get -yq --force-yes install '
-           'texlive python-matplotlib')
+           'texlive python-matplotlib python-numpy')
     check_call(cmd, shell=True)
 
     install_pantheon_tunnel()
