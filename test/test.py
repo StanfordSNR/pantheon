@@ -428,24 +428,24 @@ class Test:
                 s2c_log = acklink_tun_log
                 c2s_log = datalink_tun_log
 
-            cmd = ['mm-tunnel-merge-logs', 'single', '-i', self.ts_ilogs[i],
+            cmd = ['merge-tunnel-logs', 'single', '-i', self.ts_ilogs[i],
                    '-e', self.tc_elogs[i], '-o', c2s_log]
             check_call(cmd)
 
-            cmd = ['mm-tunnel-merge-logs', 'single', '-i', self.tc_ilogs[i],
+            cmd = ['merge-tunnel-logs', 'single', '-i', self.tc_ilogs[i],
                    '-e', self.ts_elogs[i], '-o', s2c_log]
             check_call(cmd)
 
             datalink_tun_logs.append(datalink_tun_log)
             acklink_tun_logs.append(acklink_tun_log)
 
-        cmd = ['mm-tunnel-merge-logs', 'multiple', '-o', self.datalink_log]
+        cmd = ['merge-tunnel-logs', 'multiple', '-o', self.datalink_log]
         if not self.remote:
             cmd += ['--link-log', self.mm_datalink_log]
         cmd += datalink_tun_logs
         check_call(cmd)
 
-        cmd = ['mm-tunnel-merge-logs', 'multiple', '-o', self.acklink_log]
+        cmd = ['merge-tunnel-logs', 'multiple', '-o', self.acklink_log]
         if not self.remote:
             cmd += ['--link-log', self.mm_acklink_log]
         cmd += acklink_tun_logs
