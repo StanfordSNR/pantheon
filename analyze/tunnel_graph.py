@@ -263,13 +263,10 @@ class TunnelGraph:
                          % self.avg_capacity)
 
         ax.grid()
-        lgd = ax.legend(scatterpoints=1, bbox_to_anchor=(0.5, -0.26),
+        lgd = ax.legend(scatterpoints=1, bbox_to_anchor=(0.5, -0.2),
                         loc='lower center', ncol=2, fontsize=12)
 
-        (fig_w, fig_h) = fig.get_size_inches()
-        self.tmin, self.tmax = ax.get_xlim()
-        fig.set_size_inches((self.tmax - self.tmin) * 0.7, fig_h)
-
+        fig.set_size_inches(12, 6)
         fig.savefig(self.throughput_graph, bbox_extra_artists=(lgd,),
                     bbox_inches='tight', pad_inches=0.2)
 
@@ -281,8 +278,8 @@ class TunnelGraph:
         for flow_id in self.flows:
             color = colors[color_i]
             ax.scatter(self.delays_t[flow_id], self.delays[flow_id],
-                       color=color, marker='.', s=1,
-                       label='Flow %s (95th percentile %.0f ms)'
+                       color=color, marker='.', s=1, label='Flow %s per-packet'
+                       ' one-way delay (95th percentile %.0f ms)'
                        % (flow_id, self.percentile_delay[flow_id]))
 
             color_i += 1
@@ -290,15 +287,12 @@ class TunnelGraph:
                 color_i = 0
 
         ax.set_xlabel('Time (s)')
-        ax.set_ylabel('One-way delay (ms)')
+        ax.set_ylabel('Per-packet one-way delay (ms)')
         ax.grid()
         lgd = ax.legend(scatterpoints=1, bbox_to_anchor=(0.5, -0.2),
                         loc='lower center', ncol=2, fontsize=12)
 
-        ax.set_xlim(self.tmin, self.tmax)
-        (fig_w, fig_h) = fig.get_size_inches()
-        fig.set_size_inches((self.tmax - self.tmin) * 0.7, fig_h)
-
+        fig.set_size_inches(12, 6)
         fig.savefig(self.delay_graph, bbox_extra_artists=(lgd,),
                     bbox_inches='tight', pad_inches=0.2)
 
