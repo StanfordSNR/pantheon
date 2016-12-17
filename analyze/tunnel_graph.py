@@ -3,8 +3,7 @@
 import sys
 import argparse
 import numpy as np
-import matplotlib
-matplotlib.use('Agg')
+import matplotlib_agg
 import matplotlib.pyplot as plt
 
 
@@ -16,14 +15,14 @@ def parse_arguments():
     parser.add_argument('tunnel_log', metavar='tunnel-log',
                         help='tunnel log file')
     parser.add_argument(
-        '--throughput-graph',
-        metavar='OUTPUT-PATH',
+        '--throughput',
+        metavar='OUTPUT-GRAPH',
         action='store',
         dest='throughput_graph',
         help='throughput graph to save')
     parser.add_argument(
-        '--delay-graph',
-        metavar='OUTPUT-PATH',
+        '--delay',
+        metavar='OUTPUT-GRAPH',
         action='store',
         dest='delay_graph',
         help='delay graph to save')
@@ -31,13 +30,13 @@ def parse_arguments():
     args = parser.parse_args()
 
     if not args.throughput_graph or not args.delay_graph:
-        sys.stderr.write('Must specify the path of output graphs\n')
+        sys.stderr.write('Must specify the paths of output graphs\n')
         exit(1)
 
     return args
 
 
-class TunnelPlot:
+class TunnelGraph:
     def __init__(self, args):
         self.ms_per_bin = int(args.ms_per_bin)
         self.tunnel_log = args.tunnel_log
@@ -331,7 +330,7 @@ class TunnelPlot:
             sys.stderr.write('Loss rate: %.2f%%\n'
                              % (self.loss_rate[flow_id] * 100.0))
 
-    def tunnel_plot(self):
+    def tunnel_graph(self):
         self.parse_tunnel_log()
         self.plot_throughput_graph()
         self.plot_delay_graph()
@@ -341,8 +340,8 @@ class TunnelPlot:
 def main():
     args = parse_arguments()
 
-    tunnel_plot = TunnelPlot(args)
-    tunnel_plot.tunnel_plot()
+    tunnel_graph = TunnelGraph(args)
+    tunnel_graph.tunnel_graph()
 
 
 if __name__ == '__main__':
