@@ -144,8 +144,9 @@ def main():
             for cc in cc_schemes:
                 i += 1
 
-                msg = ('Running scheme %d of %d for experiment run %d of %d.\n'
-                       % (i, len(cc_schemes), run_id, args.run_times))
+                msg = ('Running scheme %d of %d (%s) for experiment run %d of '
+                       '%d.\n' % (i, len(cc_schemes), cc, run_id,
+                                  args.run_times))
                 sys.stderr.write(msg)
                 cmd = test_cmd + ['--run-id', str(run_id), cc]
 
