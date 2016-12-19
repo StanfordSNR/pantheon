@@ -295,7 +295,7 @@ class Test:
 
             tc_cmd = 'tunnel %s %s\n' % (tun_id, tc_cmd)
 
-            # re-run mm-tunnelclient after 10s timeout for at most 3 times
+            # re-run mm-tunnelclient after 20s timeout for at most 3 times
             max_run = 3
             curr_run = 0
             got_connection = ''
@@ -307,15 +307,16 @@ class Test:
 
                 tc_manager.stdin.write(tc_cmd)
                 while True:
-                    ts_manager.stdin.write(readline_cmd)
+                    tc_manager.stdin.write(readline_cmd)
 
                     signal.signal(signal.SIGALRM, self.timeout_handler)
-                    signal.alarm(10)
+                    signal.alarm(20)
 
                     try:
-                        got_connection = ts_manager.stdout.readline()
+                        got_connection = tc_manager.stdout.readline()
+                        sys.stderr.write('Tunnel is connected\n')
                     except:
-                        sys.stderr.write('mm-tunnelclient timeout\n')
+                        sys.stderr.write('Tunnel connection timeout\n')
                         break
                     else:
                         signal.alarm(0)
