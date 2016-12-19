@@ -31,7 +31,7 @@ class Test:
         self.worst_abs_ofst = None
         self.ntp_addr = args.ntp_addr
 
-    def timeout_handler(signum, frame):
+    def timeout_handler(self, signum, frame):
         raise
 
     def get_port(self, process):
