@@ -226,7 +226,7 @@ class PlotSummary:
             ax.grid()
 
         # save pantheon_summary.png
-        ax_raw.set_title(self.experiment_title)
+        ax_raw.set_title(self.experiment_title, y=1.02, fontsize=12)
         lgd = ax_raw.legend(scatterpoints=1, bbox_to_anchor=(1, 0.5),
                             loc='center left', fontsize=12)
         raw_summary = path.join(self.data_dir, 'pantheon_summary.png')
@@ -235,7 +235,7 @@ class PlotSummary:
 
         # save pantheon_summary_mean.png
         ax_mean.set_title(self.experiment_title +
-                          '\nmean of all runs by scheme')
+                          '\nmean of all runs by scheme', fontsize=12)
         mean_summary = path.join(
             self.data_dir, 'pantheon_summary_mean.png')
         fig_mean.savefig(mean_summary, dpi=300,
