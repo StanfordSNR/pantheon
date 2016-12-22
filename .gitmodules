@@ -42,3 +42,13 @@
 	path = third_party/genericCC
 	url = https://github.com/venkatarun95/genericCC
   ignore = dirty
+[submodule "third_party/rtt_stimulus"]
+	path = third_party/rtt_stimulus
+	url = https://github.com/greghill/koho_cc.git
+	branch = rtt_stimulus
+  ignore = dirty
+[submodule "third_party/saturator_stimulus"]
+	path = third_party/saturator_stimulus
+	url = https://github.com/greghill/koho_cc.git
+	branch = saturator_stimulus
+  ignore = dirty
