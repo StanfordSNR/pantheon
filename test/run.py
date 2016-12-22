@@ -119,7 +119,7 @@ def main():
     elif args.run_only == 'test':
         run_setup = False
 
-    cc_schemes = ['default_tcp', 'vegas', 'koho_cc', 'ledbat', 'pcc', 'verus',
+    cc_schemes = ['rtt_stimulus', 'saturator_stimulus', 'default_tcp', 'vegas', 'koho_cc', 'ledbat', 'pcc', 'verus',
                   'scream', 'sprout', 'webrtc', 'quic', 'copa']
 
     if args.random_order:
