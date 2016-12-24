@@ -76,8 +76,10 @@ class Test:
         # prepare output logs
         self.datalink_name = self.cc + '_datalink_run%s' % self.run_id
         self.acklink_name = self.cc + '_acklink_run%s' % self.run_id
-        self.datalink_log_path = path.join(self.test_dir, self.datalink_name + '.log')
-        self.acklink_log_path = path.join(self.test_dir, self.acklink_name + '.log')
+        self.datalink_log_path = path.join(self.test_dir, self.datalink_name +
+                                           '.log')
+        self.acklink_log_path = path.join(self.test_dir, self.acklink_name +
+                                          '.log')
 
         if not self.remote:  # local setup
             uplink_trace = os.path.join(self.test_dir, self.uplink_trace)
@@ -254,10 +256,12 @@ class Test:
             # run mm-tunnelserver
             if self.server_side == self.sender_side:
                 ts_cmd = ('mm-tunnelserver --ingress-log=%s --egress-log=%s' %
-                         (self.acklink_ingress_logs[i], self.datalink_egress_logs[i]))
+                          (self.acklink_ingress_logs[i],
+                           self.datalink_egress_logs[i]))
             else:
                 ts_cmd = ('mm-tunnelserver --ingress-log=%s --egress-log=%s' %
-                         (self.datalink_ingress_logs[i], self.acklink_egress_logs[i]))
+                          (self.datalink_ingress_logs[i],
+                           self.acklink_egress_logs[i]))
 
             if self.server_side == 'remote':
                 if self.remote_if:
@@ -291,10 +295,12 @@ class Test:
             # run mm-tunnelclient
             if self.server_side == self.sender_side:
                 tc_cmd = ('%s --ingress-log=%s --egress-log=%s' %
-                    (' '.join(cmd), self.datalink_ingress_logs[i], self.acklink_egress_logs[i]))
+                          (' '.join(cmd), self.datalink_ingress_logs[i],
+                           self.acklink_egress_logs[i]))
             else:
                 tc_cmd = ('%s --ingress-log=%s --egress-log=%s' %
-                    (' '.join(cmd), self.acklink_ingress_logs[i], self.datalink_egress_logs[i]))
+                          (' '.join(cmd), self.acklink_ingress_logs[i],
+                           self.datalink_egress_logs[i]))
 
             if self.server_side == 'remote':
                 if self.local_if:
@@ -421,11 +427,16 @@ class Test:
                 scp_cmd += '%(log)s %(log)s'
 
                 if self.sender_side == 'remote':
-                    check_call(scp_cmd % {'log': self.acklink_ingress_logs[i]}, shell=True)
-                    check_call(scp_cmd % {'log': self.datalink_egress_logs[i]}, shell=True)
+                    check_call(scp_cmd % {'log': self.acklink_ingress_logs[i]},
+                               shell=True)
+                    check_call(scp_cmd % {'log': self.datalink_egress_logs[i]},
+                               shell=True)
                 else:
-                    check_call(scp_cmd % {'log': self.datalink_ingress_logs[i]}, shell=True)
-                    check_call(scp_cmd % {'log': self.acklink_egress_logs[i]}, shell=True)
+                    check_call(scp_cmd % {'log':
+                                          self.datalink_ingress_logs[i]},
+                               shell=True)
+                    check_call(scp_cmd % {'log': self.acklink_egress_logs[i]},
+                               shell=True)
 
             uid = uuid.uuid4()
             datalink_tun_log = (
@@ -435,12 +446,14 @@ class Test:
                 '/tmp/pantheon-tmp/%s_flow%s_uid%s.log.merged'
                 % (self.acklink_name, tun_id, uid))
 
-            cmd = ['merge-tunnel-logs', 'single', '-i', self.datalink_ingress_logs[i],
-                   '-e', self.datalink_egress_logs[i], '-o', datalink_tun_log]
+            cmd = ['merge-tunnel-logs', 'single', '-i',
+                   self.datalink_ingress_logs[i], '-e',
+                   self.datalink_egress_logs[i], '-o', datalink_tun_log]
             check_call(cmd)
 
-            cmd = ['merge-tunnel-logs', 'single', '-i', self.acklink_ingress_logs[i],
-                   '-e', self.acklink_ingress_logs[i], '-o', acklink_tun_log]
+            cmd = ['merge-tunnel-logs', 'single', '-i',
+                   self.acklink_ingress_logs[i], '-e',
+                   self.acklink_ingress_logs[i], '-o', acklink_tun_log]
             check_call(cmd)
 
             datalink_tun_logs.append(datalink_tun_log)
