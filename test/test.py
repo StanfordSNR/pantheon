@@ -74,10 +74,10 @@ class Test:
         self.who_goes_first()
 
         # prepare output logs
-        datalink_log = self.cc + '_datalink_run%s.log' % self.run_id
-        acklink_log = self.cc + '_acklink_run%s.log' % self.run_id
-        self.datalink_log = path.join(self.test_dir, datalink_log)
-        self.acklink_log = path.join(self.test_dir, acklink_log)
+        self.datalink_name = self.cc + '_datalink_run%s' % self.run_id
+        self.acklink_name = self.cc + '_acklink_run%s' % self.run_id
+        self.datalink_log_path = path.join(self.test_dir, self.datalink_name + '.log')
+        self.acklink_log_path = path.join(self.test_dir, self.acklink_name + '.log')
 
         if not self.remote:  # local setup
             uplink_trace = os.path.join(self.test_dir, self.uplink_trace)
@@ -168,25 +168,27 @@ class Test:
 
     # test congestion control using mm-tunnelclient/mm-tunnelserver
     def run_with_tunnel(self):
-        # ts: mm-tunnelserver  tc: mm-tunnelclient
-        # prepare ingress and egress logs
-        self.ts_ilogs = []
-        self.ts_elogs = []
-        self.tc_ilogs = []
-        self.tc_elogs = []
+        self.datalink_ingress_logs = []
+        self.datalink_egress_logs = []
+        self.acklink_ingress_logs = []
+        self.acklink_egress_logs = []
 
         for i in xrange(self.flows):
             tun_id = i + 1
             uid = uuid.uuid4()
 
-            self.ts_ilogs.append(
-                '/tmp/pantheon-tmp/tunserver%s-ingress-%s.log' % (tun_id, uid))
-            self.ts_elogs.append(
-                '/tmp/pantheon-tmp/tunserver%s-egress-%s.log' % (tun_id, uid))
-            self.tc_ilogs.append(
-                '/tmp/pantheon-tmp/tunclient%s-ingress-%s.log' % (tun_id, uid))
-            self.tc_elogs.append(
-                '/tmp/pantheon-tmp/tunclient%s-egress-%s.log' % (tun_id, uid))
+            self.datalink_ingress_logs.append(
+                '/tmp/pantheon-tmp/%s_flow%s_uid_%s.log.ingress'
+                % (self.datalink_name, tun_id, uid))
+            self.datalink_egress_logs.append(
+                '/tmp/pantheon-tmp/%s_flow%s_uid_%s.log.egress'
+                % (self.datalink_name, tun_id, uid))
+            self.acklink_ingress_logs.append(
+                '/tmp/pantheon-tmp/%s_flow%s_uid_%s.log.ingress'
+                % (self.acklink_name, tun_id, uid))
+            self.acklink_egress_logs.append(
+                '/tmp/pantheon-tmp/%s_flow%s_uid_%s.log.egress'
+                % (self.acklink_name, tun_id, uid))
 
         if self.remote and self.ntp_addr:
             self.update_worst_abs_ofst()
@@ -250,8 +252,12 @@ class Test:
             readline_cmd = 'tunnel %s readline\n' % tun_id
 
             # run mm-tunnelserver
-            ts_cmd = ('mm-tunnelserver --ingress-log=%s --egress-log=%s' %
-                      (self.ts_ilogs[i], self.ts_elogs[i]))
+            if self.server_side == self.sender_side:
+                ts_cmd = ('mm-tunnelserver --ingress-log=%s --egress-log=%s' %
+                         (self.acklink_ingress_logs[i], self.datalink_egress_logs[i]))
+            else:
+                ts_cmd = ('mm-tunnelserver --ingress-log=%s --egress-log=%s' %
+                         (self.datalink_ingress_logs[i], self.acklink_egress_logs[i]))
 
             if self.server_side == 'remote':
                 if self.remote_if:
@@ -283,8 +289,12 @@ class Test:
                 recv_pri_ip = ts_pri_ip
 
             # run mm-tunnelclient
-            tc_cmd = ('%s --ingress-log=%s --egress-log=%s' %
-                      (' '.join(cmd), self.tc_ilogs[i], self.tc_elogs[i]))
+            if self.server_side == self.sender_side:
+                tc_cmd = ('%s --ingress-log=%s --egress-log=%s' %
+                    (' '.join(cmd), self.datalink_ingress_logs[i], self.acklink_egress_logs[i]))
+            else:
+                tc_cmd = ('%s --ingress-log=%s --egress-log=%s' %
+                    (' '.join(cmd), self.acklink_ingress_logs[i], self.datalink_egress_logs[i]))
 
             if self.server_side == 'remote':
                 if self.local_if:
@@ -410,43 +420,39 @@ class Test:
                 scp_cmd = 'scp -C %s:' % self.rd['addr']
                 scp_cmd += '%(log)s %(log)s'
 
-                if self.server_side == 'remote':
-                    check_call(scp_cmd % {'log': self.ts_ilogs[i]}, shell=True)
-                    check_call(scp_cmd % {'log': self.ts_elogs[i]}, shell=True)
+                if self.sender_side == 'remote':
+                    check_call(scp_cmd % {'log': self.acklink_ingress_logs[i]}, shell=True)
+                    check_call(scp_cmd % {'log': self.datalink_egress_logs[i]}, shell=True)
                 else:
-                    check_call(scp_cmd % {'log': self.tc_ilogs[i]}, shell=True)
-                    check_call(scp_cmd % {'log': self.tc_elogs[i]}, shell=True)
+                    check_call(scp_cmd % {'log': self.datalink_ingress_logs[i]}, shell=True)
+                    check_call(scp_cmd % {'log': self.acklink_egress_logs[i]}, shell=True)
 
             uid = uuid.uuid4()
             datalink_tun_log = (
-                '/tmp/pantheon-tmp/datalink-tun%s-%s.log' % (tun_id, uid))
+                '/tmp/pantheon-tmp/%s_flow%s_uid%s.log.merged'
+                % (self.datalink_name, tun_id, uid))
             acklink_tun_log = (
-                '/tmp/pantheon-tmp/acklink-tun%s-%s.log' % (tun_id, uid))
-            if self.sender_side == self.server_side:
-                s2c_log = datalink_tun_log
-                c2s_log = acklink_tun_log
-            else:
-                s2c_log = acklink_tun_log
-                c2s_log = datalink_tun_log
+                '/tmp/pantheon-tmp/%s_flow%s_uid%s.log.merged'
+                % (self.acklink_name, tun_id, uid))
 
-            cmd = ['merge-tunnel-logs', 'single', '-i', self.ts_ilogs[i],
-                   '-e', self.tc_elogs[i], '-o', c2s_log]
+            cmd = ['merge-tunnel-logs', 'single', '-i', self.datalink_ingress_logs[i],
+                   '-e', self.datalink_egress_logs[i], '-o', datalink_tun_log]
             check_call(cmd)
 
-            cmd = ['merge-tunnel-logs', 'single', '-i', self.tc_ilogs[i],
-                   '-e', self.ts_elogs[i], '-o', s2c_log]
+            cmd = ['merge-tunnel-logs', 'single', '-i', self.acklink_ingress_logs[i],
+                   '-e', self.acklink_ingress_logs[i], '-o', acklink_tun_log]
             check_call(cmd)
 
             datalink_tun_logs.append(datalink_tun_log)
             acklink_tun_logs.append(acklink_tun_log)
 
-        cmd = ['merge-tunnel-logs', 'multiple', '-o', self.datalink_log]
+        cmd = ['merge-tunnel-logs', 'multiple', '-o', self.datalink_log_path]
         if not self.remote:
             cmd += ['--link-log', self.mm_datalink_log]
         cmd += datalink_tun_logs
         check_call(cmd)
 
-        cmd = ['merge-tunnel-logs', 'multiple', '-o', self.acklink_log]
+        cmd = ['merge-tunnel-logs', 'multiple', '-o', self.acklink_log_path]
         if not self.remote:
             cmd += ['--link-log', self.mm_acklink_log]
         cmd += acklink_tun_logs
