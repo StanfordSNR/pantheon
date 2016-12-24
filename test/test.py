@@ -135,7 +135,7 @@ class Test:
             self.test_end_time = strftime('%a, %d %b %Y %H:%M:%S %z')
         else:
             signal.alarm(0)
-            self.stderr.write('Test exited before time limit')
+            sys.stderr.write('Test exited before time limit')
             exit(1)
         finally:
             os.killpg(os.getpgid(proc_first.pid), signal.SIGKILL)
