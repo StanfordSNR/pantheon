@@ -1,0 +1,13 @@
+diff --git a/datagrump/sender.cc b/datagrump/sender.cc
+index 98714a1..deb73a8 100644
+--- a/datagrump/sender.cc
++++ b/datagrump/sender.cc
+@@ -98,7 +98,7 @@ void DatagrumpSender::got_ack( const uint64_t timestamp,
+ void DatagrumpSender::send_datagram( void )
+ {
+   /* All messages use the same dummy payload */
+-  static const string dummy_payload( 1424, 'x' );
++  static const string dummy_payload( 1388, 'x' );
+ 
+   ContestMessage cm( sequence_number_++, dummy_payload );
+   cm.set_send_timestamp();
