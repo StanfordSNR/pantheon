@@ -180,16 +180,16 @@ class Test:
             uid = uuid.uuid4()
 
             self.datalink_ingress_logs.append(
-                '/tmp/pantheon-tmp/%s_flow%s_uid_%s.log.ingress'
+                '/tmp/pantheon-tmp/%s_flow%s_uid%s.log.ingress'
                 % (self.datalink_name, tun_id, uid))
             self.datalink_egress_logs.append(
-                '/tmp/pantheon-tmp/%s_flow%s_uid_%s.log.egress'
+                '/tmp/pantheon-tmp/%s_flow%s_uid%s.log.egress'
                 % (self.datalink_name, tun_id, uid))
             self.acklink_ingress_logs.append(
-                '/tmp/pantheon-tmp/%s_flow%s_uid_%s.log.ingress'
+                '/tmp/pantheon-tmp/%s_flow%s_uid%s.log.ingress'
                 % (self.acklink_name, tun_id, uid))
             self.acklink_egress_logs.append(
-                '/tmp/pantheon-tmp/%s_flow%s_uid_%s.log.egress'
+                '/tmp/pantheon-tmp/%s_flow%s_uid%s.log.egress'
                 % (self.acklink_name, tun_id, uid))
 
         if self.remote and self.ntp_addr:
@@ -453,7 +453,7 @@ class Test:
 
             cmd = ['merge-tunnel-logs', 'single', '-i',
                    self.acklink_ingress_logs[i], '-e',
-                   self.acklink_ingress_logs[i], '-o', acklink_tun_log]
+                   self.acklink_egress_logs[i], '-o', acklink_tun_log]
             check_call(cmd)
 
             datalink_tun_logs.append(datalink_tun_log)
