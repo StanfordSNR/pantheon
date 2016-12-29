@@ -42,8 +42,3 @@
 	path = third_party/genericCC
 	url = https://github.com/venkatarun95/genericCC
   ignore = dirty
-[submodule "third_party/koho_rtt"]
-	path = third_party/koho_rtt
-	url = https://github.com/greghill/koho_cc.git
-	branch = koho_rtt
-  ignore = dirty

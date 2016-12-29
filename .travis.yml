@@ -25,7 +25,6 @@ env:
         - CMD='test/pre_setup.py && test/setup.py default_tcp && test/setup.py default_tcp && test/test.py -f 2 -t 10 default_tcp'
         - CMD='test/pre_setup.py && test/setup.py vegas       && test/setup.py vegas       && test/test.py -f 2 -t 10 vegas'
         - CMD='test/pre_setup.py && test/setup.py koho_cc     && test/setup.py koho_cc     && test/test.py -f 2 -t 10 koho_cc'
-        - CMD='test/pre_setup.py && test/setup.py koho_rtt    && test/setup.py koho_rtt    && test/test.py -f 2 -t 10 koho_rtt'
         - CMD='test/pre_setup.py && test/setup.py ledbat      && test/setup.py ledbat      && test/test.py -f 2 -t 10 ledbat'
         - CMD='test/pre_setup.py && test/setup.py pcc         && test/setup.py pcc         && test/test.py -f 2 -t 10 pcc'
         - CMD='test/pre_setup.py && test/setup.py verus       && test/setup.py verus       && test/test.py -f 2 -t 10 verus'
