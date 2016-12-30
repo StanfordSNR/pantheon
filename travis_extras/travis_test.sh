@@ -1,4 +1,22 @@
-#! /bin/bash -x
+#! /bin/bash -xe
+
+echo "Adding credentials to ~/.ssh for testing."
+echo "Do NOT run this on your personal account."
+echo "Ctrl-C to exit."
+
+sleep 3
+
+if [ -e ~/.ssh/id_rsa ]
+then
+    echo "id_rsa already exists, exiting"
+    exit 1
+fi
+
+if [ -e ~/.ssh/id_rsa.pub ]
+then
+    echo "id_rsa.pub already exists, exiting"
+    exit 1
+fi
 
 cp travis_extras/id_rsa ~/.ssh/id_rsa
 cp travis_extras/id_rsa.pub ~/.ssh/id_rsa.pub
