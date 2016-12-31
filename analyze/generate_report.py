@@ -177,7 +177,7 @@ class GenerateReport:
                     '\\PantheonFig{%(acklink_throughput)s}\n\n'
                     '\\PantheonFig{%(acklink_delay)s}\n\n' % str_dict)
 
-                if cc != self.cc_schemes[-1]:
+                if cc != self.cc_schemes[-1] or run_id != self.run_times:
                     self.latex.write('\\newpage\n\n')
 
         self.latex.write('\\end{document}')
