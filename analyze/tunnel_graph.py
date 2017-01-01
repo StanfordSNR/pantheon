@@ -44,7 +44,7 @@ class TunnelGraph:
         self.delay_graph = args.delay_graph
 
     def ms_to_bin(self, ts, first_ts):
-        return (ts - first_ts) / self.ms_per_bin
+        return int((ts - first_ts) / self.ms_per_bin)
 
     def bin_to_s(self, bin_id):
         return bin_id * self.ms_per_bin / 1000.0
@@ -82,7 +82,7 @@ class TunnelGraph:
                 continue
 
             items = line.split()
-            ts = int(items[0])
+            ts = float(items[0])
             event_type = items[1]
             num_bits = int(items[2]) * 8
 
@@ -153,7 +153,7 @@ class TunnelGraph:
                         total_last_departure = ts
 
                     # store delays in a list for each flow and sort later
-                    delay = int(items[3])
+                    delay = float(items[3])
                     if flow_id not in self.delays:
                         self.delays[flow_id] = []
                         self.delays_t[flow_id] = []
@@ -362,7 +362,7 @@ class TunnelGraph:
 
         if self.total_percentile_delay is not None:
             sys.stderr.write('95th percentile per-packet one-way delay: '
-                             '%.0f ms\n' % self.total_percentile_delay)
+                             '%.3f ms\n' % self.total_percentile_delay)
 
         if self.total_loss_rate is not None:
             sys.stderr.write('Loss rate: %.2f%%\n'
@@ -378,7 +378,7 @@ class TunnelGraph:
             if (flow_id in self.percentile_delay and
                     self.percentile_delay[flow_id] is not None):
                 sys.stderr.write('95th percentile per-packet one-way delay: '
-                                 '%.0f ms\n' % self.percentile_delay[flow_id])
+                                 '%.3f ms\n' % self.percentile_delay[flow_id])
 
             if (flow_id in self.loss_rate and
                     self.loss_rate[flow_id] is not None):
