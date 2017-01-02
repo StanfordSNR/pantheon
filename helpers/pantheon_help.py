@@ -80,8 +80,12 @@ def get_friendly_names(cc_schemes):
     src_dir = path.abspath(path.join(path.dirname(__file__), '../src'))
     for cc in cc_schemes:
         cc_src = path.join(src_dir, cc + '.py')
-        cc_name = check_output(['python', cc_src, 'friendly_name']).strip()
-        friendly_names[cc] = cc_name if cc_name else cc
+        try:
+            cc_name = check_output(['python', cc_src, 'friendly_name']).strip()
+        except subprocess.CalledProcessError:
+            sys.stderr.write( "%s not found in repository, skipping friendly name" % cc_src )
+            cc_name = cc
+        friendly_names[cc] = cc_name
     return friendly_names
 
 
