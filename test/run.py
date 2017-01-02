@@ -120,7 +120,7 @@ def main():
         run_setup = False
 
     cc_schemes = ['default_tcp', 'vegas', 'koho_cc', 'ledbat', 'pcc', 'verus',
-                  'scream', 'sprout', 'webrtc', 'quic', 'copa']
+                  'scream', 'sprout', 'webrtc', 'quic', 'copa', 'saturator']
 
     if args.random_order:
         random.shuffle(cc_schemes)
