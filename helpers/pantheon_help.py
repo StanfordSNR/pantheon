@@ -125,6 +125,7 @@ def get_color_names(cc_schemes):
         'vegas': 'gold',
         'verus': 'skyblue',
         'webrtc': 'olive',
+        'saturator': 'purple',
     }
 
     for cc in cc_schemes:
@@ -148,6 +149,7 @@ def get_marker_names(cc_schemes):
         'vegas': 'h',
         'verus': 'H',
         'webrtc': 'D',
+        'saturator': '+',
     }
 
     for cc in cc_schemes:
