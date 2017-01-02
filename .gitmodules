@@ -39,6 +39,10 @@
   url = https://github.com/StanfordLPNG/pantheon-tunnel.git
   ignore = dirty
 [submodule "third_party/genericCC"]
-	path = third_party/genericCC
-	url = https://github.com/venkatarun95/genericCC
+  path = third_party/genericCC
+  url = https://github.com/venkatarun95/genericCC
+  ignore = dirty
+[submodule "third_party/pantheon-stimuli"]
+  path = third_party/pantheon-stimuli
+  url = https://github.com/StanfordLPNG/pantheon-stimuli.git
   ignore = dirty
