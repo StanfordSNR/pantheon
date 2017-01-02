@@ -29,10 +29,6 @@ def parse_arguments():
 
     args = parser.parse_args()
 
-    if not args.throughput_graph or not args.delay_graph:
-        sys.stderr.write('Must specify the paths of output graphs\n')
-        exit(1)
-
     return args
 
 
@@ -387,8 +383,10 @@ class TunnelGraph:
 
     def tunnel_graph(self):
         self.parse_tunnel_log()
-        self.plot_throughput_graph()
-        self.plot_delay_graph()
+        if self.throughput_graph:
+            self.plot_throughput_graph()
+        if self.delay_graph:
+            self.plot_delay_graph()
         self.print_statistics()
 
 
