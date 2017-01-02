@@ -32,6 +32,7 @@ env:
         - CMD='test/pre_setup.py && test/setup.py sprout      && test/setup.py sprout      && test/test.py -f 2 -t 10 sprout'
         - CMD='test/pre_setup.py && test/setup.py taova       && test/setup.py taova       && test/test.py -f 2 -t 10 taova'
         - CMD='test/pre_setup.py && test/setup.py copa        && test/setup.py copa        && test/test.py -f 2 -t 10 copa'
+        - CMD='test/pre_setup.py && test/setup.py copa        && test/setup.py copa        && test/test.py -f 2 -t 10 saturator'
 
 script:
   - eval $CMD
