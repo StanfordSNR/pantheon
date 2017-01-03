@@ -164,6 +164,12 @@ def build_arg_dict():
         'help': 'directory containing logs for analysis (default .)',
     }
 
+    arg_dict['--no-plots'] = {
+        'action': 'store_true',
+        'dest': 'no_plots',
+        'help': 'don\'t output plots',
+    }
+
     arg_dict['--s3-link'] = {
         'metavar': 'URL',
         'action': 'store',
@@ -265,7 +271,9 @@ def parse_arguments(filename):
             '--local-addr', '--sender-side', '--local-interface',
             '--remote-interface', '--run-id', '--downlink-trace',
             '--uplink-trace', '--ntp-addr', 'cc'])
-    elif filename == 'plot_summary.py' or filename == 'generate_report.py':
+    elif filename == 'plot_summary.py':
+        add_arg_list(parser, arg_dict, ['--data-dir', '--include-acklink', '--no-plots'])
+    elif filename == 'generate_report.py':
         add_arg_list(parser, arg_dict, ['--data-dir', '--include-acklink'])
     elif filename == 'full_experiment_plot.py':
         add_arg_list(parser, arg_dict, ['--ms-per-bin', '--data-dir'])
