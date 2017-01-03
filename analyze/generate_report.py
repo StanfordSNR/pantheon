@@ -26,6 +26,8 @@ class GenerateReport:
         self.cc_schemes = self.metadata_dict['cc_schemes'].split()
         self.flows = int(self.metadata_dict['flows'])
 
+        self.include_acklink = args.include_acklink
+
     def describe_metadata(self):
         metadata = self.metadata_dict
 
@@ -156,7 +158,12 @@ class GenerateReport:
                 str_dict = {'cc_name': cc_name,
                             'run_id': run_id,
                             'stats_info': stats_info}
-                for link_t in ['datalink', 'acklink']:
+
+                link_directions = ['datalink']
+                if self.include_acklink:
+                    link_directions.append('acklink')
+
+                for link_t in link_directions :
                     for metric_t in ['throughput', 'delay']:
                         graph_path = path.join(
                             self.data_dir, cc + '_%s_%s_run%s.png' %
@@ -172,10 +179,12 @@ class GenerateReport:
                     'Run %(run_id)s: Report of %(cc_name)s --- Data Link\n\n'
                     '\\PantheonFig{%(datalink_throughput)s}\n\n'
                     '\\PantheonFig{%(datalink_delay)s}\n\n'
-                    '\\newpage\n\n'
-                    'Run %(run_id)s: Report of %(cc_name)s --- ACK Link\n\n'
-                    '\\PantheonFig{%(acklink_throughput)s}\n\n'
-                    '\\PantheonFig{%(acklink_delay)s}\n\n' % str_dict)
+                    '\\newpage\n\n' % str_dict)
+                if self.include_acklink:
+                    self.latex.write(
+                        'Run %(run_id)s: Report of %(cc_name)s --- ACK Link\n\n'
+                        '\\PantheonFig{%(acklink_throughput)s}\n\n'
+                        '\\PantheonFig{%(acklink_delay)s}\n\n' % str_dict)
 
                 if cc != self.cc_schemes[-1] or run_id != self.run_times:
                     self.latex.write('\\newpage\n\n')
