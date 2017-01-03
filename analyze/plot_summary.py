@@ -34,6 +34,8 @@ class PlotSummary:
         self.flows = int(metadata_dict['flows'])
         self.timezone = None
 
+        self.include_acklink = args.include_acklink
+
         self.experiment_title = ''
         if ('remote_information' in metadata_dict and
                 'local_information' in metadata_dict):
@@ -70,7 +72,11 @@ class PlotSummary:
         procs = []
         error = False
 
-        for link_t in ['datalink', 'acklink']:
+        link_directions = ['datalink']
+        if self.include_acklink:
+            link_directions.append('acklink')
+
+        for link_t in link_directions:
             log_name = log_prefix + '_%s_run%s.log' % (link_t, run_id)
             log_path = path.join(self.data_dir, log_name)
 

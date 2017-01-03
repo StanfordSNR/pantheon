@@ -191,6 +191,12 @@ def build_arg_dict():
         'help': 'congestion control schemes',
     }
 
+    arg_dict['--include-acklink'] = {
+        'action': 'store_true',
+        'dest': 'include_acklink',
+        'help': 'include acklink analysis',
+    }
+
     arg_dict['--no-pre-setup'] = {
         'action': 'store_true',
         'dest': 'no_pre_setup',
@@ -260,12 +266,12 @@ def parse_arguments(filename):
             '--remote-interface', '--run-id', '--downlink-trace',
             '--uplink-trace', '--ntp-addr', 'cc'])
     elif filename == 'plot_summary.py' or filename == 'generate_report.py':
-        add_arg_list(parser, arg_dict, ['--data-dir'])
+        add_arg_list(parser, arg_dict, ['--data-dir', '--include-acklink'])
     elif filename == 'plot_throughput_time.py':
         add_arg_list(parser, arg_dict, ['--ms-per-bin', '--data-dir'])
     elif filename == 'analyze.py':
         add_arg_list(parser, arg_dict, [
-            '--s3-link', '--s3-dir-prefix', '--data-dir', '--no-pre-setup'])
+            '--s3-link', '--s3-dir-prefix', '--data-dir', '--no-pre-setup', '--include-acklink'])
     elif filename == 'run.py':
         add_arg_list(parser, arg_dict, [
             '-r', '-t', '-f', '--interval', '--tunnel-server',

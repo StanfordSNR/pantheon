@@ -32,9 +32,14 @@ def main():
     if not args.no_pre_setup:
         check_call(['python', analyze_pre_setup])
 
-    check_call(['python', plot_summary])
-    check_call(['python', generate_report])
+    plot_summary_cmd = ['python', plot_summary]
+    generate_report_cmd = ['python', generate_report]
+    if args.include_acklink:
+        plot_summary_cmd.append('--include-acklink')
+        generate_report_cmd.append('--include-acklink')
 
+    check_call(plot_summary_cmd)
+    check_call(generate_report_cmd)
 
 if __name__ == '__main__':
     main()
