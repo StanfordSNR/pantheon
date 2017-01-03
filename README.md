@@ -1,96 +1,100 @@
 [![Build Status](https://travis-ci.org/StanfordLPNG/pantheon.svg?branch=master)]
 (https://travis-ci.org/StanfordLPNG/pantheon)
 
+# Disclaimer:
+This is unfinished research software. Multiple scripts run commands as root to install prerequisite programs, update package lists, etc. Our scripts will write to the filesystem in the pantheon folder and in /tmp/. We have not implemented most of the programs run by our wrappers. Those programs may write to the filesytem (for example, Verus will write files like `client_45191.out` into the current working directory when it is called). We never run third party programs as root, but we can not guarantee they will never try to escalate privaledge to root.
+
+Run at your own risk.
+
 # Pantheon of Congestion Control
-Pantheon tests can be run locally over emulated mahimahi link or between local
-and remote machines over real networks.
+The Pantheon has wrappers for many popular and research congestion control schemes. It allows them to run over a common interface and has tools to benchmark and compare their performance.
+Pantheon tests can be run locally over an emulated link using [mahimahi](http://mahimahi.mit.edu/) or over the internet to a remote machine.
 
 ## Preparation
-On local machine (and remote machine), clone the repository and get submodules:
+Many of the tools and programs run by the Pantheon are git submodules in the `third_party` folder.
+To clone this repository, including submodules, run:
 
 ```
-git clone https://github.com/StanfordLPNG/pantheon.git
+git clone --recursive https://github.com/StanfordLPNG/pantheon.git
+```
+
+To add submodules after cloning, run:
+```
 git submodule update --init
 ```
 
-Install dependencies to generate summary plots and reports of experiments:
+
+## Running the Pantheon
+Currently supported schemes can be found in `src/`. Running:
 
 ```
-sudo apt-get install texlive python-matplotlib ntp
+test/run.py
 ```
 
-## Setup
-First, change directory to `test` and run:
+Will setup and run all congestion control schemes in the Pantheon locally (and remotely if the `-r` flag is used). Multiple flows can be run simultaneously with `-f`. The running time of each scheme can be specified with `-t` and the entire experiment can be run multiple times using `--run-times`. Logs of all packets sent and recieved will be written to `test/` for later analysis.
 
+
+Run `test/run.py -h` for detailed usage and additional optional arguments.
+
+
+To run over an arbitrary set of mahimahi shells locally run:
 ```
-./pre_setup.py
-```
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 
-Then
-
-```
-./setup.py congestion-control
-```
-
-Currently the supported `congestion-control` is `default_tcp`, `vegas`,
-`ledbat`, `pcc`, `scream`, `sprout`, `verus`, `koho_cc`, `webrtc` and `quic`.
-
-Alternatively, set up on both local and remote machines:
-
-```
-./pre_setup.py -r REMOTE:PANTHEON-DIR
-./setup.py -r REMOTE:PANTHEON-DIR congestion-control
+test/run.py --run-only setup
+mm-delay 50 mm-loss uplink .1 mm-loss downlink .1 mm-link /usr/share/mahimahi/traces/TMobile-LTE-short.up /usr/share/mahimahi/traces/TMobile-LTE-short.down -- sh -c 'test/run.py -r $USER@$MAHIMAHI_BASE:pantheon --run-only test'  # assumes pantheon in home directory
 ```
 
-Run `./setup.py -h` for detailed usage.
-
-## Test
-Test congestion control schemes on local machine:
-
+## Pantheon analysis
+Before perorming analysis run:
 ```
-./test.py [-t RUNTIME] [-f FLOWS] congestion-control
+analysis/analysis_pre_setup.py
 ```
 
-or between local machine and remote machine:
+To analyze experiment logs in the `test/` directory run:
+```
+analyze/analyze.py --data-dir test/
+```
+This will generate charts and `pantheon_report.pdf `in the `data-dir` folder
+
+
+To compare two Pantheon experiments, one can use `analyze/compare_two_runs.py` with directories, xz archives, or archive url's from Pantheon experiments.
+
+
+## Running a single congestion control scheme
+Before performing experiments individually run:
+```
+test/pre_setup.py
+```
+
+To make and install the `sprout` and it's dependencies run:
 
 ```
-./test.py -r REMOTE:PANTHEON-DIR [-t RUNTIME] [-f FLOWS] congestion-control
+test/setup.py sprout
 ```
 
-`-f 0` indicates that no tunnels would be created in the tests; otherwise,
-there will be `FLOWS` tunnels created to run a congestion control scheme.
-Notice that if `-r` is given, `FLOWS` must be positive.
+Run `test/setup.py -h` for detailed usage and additional optional arguments.
 
-Alternatively, run
-
+To test `sprout` over an emulated link run:
 ```
-./run.py [-r REMOTE:PANTHEON-DIR] [-t RUNTIME] [-f FLOWS]
+test/test.py [-t RUNTIME] [-f FLOWS] congestion-control
 ```
 
-to set up and test all congestion control schemes. In addition, a summary
-report `pantheon_report.pdf` of the experiments will be generated.
-
-Run `./test.py -h` and `./run.py -h` for detailed usage, including more
-optional arguments.
-
-## Usage of Individual Scheme
-Change directory to `src` first.
-
+To setup and test `sprout` over the wide area to a remote machine run:
 ```
-# print the dependencies required to be installed
-./<congestion-control>.py deps
+test/pre_setup.py -r REMOTE:PANTHEON-DIR
+test/setup.py -r REMOTE:PANTHEON-DIR sprout
+test/test.py -r REMOTE:PANTHEON-DIR [-t RUNTIME] [-f FLOWS] sprout
+```
 
-# perform build commands for scheme
-./<congestion-control>.py build
+Run `test/test.py -h` for detailed usage and additional optional arguments.
 
-# run initialize commands after building and before running
-./<congestion-control>.py init
+## Running schemes without any logging
+Run `test/pre_setup.py` and `test/setup.py <congestion-control>` first.
 
-# find running order for scheme
+Find running order for scheme:
+```
 ./<congestion-control>.py who_goes_first
-
-# find friendly name of scheme
-./<congestion-control>.py friendly_name
 ```
 
 Depending on the output of `who_goes_first`, run
