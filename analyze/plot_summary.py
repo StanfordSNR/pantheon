@@ -12,14 +12,15 @@ import matplotlib.ticker as ticker
 from os import path
 from time import strftime
 from datetime import datetime
+from multiprocessing.pool import ThreadPool
 from helpers.pantheon_help import (check_output, get_friendly_names, Popen,
                                    PIPE, get_color_names, get_marker_names)
 from helpers.parse_arguments import parse_arguments
 
 
 class PlotSummary:
-    def __init__(self, args):
-        self.data_dir = path.abspath(args.data_dir)
+    def __init__(self, no_plots, include_acklink, data_dir):
+        self.data_dir = path.abspath(data_dir)
         analyze_dir = path.dirname(__file__)
         self.tunnel_graph = path.join(analyze_dir, 'tunnel_graph.py')
         self.src_dir = path.abspath(path.join(analyze_dir, '../src'))
@@ -34,7 +35,8 @@ class PlotSummary:
         self.flows = int(metadata_dict['flows'])
         self.timezone = None
 
-        self.include_acklink = args.include_acklink
+        self.include_acklink = include_acklink
+        self.no_plots = no_plots
 
         self.experiment_title = ''
         if ('remote_information' in metadata_dict and
@@ -85,14 +87,18 @@ class PlotSummary:
                 error = True
                 continue
 
-            tput_graph = cc + '_%s_throughput_run%s.png' % (link_t, run_id)
-            tput_graph_path = path.join(self.data_dir, tput_graph)
+            cmd = [self.tunnel_graph]
 
-            delay_graph = cc + '_%s_delay_run%s.png' % (link_t, run_id)
-            delay_graph_path = path.join(self.data_dir, delay_graph)
+            if not self.no_plots:
+                tput_graph = cc + '_%s_throughput_run%s.png' % (link_t, run_id)
+                tput_graph_path = path.join(self.data_dir, tput_graph)
+                cmd += ['--throughput', tput_graph_path]
 
-            cmd = [self.tunnel_graph, '--throughput', tput_graph_path,
-                   '--delay', delay_graph_path, '500', log_path]
+                delay_graph = cc + '_%s_delay_run%s.png' % (link_t, run_id)
+                delay_graph_path = path.join(self.data_dir, delay_graph)
+                cmd += ['--delay', delay_graph_path]
+
+            cmd += ['500', log_path]
 
             try:
                 proc = Popen(cmd, stderr=PIPE)
@@ -167,8 +173,14 @@ class PlotSummary:
             self.data[cc] = []
             cc_name = self.friendly_names[cc]
 
+
+            pool = ThreadPool(processes=self.run_times)
+            results = dict()
             for run_id in xrange(1, 1 + self.run_times):
-                (tput, delay, for_stats) = self.parse_tunnel_log(cc, run_id)
+                results[run_id] = pool.apply_async(self.parse_tunnel_log, args=(cc, run_id))
+
+            for run_id in xrange(1, 1 + self.run_times):
+                (tput, delay, for_stats) = results[run_id].get()
                 ofst = self.parse_stats_log(cc, run_id, for_stats)
 
                 if not tput or not delay:
@@ -178,6 +190,7 @@ class PlotSummary:
                 if ofst:
                     if not self.worst_abs_ofst or ofst > self.worst_abs_ofst:
                         self.worst_abs_ofst = ofst
+        return self.data
 
     def plot_throughput_delay(self):
         min_delay = None
@@ -257,14 +270,16 @@ class PlotSummary:
 
     def plot_summary(self):
         self.friendly_names = get_friendly_names(self.cc_schemes)
-        self.generate_data()
-        self.plot_throughput_delay()
+        data = self.generate_data()
+        if not self.no_plots:
+            self.plot_throughput_delay()
+        return data
 
 
 def main():
     args = parse_arguments(path.basename(__file__))
 
-    plot_summary = PlotSummary(args)
+    plot_summary = PlotSummary(args.no_plots, args.include_acklink, args.data_dir)
     plot_summary.plot_summary()
 
 
