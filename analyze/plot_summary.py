@@ -21,7 +21,7 @@ class PlotSummary:
     def __init__(self, args):
         self.data_dir = path.abspath(args.data_dir)
         analyze_dir = path.dirname(__file__)
-        self.parse_packet_logs = path.join(analyze_dir, 'parse_packet_logs.py')
+        self.parse_tunnel_log = path.join(analyze_dir, 'parse_tunnel_log.py')
         self.src_dir = path.abspath(path.join(analyze_dir, '../src'))
 
         # load pantheon_metadata.json as a dictionary
@@ -91,7 +91,7 @@ class PlotSummary:
             delay_graph = cc + '_%s_delay_run%s.png' % (link_t, run_id)
             delay_graph_path = path.join(self.data_dir, delay_graph)
 
-            cmd = [self.parse_packet_logs, '--throughput', tput_graph_path,
+            cmd = [self.parse_tunnel_log, '--throughput', tput_graph_path,
                    '--delay', delay_graph_path, '500', log_path]
 
             try:
