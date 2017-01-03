@@ -9,6 +9,7 @@ import pantheon_helpers
 import matplotlib_agg
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+import multiprocessing
 from os import path
 from time import strftime
 from datetime import datetime
@@ -174,7 +175,7 @@ class PlotSummary:
             cc_name = self.friendly_names[cc]
 
 
-            pool = ThreadPool(processes=self.run_times)
+            pool = ThreadPool(processes=min(multiprocessing.cpu_count(), self.run_times))
             results = dict()
             for run_id in xrange(1, 1 + self.run_times):
                 results[run_id] = pool.apply_async(self.parse_tunnel_log, args=(cc, run_id))
