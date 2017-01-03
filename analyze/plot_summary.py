@@ -174,11 +174,12 @@ class PlotSummary:
             self.data[cc] = []
             cc_name = self.friendly_names[cc]
 
-
-            pool = ThreadPool(processes=min(multiprocessing.cpu_count(), self.run_times))
+            pool = ThreadPool(processes=min(multiprocessing.cpu_count(),
+                                            self.run_times))
             results = dict()
             for run_id in xrange(1, 1 + self.run_times):
-                results[run_id] = pool.apply_async(self.parse_tunnel_log, args=(cc, run_id))
+                results[run_id] = pool.apply_async(self.parse_tunnel_log,
+                                                   args=(cc, run_id))
 
             for run_id in xrange(1, 1 + self.run_times):
                 (tput, delay, for_stats) = results[run_id].get()
@@ -280,7 +281,8 @@ class PlotSummary:
 def main():
     args = parse_arguments(path.basename(__file__))
 
-    plot_summary = PlotSummary(args.no_plots, args.include_acklink, args.data_dir)
+    plot_summary = PlotSummary(args.no_plots, args.include_acklink,
+                               args.data_dir)
     plot_summary.plot_summary()
 
 

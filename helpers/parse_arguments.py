@@ -61,7 +61,8 @@ def build_arg_dict():
         'metavar': 'ADDR',
         'action': 'store',
         'dest': 'ntp_addr',
-        'help': 'IP address or domain of ntp server to check clock offset with',
+        'help': 'IP address or domain of ntp server '
+                'to check clock offset with',
     }
 
     arg_dict['--sender-side'] = {
@@ -128,7 +129,7 @@ def build_arg_dict():
         'dest': 'run_times',
         'type': int,
         'default': 1,
-        'help': 'run times of each test',
+        'help': 'run times of each test (default 1)',
     }
 
     arg_dict['--downlink-trace'] = {
@@ -272,14 +273,16 @@ def parse_arguments(filename):
             '--remote-interface', '--run-id', '--downlink-trace',
             '--uplink-trace', '--ntp-addr', 'cc'])
     elif filename == 'plot_summary.py':
-        add_arg_list(parser, arg_dict, ['--data-dir', '--include-acklink', '--no-plots'])
+        add_arg_list(parser, arg_dict,
+                     ['--data-dir', '--include-acklink', '--no-plots'])
     elif filename == 'generate_report.py':
         add_arg_list(parser, arg_dict, ['--data-dir', '--include-acklink'])
     elif filename == 'full_experiment_plot.py':
         add_arg_list(parser, arg_dict, ['--ms-per-bin', '--data-dir'])
     elif filename == 'analyze.py':
         add_arg_list(parser, arg_dict, [
-            '--s3-link', '--s3-dir-prefix', '--data-dir', '--no-pre-setup', '--include-acklink'])
+            '--s3-link', '--s3-dir-prefix', '--data-dir', '--no-pre-setup',
+            '--include-acklink'])
     elif filename == 'run.py':
         add_arg_list(parser, arg_dict, [
             '-r', '-t', '-f', '--interval', '--tunnel-server',

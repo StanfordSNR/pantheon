@@ -163,7 +163,7 @@ class GenerateReport:
                 if self.include_acklink:
                     link_directions.append('acklink')
 
-                for link_t in link_directions :
+                for link_t in link_directions:
                     for metric_t in ['throughput', 'delay']:
                         graph_path = path.join(
                             self.data_dir, cc + '_%s_%s_run%s.png' %
@@ -182,7 +182,8 @@ class GenerateReport:
                     '\\newpage\n\n' % str_dict)
                 if self.include_acklink:
                     self.latex.write(
-                        'Run %(run_id)s: Report of %(cc_name)s --- ACK Link\n\n'
+                        'Run %(run_id)s: '
+                        'Report of %(cc_name)s --- ACK Link\n\n'
                         '\\PantheonFig{%(acklink_throughput)s}\n\n'
                         '\\PantheonFig{%(acklink_delay)s}\n\n' % str_dict)
 
