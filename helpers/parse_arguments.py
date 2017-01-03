@@ -267,7 +267,7 @@ def parse_arguments(filename):
             '--uplink-trace', '--ntp-addr', 'cc'])
     elif filename == 'plot_summary.py' or filename == 'generate_report.py':
         add_arg_list(parser, arg_dict, ['--data-dir', '--include-acklink'])
-    elif filename == 'plot_throughput_time.py':
+    elif filename == 'full_experiment_plot.py':
         add_arg_list(parser, arg_dict, ['--ms-per-bin', '--data-dir'])
     elif filename == 'analyze.py':
         add_arg_list(parser, arg_dict, [
