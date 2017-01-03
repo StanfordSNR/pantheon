@@ -83,7 +83,8 @@ def get_friendly_names(cc_schemes):
         try:
             cc_name = check_output(['python', cc_src, 'friendly_name']).strip()
         except subprocess.CalledProcessError:
-            sys.stderr.write( "%s not found in repository, skipping friendly name" % cc_src )
+            sys.stderr.write('%s not found in repository, '
+                             'skipping friendly name' % cc_src)
             cc_name = cc
         friendly_names[cc] = cc_name
     return friendly_names
@@ -125,7 +126,8 @@ def get_color_names(cc_schemes):
         'vegas': 'gold',
         'verus': 'skyblue',
         'webrtc': 'olive',
-        'saturator': 'purple',
+        'saturator': 'pink',
+        'greg_saturator': 'purple',
     }
 
     for cc in cc_schemes:
@@ -150,6 +152,7 @@ def get_marker_names(cc_schemes):
         'verus': 'H',
         'webrtc': 'D',
         'saturator': '+',
+        'greg_saturator': 'x',
     }
 
     for cc in cc_schemes:
