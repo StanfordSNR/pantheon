@@ -18,7 +18,7 @@ def main():
            'texlive python-matplotlib python-numpy python-pip')
     check_call(cmd, shell=True)
 
-    # install tabulate for compare_two_runs.py
+    # install tabulate for compare_two_experiments.py
     cmd = ('sudo pip install tabulate')
     check_call(cmd, shell=True)
 
