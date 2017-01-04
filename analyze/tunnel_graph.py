@@ -33,11 +33,11 @@ def parse_arguments():
 
 
 class TunnelGraph:
-    def __init__(self, args):
-        self.ms_per_bin = int(args.ms_per_bin)
-        self.tunnel_log = args.tunnel_log
-        self.throughput_graph = args.throughput_graph
-        self.delay_graph = args.delay_graph
+    def __init__(self, ms_per_bin, tunnel_log, throughput_graph, delay_graph):
+        self.ms_per_bin = int(ms_per_bin)
+        self.tunnel_log = tunnel_log
+        self.throughput_graph = throughput_graph
+        self.delay_graph = delay_graph
 
     def ms_to_bin(self, ts, first_ts):
         return int((ts - first_ts) / self.ms_per_bin)
@@ -258,9 +258,11 @@ class TunnelGraph:
         self.total_avg_egress = 0
         if total_last_departure == total_first_departure:
             self.total_avg_egress = 0
+            self.total_duration = 0
         else:
-            delta = 1000.0 * (total_last_departure - total_first_departure)
-            self.total_avg_egress = total_departures / delta
+            self.total_duration = total_last_departure - total_first_departure
+            self.total_avg_egress = total_departures / (1000.0 *
+                                                        self.total_duration)
 
         self.total_percentile_delay = None
         if total_delays:
@@ -341,45 +343,42 @@ class TunnelGraph:
         fig.savefig(self.delay_graph, bbox_extra_artists=(lgd,),
                     bbox_inches='tight', pad_inches=0.2)
 
-    def print_statistics(self):
-        sys.stderr.write('-- Total:\n')
+    def statistics_string(self):
+        ret = '-- Total:\n'
         if self.avg_capacity is not None:
-            sys.stderr.write('Average capacity: %.2f Mbit/s\n'
-                             % self.avg_capacity)
+            ret += 'Average capacity: %.2f Mbit/s\n' % self.avg_capacity
 
         if self.total_avg_egress is not None:
-            sys.stderr.write('Average throughput: %.2f Mbit/s'
-                             % self.total_avg_egress)
+            ret += 'Average throughput: %.2f Mbit/s' % self.total_avg_egress
 
         if self.avg_capacity is not None and self.total_avg_egress is not None:
-            sys.stderr.write(' (%.1f%% utilization)' % (
-                100.0 * self.total_avg_egress / self.avg_capacity))
-        sys.stderr.write('\n')
+            ret += ' (%.1f%% utilization)' % (100.0 * self.total_avg_egress /
+                                              self.avg_capacity)
+        ret += '\n'
 
         if self.total_percentile_delay is not None:
-            sys.stderr.write('95th percentile per-packet one-way delay: '
+            ret += ('95th percentile per-packet one-way delay: '
                              '%.3f ms\n' % self.total_percentile_delay)
 
         if self.total_loss_rate is not None:
-            sys.stderr.write('Loss rate: %.2f%%\n'
-                             % (self.total_loss_rate * 100.0))
+            ret += 'Loss rate: %.2f%%\n' % (self.total_loss_rate * 100.0)
 
         for flow_id in self.flows:
-            sys.stderr.write('-- Flow %s:\n' % flow_id)
+            ret += '-- Flow %s:\n' % flow_id
             if (flow_id in self.avg_egress and
                     self.avg_egress[flow_id] is not None):
-                sys.stderr.write('Average throughput: %.2f Mbit/s\n'
+                ret += ('Average throughput: %.2f Mbit/s\n'
                                  % self.avg_egress[flow_id])
 
             if (flow_id in self.percentile_delay and
                     self.percentile_delay[flow_id] is not None):
-                sys.stderr.write('95th percentile per-packet one-way delay: '
+                ret += ('95th percentile per-packet one-way delay: '
                                  '%.3f ms\n' % self.percentile_delay[flow_id])
 
             if (flow_id in self.loss_rate and
                     self.loss_rate[flow_id] is not None):
-                sys.stderr.write('Loss rate: %.2f%%\n'
-                                 % (self.loss_rate[flow_id] * 100.0))
+                ret += 'Loss rate: %.2f%%\n' % (self.loss_rate[flow_id] * 100.)
+        return ret
 
     def tunnel_graph(self):
         self.parse_tunnel_log()
@@ -387,14 +386,17 @@ class TunnelGraph:
             self.plot_throughput_graph()
         if self.delay_graph:
             self.plot_delay_graph()
-        self.print_statistics()
+
+        plt.close('all')
+        return (self.total_avg_egress, self.total_percentile_delay, self.total_duration, self.statistics_string())
 
 
 def main():
     args = parse_arguments()
 
-    tunnel_graph = TunnelGraph(args)
+    tunnel_graph = TunnelGraph(args.ms_per_bin, args.tunnel_log, args.throughput_graph, args.delay_graph)
     tunnel_graph.tunnel_graph()
+    sys.stderr.write(tunnel_graph.statistics_string())
 
 
 if __name__ == '__main__':
