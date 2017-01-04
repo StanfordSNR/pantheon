@@ -2,7 +2,7 @@
 (https://travis-ci.org/StanfordLPNG/pantheon)
 
 # Disclaimer:
-This is unfinished research software. Multiple scripts run commands as root to install prerequisite programs, update package lists, etc. Our scripts will write to the filesystem in the pantheon folder and in /tmp/. We have not implemented most of the programs run by our wrappers. Those programs may write to the filesytem (for example, Verus will write files like `client_45191.out` into the current working directory when it is called). We never run third party programs as root, but we can not guarantee they will never try to escalate privaledge to root.
+This is unfinished research software. Multiple scripts run commands as root to install prerequisite programs, update package lists, etc. Our scripts will write to the filesystem in the pantheon folder and in /tmp/. We have not implemented most of the programs run by our wrappers. Those programs may write to the filesystem (for example, Verus will write files like `client_45191.out` into the current working directory when it is called). We never run third party programs as root, but we can not guarantee they will never try to escalate privilege to root.
 
 Run at your own risk.
 
@@ -31,7 +31,7 @@ Currently supported schemes can be found in `src/`. Running:
 test/run.py
 ```
 
-Will setup and run all congestion control schemes in the Pantheon locally (and remotely if the `-r` flag is used). Multiple flows can be run simultaneously with `-f`. The running time of each scheme can be specified with `-t` and the entire experiment can be run multiple times using `--run-times`. Logs of all packets sent and recieved will be written to `test/` for later analysis.
+Will setup and run all congestion control schemes in the Pantheon locally (and remotely if the `-r` flag is used). Multiple flows can be run simultaneously with `-f`. The running time of each scheme can be specified with `-t` and the entire experiment can be run multiple times using `--run-times`. Logs of all packets sent and received will be written to `test/` for later analysis.
 
 
 Run `test/run.py -h` for detailed usage and additional optional arguments.
@@ -46,7 +46,7 @@ mm-delay 50 mm-loss uplink .1 mm-loss downlink .1 mm-link /usr/share/mahimahi/tr
 ```
 
 ## Pantheon analysis
-Before perorming analysis run:
+Before performing analysis run:
 ```
 analysis/analysis_pre_setup.py
 ```
@@ -58,7 +58,7 @@ analyze/analyze.py --data-dir test/
 This will generate charts and `pantheon_report.pdf `in the `data-dir` folder
 
 
-To compare two Pantheon experiments, one can use `analyze/compare_two_runs.py` with directories, xz archives, or archive url's from Pantheon experiments.
+To compare two Pantheon experiments, one can use `analyze/compare_two_runs.py` with directories, xz archives, or archive URLs from Pantheon experiments.
 
 
 ## Running a single congestion control scheme
