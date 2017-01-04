@@ -52,12 +52,16 @@ common_schemes = exp_1_schemes & exp_2_schemes
 
 throughput_lines = []
 delay_lines = []
+loss_lines = []
 
 for scheme in common_schemes:
     exp1_tputs = [x[0] for x in exp1_data[scheme]]
     exp1_delays = [x[1] for x in exp1_data[scheme]]
+    exp1_loss = [100. * x[2] for x in exp1_data[scheme]]
+
     exp2_tputs = [x[0] for x in exp2_data[scheme]]
     exp2_delays = [x[1] for x in exp2_data[scheme]]
+    exp2_loss = [100. * x[2] for x in exp2_data[scheme]]
 
     exp1_runs = len(exp1_tputs)
     exp2_runs = len(exp2_tputs)
@@ -87,10 +91,22 @@ for scheme in common_schemes:
         exp1_delay_std, exp2_delay_std,
         get_difference(exp1_delay_std, exp2_delay_std)])
 
+    exp1_loss_mean = np.mean(exp1_loss)
+    exp2_loss_mean = np.mean(exp2_loss)
+    exp1_loss_std = np.std(exp1_loss)
+    exp2_loss_std = np.std(exp2_loss)
+
+    loss_lines.append([
+        scheme, exp1_runs, exp2_runs, '% loss rate',
+        exp1_loss_mean, exp2_loss_mean,
+        get_difference(exp1_loss_mean, exp2_loss_mean),
+        exp1_loss_std, exp2_loss_std,
+        get_difference(exp1_loss_std, exp2_loss_std)])
+
 output_headers = [
     'scheme', 'exp 1 runs', 'exp 2 runs', 'aggregate metric', 'mean 1',
     'mean 2', '% difference', 'std dev 1', 'std dev 2', '% difference']
 
 print('Comparison of: %s and %s' % (exp_dirs[0], exp_dirs[1]))
-print tabulate(throughput_lines + delay_lines,
+print tabulate(throughput_lines + delay_lines + loss_lines,
                headers=output_headers, floatfmt=".2f", stralign="right")

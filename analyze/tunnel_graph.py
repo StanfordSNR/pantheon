@@ -357,8 +357,8 @@ class TunnelGraph:
         ret += '\n'
 
         if self.total_percentile_delay is not None:
-            ret += ('95th percentile per-packet one-way delay: '
-                             '%.3f ms\n' % self.total_percentile_delay)
+            ret += ('95th percentile per-packet one-way delay: %.3f ms\n' %
+                    self.total_percentile_delay)
 
         if self.total_loss_rate is not None:
             ret += 'Loss rate: %.2f%%\n' % (self.total_loss_rate * 100.0)
@@ -367,13 +367,13 @@ class TunnelGraph:
             ret += '-- Flow %s:\n' % flow_id
             if (flow_id in self.avg_egress and
                     self.avg_egress[flow_id] is not None):
-                ret += ('Average throughput: %.2f Mbit/s\n'
-                                 % self.avg_egress[flow_id])
+                ret += ('Average throughput: %.2f Mbit/s\n' %
+                        self.avg_egress[flow_id])
 
             if (flow_id in self.percentile_delay and
                     self.percentile_delay[flow_id] is not None):
-                ret += ('95th percentile per-packet one-way delay: '
-                                 '%.3f ms\n' % self.percentile_delay[flow_id])
+                ret += ('95th percentile per-packet one-way delay: %.3f ms\n' %
+                        self.percentile_delay[flow_id])
 
             if (flow_id in self.loss_rate and
                     self.loss_rate[flow_id] is not None):
@@ -388,13 +388,16 @@ class TunnelGraph:
             self.plot_delay_graph()
 
         plt.close('all')
-        return (self.total_avg_egress, self.total_percentile_delay, self.total_duration, self.statistics_string())
+        return (self.total_avg_egress, self.total_percentile_delay,
+                self.total_loss_rate, self.total_duration,
+                self.statistics_string())
 
 
 def main():
     args = parse_arguments()
 
-    tunnel_graph = TunnelGraph(args.ms_per_bin, args.tunnel_log, args.throughput_graph, args.delay_graph)
+    tunnel_graph = TunnelGraph(args.ms_per_bin, args.tunnel_log,
+                               args.throughput_graph, args.delay_graph)
     tunnel_graph.tunnel_graph()
     sys.stderr.write(tunnel_graph.statistics_string())
 

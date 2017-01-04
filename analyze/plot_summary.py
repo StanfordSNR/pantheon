@@ -36,7 +36,7 @@ class PlotSummary:
         self.cc_schemes = metadata_dict['cc_schemes'].split()
         self.flows = int(metadata_dict['flows'])
         self.timezone = None
-        self.runtime= int(metadata_dict['runtime'])
+        self.runtime = int(metadata_dict['runtime'])
 
         self.include_acklink = include_acklink
         self.no_plots = no_plots
@@ -72,6 +72,7 @@ class PlotSummary:
 
         tput = None
         delay = None
+        loss = None
         for_stats = None
 
         procs = []
@@ -102,7 +103,10 @@ class PlotSummary:
 
             try:
                 sys.stderr.write("tunnel_graph %s\n" % log_path)
-                run_analysis = tunnel_graph.TunnelGraph(500, log_path, tput_graph_path, delay_graph_path).tunnel_graph()
+                run_analysis = tunnel_graph.TunnelGraph(500, log_path,
+                                                        tput_graph_path,
+                                                        delay_graph_path
+                                                        ).tunnel_graph()
             except:
                 sys.stderr.write('Warning: "tunnel_graph %s" failed with an '
                                  'exception.\n' % log_path)
@@ -112,16 +116,19 @@ class PlotSummary:
                 continue
 
             if link_t == 'datalink':
-                (tput, delay, test_runtime, for_stats) = run_analysis
-                if test_runtime < (750 * self.runtime): # .75 * 1000 ms/s
-                    sys.stderr.write('Warning: "tunnel_graph %s" had duration %.2f seconds but should have been around %d seconds. Ignoring this run.\n'
-                                     % (log_path, (test_runtime / 1000.), self.runtime))
+                (tput, delay, loss, test_runtime, for_stats) = run_analysis
+                if test_runtime < (750 * self.runtime):  # .75 * 1000 ms/s
+                    sys.stderr.write('Warning: "tunnel_graph %s" had duration '
+                                     '%.2f seconds but should have been around'
+                                     '%d seconds. Ignoring this run.\n' %
+                                     (log_path, (test_runtime / 1000.),
+                                      self.runtime))
                     error = True
 
         if error:
-            return (None, None, None)
+            return (None, None, None, None)
         else:
-            return (tput, delay, for_stats)
+            return (tput, delay, loss, for_stats)
 
     def parse_stats_log(self, cc, run_id, for_stats):
         stats_log_path = path.join(
@@ -171,13 +178,13 @@ class PlotSummary:
                                                    args=(cc, run_id))
 
             for run_id in xrange(1, 1 + self.run_times):
-                (tput, delay, for_stats) = results[run_id].get()
+                (tput, delay, loss_rate, for_stats) = results[run_id].get()
                 ofst = self.parse_stats_log(cc, run_id, for_stats)
 
                 if not tput or not delay:
                     continue
 
-                self.data[cc].append((tput, delay))
+                self.data[cc].append((tput, delay, loss_rate))
                 if ofst:
                     if not self.worst_abs_ofst or ofst > self.worst_abs_ofst:
                         self.worst_abs_ofst = ofst
@@ -199,7 +206,7 @@ class PlotSummary:
             cc_name = self.friendly_names[cc]
             color = color_names[cc]
             marker = marker_names[cc]
-            y_data, x_data = zip(*value)
+            y_data, x_data, _ = zip(*value)
 
             # find min and max delay
             cc_min_delay = min(x_data)
