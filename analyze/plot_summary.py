@@ -10,6 +10,7 @@ import matplotlib_agg
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import multiprocessing
+import tunnel_graph
 from os import path
 from time import strftime
 from datetime import datetime
@@ -35,6 +36,7 @@ class PlotSummary:
         self.cc_schemes = metadata_dict['cc_schemes'].split()
         self.flows = int(metadata_dict['flows'])
         self.timezone = None
+        self.runtime= int(metadata_dict['runtime'])
 
         self.include_acklink = include_acklink
         self.no_plots = no_plots
@@ -88,46 +90,33 @@ class PlotSummary:
                 error = True
                 continue
 
-            cmd = [self.tunnel_graph]
-
-            if not self.no_plots:
+            if self.no_plots:
+                tput_graph_path = None
+                delay_graph_path = None
+            else:
                 tput_graph = cc + '_%s_throughput_run%s.png' % (link_t, run_id)
                 tput_graph_path = path.join(self.data_dir, tput_graph)
-                cmd += ['--throughput', tput_graph_path]
 
                 delay_graph = cc + '_%s_delay_run%s.png' % (link_t, run_id)
                 delay_graph_path = path.join(self.data_dir, delay_graph)
-                cmd += ['--delay', delay_graph_path]
-
-            cmd += ['500', log_path]
 
             try:
-                proc = Popen(cmd, stderr=PIPE)
-                results = proc.communicate()[1]
+                sys.stderr.write("tunnel_graph %s\n" % log_path)
+                run_analysis = tunnel_graph.TunnelGraph(500, log_path, tput_graph_path, delay_graph_path).tunnel_graph()
             except:
-                sys.stderr.write('Warning: "%s" failed with an exception.\n'
-                                 % ' '.join(cmd))
-                error = True
-
-            if not error and proc.returncode != 0:
-                sys.stderr.write('Warning: "%s" failed with an non-zero return'
-                                 ' code.\n' % ' '.join(cmd))
+                sys.stderr.write('Warning: "tunnel_graph %s" failed with an '
+                                 'exception.\n' % log_path)
                 error = True
 
             if error:
                 continue
 
             if link_t == 'datalink':
-                for_stats = results
-
-                ret = re.search(r'Average throughput: (.*?) Mbit/s', results)
-                if ret and not tput:
-                    tput = float(ret.group(1))
-
-                ret = re.search(r'95th percentile per-packet one-way '
-                                'delay: (.*?) ms', results)
-                if ret and not delay:
-                    delay = float(ret.group(1))
+                (tput, delay, test_runtime, for_stats) = run_analysis
+                if test_runtime < (750 * self.runtime): # .75 * 1000 ms/s
+                    sys.stderr.write('Warning: "tunnel_graph %s" had duration %.2f seconds but should have been around %d seconds. Ignoring this run.\n'
+                                     % (log_path, (test_runtime / 1000.), self.runtime))
+                    error = True
 
         if error:
             return (None, None, None)
