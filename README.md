@@ -2,12 +2,18 @@
 (https://travis-ci.org/StanfordLPNG/pantheon)
 
 # Disclaimer:
-This is unfinished research software. Multiple scripts run commands as root to install prerequisite programs, update package lists, etc. Our scripts will write to the filesystem in the pantheon folder and in /tmp/. We have not implemented most of the programs run by our wrappers. Those programs may write to the filesystem (for example, Verus will write files like `client_45191.out` into the current working directory when it is called). We never run third party programs as root, but we can not guarantee they will never try to escalate privilege to root.
+This is unfinished research software.
+Multiple scripts run commands as root to install prerequisite programs, update package lists, etc.
+Our scripts will write to the filesystem in the pantheon folder and in /tmp/.
+We have not implemented most of the programs run by our wrappers.
+Those programs may write to the filesystem (for example, Verus will write files like `client_45191.out`  and a folder named `verus_tmp` into the current working directory when it is called).
+We never run third party programs as root, but we can not guarantee they will never try to escalate privilege to root.
 
 Run at your own risk.
 
 # Pantheon of Congestion Control
-The Pantheon has wrappers for many popular and research congestion control schemes. It allows them to run over a common interface and has tools to benchmark and compare their performance.
+The Pantheon has wrappers for many popular and research congestion control schemes.
+It allows them to run over a common interface and has tools to benchmark and compare their performance.
 Pantheon tests can be run locally over an emulated link using [mahimahi](http://mahimahi.mit.edu/) or over the internet to a remote machine.
 
 ## Preparation
@@ -31,7 +37,10 @@ Currently supported schemes can be found in `src/`. Running:
 test/run.py
 ```
 
-Will setup and run all congestion control schemes in the Pantheon locally (and remotely if the `-r` flag is used). Multiple flows can be run simultaneously with `-f`. The running time of each scheme can be specified with `-t` and the entire experiment can be run multiple times using `--run-times`. Logs of all packets sent and received will be written to `test/` for later analysis.
+Will setup and run all congestion control schemes in the Pantheon locally (and remotely if the `-r` flag is used).
+Multiple flows can be run simultaneously with `-f`.
+The running time of each scheme can be specified with `-t` and the entire experiment can be run multiple times using `--run-times`.
+Logs of all packets sent and received will be written to `test/` for later analysis.
 
 
 Run `test/run.py -h` for detailed usage and additional optional arguments.
