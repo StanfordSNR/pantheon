@@ -67,7 +67,7 @@ analyze/analyze.py --data-dir test/
 This will generate charts and `pantheon_report.pdf `in the `data-dir` folder
 
 
-To compare two Pantheon experiments, one can use `analyze/compare_two_runs.py` with directories, xz archives, or archive URLs from Pantheon experiments.
+To compare two Pantheon experiments, one can use `analyze/compare_two_experiments.py` with directories, xz archives, or archive URLs from Pantheon experiments.
 
 
 ## Running a single congestion control scheme
