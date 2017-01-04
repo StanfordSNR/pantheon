@@ -10,15 +10,13 @@ from helpers.pantheon_help import (check_call, make_sure_path_exists,
 
 
 def main():
-    # prepare /tmp/pantheon-tmp
+    # prepare /tmp/pantheon-tmp  to store .tex flie
     make_sure_path_exists('/tmp/pantheon-tmp')
 
     # install texlive, matplotlib, etc.
     cmd = ('sudo apt-get -yq --force-yes install '
            'texlive python-matplotlib python-numpy')
     check_call(cmd, shell=True)
-
-    install_pantheon_tunnel()
 
 
 if __name__ == '__main__':
