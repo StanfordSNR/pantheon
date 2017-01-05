@@ -132,20 +132,30 @@ def build_arg_dict():
         'help': 'run times of each test (default 1)',
     }
 
-    arg_dict['--downlink-trace'] = {
-        'metavar': 'TRACE',
-        'action': 'store',
-        'dest': 'downlink_trace',
-        'default': '12mbps_trace',
-        'help': 'downlink trace (default 12mbps_trace)',
-    }
-
     arg_dict['--uplink-trace'] = {
         'metavar': 'TRACE',
         'action': 'store',
         'dest': 'uplink_trace',
         'default': '12mbps_trace',
-        'help': 'uplink trace (default 12mbps_trace)',
+        'help': 'uplink trace to pass to mm-link when running locally '
+                '(default 12mbps_trace)',
+    }
+
+    arg_dict['--downlink-trace'] = {
+        'metavar': 'TRACE',
+        'action': 'store',
+        'dest': 'downlink_trace',
+        'default': '12mbps_trace',
+        'help': 'downlink trace to pass to mm-link when running locally '
+                '(default 12mbps_trace)',
+    }
+
+    arg_dict['--extra-mm-cmds'] = {
+        'metavar': 'CMD_LIST',
+        'action': 'store',
+        'dest': 'extra_mm_cmds',
+        'help': 'mahimahi shells to be run in addition to mm-link when running'
+                'locally',
     }
 
     arg_dict['--ms-per-bin'] = {
@@ -270,8 +280,8 @@ def parse_arguments(filename):
         add_arg_list(parser, arg_dict, [
             '-r', '-t', '-f', '--interval', '--tunnel-server',
             '--local-addr', '--sender-side', '--local-interface',
-            '--remote-interface', '--run-id', '--downlink-trace',
-            '--uplink-trace', '--ntp-addr', 'cc'])
+            '--remote-interface', '--run-id', '--uplink-trace',
+            '--downlink-trace', '--extra-mm-cmds', '--ntp-addr', 'cc'])
     elif filename == 'plot_summary.py':
         add_arg_list(parser, arg_dict,
                      ['--data-dir', '--include-acklink', '--no-plots'])
@@ -288,7 +298,8 @@ def parse_arguments(filename):
             '-r', '-t', '-f', '--interval', '--tunnel-server',
             '--local-addr', '--sender-side', '--local-interface',
             '--remote-interface', '--local-info', '--remote-info',
-            '--run-only', '--random-order', '--run-times', '--ntp-addr'])
+            '--run-only', '--random-order', '--run-times', '--ntp-addr',
+            '--uplink-trace', '--downlink-trace', '--extra-mm-cmds'])
 
     args = parser.parse_args()
     validate_args(args)

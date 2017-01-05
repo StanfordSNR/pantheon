@@ -28,6 +28,7 @@ class Test:
         self.run_id = args.run_id
         self.downlink_trace = args.downlink_trace
         self.uplink_trace = args.uplink_trace
+        self.extra_mm_cmds = args.extra_mm_cmds
         self.worst_abs_ofst = None
         self.ntp_addr = args.ntp_addr
 
@@ -97,7 +98,12 @@ class Test:
                 uplink_log = self.mm_acklink_log
                 downlink_log = self.mm_datalink_log
 
-            self.mm_link_cmd = [
+            if self.extra_mm_cmds:
+                self.mm_link_cmd = self.extra_mm_cmds.split()
+            else:
+                self.mm_link_cmd = []
+
+            self.mm_link_cmd += [
                 'mm-link', uplink_trace, downlink_trace,
                 '--uplink-log=' + uplink_log, '--downlink-log=' + downlink_log]
             self.rd = {}
