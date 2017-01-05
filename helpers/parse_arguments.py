@@ -124,7 +124,7 @@ def build_arg_dict():
     }
 
     arg_dict['--run-times'] = {
-        'metavar': 'TIMES',
+        'metavar': 'N',
         'action': 'store',
         'dest': 'run_times',
         'type': int,
@@ -135,7 +135,7 @@ def build_arg_dict():
     cc_schemes = 'default_tcp vegas koho_cc ledbat pcc verus scream sprout ' \
                  'webrtc quic copa saturator greg_saturator'
     arg_dict['--schemes'] = {
-        'metavar': 'SCHEMES',
+        'metavar': '\"SCHEME_1 SCHEME_2..\"',
         'action': 'store',
         'dest': 'schemes',
         'default': cc_schemes,
@@ -162,7 +162,7 @@ def build_arg_dict():
     }
 
     arg_dict['--extra-mm-cmds'] = {
-        'metavar': 'CMD_LIST',
+        'metavar': '\"CMD_1 CMD_2..\"',
         'action': 'store',
         'dest': 'extra_mm_cmds',
         'help': 'mahimahi shells to be run in addition to mm-link when running'
@@ -170,7 +170,7 @@ def build_arg_dict():
     }
 
     arg_dict['--extra-mm-link-args'] = {
-        'metavar': 'ARG_LIST',
+        'metavar': '\"ARG_1 ARG_2..\"',
         'action': 'store',
         'dest': 'extra_mm_link_args',
         'help': 'extra arguments to be passed to mm-link when running locally',
