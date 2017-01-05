@@ -155,7 +155,14 @@ def build_arg_dict():
         'action': 'store',
         'dest': 'extra_mm_cmds',
         'help': 'mahimahi shells to be run in addition to mm-link when running'
-                'locally',
+                ' locally',
+    }
+
+    arg_dict['--extra-mm-link-args'] = {
+        'metavar': 'ARG_LIST',
+        'action': 'store',
+        'dest': 'extra_mm_link_args',
+        'help': 'extra arguments to be passed to mm-link when running locally',
     }
 
     arg_dict['--ms-per-bin'] = {
@@ -281,7 +288,8 @@ def parse_arguments(filename):
             '-r', '-t', '-f', '--interval', '--tunnel-server',
             '--local-addr', '--sender-side', '--local-interface',
             '--remote-interface', '--run-id', '--uplink-trace',
-            '--downlink-trace', '--extra-mm-cmds', '--ntp-addr', 'cc'])
+            '--downlink-trace', '--extra-mm-cmds', '--extra-mm-link-args',
+            '--ntp-addr', 'cc'])
     elif filename == 'plot_summary.py':
         add_arg_list(parser, arg_dict,
                      ['--data-dir', '--include-acklink', '--no-plots'])
@@ -299,7 +307,8 @@ def parse_arguments(filename):
             '--local-addr', '--sender-side', '--local-interface',
             '--remote-interface', '--local-info', '--remote-info',
             '--run-only', '--random-order', '--run-times', '--ntp-addr',
-            '--uplink-trace', '--downlink-trace', '--extra-mm-cmds'])
+            '--uplink-trace', '--downlink-trace', '--extra-mm-cmds',
+            '--extra-mm-link-args'])
 
     args = parser.parse_args()
     validate_args(args)
