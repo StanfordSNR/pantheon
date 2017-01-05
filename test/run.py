@@ -112,6 +112,13 @@ def main():
         pre_setup_cmd += ['--remote-interface', args.remote_if]
         test_cmd += ['--remote-interface', args.remote_if]
 
+    if args.downlink_trace and not args.remote:
+        test_cmd += ['--downlink-trace', args.downlink_trace]
+    if args.uplink_trace and not args.remote:
+        test_cmd += ['--uplink-trace', args.uplink_trace]
+    if args.extra_mm_cmds and not args.remote:
+        test_cmd += ['--extra-mm-cmds', args.extra_mm_cmds]
+
     run_setup = True
     run_test = True
     if args.run_only == 'setup':
