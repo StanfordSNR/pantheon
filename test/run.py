@@ -32,9 +32,9 @@ def get_git_info(args, root_dir):
     return local_git_info
 
 
-def create_metadata_file(args, cc_schemes, git_info, metadata_fname):
+def create_metadata_file(args, git_info, metadata_fname):
     metadata = dict()
-    metadata['cc_schemes'] = ' '.join(cc_schemes)
+    metadata['cc_schemes'] = args.schemes
     metadata['runtime'] = args.runtime
     metadata['flows'] = args.flows
     metadata['interval'] = args.interval
@@ -69,11 +69,22 @@ def create_metadata_file(args, cc_schemes, git_info, metadata_fname):
         json.dump(metadata, metadata_file)
 
 
+def check_cc_schemes_valid(src_dir, cc_list):
+    for cc in cc_list:
+        src_file = path.join(src_dir, cc + '.py')
+        if not path.isfile(src_file):
+            sys.stderr.write('%s is not a valid scheme, aborting.\n' % cc)
+            return False
+
+    return True
+
+
 def main():
     # arguments and source files location setup
     args = parse_arguments(path.basename(__file__))
 
     test_dir = path.abspath(path.dirname(__file__))
+    src_dir = path.abspath(path.join(test_dir, '../src'))
     root_dir = path.abspath(path.join(test_dir, os.pardir))
     pre_setup_src = path.join(test_dir, 'pre_setup.py')
     setup_src = path.join(test_dir, 'setup.py')
@@ -128,9 +139,9 @@ def main():
     elif args.run_only == 'test':
         run_setup = False
 
-    cc_schemes = ['default_tcp', 'vegas', 'koho_cc', 'ledbat', 'pcc', 'verus',
-                  'scream', 'sprout', 'webrtc', 'quic', 'copa', 'saturator',
-                  'greg_saturator']
+    cc_schemes = args.schemes.split()
+    if not check_cc_schemes_valid(src_dir, cc_schemes):
+        exit(1)
 
     if args.random_order:
         random.shuffle(cc_schemes)
@@ -146,7 +157,7 @@ def main():
     error_in_test = False
     if run_test:
         git_info = get_git_info(args, root_dir)
-        create_metadata_file(args, cc_schemes, git_info, metadata_fname)
+        create_metadata_file(args, git_info, metadata_fname)
 
         sys.stderr.write('\n')
         for run_id in xrange(1, 1 + args.run_times):

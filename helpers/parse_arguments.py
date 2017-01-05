@@ -132,6 +132,17 @@ def build_arg_dict():
         'help': 'run times of each test (default 1)',
     }
 
+    cc_schemes = 'default_tcp vegas koho_cc ledbat pcc verus scream sprout ' \
+                 'webrtc quic copa saturator greg_saturator'
+    arg_dict['--schemes'] = {
+        'metavar': 'SCHEMES',
+        'action': 'store',
+        'dest': 'schemes',
+        'default': cc_schemes,
+        'help': 'what congestion control schemes to run '
+                '(default: \"%s\")' % cc_schemes,
+    }
+
     arg_dict['--uplink-trace'] = {
         'metavar': 'TRACE',
         'action': 'store',
@@ -308,7 +319,7 @@ def parse_arguments(filename):
             '--remote-interface', '--local-info', '--remote-info',
             '--run-only', '--random-order', '--run-times', '--ntp-addr',
             '--uplink-trace', '--downlink-trace', '--extra-mm-cmds',
-            '--extra-mm-link-args'])
+            '--extra-mm-link-args', '--schemes'])
 
     args = parser.parse_args()
     validate_args(args)
