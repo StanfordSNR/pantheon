@@ -118,6 +118,8 @@ def main():
         test_cmd += ['--uplink-trace', args.uplink_trace]
     if args.extra_mm_cmds and not args.remote:
         test_cmd += ['--extra-mm-cmds', args.extra_mm_cmds]
+    if args.extra_mm_link_args and not args.remote:
+        test_cmd += ['--extra-mm-link-args', args.extra_mm_link_args]
 
     run_setup = True
     run_test = True
