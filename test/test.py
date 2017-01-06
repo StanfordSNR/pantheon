@@ -28,7 +28,8 @@ class Test:
         self.run_id = args.run_id
         self.downlink_trace = args.downlink_trace
         self.uplink_trace = args.uplink_trace
-        self.extra_mm_cmds = args.extra_mm_cmds
+        self.prepend_mm_cmds = args.prepend_mm_cmds
+        self.append_mm_cmds = args.append_mm_cmds
         self.extra_mm_link_args = args.extra_mm_link_args
         self.worst_abs_ofst = None
         self.ntp_addr = args.ntp_addr
@@ -99,10 +100,10 @@ class Test:
                 uplink_log = self.mm_acklink_log
                 downlink_log = self.mm_datalink_log
 
-            if self.extra_mm_cmds:
-                self.mm_link_cmd = self.extra_mm_cmds.split()
-            else:
-                self.mm_link_cmd = []
+            self.mm_link_cmd = []
+
+            if self.prepend_mm_cmds:
+                self.mm_link_cmd += self.prepend_mm_cmds.split()
 
             self.mm_link_cmd += [
                 'mm-link', uplink_trace, downlink_trace,
@@ -110,6 +111,9 @@ class Test:
 
             if self.extra_mm_link_args:
                 self.mm_link_cmd += self.extra_mm_link_args.split()
+
+            if self.append_mm_cmds:
+                self.mm_link_cmd += self.append_mm_cmds.split()
 
             self.rd = {}
         else:  # remote setup
