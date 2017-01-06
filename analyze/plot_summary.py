@@ -21,8 +21,8 @@ from helpers.parse_arguments import parse_arguments
 
 
 class PlotSummary:
-    def __init__(self, args):
-        self.data_dir = path.abspath(args.data_dir)
+    def __init__(self, no_plots, include_acklink, data_dir):
+        self.data_dir = path.abspath(data_dir)
         analyze_dir = path.dirname(__file__)
         self.tunnel_graph = path.join(analyze_dir, 'tunnel_graph.py')
         self.src_dir = path.abspath(path.join(analyze_dir, '../src'))
@@ -38,9 +38,8 @@ class PlotSummary:
         self.timezone = None
         self.runtime = int(metadata_dict['runtime'])
 
-        self.include_acklink = args.include_acklink
-        self.no_plots = args.no_plots
-        self.print_data = args.print_data
+        self.include_acklink = include_acklink
+        self.no_plots = no_plots
 
         self.experiment_title = ''
         if ('remote_information' in metadata_dict and
@@ -267,37 +266,19 @@ class PlotSummary:
                     friendly_names[i], ha='center', va='bottom')
             i += 1
 
-    def pretty_print(self, data):
-        for cc in data:
-            data_sum = [0.0, 0.0, 0.0]
-            for run in data[cc]:
-                for i in xrange(3):
-                    data_sum[i] += run[i]
-
-            sys.stdout.write('%s %d ' % (cc, len(data[cc])))
-            for i in xrange(3):
-                sys.stdout.write('%.2f' % (data_sum[i] / len(data[cc])))
-                if i < 2:
-                    sys.stdout.write(' ')
-                else:
-                    sys.stdout.write('\n')
-
     def plot_summary(self):
         self.friendly_names = get_friendly_names(self.cc_schemes)
         data = self.generate_data()
         if not self.no_plots:
             self.plot_throughput_delay()
-
-        if self.print_data:
-            self.pretty_print(data)
-
         return data
 
 
 def main():
     args = parse_arguments(path.basename(__file__))
 
-    plot_summary = PlotSummary(args)
+    plot_summary = PlotSummary(args.no_plots, args.include_acklink,
+                               args.data_dir)
     plot_summary.plot_summary()
 
 

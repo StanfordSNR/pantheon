@@ -199,13 +199,6 @@ def build_arg_dict():
         'help': 'don\'t output plots',
     }
 
-    arg_dict['--print-data'] = {
-        'action': 'store_true',
-        'dest': 'print_data',
-        'help': 'print data to stdout with each line in the format: cc_scheme '
-                'runs avg_throughput 95th_percentile_delay loss_rate',
-    }
-
     arg_dict['--s3-link'] = {
         'metavar': 'URL',
         'action': 'store',
@@ -310,8 +303,7 @@ def parse_arguments(filename):
             '--ntp-addr', 'cc'])
     elif filename == 'plot_summary.py':
         add_arg_list(parser, arg_dict,
-                     ['--data-dir', '--include-acklink', '--no-plots',
-                      '--print-data'])
+                     ['--data-dir', '--include-acklink', '--no-plots'])
     elif filename == 'generate_report.py':
         add_arg_list(parser, arg_dict, ['--data-dir', '--include-acklink'])
     elif filename == 'full_experiment_plot.py':
