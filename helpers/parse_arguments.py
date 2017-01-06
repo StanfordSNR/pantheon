@@ -161,11 +161,19 @@ def build_arg_dict():
                 '(default 12mbps_trace)',
     }
 
-    arg_dict['--extra-mm-cmds'] = {
+    arg_dict['--prepend-mm-cmds'] = {
         'metavar': '\"CMD_1 CMD_2..\"',
         'action': 'store',
-        'dest': 'extra_mm_cmds',
-        'help': 'mahimahi shells to be run in addition to mm-link when running'
+        'dest': 'prepend_mm_cmds',
+        'help': 'mahimahi shells to be run in outside of mm-link when running'
+                ' locally',
+    }
+
+    arg_dict['--append-mm-cmds'] = {
+        'metavar': '\"CMD_1 CMD_2..\"',
+        'action': 'store',
+        'dest': 'append_mm_cmds',
+        'help': 'mahimahi shells to be run in inside of mm-link when running'
                 ' locally',
     }
 
@@ -257,6 +265,9 @@ def validate_args(args):
     sender_side = getattr(args, 'sender_side', None)
     remote_if = getattr(args, 'remote_if', None)
     remote_info = getattr(args, 'remote_info', None)
+    prepend_mm_cmds = getattr(args, 'prepend_mm_cmds', None)
+    append_mm_cmds = getattr(args, 'append_mm_cmds', None)
+    extra_mm_link_args = getattr(args, 'extra_mm_link_args', None)
 
     if remote_if:
         assert remote, '--remote-interface must run along with -r'
@@ -284,6 +295,12 @@ def validate_args(args):
         assert remote, (
             'local test can only run tunnel server and sender inside mm-link')
 
+    if remote:
+        assert not prepend_mm_cmds, '--prepend-mm-cmds can\'t be run with -r'
+        assert not append_mm_cmds, '--append-mm-cmds can\'t be run with -r'
+        assert not extra_mm_link_args, (
+                '--extra-mm-link-args can\'t be run with -r')
+
 
 def parse_arguments(filename):
     parser = argparse.ArgumentParser()
@@ -299,8 +316,8 @@ def parse_arguments(filename):
             '-r', '-t', '-f', '--interval', '--tunnel-server',
             '--local-addr', '--sender-side', '--local-interface',
             '--remote-interface', '--run-id', '--uplink-trace',
-            '--downlink-trace', '--extra-mm-cmds', '--extra-mm-link-args',
-            '--ntp-addr', 'cc'])
+            '--downlink-trace', '--prepend-mm-cmds', '--append-mm-cmds',
+            '--extra-mm-link-args', '--ntp-addr', 'cc'])
     elif filename == 'plot_summary.py':
         add_arg_list(parser, arg_dict,
                      ['--data-dir', '--include-acklink', '--no-plots'])
@@ -318,8 +335,8 @@ def parse_arguments(filename):
             '--local-addr', '--sender-side', '--local-interface',
             '--remote-interface', '--local-info', '--remote-info',
             '--run-only', '--random-order', '--run-times', '--ntp-addr',
-            '--uplink-trace', '--downlink-trace', '--extra-mm-cmds',
-            '--extra-mm-link-args', '--schemes'])
+            '--uplink-trace', '--downlink-trace', '--prepend-mm-cmds',
+            '--append-mm-cmds', '--extra-mm-link-args', '--schemes'])
 
     args = parser.parse_args()
     validate_args(args)
