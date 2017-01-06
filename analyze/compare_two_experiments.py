@@ -66,46 +66,46 @@ for scheme in common_schemes:
     exp1_runs = len(exp1_tputs)
     exp2_runs = len(exp2_tputs)
 
-    exp1_throughput_mean = np.mean(exp1_tputs)
-    exp2_throughput_mean = np.mean(exp2_tputs)
+    exp1_throughput_median = np.median(exp1_tputs)
+    exp2_throughput_median = np.median(exp2_tputs)
 
     exp1_throughput_std = np.std(exp1_tputs)
     exp2_throughput_std = np.std(exp2_tputs)
 
     throughput_lines.append([
         scheme, exp1_runs, exp2_runs, 'throughput (Mbit/s)',
-        exp1_throughput_mean, exp2_throughput_mean,
-        get_difference(exp1_throughput_mean, exp2_throughput_mean),
+        exp1_throughput_median, exp2_throughput_median,
+        get_difference(exp1_throughput_median, exp2_throughput_median),
         exp1_throughput_std, exp2_throughput_std,
         get_difference(exp1_throughput_std, exp2_throughput_std)])
 
-    exp1_delay_mean = np.mean(exp1_delays)
-    exp2_delay_mean = np.mean(exp2_delays)
+    exp1_delay_median = np.median(exp1_delays)
+    exp2_delay_median = np.median(exp2_delays)
     exp1_delay_std = np.std(exp1_delays)
     exp2_delay_std = np.std(exp2_delays)
 
     delay_lines.append([
         scheme, exp1_runs, exp2_runs, '95th percentile delay (ms)',
-        exp1_delay_mean, exp2_delay_mean,
-        get_difference(exp1_delay_mean, exp2_delay_mean),
+        exp1_delay_median, exp2_delay_median,
+        get_difference(exp1_delay_median, exp2_delay_median),
         exp1_delay_std, exp2_delay_std,
         get_difference(exp1_delay_std, exp2_delay_std)])
 
-    exp1_loss_mean = np.mean(exp1_loss)
-    exp2_loss_mean = np.mean(exp2_loss)
+    exp1_loss_median = np.median(exp1_loss)
+    exp2_loss_median = np.median(exp2_loss)
     exp1_loss_std = np.std(exp1_loss)
     exp2_loss_std = np.std(exp2_loss)
 
     loss_lines.append([
         scheme, exp1_runs, exp2_runs, '% loss rate',
-        exp1_loss_mean, exp2_loss_mean,
-        get_difference(exp1_loss_mean, exp2_loss_mean),
+        exp1_loss_median, exp2_loss_median,
+        get_difference(exp1_loss_median, exp2_loss_median),
         exp1_loss_std, exp2_loss_std,
         get_difference(exp1_loss_std, exp2_loss_std)])
 
 output_headers = [
-    'scheme', 'exp 1 runs', 'exp 2 runs', 'aggregate metric', 'mean 1',
-    'mean 2', '% difference', 'std dev 1', 'std dev 2', '% difference']
+    'scheme', 'exp 1 runs', 'exp 2 runs', 'aggregate metric', 'median 1',
+    'median 2', '% difference', 'std dev 1', 'std dev 2', '% difference']
 
 print('Comparison of: %s and %s' % (exp_dirs[0], exp_dirs[1]))
 print tabulate(throughput_lines + delay_lines + loss_lines,
