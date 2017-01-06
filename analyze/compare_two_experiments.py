@@ -10,9 +10,12 @@ import plot_summary
 from helpers.pantheon_help import check_call
 
 
-def get_difference(metric_1, metric_2):
-    return '{:+.2%}'.format((metric_2 - metric_1) / metric_1)
+def get_diff(metric_1, metric_2):
+    return (metric_2 - metric_1) / metric_1
 
+
+def difference_str(metric_1, metric_2):
+    return '{:+.2%}'.format(get_diff(metric_1, metric_2))
 
 parser = argparse.ArgumentParser()
 
@@ -54,6 +57,7 @@ throughput_lines = []
 delay_lines = []
 loss_lines = []
 
+score = 0.0
 for scheme in common_schemes:
     exp1_tputs = [x[0] for x in exp1_data[scheme]]
     exp1_delays = [x[1] for x in exp1_data[scheme]]
@@ -72,24 +76,28 @@ for scheme in common_schemes:
     exp1_throughput_std = np.std(exp1_tputs)
     exp2_throughput_std = np.std(exp2_tputs)
 
+    score += abs(get_diff(exp1_throughput_median, exp2_throughput_median))
+
     throughput_lines.append([
         scheme, exp1_runs, exp2_runs, 'throughput (Mbit/s)',
         exp1_throughput_median, exp2_throughput_median,
-        get_difference(exp1_throughput_median, exp2_throughput_median),
+        difference_str(exp1_throughput_median, exp2_throughput_median),
         exp1_throughput_std, exp2_throughput_std,
-        get_difference(exp1_throughput_std, exp2_throughput_std)])
+        difference_str(exp1_throughput_std, exp2_throughput_std)])
 
     exp1_delay_median = np.median(exp1_delays)
     exp2_delay_median = np.median(exp2_delays)
     exp1_delay_std = np.std(exp1_delays)
     exp2_delay_std = np.std(exp2_delays)
 
+    score += abs(get_diff(exp1_delay_median, exp2_delay_median))
+
     delay_lines.append([
         scheme, exp1_runs, exp2_runs, '95th percentile delay (ms)',
         exp1_delay_median, exp2_delay_median,
-        get_difference(exp1_delay_median, exp2_delay_median),
+        difference_str(exp1_delay_median, exp2_delay_median),
         exp1_delay_std, exp2_delay_std,
-        get_difference(exp1_delay_std, exp2_delay_std)])
+        difference_str(exp1_delay_std, exp2_delay_std)])
 
     exp1_loss_median = np.median(exp1_loss)
     exp2_loss_median = np.median(exp2_loss)
@@ -99,9 +107,9 @@ for scheme in common_schemes:
     loss_lines.append([
         scheme, exp1_runs, exp2_runs, '% loss rate',
         exp1_loss_median, exp2_loss_median,
-        get_difference(exp1_loss_median, exp2_loss_median),
+        difference_str(exp1_loss_median, exp2_loss_median),
         exp1_loss_std, exp2_loss_std,
-        get_difference(exp1_loss_std, exp2_loss_std)])
+        difference_str(exp1_loss_std, exp2_loss_std)])
 
 output_headers = [
     'scheme', 'exp 1 runs', 'exp 2 runs', 'aggregate metric', 'median 1',
@@ -110,3 +118,4 @@ output_headers = [
 print('Comparison of: %s and %s' % (exp_dirs[0], exp_dirs[1]))
 print tabulate(throughput_lines + delay_lines + loss_lines,
                headers=output_headers, floatfmt=".2f", stralign="right")
+print('Score: %.4f' % score)
