@@ -128,5 +128,8 @@ print('Comparison of: %s and %s' % (exp_dirs[0], exp_dirs[1]))
 print tabulate(throughput_lines + delay_lines + loss_lines,
                headers=output_headers, floatfmt=".2f", stralign="right")
 
-print('*Sum of absolute value median difference ratios for throughput and '
-      'delay for %s is:\n%.4f' % (', '.join(score_schemes), score))
+print('*Average median difference for throughput and delay '
+      'for %s is:' % ', '.join(score_schemes))
+
+score = score / (2 * len(score_schemes))
+print('{:.2%}'.format(score))
