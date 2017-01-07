@@ -59,6 +59,7 @@ delay_lines = []
 loss_lines = []
 
 score = 0.0
+std_score = 0.0
 score_candidate_schemes = ['default_tcp', 'vegas', 'ledbat', 'pcc', 'verus',
                            'scream', 'sprout', 'webrtc', 'quic']
 score_schemes = []
@@ -96,6 +97,10 @@ for scheme in sorted(common_schemes):
     if scheme in score_candidate_schemes:
         score += abs(get_diff(exp1_throughput_median, exp2_throughput_median))
         score += abs(get_diff(exp1_delay_median, exp2_delay_median))
+
+        std_score += abs(get_diff(exp1_throughput_std, exp2_throughput_std))
+        std_score += abs(get_diff(exp1_delay_std, exp2_delay_std))
+
         score_schemes.append(scheme)
         scheme = '*' + scheme
 
@@ -133,3 +138,9 @@ print('*Average median difference for throughput and delay '
 
 score = score / (2 * len(score_schemes))
 print('{:.2%}'.format(score))
+
+print('*Average stddev difference for throughput and delay '
+      'for %s is:' % ', '.join(sorted(score_schemes)))
+
+std_score = std_score / (2 * len(score_schemes))
+print('{:.2%}'.format(std_score))
