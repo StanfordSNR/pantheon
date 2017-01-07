@@ -15,11 +15,7 @@ def main():
 
     # install texlive, matplotlib, etc.
     cmd = ('sudo apt-get -yq --force-yes install '
-           'texlive python-matplotlib python-numpy python-pip')
-    check_call(cmd, shell=True)
-
-    # install tabulate for compare_two_experiments.py
-    cmd = ('sudo pip install tabulate')
+           'texlive python-matplotlib python-numpy python-tabulate')
     check_call(cmd, shell=True)
 
 
