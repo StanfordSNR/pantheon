@@ -18,6 +18,8 @@ def main():
            'texlive python-matplotlib python-numpy python-tabulate')
     check_call(cmd, shell=True)
 
+    install_pantheon_tunnel()
+
 
 if __name__ == '__main__':
     main()
