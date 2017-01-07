@@ -63,7 +63,7 @@ score_candidate_schemes = ['default_tcp', 'vegas', 'ledbat', 'pcc', 'verus',
                            'scream', 'sprout', 'webrtc', 'quic']
 score_schemes = []
 
-for scheme in common_schemes:
+for scheme in sorted(common_schemes):
     exp1_tputs = [x[0] for x in exp1_data[scheme]]
     exp1_delays = [x[1] for x in exp1_data[scheme]]
     exp1_loss = [100. * x[2] for x in exp1_data[scheme]]
@@ -129,7 +129,7 @@ print tabulate(throughput_lines + delay_lines + loss_lines,
                headers=output_headers, floatfmt=".2f", stralign="right")
 
 print('*Average median difference for throughput and delay '
-      'for %s is:' % ', '.join(score_schemes))
+      'for %s is:' % ', '.join(sorted(score_schemes)))
 
 score = score / (2 * len(score_schemes))
 print('{:.2%}'.format(score))
