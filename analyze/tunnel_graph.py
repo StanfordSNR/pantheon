@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys
+import math
 import argparse
 import numpy as np
 import matplotlib_agg
@@ -154,7 +155,7 @@ class TunnelGraph:
                         self.delays[flow_id] = []
                         self.delays_t[flow_id] = []
                     self.delays[flow_id].append(delay)
-                    self.delays_t[flow_id].append(ts / 1000.0)
+                    self.delays_t[flow_id].append((ts - first_ts) / 1000.0)
 
         tunlog.close()
 
@@ -314,12 +315,15 @@ class TunnelGraph:
         empty_graph = True
         fig, ax = plt.subplots()
 
+        max_delay = 0
         colors = ['r', 'y', 'b', 'g', 'c', 'm']
         color_i = 0
         for flow_id in self.flows:
             color = colors[color_i]
             if flow_id in self.delays and flow_id in self.delays_t:
                 empty_graph = False
+                max_delay = max(max_delay, max(self.delays_t[flow_id]))
+
                 ax.scatter(self.delays_t[flow_id], self.delays[flow_id], s=1,
                            color=color, marker='.', label='Flow %s per-packet'
                            ' one-way delay (95th percentile %.3f ms)'
@@ -333,6 +337,7 @@ class TunnelGraph:
             sys.stderr.write('No valid delay graph is generated\n')
             return
 
+        ax.set_xlim(0, int(math.ceil(max_delay)))
         ax.set_xlabel('Time (s)')
         ax.set_ylabel('Per-packet one-way delay (ms)')
         ax.grid()
