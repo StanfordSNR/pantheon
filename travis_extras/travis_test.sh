@@ -30,5 +30,5 @@ mkdir -p ~/.ssh/controlmasters
 
 test/run.py --run-only setup
 mm-delay 100 sh -c 'ssh -o "StrictHostKeyChecking=no" $USER@$MAHIMAHI_BASE exit; $EXTRA_MAHIMAHI_SHELLS test/run.py --run-only test -t 15 -r $USER@$MAHIMAHI_BASE:build/StanfordLPNG/pantheon $RUN_PY_EXTRAS'
-pip install matplotlib numpy
+pip install matplotlib numpy tabulate
 analyze/analyze.py --data-dir test
