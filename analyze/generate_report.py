@@ -87,6 +87,7 @@ class GenerateReport:
             recv_side = local_side
             send_side = remote_side
 
+        git_info = None
         if 'git_information' in metadata:
             git_info = metadata['git_information']
 
@@ -100,12 +101,13 @@ class GenerateReport:
             ntp_addr = metadata['ntp_addr']
             desc += '\n\nNTP offset measured against %s.' % ntp_addr
 
-        desc += (
-            '\\newline\n\n'
-            '\\begin{verbatim}\n'
-            '%s'
-            '\\end{verbatim}\n\n'
-            '\\newpage\n\n' % git_info)
+        if git_info is not None:
+            desc += (
+                '\\newline\n\n'
+                '\\begin{verbatim}\n'
+                '%s'
+                '\\end{verbatim}\n\n' % git_info)
+        desc += ('\\newpage\n\n')
 
         return desc
 
