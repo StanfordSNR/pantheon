@@ -40,8 +40,10 @@ for experiment in experiments:
     exp_dirs.append(experiment)
 
 
-exp1_data = plot_summary.PlotSummary(True, False, exp_dirs[0]).plot_summary()
-exp2_data = plot_summary.PlotSummary(True, False, exp_dirs[1]).plot_summary()
+exp1_data = plot_summary.PlotSummary(True, False, exp_dirs[0],
+                                     None).plot_summary()
+exp2_data = plot_summary.PlotSummary(True, False, exp_dirs[1],
+                                     None).plot_summary()
 
 '''
 print(exp1_data)

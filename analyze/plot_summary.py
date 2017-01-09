@@ -21,7 +21,7 @@ from helpers.parse_arguments import parse_arguments
 
 
 class PlotSummary:
-    def __init__(self, no_plots, include_acklink, data_dir):
+    def __init__(self, no_plots, include_acklink, data_dir, schemes):
         self.data_dir = path.abspath(data_dir)
         analyze_dir = path.dirname(__file__)
         self.tunnel_graph = path.join(analyze_dir, 'tunnel_graph.py')
@@ -33,13 +33,19 @@ class PlotSummary:
             metadata_dict = json.load(metadata_file)
 
         self.run_times = metadata_dict['run_times']
-        self.cc_schemes = metadata_dict['cc_schemes'].split()
         self.flows = int(metadata_dict['flows'])
         self.timezone = None
         self.runtime = int(metadata_dict['runtime'])
 
         self.include_acklink = include_acklink
         self.no_plots = no_plots
+
+        if schemes:
+            self.cc_schemes = schemes.split()
+            assert set(self.cc_schemes).issubset(
+                    set(metadata_dict['cc_schemes'].split()))
+        else:
+            self.cc_schemes = metadata_dict['cc_schemes'].split()
 
         self.experiment_title = ''
         if ('remote_information' in metadata_dict and
@@ -278,7 +284,7 @@ def main():
     args = parse_arguments(path.basename(__file__))
 
     plot_summary = PlotSummary(args.no_plots, args.include_acklink,
-                               args.data_dir)
+                               args.data_dir, args.analyze_schemes)
     plot_summary.plot_summary()
 
 

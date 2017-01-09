@@ -23,10 +23,15 @@ class GenerateReport:
             self.metadata_dict = json.load(metadata_file)
 
         self.run_times = self.metadata_dict['run_times']
-        self.cc_schemes = self.metadata_dict['cc_schemes'].split()
         self.flows = int(self.metadata_dict['flows'])
-
+        self.test_schemes = self.metadata_dict['cc_schemes'].split()
         self.include_acklink = args.include_acklink
+
+        if args.analyze_schemes:
+            self.analyze_schemes = args.analyze_schemes.split()
+            assert set(self.analyze_schemes).issubset(set(self.test_schemes))
+        else:
+            self.analyze_schemes = self.test_schemes
 
     def describe_metadata(self):
         metadata = self.metadata_dict
@@ -95,19 +100,23 @@ class GenerateReport:
             'Repeated the test of %d congestion control schemes %s.\n\n'
             'Each test lasted for %s running %s.\n\n'
             'Data path FROM %s TO %s.'
-            % (len(self.cc_schemes), times, runtime, flows, send_side,
+            % (len(self.test_schemes), times, runtime, flows, send_side,
                recv_side))
         if 'ntp_addr' in metadata:
             ntp_addr = metadata['ntp_addr']
             desc += '\n\nNTP offset measured against %s.' % ntp_addr
 
-        if git_info is not None:
+        if self.analyze_schemes != self.test_schemes:
+            desc += ('\n\nAnalysis performed on %s only.'
+                     % ', '.join(self.analyze_schemes).replace('_', '\\_'))
+
+        if git_info:
             desc += (
                 '\\newline\n\n'
                 '\\begin{verbatim}\n'
                 '%s'
                 '\\end{verbatim}\n\n' % git_info)
-        desc += ('\\newpage\n\n')
+        desc += '\\newpage\n\n'
 
         return desc
 
@@ -144,7 +153,7 @@ class GenerateReport:
                raw_summary))
 
     def include_runs(self):
-        for cc in self.cc_schemes:
+        for cc in self.analyze_schemes:
             cc_name = self.friendly_names[cc].strip().replace('_', '\\_')
 
             for run_id in xrange(1, 1 + self.run_times):
@@ -189,13 +198,13 @@ class GenerateReport:
                         '\\PantheonFig{%(acklink_throughput)s}\n\n'
                         '\\PantheonFig{%(acklink_delay)s}\n\n' % str_dict)
 
-                if cc != self.cc_schemes[-1] or run_id != self.run_times:
+                if cc != self.analyze_schemes[-1] or run_id != self.run_times:
                     self.latex.write('\\newpage\n\n')
 
         self.latex.write('\\end{document}')
 
     def generate_report(self):
-        self.friendly_names = get_friendly_names(self.cc_schemes)
+        self.friendly_names = get_friendly_names(self.analyze_schemes)
 
         latex_path = '/tmp/pantheon-tmp/pantheon-report-%s.tex' % uuid.uuid4()
         self.latex = open(latex_path, 'w')
