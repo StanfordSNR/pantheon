@@ -16,7 +16,11 @@ def main():
     # install texlive, matplotlib, etc.
     cmd = ('sudo apt-get -yq --force-yes install '
            'texlive python-matplotlib python-numpy python-tabulate')
-    check_call(cmd, shell=True)
+    try:
+        check_call(cmd, shell=True)
+    except:
+        sys.stderr.write(
+            'Warning: some dependencies may not be installed properly\n')
 
     install_pantheon_tunnel()
 
