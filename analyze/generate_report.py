@@ -29,7 +29,8 @@ class GenerateReport:
 
         if args.analyze_schemes:
             self.analyze_schemes = args.analyze_schemes.split()
-            assert set(self.analyze_schemes).issubset(set(self.test_schemes))
+            assert set(self.analyze_schemes).issubset(
+                    set(self.test_schemes)), '--analyze-schemes invalid'
         else:
             self.analyze_schemes = self.test_schemes
 

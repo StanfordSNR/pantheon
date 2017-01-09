@@ -43,7 +43,8 @@ class PlotSummary:
         if schemes:
             self.cc_schemes = schemes.split()
             assert set(self.cc_schemes).issubset(
-                    set(metadata_dict['cc_schemes'].split()))
+                    set(metadata_dict['cc_schemes'].split())), (
+                    '--analyze-schemes invalid')
         else:
             self.cc_schemes = metadata_dict['cc_schemes'].split()
 
