@@ -38,6 +38,10 @@ def main():
         plot_summary_cmd.append('--include-acklink')
         generate_report_cmd.append('--include-acklink')
 
+    if args.analyze_schemes:
+        plot_summary_cmd += ['--analyze-schemes', args.analyze_schemes]
+        generate_report_cmd += ['--analyze-schemes', args.analyze_schemes]
+
     check_call(plot_summary_cmd)
     check_call(generate_report_cmd)
 

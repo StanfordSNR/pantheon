@@ -143,6 +143,14 @@ def build_arg_dict():
                 '(default: \"%s\")' % cc_schemes,
     }
 
+    arg_dict['--analyze-schemes'] = {
+        'metavar': '\"SCHEME_1 SCHEME_2..\"',
+        'action': 'store',
+        'dest': 'analyze_schemes',
+        'help': 'what congestion control schemes to analyze '
+                '(default: is contents of pantheon_metadata.json',
+    }
+
     arg_dict['--uplink-trace'] = {
         'metavar': 'TRACE',
         'action': 'store',
@@ -320,15 +328,17 @@ def parse_arguments(filename):
             '--extra-mm-link-args', '--ntp-addr', 'cc'])
     elif filename == 'plot_summary.py':
         add_arg_list(parser, arg_dict,
-                     ['--data-dir', '--include-acklink', '--no-plots'])
+                     ['--data-dir', '--include-acklink', '--no-plots',
+                      '--analyze-schemes'])
     elif filename == 'generate_report.py':
-        add_arg_list(parser, arg_dict, ['--data-dir', '--include-acklink'])
+        add_arg_list(parser, arg_dict, ['--data-dir', '--include-acklink',
+                                        '--analyze-schemes'])
     elif filename == 'full_experiment_plot.py':
         add_arg_list(parser, arg_dict, ['--ms-per-bin', '--data-dir'])
     elif filename == 'analyze.py':
         add_arg_list(parser, arg_dict, [
             '--s3-link', '--s3-dir-prefix', '--data-dir', '--no-pre-setup',
-            '--include-acklink'])
+            '--include-acklink', '--analyze-schemes'])
     elif filename == 'run.py':
         add_arg_list(parser, arg_dict, [
             '-r', '-t', '-f', '--interval', '--tunnel-server',
