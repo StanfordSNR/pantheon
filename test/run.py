@@ -60,7 +60,7 @@ def create_metadata_file(args, git_info, metadata_fname):
         remote_addr = args.remote.split(':')[0].split('@')[1]
         metadata['remote_address'] = remote_addr
         if args.ntp_addr:
-            metadata['ntp_addr'] = remote_addr
+            metadata['ntp_addr'] = args.ntp_addr
 
     if git_info:
         metadata['git_information'] = git_info
