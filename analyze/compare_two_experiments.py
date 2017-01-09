@@ -24,6 +24,9 @@ parser.add_argument('experiment_1', help='Logs folder, xz archive, '
                     'or archive url from a pantheon run')
 parser.add_argument('experiment_2', help='Logs folder, xz archive, '
                     'or archive url from a pantheon run')
+parser.add_argument('--analyze-schemes', metavar='\"SCHEME_1 SCHEME_2..\"',
+                    help='what congestion control schemes to analyze '
+                    '(default: is contents of pantheon_metadata.json')
 
 args = parser.parse_args()
 
@@ -41,9 +44,9 @@ for experiment in experiments:
 
 
 exp1_data = plot_summary.PlotSummary(True, False, exp_dirs[0],
-                                     None).plot_summary()
+                                     args.analyze_schemes).plot_summary()
 exp2_data = plot_summary.PlotSummary(True, False, exp_dirs[1],
-                                     None).plot_summary()
+                                     args.analyze_schemes).plot_summary()
 
 '''
 print(exp1_data)
