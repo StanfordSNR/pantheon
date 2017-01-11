@@ -32,7 +32,7 @@ parser.add_argument('--analyze-schemes', metavar='\"SCHEME_1 SCHEME_2..\"',
 args = parser.parse_args()
 exp1_stats = get_experiment_stats.get_experiment_stats(args.experiment_1,
                                                        args.analyze_schemes)
-exp2_stats = get_experiment_stats.get_experiment_stats(args.experiment_2
+exp2_stats = get_experiment_stats.get_experiment_stats(args.experiment_2,
                                                        args.analyze_schemes)
 
 exp_1_schemes = set(exp1_stats.keys())
