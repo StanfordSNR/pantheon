@@ -28,12 +28,18 @@ parser.add_argument('experiment_2', help='Logs folder, xz archive, '
 parser.add_argument('--analyze-schemes', metavar='\"SCHEME_1 SCHEME_2..\"',
                     help='what congestion control schemes to analyze '
                     '(default: is contents of pantheon_metadata.json')
+parser.add_argument('--no-pickle', action='store_true', dest='no_pickle',
+                    help='don\'t try to load stats from pickle file (only '
+                    'tries when using --analyze schemes')
 
 args = parser.parse_args()
 exp1_stats = get_experiment_stats.get_experiment_stats(args.experiment_1,
-                                                       args.analyze_schemes)
+                                                       args.analyze_schemes,
+                                                       args.no_pickle)
 exp2_stats = get_experiment_stats.get_experiment_stats(args.experiment_2,
-                                                       args.analyze_schemes)
+                                                       args.analyze_schemes,
+                                                       args.no_pickle)
+
 
 exp_1_schemes = set(exp1_stats.keys())
 exp_2_schemes = set(exp2_stats.keys())

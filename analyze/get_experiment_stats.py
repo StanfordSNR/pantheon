@@ -6,6 +6,7 @@ import os
 import numpy as np
 import pantheon_helpers
 from tabulate import tabulate
+import pickle
 import plot_summary
 from helpers.pantheon_help import check_call
 from collections import namedtuple
@@ -15,10 +16,25 @@ SchemeStats = namedtuple('SchemeStats', 'runs, throughput_median, '
                          'loss_median, loss_std')
 
 
-def get_experiment_stats(experiment_folder, only_schemes):
+def get_experiment_stats(experiment_folder, only_schemes, no_pickle):
+
+    pickle_path = os.path.join(experiment_folder, 'stats.pickle.log')
+    pickle_schemes = None
+    if only_schemes and not no_pickle:
+        try:
+            with open(pickle_path, 'rb') as pfile:
+                stats = pickle.load(pfile)
+            pickle_schemes = set(stats.keys())
+
+            if set(only_schemes.split()).issubset(pickle_schemes):
+                print('load from stats picke successful')
+                # only include schemes desired in case pickle map has more
+                return {k: stats[k] for k in only_schemes.split()}
+        except:
+            print('load from stats pickle failed, ignoring it')
+
     exp_data = plot_summary.PlotSummary(True, False, experiment_folder,
                                         only_schemes).plot_summary()
-
     stats = dict()
     for scheme in exp_data.keys():
         tputs = [x[0] for x in exp_data[scheme]]
@@ -39,6 +55,14 @@ def get_experiment_stats(experiment_folder, only_schemes):
         stats[scheme] = SchemeStats(runs, throughput_median, throughput_std,
                                     delay_median, delay_std, loss_median,
                                     loss_std)
+    if not no_pickle:
+        try:
+            with open(pickle_path, 'wb') as pfile:
+                pickle.dump(stats, pfile, protocol=pickle.HIGHEST_PROTOCOL)
+                print('stats pickle dumped')
+        except:
+            print('stats pickle dump failed, whatever')
+
     return stats
 
 
@@ -62,6 +86,7 @@ def get_experiment_folder(experiment_arg):
         experiment = experiment[:-7]  # strip .tar.xz
     return experiment
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
@@ -70,8 +95,12 @@ if __name__ == '__main__':
     parser.add_argument('--analyze-schemes', metavar='\"SCHEME_1 SCHEME_2..\"',
                         help='what congestion control schemes to analyze '
                         '(default: is contents of pantheon_metadata.json')
+    parser.add_argument('--no-pickle', action='store_true', dest='no_pickle',
+                        help='don\'t try to load stats from pickle file (only '
+                        'tries when using --analyze schemes')
 
     args = parser.parse_args()
     experiment_folder = get_experiment_folder(args.experiment)
-    stats = get_experiment_stats(experiment_folder, args.analyze_schemes)
+    stats = get_experiment_stats(experiment_folder, args.analyze_schemes,
+                                 args.no_pickle)
     print_stats(stats)
