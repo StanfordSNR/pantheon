@@ -44,9 +44,9 @@ class PlotSummary:
             self.cc_schemes = schemes.split()
             assert set(self.cc_schemes).issubset(
                     set(metadata_dict['cc_schemes'].split())), (
-                    '--analyze-schemes invalid, %s not in '
-                    '%s' % (set(self.cc_schemes),
-                            set(metadata_dict['cc_schemes'].split())))
+                    '--analyze-schemes %s has schemes not in experiment '
+                    '(%s)' % (self.cc_schemes,
+                              metadata_dict['cc_schemes'].split()))
         else:
             self.cc_schemes = metadata_dict['cc_schemes'].split()
 
