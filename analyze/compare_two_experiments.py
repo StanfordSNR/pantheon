@@ -43,8 +43,11 @@ throughput_lines = []
 delay_lines = []
 loss_lines = []
 
-score = 0.0
-std_score = 0.0
+tput_median_score = 0.0
+delay_median_score = 0.0
+tput_std_score = 0.0
+delay_std_score = 0.0
+
 score_candidate_schemes = ['default_tcp', 'vegas', 'ledbat', 'pcc', 'verus',
                            'scream', 'sprout', 'webrtc', 'quic']
 score_schemes = []
@@ -53,11 +56,15 @@ for scheme in sorted(common_schemes):
     exp1 = exp1_stats[scheme]
     exp2 = exp2_stats[scheme]
     if scheme in score_candidate_schemes:
-        score += abs(get_diff(exp1.throughput_median, exp2.throughput_median))
-        score += abs(get_diff(exp1.delay_median, exp2.delay_median))
+        tput_median_score += abs(get_diff(exp1.throughput_median,
+                                          exp2.throughput_median))
+        delay_median_score += abs(get_diff(exp1.delay_median,
+                                           exp2.delay_median))
 
-        std_score += abs(get_diff(exp1.throughput_std, exp2.throughput_std))
-        std_score += abs(get_diff(exp1.delay_std, exp2.delay_std))
+        tput_std_score += abs(get_diff(exp1.throughput_std,
+                                       exp2.throughput_std))
+        delay_std_score += abs(get_diff(exp1.delay_std,
+                                        exp2.delay_std))
 
         score_schemes.append(scheme)
         scheme = '*' + scheme
@@ -91,14 +98,18 @@ print('Comparison of: %s and %s' % (args.experiment_1, args.experiment_2))
 print tabulate(throughput_lines + delay_lines + loss_lines,
                headers=output_headers, floatfmt=".2f", stralign="right")
 
-print('*Average median difference for throughput and delay '
-      'for %s is:' % ', '.join(sorted(score_schemes)))
+print('*Average median throughput difference for %s is:' %
+      ', '.join(sorted(score_schemes)))
+print('{:.2%}'.format(tput_median_score / len(score_schemes)))
 
-score = score / (2 * len(score_schemes))
-print('{:.2%}'.format(score))
+print('*Average median delay difference for delay for %s is:' %
+      ', '.join(sorted(score_schemes)))
+print('{:.2%}'.format(delay_median_score / len(score_schemes)))
 
-print('*Average stddev difference for throughput and delay '
-      'for %s is:' % ', '.join(sorted(score_schemes)))
+print('*Average stddev throughput difference for %s is:' %
+      ', '.join(sorted(score_schemes)))
+print('{:.2%}'.format(tput_std_score / len(score_schemes)))
 
-std_score = std_score / (2 * len(score_schemes))
-print('{:.2%}'.format(std_score))
+print('*Average stddev delay difference for %s is:' %
+      ', '.join(sorted(score_schemes)))
+print('{:.2%}'.format(delay_std_score / len(score_schemes)))
