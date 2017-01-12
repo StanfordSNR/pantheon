@@ -129,7 +129,7 @@ class PlotSummary:
                 if test_runtime < (750 * self.runtime):  # .75 * 1000 ms/s
                     sys.stderr.write('Warning: "tunnel_graph %s" had duration '
                                      '%.2f seconds but should have been around'
-                                     '%d seconds. Ignoring this run.\n' %
+                                     ' %d seconds. Ignoring this run.\n' %
                                      (log_path, (test_runtime / 1000.),
                                       self.runtime))
                     error = True
