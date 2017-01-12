@@ -27,7 +27,7 @@ def get_experiment_stats(experiment_folder, only_schemes, no_pickle):
             pickle_schemes = set(stats.keys())
 
             if set(only_schemes.split()).issubset(pickle_schemes):
-                print('load from stats picke successful')
+                print('load from stats picke (%s) successful' % pickle_path)
                 # only include schemes desired in case pickle map has more
                 return {k: stats[k] for k in only_schemes.split()}
         except:
@@ -59,7 +59,7 @@ def get_experiment_stats(experiment_folder, only_schemes, no_pickle):
         try:
             with open(pickle_path, 'wb') as pfile:
                 pickle.dump(stats, pfile, protocol=pickle.HIGHEST_PROTOCOL)
-                print('stats pickle dumped')
+                print('stats pickle written to %s' % pickle_path)
         except:
             print('stats pickle dump failed, whatever')
 
