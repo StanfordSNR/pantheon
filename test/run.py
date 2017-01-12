@@ -11,12 +11,15 @@ from helpers.pantheon_help import check_call, check_output, parse_remote
 from helpers.parse_arguments import parse_arguments
 
 
-def get_git_info(args, root_dir):
+def get_git_info(args, root_dir, check_modified_files):
     git_info_cmd = (
         'echo -n \'git branch: \'; git rev-parse --abbrev-ref @ | head -c -1; '
         'echo -n \' @ \'; git rev-parse @; git submodule foreach --quiet '
-        '\'echo $path @ `git rev-parse HEAD`; '
-        'git status -s --untracked-files=no --porcelain\'')
+        '\'echo $path @ `git rev-parse HEAD`')
+
+    if check_modified_files:
+        git_info_cmd += '; git status -s --untracked-files=no --porcelain'
+    git_info_cmd += '\''
 
     local_git_info = check_output(git_info_cmd, shell=True, cwd=root_dir)
 
@@ -150,7 +153,8 @@ def main():
 
     # setup and run each congestion control
     if run_setup:
-        get_git_info(args, root_dir)  # use as check for version mismatch
+        # check for git version mismatch
+        get_git_info(args, root_dir, check_modified_files=False)
         check_call(pre_setup_cmd)
         for cc in cc_schemes:
             cmd = setup_cmd + [cc]
@@ -158,7 +162,7 @@ def main():
 
     error_in_test = False
     if run_test:
-        git_info = get_git_info(args, root_dir)
+        git_info = get_git_info(args, root_dir, check_modified_files=True)
         create_metadata_file(args, git_info, metadata_fname)
 
         sys.stderr.write('\n')
