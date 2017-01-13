@@ -38,7 +38,7 @@ exp1_stats = get_experiment_stats.get_experiment_stats(args.experiment_1,
                                                        args.no_pickle)
 exp2_stats = get_experiment_stats.get_experiment_stats(args.experiment_2,
                                                        args.analyze_schemes,
-                                                       args.no_pickle)
+                                                       True)  #TODO for now don't ever use cache on second argument
 
 
 exp_1_schemes = set(exp1_stats.keys())
