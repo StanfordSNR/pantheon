@@ -290,8 +290,9 @@ class PlotSummary:
         all_max_throughputs = []
         all_tputs = []
         all_max_outstanding_packets = []
+        all_loss_rates = []
         for cc in self.cc_schemes:
-            tputs, _, _, max_delays, min_delays, max_throughputs, max_outstanding_packets = zip(*self.data[cc])
+            tputs, _, losses, max_delays, min_delays, max_throughputs, max_outstanding_packets = zip(*self.data[cc])
             all_max_delays += max_delays
             all_min_delays += min_delays
             all_max_throughputs += max_throughputs
@@ -312,8 +313,12 @@ class PlotSummary:
 
         max_outstanding_packets = max(all_max_outstanding_packets)
 
-        print("real limits: max prop delay %d, min prop delay %d, max throughput in a bin %.2f, min average throughput %.2f, outstanding packets %d" % (max_delay, min_delay, max_throughput, min_throughput, max_outstanding_packets))
-        print("bounds: max_delay_bound %d, min_delay_bound %d, max_throughput_bound %.2f, min_throughput_bound %.2f" % (max_delay_bound, min_delay_bound, max_throughput_bound, min_throughput_bound))
+        min_loss = min(all_loss_rates)
+        max_loss = max(all_loss_rates)
+        max_loss_bound = (min_loss + max_loss) / 2
+
+        print("real limits: max prop delay %d, min prop delay %d, max throughput in a bin %.2f, min average throughput %.2f, outstanding packets %d, min loss rate %.4f" % (max_delay, min_delay, max_throughput, min_throughput, max_outstanding_packets, min_loss))
+        print("bounds: max_delay_bound %d, min_delay_bound %d, max_throughput_bound %.2f, min_throughput_bound %.2f,  min_loss_bound 0, max_loss_bound %.4f" % (max_delay_bound, min_delay_bound, max_throughput_bound, min_throughput_bound, max_loss_bound))
         return data
 
 
