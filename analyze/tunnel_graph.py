@@ -234,6 +234,10 @@ class TunnelGraph:
                             departures[flow_id].get(bin_id, 0) / us_per_bin)
                     self.egress_t[flow_id].append(self.bin_to_s(bin_id))
 
+            if flow_id == 1:
+                self.max_prop_delay = max(self.delays[flow_id])
+                self.min_prop_delay = min(self.delays[flow_id])
+
             # calculate 95th percentile per-packet one-way delay
             self.percentile_delay[flow_id] = None
             if flow_id in self.delays:
@@ -264,6 +268,13 @@ class TunnelGraph:
             self.total_duration = total_last_departure - total_first_departure
             self.total_avg_egress = total_departures / (1000.0 *
                                                         self.total_duration)
+
+        # calculate highest overall throughput in a bin
+        assert len(self.flows) == 1
+        assert 1 in self.egress_tput
+        self.max_total_throughput_in_a_bin = max(self.egress_tput[1])
+
+        print(self.max_total_throughput_in_a_bin)
 
         self.total_percentile_delay = None
         if total_delays:
@@ -395,7 +406,7 @@ class TunnelGraph:
         plt.close('all')
         return (self.total_avg_egress, self.total_percentile_delay,
                 self.total_loss_rate, self.total_duration,
-                self.statistics_string())
+                self.statistics_string(), self.max_prop_delay, self.min_prop_delay, self.max_total_throughput_in_a_bin)
 
 
 def main():

@@ -125,7 +125,7 @@ class PlotSummary:
                 continue
 
             if link_t == 'datalink':
-                (tput, delay, loss, test_runtime, for_stats) = run_analysis
+                (tput, delay, loss, test_runtime, for_stats, max_prop_delay, min_prop_delay, max_total_throughput_in_a_bin) = run_analysis
                 if test_runtime < (750 * self.runtime):  # .75 * 1000 ms/s
                     sys.stderr.write('Warning: "tunnel_graph %s" had duration '
                                      '%.2f seconds but should have been around'
@@ -135,9 +135,9 @@ class PlotSummary:
                     error = True
 
         if error:
-            return (None, None, None, None)
+            return (None, None, None, None, None, None, None)
         else:
-            return (tput, delay, loss, for_stats)
+            return (tput, delay, loss, for_stats, max_prop_delay, min_prop_delay, max_total_throughput_in_a_bin)
 
     def parse_stats_log(self, cc, run_id, for_stats):
         stats_log_path = path.join(
@@ -187,16 +187,17 @@ class PlotSummary:
                                                    args=(cc, run_id))
 
             for run_id in xrange(1, 1 + self.run_times):
-                (tput, delay, loss_rate, for_stats) = results[run_id].get()
+                (tput, delay, loss_rate, for_stats, max_prop_delays, min_prop_delays, max_total_throughput_in_a_bins) = results[run_id].get()
                 ofst = self.parse_stats_log(cc, run_id, for_stats)
 
                 if not tput or not delay:
                     continue
 
-                self.data[cc].append((tput, delay, loss_rate))
+                self.data[cc].append((tput, delay, loss_rate, max_prop_delays, min_prop_delays, max_total_throughput_in_a_bins))
                 if ofst:
                     if not self.worst_abs_ofst or ofst > self.worst_abs_ofst:
                         self.worst_abs_ofst = ofst
+
         return self.data
 
     def plot_throughput_delay(self):
@@ -215,7 +216,7 @@ class PlotSummary:
             cc_name = self.friendly_names[cc]
             color = color_names[cc]
             marker = marker_names[cc]
-            y_data, x_data, _ = zip(*value)
+            y_data, x_data, _, _, _, _ = zip(*value)
 
             # find min and max delay
             cc_min_delay = min(x_data)
@@ -280,6 +281,32 @@ class PlotSummary:
         data = self.generate_data()
         if not self.no_plots:
             self.plot_throughput_delay()
+
+        all_max_delays = []
+        all_min_delays = []
+        all_max_throughputs = []
+        all_tputs = []
+        for cc in self.cc_schemes:
+            tputs, _, _, max_delays, min_delays, max_throughputs = zip(*self.data[cc])
+            all_max_delays += max_delays
+            all_min_delays += min_delays
+            all_max_throughputs += max_throughputs
+            all_tputs += tputs
+
+        max_delay =  max(all_min_delays)
+        max_delay_bound = round(float(max_delay)*1.1)
+
+        min_delay = min(all_min_delays)
+        min_delay_bound = round(float(min_delay)*.9)
+
+        max_throughput = max(all_max_throughputs)
+        max_throughput_bound = float(max_throughput)*1.2
+
+        min_throughput = min(all_tputs)
+        min_throughput_bound = min_throughput
+
+        print("real limits: max prop delay %d, min prop delay %d, max throughput in a bin %.2f, min average throughput %.2f" % (max_delay, min_delay, max_throughput, min_throughput))
+        print("bounds: max_delay_bound %d, min_delay_bound %d, max_throughput_bound %.2f, min_throughput_bound %.2f" % (max_delay_bound, min_delay_bound, max_throughput_bound, min_throughput_bound))
         return data
 
 
