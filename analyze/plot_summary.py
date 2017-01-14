@@ -302,12 +302,12 @@ class PlotSummary:
         max_delay_bound = round(float(max_delay)*1.1)
 
         min_delay = min(all_min_delays)
-        min_delay_bound = round(float(min_delay)*.9)
+        min_delay_bound = round(float(min_delay)*.7)
 
         max_throughput = max(all_max_throughputs)
         max_throughput_bound = float(max_throughput)*1.2
 
-        min_throughput = min(all_tputs)
+        min_throughput = min(all_max_throughputs)
         min_throughput_bound = min_throughput
 
         max_outstanding_packets = max(all_max_outstanding_packets)
