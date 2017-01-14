@@ -5,6 +5,7 @@ import re
 import sys
 import math
 import json
+import numpy
 import pantheon_helpers
 import matplotlib_agg
 import matplotlib.pyplot as plt
@@ -280,6 +281,8 @@ class PlotSummary:
             i += 1
 
     def plot_summary(self):
+
+        numpy.median([1, 2]) # break early if no numpy
         self.friendly_names = get_friendly_names(self.cc_schemes)
         data = self.generate_data()
         if not self.no_plots:
@@ -300,8 +303,8 @@ class PlotSummary:
             all_max_outstanding_packets += max_outstanding_packets
             all_loss_rates += losses
 
-        max_delay =  max(all_min_delays)
-        max_delay_bound = round(float(max_delay)*1.1)
+        median_delay =  numpy.median(all_min_delays)
+        max_delay_bound = median_delay
 
         min_delay = min(all_min_delays)
         min_delay_bound = round(float(min_delay)*.7)
@@ -309,16 +312,15 @@ class PlotSummary:
         max_throughput = max(all_max_throughputs)
         max_throughput_bound = float(max_throughput)*1.2
 
-        min_throughput = min(all_max_throughputs)
+        min_throughput = numpy.median(all_max_throughputs)
         min_throughput_bound = min_throughput
 
         max_outstanding_packets = max(all_max_outstanding_packets)
 
-        min_loss = min(all_loss_rates)
-        max_loss = max(all_loss_rates)
-        max_loss_bound = (min_loss + max_loss) / 2
+        median_loss_rate = numpy.median(all_loss_rates)
+        max_loss_bound = median_loss_rate
 
-        print("real limits: max prop delay %d, min prop delay %d, max throughput in a bin %.2f, min average throughput %.2f, outstanding packets %d, min loss rate %.4f" % (max_delay, min_delay, max_throughput, min_throughput, max_outstanding_packets, min_loss))
+        print("real limits: median prop delay %d, min prop delay %d, max throughput in a bin %.2f, min average throughput %.2f, outstanding packets %d, median loss rate %.4f" % (median_delay, min_delay, max_throughput, min_throughput, max_outstanding_packets, median_loss_rate))
         print("bounds: max_delay_bound %d, min_delay_bound %d, max_throughput_bound %.2f, min_throughput_bound %.2f,  min_loss_bound 0, max_loss_bound %.4f" % (max_delay_bound, min_delay_bound, max_throughput_bound, min_throughput_bound, max_loss_bound))
         return data
 
