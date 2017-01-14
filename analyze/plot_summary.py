@@ -298,6 +298,7 @@ class PlotSummary:
             all_max_throughputs += max_throughputs
             all_tputs += tputs
             all_max_outstanding_packets += max_outstanding_packets
+            all_loss_rates += losses
 
         max_delay =  max(all_min_delays)
         max_delay_bound = round(float(max_delay)*1.1)
