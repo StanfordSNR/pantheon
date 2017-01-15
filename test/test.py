@@ -155,8 +155,8 @@ class Test:
             sys.stderr.write('Test exited before time limit')
             exit(1)
         finally:
-            os.killpg(os.getpgid(proc_first.pid), signal.SIGKILL)
-            os.killpg(os.getpgid(proc_second.pid), signal.SIGKILL)
+            os.killpg(os.getpgid(proc_first.pid), signal.SIGTERM)
+            os.killpg(os.getpgid(proc_second.pid), signal.SIGTERM)
 
     # read and update worst absolute clock offset
     def update_worst_abs_ofst(self):
