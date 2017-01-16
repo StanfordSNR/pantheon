@@ -33,12 +33,17 @@ parser.add_argument('--no-pickle', action='store_true', dest='no_pickle',
                     'tries when using --analyze schemes')
 
 args = parser.parse_args()
-exp1_stats = get_experiment_stats.get_experiment_stats(args.experiment_1,
+
+exp1_folder = get_experiment_stats.get_experiment_folder(args.experiment_1)
+exp1_stats = get_experiment_stats.get_experiment_stats(exp1_folder,
                                                        args.analyze_schemes,
                                                        args.no_pickle)
-exp2_stats = get_experiment_stats.get_experiment_stats(args.experiment_2,
+
+exp2_folder = get_experiment_stats.get_experiment_folder(args.experiment_2)
+# TODO for now don't ever use cache on second argument
+exp2_stats = get_experiment_stats.get_experiment_stats(exp2_folder,
                                                        args.analyze_schemes,
-                                                       True)  #TODO for now don't ever use cache on second argument
+                                                       True)
 
 
 exp_1_schemes = set(exp1_stats.keys())
@@ -114,4 +119,5 @@ print('{:.2%}'.format(delay_median_score / len(score_schemes)))
 
 print('*Average median difference for throughput and delay for %s is:' %
       ', '.join(sorted(score_schemes)))
-print('{:.2%}'.format((tput_median_score + delay_median_score) / (2 * len(score_schemes))))
+print('{:.2%}'.format((tput_median_score +
+                       delay_median_score) / (2 * len(score_schemes))))
