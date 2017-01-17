@@ -8,9 +8,9 @@ from subprocess import Popen, PIPE, check_output
 
 
 def destroy(procs):
-    # send SIGKILL signal to all processes and the subprocesses they spawned
+    # send SIGTERM signal to all processes and the subprocesses they spawned
     for proc in procs.itervalues():
-        os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+        os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
 
 
 def main():
