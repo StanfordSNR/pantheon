@@ -304,10 +304,11 @@ class PlotSummary:
             all_loss_rates += losses
 
         median_min_delay =  numpy.median(all_min_delays)
-        max_delay_bound = median_min_delay*2
+        max_delay_bound = median_min_delay * 2
 
         min_delay = min(all_min_delays)
         min_delay_bound = round(float(min_delay)*.5)
+        min_delay_bound = max(min_delay_bound, 1)
 
         max_throughput = max(all_max_throughputs)
         max_throughput_bound = float(max_throughput)*2.0
