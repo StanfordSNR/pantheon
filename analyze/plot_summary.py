@@ -175,19 +175,28 @@ class PlotSummary:
         self.worst_abs_ofst = None
         time_format = '%a, %d %b %Y %H:%M:%S'
 
+        results = {}
         for cc in self.cc_schemes:
             self.data[cc] = []
-            cc_name = self.friendly_names[cc]
+            results[cc] = {}
 
-            pool = ThreadPool(processes=min(multiprocessing.cpu_count(),
-                                            self.run_times))
-            results = dict()
-            for run_id in xrange(1, 1 + self.run_times):
-                results[run_id] = pool.apply_async(self.parse_tunnel_log,
+        cc_id = 0
+        run_id = 1
+        pool = ThreadPool(processes=multiprocessing.cpu_count())
+
+        while cc_id < len(self.cc_schemes):
+            cc = self.cc_schemes[cc_id]
+            results[cc][run_id] = pool.apply_async(self.parse_tunnel_log,
                                                    args=(cc, run_id))
 
+            run_id += 1
+            if run_id > self.run_times:
+                run_id = 1
+                cc_id += 1
+
+        for cc in self.cc_schemes:
             for run_id in xrange(1, 1 + self.run_times):
-                (tput, delay, loss_rate, for_stats) = results[run_id].get()
+                (tput, delay, loss_rate, for_stats) = results[cc][run_id].get()
                 ofst = self.parse_stats_log(cc, run_id, for_stats)
 
                 if not tput or not delay:
