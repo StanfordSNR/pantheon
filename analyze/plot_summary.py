@@ -319,6 +319,7 @@ class PlotSummary:
 
         median_loss_rate = numpy.median(all_loss_rates)
         max_loss_bound = median_loss_rate * 4
+        max_loss_bound = min(max_loss_bound, .5)
 
         print("real limits: median of (minum prop delay of a single run) %d, min prop delay %d, max throughput in any bin %.2f, median of (max thoughput in any bin) throughput %.2f, outstanding packets %d, median loss rate %.4f" % (median_min_delay, min_delay, max_throughput, median_max_throughput, max_outstanding_packets, median_loss_rate))
         print("bounds: max_delay_bound %d, min_delay_bound %d, max_throughput_bound %.2f, min_throughput_bound %.2f,  min_loss_bound 0, max_loss_bound %.4f" % (max_delay_bound, min_delay_bound, max_throughput_bound, min_throughput_bound, max_loss_bound))
