@@ -306,9 +306,7 @@ class PlotSummary:
         median_min_delay =  numpy.median(all_min_delays)
         max_delay_bound = median_min_delay * 2
 
-        min_delay = min(all_min_delays)
-        min_delay_bound = round(float(min_delay)*.5)
-        min_delay_bound = max(min_delay_bound, 1)
+        min_delay_bound = 1
 
         max_throughput = max(all_max_throughputs)
         max_throughput_bound = float(max_throughput)*2.0
@@ -325,7 +323,7 @@ class PlotSummary:
         max_loss_bound = min(max_loss_bound, .5)
 
         print("real limits: median of (minum prop delay of a single run) %d, min prop delay %d, max throughput in any bin %.2f, median of (max thoughput in any bin) throughput %.2f, outstanding packets %d, median loss rate %.4f" % (median_min_delay, min_delay, max_throughput, median_max_throughput, max_outstanding_packets, median_loss_rate))
-        print("bounds: max_delay_bound %d, min_delay_bound %d, max_throughput_bound %.2f, min_throughput_bound %.2f,  min_loss_bound 0, max_loss_bound %.4f, max_queue_bound %d" % (max_delay_bound, min_delay_bound, max_throughput_bound, min_throughput_bound, max_loss_bound, max_queue_bound))
+        print("bounds: max_delay_bound %d, min_delay_bound %d, max_throughput_bound %.2f, min_throughput_bound %.2f,  min_loss_bound 0, max_loss_bound %.4f, min_queue_bound 10, max_queue_bound %d" % (max_delay_bound, min_delay_bound, max_throughput_bound, min_throughput_bound, max_loss_bound, max_queue_bound))
         # TODO not looking at acklink loss
         return data
 
