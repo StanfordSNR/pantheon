@@ -315,7 +315,7 @@ class PlotSummary:
         min_throughput_bound = median_max_throughput*.5
 
         max_outstanding_packets = max(all_max_outstanding_packets)
-        max_queue_bound = max_outstanding_packets * 2
+        max_queue_bound = max_outstanding_packets * 1.5
 
         median_loss_rate = numpy.median(all_loss_rates)
         max_loss_bound = median_loss_rate * 4
