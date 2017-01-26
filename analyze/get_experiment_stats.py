@@ -30,8 +30,8 @@ def get_experiment_stats(experiment_folder, only_schemes, no_pickle):
                 print('load from stats picke (%s) successful' % pickle_path)
                 # only include schemes desired in case pickle map has more
                 return {k: stats[k] for k in only_schemes.split()}
-        except:
-            print('load from stats pickle failed, ignoring it')
+        except Exception as e:
+            print('load from stats pickle failed, ignoring it (%s)' % str(e))
 
     exp_data = plot_summary.PlotSummary(True, False, experiment_folder,
                                         only_schemes).plot_summary()

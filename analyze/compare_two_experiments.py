@@ -9,6 +9,7 @@ from tabulate import tabulate
 import plot_summary
 from helpers.pantheon_help import check_call
 import get_experiment_stats
+from get_experiment_stats import SchemeStats
 
 
 def get_diff(metric_1, metric_2):
