@@ -126,11 +126,12 @@ class PlotSummary:
 
             if link_t == 'datalink':
                 (tput, delay, loss, test_runtime, for_stats) = run_analysis
-                if test_runtime < (750 * self.runtime):  # .75 * 1000 ms/s
+                if (test_runtime / 1000.0 < 0.9 * self.runtime or
+                        test_runtime / 1000.0 > 1.1 * self.runtime):
                     sys.stderr.write('Warning: "tunnel_graph %s" had duration '
                                      '%.2f seconds but should have been around'
                                      ' %d seconds. Ignoring this run.\n' %
-                                     (log_path, (test_runtime / 1000.),
+                                     (log_path, (test_runtime / 1000.0),
                                       self.runtime))
                     error = True
 
