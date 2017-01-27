@@ -290,6 +290,15 @@ class PlotSummary:
         data = self.generate_data()
         if not self.no_plots:
             self.plot_throughput_delay()
+
+        prefix = ''
+        for cc in self.cc_schemes:
+            data_log = open(prefix + cc + '_log', 'a')
+            if cc in data:
+                for run in data[cc]:
+                    data_log.write('%.3f %.3f\n' % (run[0], run[1]))
+            data_log.close()
+
         return data
 
 
