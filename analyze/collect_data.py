@@ -3,7 +3,7 @@
 from os import path
 from subprocess import check_call
 
-prefix = 'aws_brazil_to_brazil'
+prefix = ''
 
 with open(prefix) as urls:
     for url in urls:
@@ -21,4 +21,3 @@ with open(prefix) as urls:
             shell=True)
 
         check_call(['rm', '-rf', tarname, filename])
-        break
