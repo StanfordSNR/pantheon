@@ -176,12 +176,9 @@ class PlotSummary:
         while cc_id < len(self.cc_schemes):
             cc = self.cc_schemes[cc_id]
             ofst = self.parse_stats_log(cc, run_id)
-            print cc, run_id, ofst
             if ofst <= 10:
                 results[cc][run_id] = pool.apply_async(self.parse_tunnel_log,
                                                        args=(cc, run_id))
-            else:
-                results[cc][run_id] = (None, None, None, None)
 
             run_id += 1
             if run_id > self.run_times:
@@ -190,7 +187,9 @@ class PlotSummary:
 
         for cc in self.cc_schemes:
             for run_id in xrange(1, 1 + self.run_times):
-                (tput, delay, loss_rate, for_stats) = results[cc][run_id]
+                if run_id not in results[cc]:
+                    continue
+                (tput, delay, loss_rate, for_stats) = results[cc][run_id].get()
 
                 if not tput or not delay:
                     continue
