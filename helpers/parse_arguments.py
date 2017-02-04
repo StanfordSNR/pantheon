@@ -133,7 +133,7 @@ def build_arg_dict():
     }
 
     cc_schemes = 'default_tcp vegas koho_cc ledbat pcc verus scream sprout ' \
-                 'webrtc quic copa saturator greg_saturator'
+                 'webrtc quic copa saturator'
     arg_dict['--schemes'] = {
         'metavar': '\"SCHEME_1 SCHEME_2..\"',
         'action': 'store',
