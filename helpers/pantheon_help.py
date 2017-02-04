@@ -127,7 +127,6 @@ def get_color_names(cc_schemes):
         'verus': 'skyblue',
         'webrtc': 'olive',
         'saturator': 'pink',
-        'greg_saturator': 'purple',
     }
 
     for cc in cc_schemes:
@@ -152,7 +151,6 @@ def get_marker_names(cc_schemes):
         'verus': 'H',
         'webrtc': 'D',
         'saturator': '+',
-        'greg_saturator': 'x',
     }
 
     for cc in cc_schemes:
