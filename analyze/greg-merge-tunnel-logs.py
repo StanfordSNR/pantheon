@@ -95,7 +95,7 @@ def single_mode(args):
                 prop_delay = recv_pkts[send_uid] - send_ts_cal
                 output_log.write('%.3f %.3f\n' % (send_ts_cal, prop_delay))
             else:
-                output_log.write('%.3f lost\n' % send_ts_cal)
+                output_log.write('%.3f NaN\n' % send_ts_cal)
 
             #output_log.write('%.3f + %s\n' % (send_ts_cal, send_size))
             send_l = send_log.readline()
