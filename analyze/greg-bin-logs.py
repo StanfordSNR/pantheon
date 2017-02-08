@@ -22,10 +22,10 @@ def parse_line(line):
 
 def write_out_bin(outfile, ms_per_bin, packet_bin, bin_bytes, num_lost):
     bin_megabits = bin_bytes * 8. / (1024. * 1024.)
-    bin_mbps = bin_megabits * 1000. / ms_per_bin
+    bin_mbps = (bin_megabits * 1000.) / ms_per_bin
 
     loss_rate = float(num_lost)/float(num_lost + len(packet_bin))
-    outfile.write('%.3f %.3f %.3f\n' % (np.mean(packet_bin), bin_mbps, loss_rate))
+    outfile.write('%.3f %.3f\n' % (np.mean(packet_bin), bin_mbps))
 
 def main():
     args = parse_arguments()
