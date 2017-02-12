@@ -8,8 +8,6 @@ branches:
 
 addons:
   apt:
-    sources:
-    - sourceline: 'ppa:ubuntu-toolchain-r/test'
     packages:
     - g++-4.9
 
