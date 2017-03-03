@@ -117,6 +117,7 @@ def get_color_names(cc_schemes):
         'copa': 'r',
         'default_tcp': 'y',
         'koho_cc': 'b',
+        'new_koho': 'purple',
         'ledbat': 'g',
         'pcc': 'c',
         'quic': 'm',
