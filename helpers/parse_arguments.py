@@ -192,6 +192,13 @@ def build_arg_dict():
         'help': 'extra arguments to be passed to mm-link when running locally',
     }
 
+    arg_dict['--extra-sender-args'] = {
+        'metavar': '\"ARG_1 ARG_2..\"',
+        'action': 'store',
+        'dest': 'extra_sender_args',
+        'help': 'extra arguments to be passed to sender command',
+    }
+
     arg_dict['--ms-per-bin'] = {
         'metavar': 'MS',
         'action': 'store',
@@ -326,7 +333,7 @@ def parse_arguments(filename):
             '--local-addr', '--sender-side', '--local-interface',
             '--remote-interface', '--run-id', '--uplink-trace',
             '--downlink-trace', '--prepend-mm-cmds', '--append-mm-cmds',
-            '--extra-mm-link-args', '--ntp-addr', 'cc'])
+            '--extra-mm-link-args', '--ntp-addr', 'cc', '--extra-sender-args'])
     elif filename == 'plot_summary.py':
         add_arg_list(parser, arg_dict,
                      ['--data-dir', '--include-acklink', '--no-plots',

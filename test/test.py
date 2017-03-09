@@ -31,6 +31,7 @@ class Test:
         self.prepend_mm_cmds = args.prepend_mm_cmds
         self.append_mm_cmds = args.append_mm_cmds
         self.extra_mm_link_args = args.extra_mm_link_args
+        self.extra_sender_args = args.extra_sender_args
         self.worst_abs_ofst = None
         self.ntp_addr = args.ntp_addr
 
@@ -375,7 +376,7 @@ class Test:
                     recv_manager.stdin.write(readline_cmd)
                     port = self.get_port(recv_manager)
 
-                second_cmd += ' %s\n' % port
+                second_cmd += ' %s %s\n' % (port, self.extra_sender_args)
                 second_cmds.append(second_cmd)
             else:  # self.first_to_run == 'sender'
                 if self.sender_side == 'local':

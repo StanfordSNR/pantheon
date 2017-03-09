@@ -62,7 +62,7 @@ def main():
     if option == 'sender':
         ip = sys.argv[2]
         port = sys.argv[3]
-        cmd = [send_file, ip, port]
+        cmd = [send_file, ip, port] + sys.argv[4:]
         check_call(cmd)
 
 
