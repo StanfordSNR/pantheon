@@ -31,7 +31,10 @@ class Test:
         self.prepend_mm_cmds = args.prepend_mm_cmds
         self.append_mm_cmds = args.append_mm_cmds
         self.extra_mm_link_args = args.extra_mm_link_args
-        self.extra_sender_args = args.extra_sender_args
+        if args.extra_sender_args:
+            self.extra_sender_args = args.extra_sender_args
+        else:
+            self.extra_sender_args = ''
         self.worst_abs_ofst = None
         self.ntp_addr = args.ntp_addr
 
