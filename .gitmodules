@@ -51,3 +51,7 @@
 	url = https://github.com/greghill/koho_cc.git
 	branch = koho_march_2017
 	ignore = dirty
+[submodule "third_party/calibrated_koho"]
+	path = third_party/calibrated_koho
+	url = https://github.com/greghill/koho_cc.git
+	branch = calibrated_koho
