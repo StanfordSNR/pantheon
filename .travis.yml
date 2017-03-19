@@ -19,7 +19,7 @@ install:
 
 env:
     global:
-        - EMULATOR_SCHEMES='default_tcp vegas ledbat pcc verus scream sprout webrtc quic'
+        - EMULATOR_SCHEMES='default_tcp vegas ledbat pcc verus scream sprout quic'
     matrix:
         # run calibrated emulators on 9 schemes
         - CMD='travis_extras/calibrated_emulators/run_calibrated_emulator.sh 97.11 1 366 0 0 travis_extras/calibrated_emulators/2017-01-04T07-24-AWS-Brazil-1-to-Brazil-10-runs/ "$EMULATOR_SCHEMES"'
@@ -32,7 +32,7 @@ env:
         - CMD='EXTRA_MAHIMAHI_SHELLS="mm-loss uplink .3 mm-loss downlink .3"; RUN_PY_EXTRAS="--sender-side local"; travis_extras/travis_test.sh'
         # test setup and test for each individual scheme
         - CMD='test/pre_setup.py && test/setup.py quic           && test/setup.py quic           && test/test.py -f 2 -t 10 quic'
-        - CMD='test/pre_setup.py && test/setup.py webrtc         && test/setup.py webrtc         && test/test.py -f 2 -t 10 webrtc'
+        #- CMD='test/pre_setup.py && test/setup.py webrtc         && test/setup.py webrtc         && test/test.py -f 2 -t 10 webrtc'
         - CMD='test/pre_setup.py && test/setup.py default_tcp    && test/setup.py default_tcp    && test/test.py -f 2 -t 10 default_tcp'
         - CMD='test/pre_setup.py && test/setup.py vegas          && test/setup.py vegas          && test/test.py -f 2 -t 10 vegas'
         - CMD='test/pre_setup.py && test/setup.py koho_cc        && test/setup.py koho_cc        && test/test.py -f 2 -t 10 koho_cc'

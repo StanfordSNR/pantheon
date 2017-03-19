@@ -133,7 +133,7 @@ def build_arg_dict():
     }
 
     cc_schemes = 'default_tcp vegas koho_cc new_koho ledbat pcc verus scream' \
-                 ' sprout webrtc quic copa saturator'
+                 ' sprout quic copa saturator'
     arg_dict['--schemes'] = {
         'metavar': '\"SCHEME_1 SCHEME_2..\"',
         'action': 'store',
@@ -233,8 +233,7 @@ def build_arg_dict():
     arg_dict['cc'] = {
         'metavar': 'congestion-control',
         'help': 'a congestion control scheme in default_tcp, koho_cc, '
-                'new_koho, ledbat, pcc, quic, scream, sprout, vegas, verus, '
-                'webrtc',
+                'new_koho, ledbat, pcc, quic, scream, sprout, vegas, verus, ',
     }
 
     arg_dict['cc_schemes'] = {
