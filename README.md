@@ -9,7 +9,7 @@ We have not implemented most of the programs run by our wrappers.
 Those programs may write to the filesystem (for example, Verus will write files like `client_45191.out`  and a folder named `verus_tmp` into the current working directory when it is called).
 We never run third party programs as root, but we can not guarantee they will never try to escalate privilege to root.
 
-Run at your own risk.
+Run at your own risk. Feel free to contact our mailing list: `the name of this repository`@cs.stanford.edu
 
 # Pantheon of Congestion Control
 The Pantheon has wrappers for many popular and research congestion control schemes.
