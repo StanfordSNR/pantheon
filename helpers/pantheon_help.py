@@ -126,7 +126,6 @@ def get_color_names(cc_schemes):
         'taova': 'gray',
         'vegas': 'gold',
         'verus': 'skyblue',
-        'webrtc': 'olive',
         'saturator': 'pink',
     }
 
@@ -150,7 +149,6 @@ def get_marker_names(cc_schemes):
         'taova': '*',
         'vegas': 'h',
         'verus': 'H',
-        'webrtc': 'D',
         'saturator': '+',
     }
 
