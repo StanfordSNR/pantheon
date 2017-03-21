@@ -104,7 +104,7 @@ class PlotSummary:
                 tput_graph_path = None
                 delay_graph_path = None
             else:
-                tput_graph = cc + '_%s_throughput_run%s.png' % (link_t, run_id)
+                tput_graph = cc + '_%s_throughput_run%s.svg' % (link_t, run_id)
                 tput_graph_path = path.join(self.data_dir, tput_graph)
 
                 delay_graph = cc + '_%s_delay_run%s.png' % (link_t, run_id)

@@ -282,22 +282,22 @@ class TunnelGraph:
         for flow_id in self.flows:
             if flow_id in self.ingress_tput and flow_id in self.ingress_t:
                 empty_graph = False
-                ax.plot(self.ingress_t[flow_id], self.ingress_tput[flow_id],
-                        label='Flow %s ingress (mean %.2f Mbit/s)'
-                        % (flow_id, self.avg_ingress.get(flow_id, 0)))
+                #ax.plot(self.ingress_t[flow_id], self.ingress_tput[flow_id],
+                #        label='ingress (mean %.2f Mbit/s)'
+                #        % (flow_id, self.avg_ingress.get(flow_id, 0)))
 
             if flow_id in self.egress_tput and flow_id in self.egress_t:
                 empty_graph = False
-                ax.plot(self.egress_t[flow_id], self.egress_tput[flow_id],
-                        label='Flow %s egress (mean %.2f Mbit/s)'
-                        % (flow_id, self.avg_egress.get(flow_id, 0)))
+                ax.plot(self.egress_t[flow_id], self.egress_tput[flow_id], linewidth=2.5)
 
         if empty_graph:
             sys.stderr.write('No valid throughput graph is generated\n')
             return
 
-        ax.set_xlabel('Time (s)')
-        ax.set_ylabel('Throughput (Mbit/s)')
+        ax.set_xlabel('time (s)', fontsize=20)
+        ax.set_ylabel('throughput (Mbits/s)', fontsize=20)
+        for tick in ax.xaxis.get_major_ticks():
+            tick.label.set_fontsize(15)
 
         if self.link_capacity and self.avg_capacity:
             ax.set_title('Average capacity %.2f Mbit/s (shaded region)'
@@ -308,8 +308,9 @@ class TunnelGraph:
                         loc='upper center', ncol=2, fontsize=12)
 
         fig.set_size_inches(12, 6)
-        fig.savefig(self.throughput_graph, bbox_extra_artists=(lgd,),
-                    bbox_inches='tight', pad_inches=0.2)
+        #fig.savefig(self.throughput_graph, bbox_extra_artists=(lgd,),
+        #            bbox_inches='tight', pad_inches=0.2)
+        fig.savefig(self.throughput_graph, format='svg')
 
     def plot_delay_graph(self):
         empty_graph = True
@@ -347,6 +348,7 @@ class TunnelGraph:
         fig.set_size_inches(12, 6)
         fig.savefig(self.delay_graph, bbox_extra_artists=(lgd,),
                     bbox_inches='tight', pad_inches=0.2)
+        #fig.savefig(self.throughput_graph, format='svg')
 
     def statistics_string(self):
         ret = '-- Total:\n'
