@@ -1,5 +1,4 @@
-[![Build Status](https://travis-ci.org/StanfordLPNG/pantheon.svg?branch=master)]
-(https://travis-ci.org/StanfordLPNG/pantheon)
+[![Build Status](https://travis-ci.org/StanfordSNR/pantheon.svg?branch=master)](https://travis-ci.org/StanfordSNR/pantheon)
 
 # Disclaimer:
 This is unfinished research software.
