@@ -20,7 +20,7 @@ Many of the tools and programs run by the Pantheon are git submodules in the `th
 To clone this repository, including submodules, run:
 
 ```
-git clone --recursive https://github.com/StanfordLPNG/pantheon.git
+git clone --recursive https://github.com/StanfordSNR/pantheon.git
 ```
 
 To add submodules after cloning, run:
