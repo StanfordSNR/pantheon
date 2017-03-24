@@ -6,6 +6,7 @@ import sys
 import math
 import json
 import pantheon_helpers
+import numpy as np
 import matplotlib_agg
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
@@ -217,6 +218,8 @@ class PlotSummary:
         fig_raw, ax_raw = plt.subplots()
         fig_mean, ax_mean = plt.subplots()
 
+        power_scores = []
+
         for cc in self.data:
             if not self.data[cc]:
                 continue
@@ -241,6 +244,7 @@ class PlotSummary:
             y_mean = sum(y_data) / len(y_data)
             ax_mean.scatter(x_mean, y_mean, color=color, marker=marker,
                             clip_on=False)
+            power_scores.append((float(y_mean)/float(x_mean), color))
             ax_mean.annotate(cc_name, (x_mean, y_mean))
 
         for fig, ax in [(fig_raw, ax_raw), (fig_mean, ax_mean)]:
@@ -275,6 +279,39 @@ class PlotSummary:
         mean_summary = path.join(
             self.data_dir, 'pantheon_summary_mean.png')
         fig_mean.savefig(mean_summary, dpi=300,
+                         bbox_inches='tight', pad_inches=0.2)
+
+        # make and save pantheon_summary_power.png
+        x_max, x_min = ax_mean.get_xlim()
+        y_min, y_max = ax_mean.get_ylim()
+        power_score_lines = []
+
+        ax_mean.set_autoscale_on(False)
+
+        for power_score, color in power_scores:
+            power_score_line = []
+            for x in np.arange(x_min, x_max, (x_max-x_min)/500.):
+                y = x * power_score
+                if (y <= y_max and y >= y_min):
+                    power_score_line.append((x, y))
+            power_score_lines.append((power_score_line, color, power_score))
+
+        for power_score_line, color, power_score in power_score_lines:
+            x, y = zip(*power_score_line)
+            ax_mean.plot(x, y, '-', color=color)
+            annotate_idx = len(x)/2
+            ax_mean.annotate('%.2f' % power_score,
+                             (x[annotate_idx], y[annotate_idx]),
+                             horizontalalignment='right',
+                             verticalalignment='top', xytext=(0, -10),
+                             textcoords="offset pixels")
+
+        power_summary = path.join(
+            self.data_dir, 'pantheon_summary_power.png')
+        ax_mean.set_title(self.experiment_title +
+                          '\nmean power scores of all runs by scheme',
+                          fontsize=12)
+        fig_mean.savefig(power_summary, dpi=300,
                          bbox_inches='tight', pad_inches=0.2)
 
     def autolabel(self, rects, ax, friendly_names):
