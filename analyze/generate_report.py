@@ -126,6 +126,8 @@ class GenerateReport:
         raw_summary = path.join(self.data_dir, 'pantheon_summary.png')
         mean_summary = path.join(
             self.data_dir, 'pantheon_summary_mean.png')
+        power_summary = path.join(
+            self.data_dir, 'pantheon_summary_power.png')
         metadata_desc = self.describe_metadata()
 
         # set cwd to a directory in pantheon repository
@@ -149,9 +151,10 @@ class GenerateReport:
             '%s'
             '\\PantheonFig{%s}\n\n'
             '\\PantheonFig{%s}\n\n'
+            '\\PantheonFig{%s}\n\n'
             '\\newpage\n\n'
             % (curr_time, analysis_git_head, metadata_desc, mean_summary,
-               raw_summary))
+               raw_summary, power_summary))
 
     def include_runs(self):
         for cc in self.analyze_schemes:
