@@ -290,10 +290,17 @@ class PlotSummary:
 
         for power_score, color in power_scores:
             power_score_line = []
-            for x in np.arange(x_min, x_max, (x_max-x_min)/500.):
+
+            for x in np.arange(x_min, x_max, (x_max-x_min)/100.):
                 y = x * power_score
                 if (y <= y_max and y >= y_min):
                     power_score_line.append((x, y))
+            for y in np.arange(y_min, y_max, (y_max-y_min)/100.):
+                x = y / power_score
+                if (x <= x_max and x >= x_min):
+                    power_score_line.append((x, y))
+
+            power_score_line.sort()  # can have weird artifacts otherwise
             power_score_lines.append((power_score_line, color, power_score))
 
         for power_score_line, color, power_score in power_score_lines:
