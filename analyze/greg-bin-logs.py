@@ -24,8 +24,15 @@ def write_out_bin(outfile, ms_per_bin, packet_bin, bin_bytes, num_lost):
     bin_megabits = bin_bytes * 8. / (1024. * 1024.)
     bin_mbps = (bin_megabits * 1000.) / ms_per_bin
 
-    loss_rate = float(num_lost)/float(num_lost + len(packet_bin))
-    outfile.write('%.3f %.3f\n' % (np.mean(packet_bin), bin_mbps))
+
+    if len(packet_bin):
+        mean_delay = np.mean(packet_bin)
+        #print len(packet_bin)
+        loss_rate = float(num_lost)/float(num_lost + len(packet_bin))
+    else:
+        mean_delay = 0.0
+        loss_rate = 0.0
+    outfile.write('%.3f %.3f\n' % (mean_delay, bin_mbps))
 
 def main():
     args = parse_arguments()
@@ -46,8 +53,15 @@ def main():
                     latest_bin = []
                     latest_num_lost = 0
                     latest_bin_bytes = 0
-                if bin_idx - prev_bin_idx > 1:
-                    print bin_idx - prev_bin_idx
+
+                    # fill out empty bins
+                    prev_bin_idx += 1
+                    while prev_bin_idx < bin_idx:
+                        write_out_bin(output_log, args.ms_per_bin, latest_bin, latest_bin_bytes, latest_num_lost)
+                        prev_bin_idx += 1
+
+                #if bin_idx - prev_bin_idx > 1:
+                #    print bin_idx - prev_bin_idx
 
 
             if math.isnan(prop_delay):
@@ -56,11 +70,9 @@ def main():
                 latest_bin.append(prop_delay)
                 latest_bin_bytes += size
 
-
             prev_bin_idx = bin_idx
 
         # can skip last bin
-
 
 if __name__ == '__main__':
     main()
