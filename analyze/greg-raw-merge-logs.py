@@ -20,9 +20,9 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def parse_line(line):
+def parse_line(line, time_calibration_offset):
     (ts, uid, size) = line.split('-')
-    return (float(ts), int(uid), int(size))
+    return (float(ts) + time_calibration_offset, int(uid), int(size))
 
 
 def single_mode(args):
@@ -54,14 +54,15 @@ def single_mode(args):
     #output_log.write('# init timestamp: %.3f\n' % min_init_ts)
 
     # timestamp calibration to ensure non-negative timestamps
-    send_cal = send_init_ts - min_init_ts
-    recv_cal = recv_init_ts - min_init_ts
+    send_calibration_offset = send_init_ts - min_init_ts
+    recv_calibration_offset = recv_init_ts - min_init_ts
 
     # construct a hash table using uid as keys
     send_pkts = {}
     for line in send_log:
-        (send_ts, send_uid, send_size) = parse_line(line)
-        send_pkts[send_uid] = (send_ts + send_cal, send_size)
+        (send_ts, send_uid, send_size) = parse_line(line, send_calibration_offset)
+        assert send_uid not in send_pkts
+        send_pkts[send_uid] = (send_ts, send_size)
 
     send_log.seek(0)
     send_log.readline()
@@ -69,39 +70,35 @@ def single_mode(args):
     # construct a set of received uids
     recv_pkts = {}
     for line in recv_log:
-        (recv_ts, recv_uid, recv_size) = parse_line(line)
-        recv_pkts[recv_uid] = recv_ts + recv_cal
+        (recv_ts, recv_uid, recv_size) = parse_line(line, recv_calibration_offset)
+        assert recv_uid not in recv_pkts
+        recv_pkts[recv_uid] = recv_ts
 
     recv_log.seek(0)
     recv_log.readline()
 
     # merge two sorted logs into one
-    send_l = send_log.readline()
-    if send_l:
-        (send_ts, send_uid, send_size) = parse_line(send_l)
+    send_line = send_log.readline()
+    if send_line:
+        (send_ts, send_uid, send_size) = parse_line(send_line, send_calibration_offset)
 
-    recv_l = recv_log.readline()
-    if recv_l:
-        (recv_ts, recv_uid, recv_size) = parse_line(recv_l)
+    recv_line = recv_log.readline()
+    if recv_line:
+        (recv_ts, recv_uid, recv_size) = parse_line(recv_line, recv_calibration_offset)
 
-    while send_l or recv_l:
-        if send_l:
-            send_ts_cal = send_ts + send_cal
-        if recv_l:
-            recv_ts_cal = recv_ts + recv_cal
-
-        if (send_l and recv_l and send_ts_cal <= recv_ts_cal) or not recv_l:
+    while send_line or recv_line:
+        if (send_line and recv_line and send_ts <= recv_ts) or not recv_line:
             if send_uid in recv_pkts:
-                prop_delay = recv_pkts[send_uid] - send_ts_cal
-                output_log.write('%.3f %.3f %d\n' % (send_ts_cal, prop_delay, send_size))
+                prop_delay = recv_pkts[send_uid] - send_ts
+                output_log.write('%.3f %.3f %d\n' % (send_ts, prop_delay, send_size))
             else:
-                output_log.write('%.3f NaN %d\n' % (send_ts_cal, send_size))
+                output_log.write('%.3f NaN %d\n' % (send_ts, send_size))
 
-            #output_log.write('%.3f + %s\n' % (send_ts_cal, send_size))
-            send_l = send_log.readline()
-            if send_l:
-                (send_ts, send_uid, send_size) = parse_line(send_l)
-        elif (send_l and recv_l and send_ts_cal > recv_ts_cal) or not send_l:
+            #output_log.write('%.3f + %s\n' % (send_ts, send_size))
+            send_line = send_log.readline()
+            if send_line:
+                (send_ts, send_uid, send_size) = parse_line(send_line, send_calibration_offset)
+        elif (send_line and recv_line and send_ts > recv_ts) or not send_line:
             if recv_uid in send_pkts:
                 (paired_send_ts, paired_send_size) = send_pkts[recv_uid]
                 # inconsistent packet size
@@ -119,12 +116,12 @@ def single_mode(args):
                 sys.stderr.write(warning)
                 exit(0)
 
-            delay = recv_ts_cal - paired_send_ts
+            delay = recv_ts - paired_send_ts
             #output_log.write('%.3f %.3f\n'
-            #                 % (recv_ts_cal, delay))
-            recv_l = recv_log.readline()
-            if recv_l:
-                (recv_ts, recv_uid, recv_size) = parse_line(recv_l)
+            #                 % (recv_ts, delay))
+            recv_line = recv_log.readline()
+            if recv_line:
+                (recv_ts, recv_uid, recv_size) = parse_line(recv_line, recv_calibration_offset)
 
     recv_log.close()
     send_log.close()
