@@ -1,56 +1,46 @@
 #!/usr/bin/env python
 
-import os
 import sys
-import errno
-import usage
+import shutil
+import os
 from os import path
 from subprocess import check_call
+import project_root
 from generate_html import generate_html
-from get_open_port import get_open_udp_port
+from helpers import get_open_port, parse_arguments, make_sure_path_exists
 
 
 def main():
-    usage.check_args(sys.argv, path.basename(__file__), 'sender_first')
-    option = sys.argv[1]
-    src_dir = path.abspath(path.dirname(__file__))
-    submodule_dir = path.abspath(
-        path.join(src_dir, '../third_party/proto-quic'))
-    find_unused_port_file = path.join(src_dir, 'find_unused_port')
-    quic_server = path.join(submodule_dir, 'src/out/Release/quic_server')
-    quic_client = path.join(submodule_dir, 'src/out/Release/quic_client')
+    args = parse_arguments('sender_first')
 
-    cert_dir = path.abspath(path.join(path.dirname(__file__), 'certs'))
-    html_dir = path.join(submodule_dir, 'www.example.org')
-    DEVNULL = open(os.devnull, 'w')
+    cc_repo = path.join(project_root.DIR, 'third_party', 'proto-quic')
+    send_src = path.join(cc_repo, 'src', 'out', 'Release', 'quic_server')
+    recv_src = path.join(cc_repo, 'src', 'out', 'Release', 'quic_client')
 
-    # build dependencies
-    if option == 'deps':
+    cert_dir = path.join(project_root.DIR, 'src', 'quic-certs')
+    html_dir = path.join(cc_repo, 'www.example.org')
+
+    # print build dependencies (separated by spaces)
+    if args.option == 'deps':
         print 'libnss3-tools'
 
-    # build
-    if option == 'build':
-        os.environ['PATH'] += ':%s/depot_tools' % submodule_dir
-        cmd = ('cd %s && gclient runhooks && ninja -C out/Release '
-               'quic_client quic_server' % path.join(submodule_dir, 'src'))
-        check_call(cmd, shell=True)
+    # print which side runs first (sender or receiver)
+    if args.option == 'run_first':
+        print 'sender'
 
-    # commands to be run after building and before running
-    if option == 'init':
-        # initialize NSS Shared DB
-        home_dir = path.abspath(path.expanduser('~'))
-        nssdb_dir = path.join(home_dir, '.pki/nssdb')
+    # build the scheme
+    if args.option == 'build':
+        os.environ['PATH'] += os.pathsep + path.join(cc_repo, 'depot_tools')
+        cmd = ('gclient runhooks && ninja -C out/Release '
+               'quic_client quic_server')
+        check_call(cmd, shell=True, cwd=path.join(cc_repo, 'src'))
 
-        try:
-            # create nssdb directory if it doesn't exist
-            os.makedirs(nssdb_dir)
-        except OSError as exception:
-            if exception.errno != errno.EEXIST:
-                raise
+        # initialize an empty NSS Shared DB
+        nssdb_dir = path.join(path.expanduser('~'), '.pki', 'nssdb')
+        shutil.rmtree(nssdb_dir, ignore_errors=True)
+        make_sure_path_exists(nssdb_dir)
 
-        for f in os.listdir(nssdb_dir):
-            os.remove(path.join(nssdb_dir, f))
-
+        # generate certificate
         cert_pwd = path.join(cert_dir, 'cert_pwd')
         cmd = 'certutil -d %s -N -f %s' % (nssdb_dir, cert_pwd)
         check_call(cmd, shell=True)
@@ -62,36 +52,29 @@ def main():
         check_call(cmd, shell=True)
 
         # generate a html of size that can be transferred longer than 60 s
-        generate_html(html_dir, 50000000)
+        generate_html(html_dir, 5e7)
 
-    # who goes first
-    if option == 'who_goes_first':
-        print 'Sender first'
+    # initialize the scheme before running
+    if args.option == 'init':
+        pass
 
-    # friendly name
-    if option == 'friendly_name':
-        print 'QUIC Cubic (toy)'
-
-    # sender
-    if option == 'sender':
-        port = get_open_udp_port()
+    # run sender
+    if args.option == 'sender':
+        port = get_open_port()
         print 'Listening on port: %s' % port
         sys.stdout.flush()
-        cmd = [quic_server, '--port=%s' % port,
+
+        cmd = [send_src, '--port=%s' % port,
                '--quic_in_memory_cache_dir=%s' % html_dir,
                '--certificate_file=%s' % path.join(cert_dir, 'leaf_cert.pem'),
                '--key_file=%s' % path.join(cert_dir, 'leaf_cert.pkcs8')]
         check_call(cmd)
 
-    # receiver
-    if option == 'receiver':
-        ip = sys.argv[2]
-        port = sys.argv[3]
-        cmd = [quic_client, '--host=%s' % ip, '--port=%s' % port,
+    # run receiver
+    if args.option == 'receiver':
+        cmd = [recv_src, '--host=%s' % args.ip, '--port=%s' % args.port,
                'https://www.example.org/']
-        check_call(cmd, stdout=DEVNULL)
-
-    DEVNULL.close()
+        check_call(cmd)
 
 
 if __name__ == '__main__':

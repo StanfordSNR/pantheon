@@ -1,22 +1,16 @@
-import os
 import sys
-import errno
 import string
 import random
+from os import path
+from helpers import make_sure_path_exists
 
 
 def generate_html(output_dir, size):
-    file_name = os.path.join(output_dir, 'index.html')
-
-    # create file directory if it doesn't exist
-    try:
-        os.makedirs(output_dir)
-    except OSError as exception:
-        if exception.errno != errno.EEXIST:
-            raise
+    html = path.join(output_dir, 'index.html')
+    make_sure_path_exists(output_dir)
 
     # check if index.html already exists
-    if os.path.isfile(file_name) and os.path.getsize(file_name) > size:
+    if path.isfile(html) and path.getsize(html) > size:
         sys.stderr.write('index.html already exists\n')
         return
 
@@ -32,13 +26,12 @@ def generate_html(output_dir, size):
                  '</body>\n'
                  '</html>\n')
 
-    f = open(file_name, 'w')
+    f = open(html, 'w')
     f.write(head_text)
 
-    block_size = 1024
-    for i in xrange(size / block_size + 1):
-        block = ''.join(
-            random.choice(string.letters) for _ in xrange(block_size))
+    num_blocks = int(size) / 1024 + 1
+    for _ in xrange(num_blocks):
+        block = ''.join(random.choice(string.letters) for _ in xrange(1024))
         f.write(block + '\n')
 
     f.write(foot_text)

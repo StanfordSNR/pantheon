@@ -1,68 +1,59 @@
 #!/usr/bin/env python
 
-import os
 import sys
-import usage
-from subprocess import check_call, CalledProcessError
-from get_open_port import get_open_udp_port
+import os
+from os import path
+from subprocess import check_call
+import project_root
+from helpers import get_open_port, parse_arguments, apply_patch
 
 
 def main():
-    usage.check_args(sys.argv, os.path.basename(__file__), 'receiver_first')
-    option = sys.argv[1]
-    src_dir = os.path.abspath(os.path.dirname(__file__))
-    submodule_dir = os.path.abspath(
-        os.path.join(src_dir, '../third_party/pcc'))
-    recv_dir = os.path.join(submodule_dir, 'receiver')
-    send_dir = os.path.join(submodule_dir, 'sender')
-    DEVNULL = open(os.devnull, 'w')
+    args = parse_arguments('receiver_first')
 
-    # build dependencies
-    if option == 'deps':
+    cc_repo = path.join(project_root.DIR, 'third_party', 'pcc')
+    recv_dir = path.join(cc_repo, 'receiver')
+    send_dir = path.join(cc_repo, 'sender')
+    recv_src = path.join(recv_dir, 'app', 'appserver')
+    send_src = path.join(send_dir, 'app', 'appclient')
+
+    # print build dependencies (separated by spaces)
+    if args.option == 'deps':
         pass
 
-    # build
-    if option == 'build':
+    # print which side runs first (sender or receiver)
+    if args.option == 'run_first':
+        print 'receiver'
+
+    # build the scheme
+    if args.option == 'build':
         # apply patch to reduce MTU size
-        patch = os.path.join(src_dir, 'pcc_mtu.patch')
-        cmd = 'cd %s && git apply %s' % (submodule_dir, patch)
-        try:
-            check_call(cmd, shell=True)
-        except CalledProcessError:
-            sys.stderr.write('patch apply failed but assuming things okay '
-                             '(patch applied previously?)\n')
+        apply_patch('pcc_mtu.patch', cc_repo)
 
-        cmd = 'cd %s && make && cd %s && make' % (send_dir, recv_dir)
-        check_call(cmd, shell=True)
+        check_call(['make', '-j2'], cwd=recv_dir)
+        check_call(['make', '-j2'], cwd=send_dir)
 
-    # commands to be run after building and before running
-    if option == 'init':
+    # initialize the scheme before running
+    if args.option == 'init':
         pass
 
-    # who goes first
-    if option == 'who_goes_first':
-        print 'Receiver first'
-
-    # friendly name
-    if option == 'friendly_name':
-        print 'PCC'
-
-    # receiver
-    if option == 'receiver':
-        port = get_open_udp_port()
+    # run receiver
+    if args.option == 'receiver':
+        port = get_open_port()
         print 'Listening on port: %s' % port
         sys.stdout.flush()
-        os.environ['LD_LIBRARY_PATH'] = os.path.join(recv_dir, 'src')
-        cmd = [os.path.join(recv_dir, 'app/appserver'), port]
+
+        os.environ['LD_LIBRARY_PATH'] = path.join(recv_dir, 'src')
+        cmd = [recv_src, port]
         check_call(cmd)
 
-    # sender
-    if option == 'sender':
-        ip = sys.argv[2]
-        port = sys.argv[3]
-        os.environ['LD_LIBRARY_PATH'] = os.path.join(send_dir, 'src')
-        cmd = [os.path.join(send_dir, 'app/appclient'), ip, port]
-        check_call(cmd, stderr=DEVNULL)
+    # run sender
+    if args.option == 'sender':
+        os.environ['LD_LIBRARY_PATH'] = path.join(send_dir, 'src')
+        cmd = [send_src, args.ip, args.port]
+        # suppress debugging output to stderr
+        with open(os.devnull, 'w') as devnull:
+            check_call(cmd, stderr=devnull)
 
 
 if __name__ == '__main__':
