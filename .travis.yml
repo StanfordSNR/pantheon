@@ -15,7 +15,7 @@ addons:
 
 install:
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 99
-  - pip install matplotlib numpy tabulate
+  - pip install matplotlib numpy pyyaml tabulate
 
 env:
     global:
@@ -32,11 +32,10 @@ env:
         - CMD='EXTRA_MAHIMAHI_SHELLS="mm-loss uplink .3 mm-loss downlink .3"; RUN_PY_EXTRAS="--sender-side local"; travis_extras/travis_test.sh'
         # test setup and test for each individual scheme
         - CMD='test/pre_setup.py && test/setup.py quic            && test/setup.py quic            && test/test.py -f 2 -t 10 quic'
-        #- CMD='test/pre_setup.py && test/setup.py webrtc         && test/setup.py webrtc          && test/test.py -f 2 -t 10 webrtc'
+        - CMD='test/pre_setup.py && test/setup.py webrtc          && test/setup.py webrtc          && test/test.py -f 2 -t 10 webrtc'
         - CMD='test/pre_setup.py && test/setup.py default_tcp     && test/setup.py default_tcp     && test/test.py -f 2 -t 10 default_tcp'
         - CMD='test/pre_setup.py && test/setup.py vegas           && test/setup.py vegas           && test/test.py -f 2 -t 10 vegas'
         - CMD='test/pre_setup.py && test/setup.py koho_cc         && test/setup.py koho_cc         && test/test.py -f 2 -t 10 koho_cc'
-        - CMD='test/pre_setup.py && test/setup.py new_koho        && test/setup.py new_koho        && test/test.py -f 2 -t 10 new_koho'
         - CMD='test/pre_setup.py && test/setup.py calibrated_koho && test/setup.py calibrated_koho && test/test.py -f 2 -t 10 calibrated_koho'
         - CMD='test/pre_setup.py && test/setup.py ledbat          && test/setup.py ledbat          && test/test.py -f 2 -t 10 ledbat'
         - CMD='test/pre_setup.py && test/setup.py pcc             && test/setup.py pcc             && test/test.py -f 2 -t 10 pcc'

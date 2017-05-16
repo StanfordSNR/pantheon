@@ -1,17 +1,18 @@
 import argparse
-import sys
+from os import path
+import yaml
+import project_root
 
 
 def build_arg_dict():
     arg_dict = {}
 
     arg_dict['-r'] = {
-        'metavar': 'REMOTE:PANTHEON-DIR',
+        'metavar': 'HOSTADDR:PANTHEON-DIR',
         'action': 'store',
         'dest': 'remote',
-        'help': 'REMOTE: [user@]hostname; PANTHEON-DIR: must be an '
-                'absolute path (can be prefixed by ~) to the pantheon root '
-                'directory on the remote side',
+        'help': 'HOSTADDR: [user@]IP; '
+                'PANTHEON-DIR: path to pantheon directory on the remote side',
     }
 
     arg_dict['-f'] = {
@@ -33,9 +34,6 @@ def build_arg_dict():
     }
 
     arg_dict['--interval'] = {
-        'metavar': 'INTERVAL',
-        'action': 'store',
-        'dest': 'interval',
         'type': int,
         'default': 0,
         'help': 'interval in seconds between two flows (default 0)',
@@ -50,25 +48,19 @@ def build_arg_dict():
     }
 
     arg_dict['--local-addr'] = {
-        'metavar': 'IP-ADDR',
-        'action': 'store',
-        'dest': 'local_addr',
+        'metavar': 'IP',
         'help': 'local IP address; if "--tunnel-server local" is '
                 'given, the remote side must be able to reach this address',
     }
 
     arg_dict['--ntp-addr'] = {
         'metavar': 'ADDR',
-        'action': 'store',
-        'dest': 'ntp_addr',
         'help': 'IP address or domain of ntp server '
                 'to check clock offset with',
     }
 
     arg_dict['--sender-side'] = {
         'choices': ['local', 'remote'],
-        'action': 'store',
-        'dest': 'sender_side',
         'default': 'local',
         'help': 'the side to be data sender (default local)',
     }
@@ -89,35 +81,26 @@ def build_arg_dict():
 
     arg_dict['--local-info'] = {
         'metavar': 'INFO',
-        'action': 'store',
-        'dest': 'local_info',
         'help': 'extra information about the local side',
     }
 
     arg_dict['--remote-info'] = {
         'metavar': 'INFO',
-        'action': 'store',
-        'dest': 'remote_info',
         'help': 'extra information about the remote side',
     }
 
     arg_dict['--run-only'] = {
         'choices': ['setup', 'test'],
-        'action': 'store',
-        'dest': 'run_only',
         'help': 'run setup or test only',
     }
 
     arg_dict['--random-order'] = {
         'action': 'store_true',
-        'dest': 'random_order',
         'help': 'test congestion control schemes in random order',
     }
 
     arg_dict['--run-id'] = {
         'metavar': 'ID',
-        'action': 'store',
-        'dest': 'run_id',
         'type': int,
         'default': 1,
         'help': 'run ID of the test',
@@ -125,77 +108,62 @@ def build_arg_dict():
 
     arg_dict['--run-times'] = {
         'metavar': 'N',
-        'action': 'store',
-        'dest': 'run_times',
         'type': int,
         'default': 1,
         'help': 'run times of each test (default 1)',
     }
 
-    cc_schemes = 'default_tcp vegas koho_cc new_koho calibrated_koho ledbat' \
-                 ' pcc verus scream sprout quic copa saturator'
+    config_path = path.join(project_root.DIR, 'src', 'config.yml')
+    with open(config_path) as config_file:
+        config = yaml.load(config_file)
+    cc_schemes = ' '.join(config.keys())
+
     arg_dict['--schemes'] = {
-        'metavar': '\"SCHEME_1 SCHEME_2..\"',
-        'action': 'store',
-        'dest': 'schemes',
+        'metavar': '"SCHEME_1 SCHEME_2..."',
         'default': cc_schemes,
         'help': 'what congestion control schemes to run '
                 '(default: \"%s\")' % cc_schemes,
     }
 
     arg_dict['--analyze-schemes'] = {
-        'metavar': '\"SCHEME_1 SCHEME_2..\"',
-        'action': 'store',
-        'dest': 'analyze_schemes',
+        'metavar': '"SCHEME_1 SCHEME_2..."',
         'help': 'what congestion control schemes to analyze '
                 '(default: is contents of pantheon_metadata.json',
     }
 
     arg_dict['--uplink-trace'] = {
         'metavar': 'TRACE',
-        'action': 'store',
-        'dest': 'uplink_trace',
-        'default': '12mbps_trace',
+        'default': '12mbps.trace',
         'help': 'uplink trace to pass to mm-link when running locally '
-                '(default 12mbps_trace)',
+                '(default 12mbps.trace)',
     }
 
     arg_dict['--downlink-trace'] = {
         'metavar': 'TRACE',
-        'action': 'store',
-        'dest': 'downlink_trace',
-        'default': '12mbps_trace',
+        'default': '12mbps.trace',
         'help': 'downlink trace to pass to mm-link when running locally '
-                '(default 12mbps_trace)',
+                '(default 12mbps.trace)',
     }
 
     arg_dict['--prepend-mm-cmds'] = {
-        'metavar': '\"CMD_1 CMD_2..\"',
-        'action': 'store',
-        'dest': 'prepend_mm_cmds',
-        'help': 'mahimahi shells to be run in outside of mm-link when running'
+        'metavar': '"CMD1 CMD2..."',
+        'help': 'mahimahi shells to run outside of mm-link when running'
                 ' locally',
     }
 
     arg_dict['--append-mm-cmds'] = {
-        'metavar': '\"CMD_1 CMD_2..\"',
-        'action': 'store',
-        'dest': 'append_mm_cmds',
-        'help': 'mahimahi shells to be run in inside of mm-link when running'
+        'metavar': '"CMD1 CMD2..."',
+        'help': 'mahimahi shells to run inside of mm-link when running'
                 ' locally',
     }
 
     arg_dict['--extra-mm-link-args'] = {
-        'metavar': '\"ARG_1 ARG_2..\"',
-        'action': 'store',
-        'dest': 'extra_mm_link_args',
-        'help': 'extra arguments to be passed to mm-link when running locally',
+        'metavar': '"ARG1 ARG2..."',
+        'help': 'extra arguments to pass to mm-link when running locally',
     }
 
     arg_dict['--ms-per-bin'] = {
         'metavar': 'MS',
-        'action': 'store',
-        'dest': 'ms_per_bin',
         'type': int,
         'default': 1000,
         'help': 'ms per bin',
@@ -203,38 +171,29 @@ def build_arg_dict():
 
     arg_dict['--data-dir'] = {
         'metavar': 'DIR',
-        'action': 'store',
-        'dest': 'data_dir',
         'default': '.',
         'help': 'directory containing logs for analysis (default .)',
     }
 
     arg_dict['--no-plots'] = {
         'action': 'store_true',
-        'dest': 'no_plots',
         'help': 'don\'t output plots',
     }
 
     arg_dict['--s3-link'] = {
         'metavar': 'URL',
-        'action': 'store',
-        'dest': 's3_link',
         'help': 'URL to download logs from S3',
     }
 
     arg_dict['--s3-dir-prefix'] = {
         'metavar': 'DIR',
-        'action': 'store',
-        'dest': 's3_dir_prefix',
         'default': '.',
         'help': 'directory to save downloaded logs from S3 (default .)',
     }
 
     arg_dict['cc'] = {
         'metavar': 'congestion-control',
-        'help': 'a congestion control scheme in default_tcp, koho_cc, '
-                'new_koho, calibrated_koho, ledbat, pcc, quic, scream, sprout,'
-                ' vegas, verus',
+        'help': 'a congestion control scheme',
     }
 
     arg_dict['cc_schemes'] = {
@@ -245,13 +204,11 @@ def build_arg_dict():
 
     arg_dict['--include-acklink'] = {
         'action': 'store_true',
-        'dest': 'include_acklink',
         'help': 'include acklink analysis',
     }
 
     arg_dict['--no-pre-setup'] = {
         'action': 'store_true',
-        'dest': 'no_pre_setup',
         'help': 'skip pre setup',
     }
 
@@ -308,7 +265,7 @@ def validate_args(args):
         assert not prepend_mm_cmds, '--prepend-mm-cmds can\'t be run with -r'
         assert not append_mm_cmds, '--append-mm-cmds can\'t be run with -r'
         assert not extra_mm_link_args, (
-                '--extra-mm-link-args can\'t be run with -r')
+            '--extra-mm-link-args can\'t be run with -r')
 
 
 def parse_arguments(filename):
@@ -353,3 +310,25 @@ def parse_arguments(filename):
     validate_args(args)
 
     return args
+
+
+def parse_remote(remote, cc=None):
+    assert remote, 'error in parse_remote: "remote" must be non-empty'
+
+    ret = {}
+
+    ret['host_addr'], ret['pantheon_dir'] = remote.split(':')
+    ret['ip'] = ret['host_addr'].split('@')[-1]
+    ret['ssh_cmd'] = ['ssh', ret['host_addr']]
+
+    ret['src_dir'] = path.join(ret['pantheon_dir'], 'src')
+    ret['test_dir'] = path.join(ret['pantheon_dir'], 'test')
+
+    ret['pre_setup'] = path.join(ret['test_dir'], 'pre_setup.py')
+    ret['setup'] = path.join(ret['test_dir'], 'setup.py')
+    ret['tunnel_manager'] = path.join(ret['test_dir'], 'tunnel_manager.py')
+
+    if cc:
+        ret['cc_src'] = path.join(ret['src_dir'], cc + '.py')
+
+    return ret
