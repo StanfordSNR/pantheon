@@ -1,60 +1,52 @@
 #!/usr/bin/env python
 
-import os
 import sys
-import usage
+from os import path
 from subprocess import check_call
-from get_open_port import get_open_tcp_port
+import project_root
+from helpers import get_open_port, parse_arguments
 
 
 def main():
-    usage.check_args(sys.argv, os.path.basename(__file__), 'receiver_first')
-    option = sys.argv[1]
-    src_dir = os.path.abspath(os.path.dirname(__file__))
-    submodule_dir = os.path.abspath(
-        os.path.join(src_dir, '../third_party/genericCC'))
-    rat_file = os.path.join(src_dir, 'RemyCC-2014-100x.dna')
+    args = parse_arguments('receiver_first')
 
-    # build dependencies
-    if option == 'deps':
-        print ('makepp libboost-dev libprotobuf-dev protobuf-c-compiler '
-               'protobuf-compiler libjemalloc-dev')
+    cc_repo = path.join(project_root.DIR, 'third_party', 'genericCC')
+    recv_src = path.join(cc_repo, 'receiver')
+    send_src = path.join(cc_repo, 'sender')
 
-    # build commands
-    if option == 'build':
-        cmd = 'cd %s && makepp && cp %s %s' % (submodule_dir, rat_file,
-                                               submodule_dir)
-        check_call(cmd, shell=True)
+    # print build dependencies (separated by spaces)
+    if args.option == 'deps':
+        deps = ('makepp libboost-dev libprotobuf-dev protobuf-c-compiler '
+                'protobuf-compiler libjemalloc-dev')
+        print deps
 
-    # commands to be run after building and before running
-    if option == 'init':
+    # print which side runs first (sender or receiver)
+    if args.option == 'run_first':
+        print 'receiver'
+
+    # build the scheme
+    if args.option == 'build':
+        check_call(['makepp'], cwd=cc_repo)
+
+    # initialize the scheme before running
+    if args.option == 'init':
         pass
 
-    # who goes first
-    if option == 'who_goes_first':
-        print 'Receiver first'
-
-    # friendly name
-    if option == 'friendly_name':
-        print 'TaoVA-100x'
-
-    # receiver
-    if option == 'receiver':
-        port = get_open_tcp_port()
+    # run receiver
+    if args.option == 'receiver':
+        port = get_open_port()
         print 'Listening on port: %s' % port
         sys.stdout.flush()
-        cmd = [os.path.join(submodule_dir, 'receiver'), port]
+
+        cmd = [recv_src, port]
         check_call(cmd)
 
-    # sender
-    if option == 'sender':
-        ip = sys.argv[2]
-        port = sys.argv[3]
-        sender_file = os.path.join(submodule_dir, 'sender')
+    # run sender
+    if args.option == 'sender':
+        rat_file = path.join(project_root.DIR, 'src', 'RemyCC-2014-100x.dna')
         cmd = ('export MIN_RTT=1000000 && %s serverip=%s serverport=%s if=%s '
                'offduration=1 onduration=1000000 traffic_params=deterministic,'
-               'num_cycles=1' % (sender_file, ip, port, rat_file))
-        print cmd
+               'num_cycles=1' % (send_src, args.ip, args.port, rat_file))
         check_call(cmd, shell=True)
 
 

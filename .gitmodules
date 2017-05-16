@@ -46,13 +46,8 @@
   path = third_party/pantheon-stimuli
   url = https://github.com/StanfordSNR/pantheon-stimuli.git
   ignore = dirty
-[submodule "third_party/new_koho"]
-	path = third_party/new_koho
-	url = https://github.com/greghill/koho_cc.git
-	branch = koho_march_2017
-	ignore = dirty
 [submodule "third_party/calibrated_koho"]
-	path = third_party/calibrated_koho
-	url = https://github.com/greghill/koho_cc.git
-	branch = calibrated_koho
-	ignore = dirty
+  path = third_party/calibrated_koho
+  url = https://github.com/greghill/koho_cc.git
+  branch = calibrated_koho
+  ignore = dirty

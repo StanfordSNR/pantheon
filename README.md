@@ -5,7 +5,6 @@ This is unfinished research software.
 Multiple scripts run commands as root to install prerequisite programs, update package lists, etc.
 Our scripts will write to the filesystem in the pantheon folder and in /tmp/.
 We have not implemented most of the programs run by our wrappers.
-Those programs may write to the filesystem (for example, Verus will write files like `client_45191.out`  and a folder named `verus_tmp` into the current working directory when it is called).
 We never run third party programs as root, but we can not guarantee they will never try to escalate privilege to root.
 
 Run at your own risk. Feel free to contact our mailing list: `the name of this repository`@cs.stanford.edu
@@ -27,7 +26,6 @@ To add submodules after cloning, run:
 ```
 git submodule update --init
 ```
-
 
 ## Running the Pantheon
 Currently supported schemes can be found in `src/`. Running:
@@ -90,9 +88,9 @@ test/test.py [-t RUNTIME] [-f FLOWS] congestion-control
 
 To setup and test `sprout` over the wide area to a remote machine run:
 ```
-test/pre_setup.py -r REMOTE:PANTHEON-DIR
-test/setup.py -r REMOTE:PANTHEON-DIR sprout
-test/test.py -r REMOTE:PANTHEON-DIR [-t RUNTIME] [-f FLOWS] sprout
+test/pre_setup.py -r HOSTADDR:PANTHEON-DIR
+test/setup.py -r HOSTADDR:PANTHEON-DIR sprout
+test/test.py -r HOSTADDR:PANTHEON-DIR [-t RUNTIME] [-f FLOWS] sprout
 ```
 
 Run `test/test.py -h` for detailed usage and additional optional arguments.
@@ -102,10 +100,10 @@ Run `test/pre_setup.py` and `test/setup.py <congestion-control>` first.
 
 Find running order for scheme:
 ```
-./<congestion-control>.py who_goes_first
+./<congestion-control>.py run_first
 ```
 
-Depending on the output of `who_goes_first`, run
+Depending on the output of `run_first`, run
 
 ```
 # Receiver first

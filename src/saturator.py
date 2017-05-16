@@ -1,59 +1,50 @@
 #!/usr/bin/env python
 
-import os
 import sys
-import usage
-from subprocess import call, check_call, CalledProcessError
-from get_open_port import get_open_udp_port
+from os import path
+from subprocess import call, check_call
+import project_root
+from helpers import get_open_port, parse_arguments
 
 
 def main():
-    usage.check_args(sys.argv, os.path.basename(__file__), 'receiver_first')
-    option = sys.argv[1]
-    src_dir = os.path.abspath(os.path.dirname(__file__))
-    submodule_dir = os.path.abspath(
-        os.path.join(src_dir, '../third_party/pantheon-stimuli'))
-    send_file = os.path.join(submodule_dir, 'capacity_stimulus/sender')
-    recv_file = os.path.join(submodule_dir, 'capacity_stimulus/receiver')
+    args = parse_arguments('receiver_first')
 
-    # build dependencies
-    if option == 'deps':
+    cc_repo = path.join(project_root.DIR, 'third_party', 'pantheon-stimuli')
+    recv_src = path.join(cc_repo, 'capacity_stimulus', 'receiver')
+    send_src = path.join(cc_repo, 'capacity_stimulus', 'sender')
+
+    # print build dependencies (separated by spaces)
+    if args.option == 'deps':
         pass
 
-    # build
-    if option == 'build':
+    # print which side runs first (sender or receiver)
+    if args.option == 'run_first':
+        print 'receiver'
+
+    # build the scheme
+    if args.option == 'build':
         # make alone sufficient if autogen.sh and configure already run
-        cmd = 'cd %s && make -j4' % submodule_dir
-        if call(cmd, shell=True) is not 0:
-            cmd = ('cd %s && ./autogen.sh && ./configure && make -j4' %
-                   submodule_dir)
-            check_call(cmd, shell=True)
+        if call(['make', '-j2'], cwd=cc_repo) != 0:
+            cmd = './autogen.sh && ./configure && make -j2'
+            check_call(cmd, shell=True, cwd=cc_repo)
 
-    # commands to be run after building and before running
-    if option == 'init':
+    # initialize the scheme before running
+    if args.option == 'init':
         pass
 
-    # who goes first
-    if option == 'who_goes_first':
-        print 'Receiver first'
-
-    # friendly name
-    if option == 'friendly_name':
-        print 'Saturator'
-
-    # receiver
-    if option == 'receiver':
-        port = get_open_udp_port()
+    # run receiver
+    if args.option == 'receiver':
+        port = get_open_port()
         print 'Listening on port: %s' % port
         sys.stdout.flush()
-        cmd = [recv_file, port]
+
+        cmd = [recv_src, port]
         check_call(cmd)
 
-    # sender
-    if option == 'sender':
-        ip = sys.argv[2]
-        port = sys.argv[3]
-        cmd = [send_file, ip, port]
+    # run sender
+    if args.option == 'sender':
+        cmd = [send_src, args.ip, args.port]
         check_call(cmd)
 
 

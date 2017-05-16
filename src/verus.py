@@ -1,67 +1,57 @@
 #!/usr/bin/env python
 
-import os
 import sys
-import usage
-from subprocess import check_call, CalledProcessError
-from get_open_port import get_open_udp_port
+from os import path
+from subprocess import call, check_call
+import project_root
+from helpers import get_open_port, parse_arguments, apply_patch, pantheon_tmp
 
 
 def main():
-    usage.check_args(sys.argv, os.path.basename(__file__), 'sender_first')
-    option = sys.argv[1]
-    src_dir = os.path.abspath(os.path.dirname(__file__))
-    submodule_dir = os.path.abspath(
-        os.path.join(src_dir, '../third_party/verus'))
-    send_file = os.path.join(submodule_dir, 'src/verus_server')
-    recv_file = os.path.join(submodule_dir, 'src/verus_client')
+    args = parse_arguments('sender_first')
 
-    # build dependencies
-    if option == 'deps':
-        deps_list = 'libtbb-dev libasio-dev libalglib-dev libboost-system-dev'
-        print deps_list
+    cc_repo = path.join(project_root.DIR, 'third_party', 'verus')
+    send_src = path.join(cc_repo, 'src', 'verus_server')
+    recv_src = path.join(cc_repo, 'src', 'verus_client')
 
-    # build
-    if option == 'build':
+    # print build dependencies (separated by spaces)
+    if args.option == 'deps':
+        deps = 'libtbb-dev libasio-dev libalglib-dev libboost-system-dev'
+        print deps
+
+    # print which side runs first (sender or receiver)
+    if args.option == 'run_first':
+        print 'sender'
+
+    # build the scheme
+    if args.option == 'build':
         # apply patch to reduce MTU size
-        patch = os.path.join(src_dir, 'verus_mtu.patch')
-        cmd = 'cd %s && git apply %s' % (submodule_dir, patch)
-        try:
-            check_call(cmd, shell=True)
-        except CalledProcessError:
-            sys.stderr.write('patch apply failed but assuming things okay '
-                             '(patch applied previously?)\n')
+        apply_patch('verus_mtu.patch', cc_repo)
 
-        cmd = ('cd %s && ./bootstrap.sh && ./configure && make -j4' %
-               submodule_dir)
-        check_call(cmd, shell=True)
+        # make alone sufficient if bootstrap.sh and configure already run
+        if call(['make', '-j2'], cwd=cc_repo) != 0:
+            cmd = './bootstrap.sh && ./configure && make -j2'
+            check_call(cmd, shell=True, cwd=cc_repo)
 
-    # commands to be run after building and before running
-    if option == 'init':
+    # initialize the scheme before running
+    if args.option == 'init':
         pass
 
-    # who goes first
-    if option == 'who_goes_first':
-        print 'Sender first'
-
-    # friendly name
-    if option == 'friendly_name':
-        print 'Verus'
-
-    # sender
-    if option == 'sender':
-        port = get_open_udp_port()
+    # run sender
+    if args.option == 'sender':
+        port = get_open_port()
         print 'Listening on port: %s' % port
         sys.stdout.flush()
-        cmd = [send_file, '-name', 'verus_tmp', '-p', port, '-t', '75']
+
+        verus_tmp = path.join(pantheon_tmp(), 'verus_tmp')
+        cmd = [send_src, '-name', verus_tmp, '-p', port, '-t', '75']
         check_call(cmd)
 
-    # receiver
-    if option == 'receiver':
-        ip = sys.argv[2]
-        port = sys.argv[3]
-        cmd = [recv_file, ip, '-p', port]
-        check_call(cmd)
+    # run receiver
+    if args.option == 'receiver':
+        verus_tmp = path.join(pantheon_tmp(), 'verus_tmp')
+        cmd = [recv_src, args.ip, '-p', args.port]
+        check_call(cmd, cwd=verus_tmp)
 
 
 if __name__ == '__main__':
