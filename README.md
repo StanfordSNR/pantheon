@@ -3,7 +3,7 @@
 # Disclaimer:
 This is unfinished research software.
 Multiple scripts run commands as root to install prerequisite programs, update package lists, etc.
-Our scripts will write to the filesystem in the pantheon folder and in /tmp/.
+Our scripts will write to the filesystem in the pantheon folder and in `/tmp/`.
 We have not implemented most of the programs run by our wrappers.
 We never run third party programs as root, but we can not guarantee they will never try to escalate privilege to root.
 

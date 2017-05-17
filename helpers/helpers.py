@@ -1,10 +1,11 @@
 import sys
-import errno
 import os
 from os import path
 import subprocess
+import yaml
 import project_root
 from parse_arguments import parse_remote, parse_arguments
+from src.helpers import make_sure_path_exists, pantheon_tmp, get_open_port
 
 
 def print_cmd(cmd):
@@ -36,14 +37,6 @@ def Popen(cmd, **kwargs):
     return subprocess.Popen(cmd, **kwargs)
 
 
-def make_sure_path_exists(target_path):
-    try:
-        os.makedirs(target_path)
-    except OSError as exception:
-        if exception.errno != errno.EEXIST:
-            raise
-
-
 def sanity_check_gitmodules():
     third_party_dir = path.join(project_root.DIR, 'third_party')
 
@@ -66,3 +59,9 @@ def install_pantheon_tunnel():
     tunnel_repo = path.join(project_root.DIR, 'third_party', 'pantheon-tunnel')
     cmd = './autogen.sh && ./configure && make -j2 && sudo make install'
     check_call(cmd, shell=True, cwd=tunnel_repo)
+
+
+def parse_config():
+    config_path = path.join(project_root.DIR, 'src', 'config.yml')
+    with open(config_path) as config_file:
+        return yaml.load(config_file)
