@@ -37,31 +37,11 @@ def Popen(cmd, **kwargs):
     return subprocess.Popen(cmd, **kwargs)
 
 
-def sanity_check_gitmodules():
-    third_party_dir = path.join(project_root.DIR, 'third_party')
-
-    for module_dir in os.listdir(third_party_dir):
-        module = path.join(third_party_dir, module_dir)
-        if path.isdir(module):
-            assert os.listdir(module), (
-                'Folder third_party/%s empty: make sure to initialize git '
-                'submodules with "git submodule update --init"' % module_dir)
-
-
-def install_pantheon_tunnel():
-    sys.stderr.write('Installing pantheon tunnel...\n')
-
-    deps = ('debhelper autotools-dev dh-autoreconf iptables pkg-config '
-            'iproute2 iptables iproute2')
-    cmd = 'sudo apt-get -yq --force-yes install ' + deps
-    check_call(cmd, shell=True)
-
-    tunnel_repo = path.join(project_root.DIR, 'third_party', 'pantheon-tunnel')
-    cmd = './autogen.sh && ./configure && make -j2 && sudo make install'
-    check_call(cmd, shell=True, cwd=tunnel_repo)
-
-
 def parse_config():
-    config_path = path.join(project_root.DIR, 'src', 'config.yml')
-    with open(config_path) as config_file:
-        return yaml.load(config_file)
+    with open(path.join(project_root.DIR, 'src', 'config.yml')) as config:
+        return yaml.load(config)
+
+
+def update_submodules():
+    cmd = 'git submodule update --init --recursive'
+    check_call(cmd, shell=True)
