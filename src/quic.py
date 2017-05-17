@@ -74,7 +74,9 @@ def main():
     if args.option == 'receiver':
         cmd = [recv_src, '--host=%s' % args.ip, '--port=%s' % args.port,
                'https://www.example.org/']
-        check_call(cmd)
+        # suppress stdout as it prints the huge web page received
+        with open(os.devnull, 'w') as devnull:
+            check_call(cmd, stdout=devnull)
 
 
 if __name__ == '__main__':
