@@ -40,6 +40,12 @@ def make_sure_path_exists(target_path):
             raise
 
 
+def pantheon_tmp():
+    pantheon_tmp_dir = path.join(tempfile.gettempdir(), 'pantheon-tmp')
+    make_sure_path_exists(pantheon_tmp_dir)
+    return pantheon_tmp_dir
+
+
 def parse_arguments(run_first):
     if run_first != 'receiver_first' and run_first != 'sender_first':
         sys.exit('Specify "receiver_first" or "sender_first" '
@@ -71,9 +77,3 @@ def parse_arguments(run_first):
 
     args = parser.parse_args()
     return args
-
-
-def pantheon_tmp():
-    pantheon_tmp_dir = path.join(tempfile.gettempdir(), 'pantheon-tmp')
-    make_sure_path_exists(pantheon_tmp_dir)
-    return pantheon_tmp_dir
