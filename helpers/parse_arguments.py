@@ -12,7 +12,7 @@ def build_arg_dict():
         'action': 'store',
         'dest': 'remote',
         'help': 'HOSTADDR: [user@]IP; '
-                'PANTHEON-DIR: path to pantheon directory on the remote side',
+                'PANTHEON-DIR: pantheon directory on the remote side',
     }
 
     arg_dict['-f'] = {
@@ -65,18 +65,22 @@ def build_arg_dict():
         'help': 'the side to be data sender (default local)',
     }
 
-    arg_dict['--local-interface'] = {
+    arg_dict['--local-if'] = {
         'metavar': 'INTERFACE',
         'action': 'store',
         'dest': 'local_if',
         'help': 'local interface to run tunnel on',
     }
 
-    arg_dict['--remote-interface'] = {
+    arg_dict['--remote-if'] = {
         'metavar': 'INTERFACE',
         'action': 'store',
         'dest': 'remote_if',
         'help': 'remote interface to run tunnel on',
+    }
+
+    arg_dict['--interface'] = {
+        'help': 'interface on which to disable reverse path filtering',
     }
 
     arg_dict['--local-info'] = {
@@ -87,6 +91,16 @@ def build_arg_dict():
     arg_dict['--remote-info'] = {
         'metavar': 'INFO',
         'help': 'extra information about the remote side',
+    }
+
+    arg_dict['--install-deps'] = {
+        'action': 'store_true',
+        'help': 'install dependencies',
+    }
+
+    arg_dict['--build'] = {
+        'action': 'store_true',
+        'help': 'build the scheme',
     }
 
     arg_dict['--run-only'] = {
@@ -113,10 +127,9 @@ def build_arg_dict():
         'help': 'run times of each test (default 1)',
     }
 
-    config_path = path.join(project_root.DIR, 'src', 'config.yml')
-    with open(config_path) as config_file:
-        config = yaml.load(config_file)
-    cc_schemes = ' '.join(config.keys())
+    with open(path.join(project_root.DIR, 'src', 'config.yml')) as config:
+        cfg = yaml.load(config)
+    cc_schemes = ' '.join(cfg.keys())
 
     arg_dict['--schemes'] = {
         'metavar': '"SCHEME_1 SCHEME_2..."',
@@ -268,40 +281,42 @@ def validate_args(args):
             '--extra-mm-link-args can\'t be run with -r')
 
 
-def parse_arguments(filename):
+def parse_arguments(file_path):
     parser = argparse.ArgumentParser()
     arg_dict = build_arg_dict()
 
-    if filename == 'pre_setup.py':
+    test_dir = path.join(project_root.DIR, 'test')
+
+    if file_path == path.join(project_root.DIR, 'install_deps.py'):
+        add_arg_list(parser, arg_dict, ['--interface'])
+    elif file_path == path.join(test_dir, 'setup.py'):
         add_arg_list(parser, arg_dict, [
-            '-r', '--local-interface', '--remote-interface'])
-    elif filename == 'setup.py':
-        add_arg_list(parser, arg_dict, ['-r', 'cc'])
-    elif filename == 'test.py':
+            '--install-deps', '--build', 'cc_schemes'])
+    elif file_path == 'test.py':
         add_arg_list(parser, arg_dict, [
             '-r', '-t', '-f', '--interval', '--tunnel-server',
-            '--local-addr', '--sender-side', '--local-interface',
-            '--remote-interface', '--run-id', '--uplink-trace',
+            '--local-addr', '--sender-side', '--local-if',
+            '--remote-if', '--run-id', '--uplink-trace',
             '--downlink-trace', '--prepend-mm-cmds', '--append-mm-cmds',
             '--extra-mm-link-args', '--ntp-addr', 'cc'])
-    elif filename == 'plot_summary.py':
+    elif file_path == 'plot_summary.py':
         add_arg_list(parser, arg_dict,
                      ['--data-dir', '--include-acklink', '--no-plots',
                       '--analyze-schemes'])
-    elif filename == 'generate_report.py':
+    elif file_path == 'generate_report.py':
         add_arg_list(parser, arg_dict, ['--data-dir', '--include-acklink',
                                         '--analyze-schemes'])
-    elif filename == 'full_experiment_plot.py':
+    elif file_path == 'full_experiment_plot.py':
         add_arg_list(parser, arg_dict, ['--ms-per-bin', '--data-dir'])
-    elif filename == 'analyze.py':
+    elif file_path == 'analyze.py':
         add_arg_list(parser, arg_dict, [
             '--s3-link', '--s3-dir-prefix', '--data-dir', '--no-pre-setup',
             '--include-acklink', '--analyze-schemes'])
-    elif filename == 'run.py':
+    elif file_path == 'run.py':
         add_arg_list(parser, arg_dict, [
             '-r', '-t', '-f', '--interval', '--tunnel-server',
-            '--local-addr', '--sender-side', '--local-interface',
-            '--remote-interface', '--local-info', '--remote-info',
+            '--local-addr', '--sender-side', '--local-if',
+            '--remote-if', '--local-info', '--remote-info',
             '--run-only', '--random-order', '--run-times', '--ntp-addr',
             '--uplink-trace', '--downlink-trace', '--prepend-mm-cmds',
             '--append-mm-cmds', '--extra-mm-link-args', '--schemes'])
