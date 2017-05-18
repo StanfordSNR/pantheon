@@ -6,7 +6,7 @@ import os
 from os import path
 from subprocess import call, check_call, check_output, Popen
 import project_root
-from helpers import get_open_port, parse_arguments, pantheon_tmp
+from helpers import get_open_port, parse_arguments, TMPDIR
 
 
 def xvfb_in_use(display):
@@ -67,7 +67,7 @@ def main():
         print 'Listening on port: %s' % port
         sys.stdout.flush()
 
-        user_data_dir = path.join(pantheon_tmp(), 'webrtc-%s' % uuid.uuid4())
+        user_data_dir = path.join(TMPDIR, 'webrtc-%s' % uuid.uuid4())
         cmd = ['chromium-browser', '--app=http://localhost:%s/sender' % port,
                '--use-fake-ui-for-media-stream',
                '--use-fake-device-for-media-stream',
@@ -81,7 +81,7 @@ def main():
             Popen(['Xvfb', ':2'])
         os.environ['DISPLAY'] = ':2'
 
-        user_data_dir = path.join(pantheon_tmp(), 'webrtc-%s' % uuid.uuid4())
+        user_data_dir = path.join(TMPDIR, 'webrtc-%s' % uuid.uuid4())
         cmd = ['chromium-browser',
                '--app=http://%s:%s/receiver' % (args.ip, args.port),
                '--user-data-dir=%s' % user_data_dir]

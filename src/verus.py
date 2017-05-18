@@ -4,7 +4,7 @@ import sys
 from os import path
 from subprocess import call, check_call
 import project_root
-from helpers import get_open_port, parse_arguments, apply_patch, pantheon_tmp
+from helpers import get_open_port, parse_arguments, apply_patch, TMPDIR
 
 
 def main():
@@ -43,13 +43,13 @@ def main():
         print 'Listening on port: %s' % port
         sys.stdout.flush()
 
-        verus_tmp = path.join(pantheon_tmp(), 'verus_tmp')
+        verus_tmp = path.join(TMPDIR, 'verus_tmp')
         cmd = [send_src, '-name', verus_tmp, '-p', port, '-t', '75']
         check_call(cmd)
 
     # run receiver
     if args.option == 'receiver':
-        verus_tmp = path.join(pantheon_tmp(), 'verus_tmp')
+        verus_tmp = path.join(TMPDIR, 'verus_tmp')
         cmd = [recv_src, args.ip, '-p', args.port]
         check_call(cmd, cwd=verus_tmp)
 
