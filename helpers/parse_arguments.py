@@ -1,3 +1,4 @@
+import sys
 import argparse
 from os import path
 import yaml
@@ -117,7 +118,7 @@ def build_arg_dict():
         'metavar': 'ID',
         'type': int,
         'default': 1,
-        'help': 'run ID of the test',
+        'help': 'run ID of the test (default 1)',
     }
 
     arg_dict['--run-times'] = {
@@ -144,18 +145,18 @@ def build_arg_dict():
                 '(default: is contents of pantheon_metadata.json',
     }
 
-    arg_dict['--uplink-trace'] = {
+    arg_dict['--datalink-trace'] = {
         'metavar': 'TRACE',
         'default': '12mbps.trace',
-        'help': 'uplink trace to pass to mm-link when running locally '
-                '(default 12mbps.trace)',
+        'help': 'datalink trace (from sender to receiver) to pass in mm-link '
+                'when running locally (default 12mbps.trace)',
     }
 
-    arg_dict['--downlink-trace'] = {
+    arg_dict['--acklink-trace'] = {
         'metavar': 'TRACE',
         'default': '12mbps.trace',
-        'help': 'downlink trace to pass to mm-link when running locally '
-                '(default 12mbps.trace)',
+        'help': 'acklink trace (from receiver to sender) to pass in mm-link '
+                'when running locally (default 12mbps.trace)',
     }
 
     arg_dict['--prepend-mm-cmds'] = {
@@ -248,37 +249,49 @@ def validate_args(args):
     append_mm_cmds = getattr(args, 'append_mm_cmds', None)
     extra_mm_link_args = getattr(args, 'extra_mm_link_args', None)
 
-    if remote_if:
-        assert remote, '--remote-interface must run along with -r'
+    if remote_if is not None:
+        if remote is None:
+            sys.exit('--remote-interface must run along with -r')
 
-    if remote_info:
-        assert remote, '--remote-info must run along with -r'
+    if remote_info is not None:
+        if remote is None:
+            sys.exit('--remote-info must run along with -r')
 
     if remote:
-        assert ':' in remote, '-r must be followed by [user@]hostname:dir'
-        if flows:
-            assert flows >= 1, 'remote test must run at least one flow'
+        if ':' not in remote:
+            sys.exit('-r must be followed by [user@]hostname:dir')
+
+        if flows < 1:
+            sys.exit('remote test must run at least one flow')
 
     if runtime:
-        assert runtime <= 60, 'runtime cannot be greater than 60 seconds'
+        if runtime > 60:
+            sys.exit('runtime cannot be greater than 60 seconds')
+
         if flows and interval:
-            assert (flows - 1) * interval < runtime, (
-                'interval time between flows is too long to be fit in runtime')
+            if (flows - 1) * interval > runtime:
+                sys.exit('interval time between flows is too long to be '
+                         'fit in runtime')
 
     if server_side == 'local':
-        assert local_addr, (
-            'must provide local address that can be reached by the other '
-            'side if "--tunnel-server local"')
+        if local_addr is None:
+            sys.exit('must provide local address that can be reached by the '
+                     'other side if "--tunnel-server local"')
 
     if server_side == 'local' or sender_side == 'remote':
-        assert remote, (
-            'local test can only run tunnel server and sender inside mm-link')
+        if remote is None:
+            sys.exit('local test can only run tunnel server and sender '
+                     'inside mm-link')
 
     if remote:
-        assert not prepend_mm_cmds, '--prepend-mm-cmds can\'t be run with -r'
-        assert not append_mm_cmds, '--append-mm-cmds can\'t be run with -r'
-        assert not extra_mm_link_args, (
-            '--extra-mm-link-args can\'t be run with -r')
+        if prepend_mm_cmds is not None:
+            sys.exit('--prepend-mm-cmds can\'t be run with -r')
+
+        if append_mm_cmds is not None:
+            sys.exit('--append-mm-cmds can\'t be run with -r')
+
+        if extra_mm_link_args is not None:
+            sys.exit('--extra-mm-link-args can\'t be run with -r')
 
 
 def parse_arguments(file_path):
@@ -286,40 +299,41 @@ def parse_arguments(file_path):
     arg_dict = build_arg_dict()
 
     test_dir = path.join(project_root.DIR, 'test')
+    analyze_dir = path.join(project_root.DIR, 'analyze')
 
     if file_path == path.join(project_root.DIR, 'install_deps.py'):
         add_arg_list(parser, arg_dict, ['--interface'])
     elif file_path == path.join(test_dir, 'setup.py'):
         add_arg_list(parser, arg_dict, [
             '--install-deps', '--build', 'cc_schemes'])
-    elif file_path == 'test.py':
+    elif file_path == path.join(test_dir, 'test.py'):
         add_arg_list(parser, arg_dict, [
             '-r', '-t', '-f', '--interval', '--tunnel-server',
             '--local-addr', '--sender-side', '--local-if',
-            '--remote-if', '--run-id', '--uplink-trace',
-            '--downlink-trace', '--prepend-mm-cmds', '--append-mm-cmds',
+            '--remote-if', '--run-id', '--datalink-trace',
+            '--acklink-trace', '--prepend-mm-cmds', '--append-mm-cmds',
             '--extra-mm-link-args', '--ntp-addr', 'cc'])
-    elif file_path == 'plot_summary.py':
-        add_arg_list(parser, arg_dict,
-                     ['--data-dir', '--include-acklink', '--no-plots',
-                      '--analyze-schemes'])
-    elif file_path == 'generate_report.py':
-        add_arg_list(parser, arg_dict, ['--data-dir', '--include-acklink',
-                                        '--analyze-schemes'])
-    elif file_path == 'full_experiment_plot.py':
-        add_arg_list(parser, arg_dict, ['--ms-per-bin', '--data-dir'])
-    elif file_path == 'analyze.py':
-        add_arg_list(parser, arg_dict, [
-            '--s3-link', '--s3-dir-prefix', '--data-dir', '--no-pre-setup',
-            '--include-acklink', '--analyze-schemes'])
-    elif file_path == 'run.py':
+    elif file_path == path.join(test_dir, 'run.py'):
         add_arg_list(parser, arg_dict, [
             '-r', '-t', '-f', '--interval', '--tunnel-server',
             '--local-addr', '--sender-side', '--local-if',
             '--remote-if', '--local-info', '--remote-info',
             '--run-only', '--random-order', '--run-times', '--ntp-addr',
-            '--uplink-trace', '--downlink-trace', '--prepend-mm-cmds',
+            '--datalink-trace', '--acklink-trace', '--prepend-mm-cmds',
             '--append-mm-cmds', '--extra-mm-link-args', '--schemes'])
+    elif file_path == path.join(analyze_dir, 'plot_summary.py'):
+        add_arg_list(parser, arg_dict,
+                     ['--data-dir', '--include-acklink', '--no-plots',
+                      '--analyze-schemes'])
+    elif file_path == path.join(analyze_dir, 'generate_report.py'):
+        add_arg_list(parser, arg_dict, ['--data-dir', '--include-acklink',
+                                        '--analyze-schemes'])
+    elif file_path == path.join(analyze_dir, 'full_experiment_plot.py'):
+        add_arg_list(parser, arg_dict, ['--ms-per-bin', '--data-dir'])
+    elif file_path == path.join(analyze_dir, 'analyze.py'):
+        add_arg_list(parser, arg_dict, [
+            '--s3-link', '--s3-dir-prefix', '--data-dir', '--no-pre-setup',
+            '--include-acklink', '--analyze-schemes'])
 
     args = parser.parse_args()
     validate_args(args)
@@ -328,8 +342,6 @@ def parse_arguments(file_path):
 
 
 def parse_remote(remote, cc=None):
-    assert remote, 'error in parse_remote: "remote" must be non-empty'
-
     ret = {}
 
     ret['host_addr'], ret['pantheon_dir'] = remote.split(':')
@@ -338,8 +350,8 @@ def parse_remote(remote, cc=None):
 
     ret['src_dir'] = path.join(ret['pantheon_dir'], 'src')
     ret['test_dir'] = path.join(ret['pantheon_dir'], 'test')
+    ret['install_deps'] = path.join(ret['pantheon_dir'], 'install_deps.py')
 
-    ret['pre_setup'] = path.join(ret['test_dir'], 'pre_setup.py')
     ret['setup'] = path.join(ret['test_dir'], 'setup.py')
     ret['tunnel_manager'] = path.join(ret['test_dir'], 'tunnel_manager.py')
 
