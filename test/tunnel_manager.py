@@ -2,7 +2,9 @@
 
 import os
 import sys
+import signal
 from subprocess import Popen, PIPE
+from colorama import Fore, Style
 import project_root
 from helpers.helpers import kill_proc_group
 
@@ -18,7 +20,9 @@ def main():
         input_cmd = sys.stdin.readline().strip()
 
         # print all the commands fed into tunnel manager
-        sys.stderr.write(prompt + input_cmd + '\n')
+        if prompt:
+            sys.stderr.write(Fore.BLUE + prompt + Style.RESET_ALL)
+        sys.stderr.write(input_cmd + '\n')
         cmd = input_cmd.split()
 
         # manage I/O of multiple tunnels
@@ -65,7 +69,7 @@ def main():
                 continue
 
             for proc in procs.itervalues():
-                kill_proc_group(proc)
+                kill_proc_group(proc, signal.SIGKILL)
 
             sys.exit(0)
         else:

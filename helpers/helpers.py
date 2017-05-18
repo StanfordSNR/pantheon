@@ -5,6 +5,7 @@ import subprocess
 from subprocess import PIPE
 import signal
 from time import strftime
+from colorama import Fore, Style
 import yaml
 import project_root
 from parse_arguments import parse_remote, parse_arguments
@@ -17,7 +18,8 @@ def print_cmd(cmd):
     elif isinstance(cmd, str):
         cmd_to_print = cmd.strip()
 
-    sys.stderr.write('$ ' + cmd_to_print + '\n')
+    sys.stderr.write(Fore.BLUE + '$ ' + Style.RESET_ALL)
+    sys.stderr.write(cmd_to_print + '\n')
 
 
 def call(cmd, **kwargs):
@@ -62,10 +64,9 @@ def format_time():
     return strftime('%a, %d %b %Y %H:%M:%S %z')
 
 
-def kill_proc_group(proc):
+def kill_proc_group(proc, signum=signal.SIGTERM):
     if proc:
         try:
-            os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
-            os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+            os.killpg(os.getpgid(proc.pid), signum)
         except OSError as exception:
             sys.stderr.write('%s\n' % exception)
