@@ -16,7 +16,7 @@ def install_deps():
     cmd = 'sudo apt-get -y install mahimahi ntp ntpdate texlive python-pip'
     check_call(cmd, shell=True)
 
-    cmd = 'pip install matplotlib numpy tabulate pyyaml'
+    cmd = 'sudo pip install matplotlib numpy tabulate pyyaml colorama'
     check_call(cmd, shell=True)
 
     # install pantheon tunnel

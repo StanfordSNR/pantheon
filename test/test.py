@@ -1,21 +1,22 @@
 #!/usr/bin/env python
 
 import os
+from os import path
 import sys
 import time
 import uuid
 import signal
-import pantheon_helpers
-from time import strftime
-from os import path
-from helpers.parse_arguments import parse_arguments
-from helpers.pantheon_help import (Popen, PIPE, check_call, check_output,
-                                   parse_remote)
+import colorama
+from colorama import Fore, Back, Style
+import project_root
+from helpers.helpers import (
+    parse_arguments, parse_remote, Popen, PIPE, check_call, check_output,
+    TMPDIR, timeout_handler, TimeoutError, format_time, kill_proc_group)
 
 
-class Test:
+class Test(object):
     def __init__(self, args):
-        self.cc = args.cc.lower()
+        self.cc = args.cc
         self.flows = args.flows
         self.runtime = args.runtime
         self.remote = args.remote
@@ -26,26 +27,22 @@ class Test:
         self.remote_if = args.remote_if
         self.local_if = args.local_if
         self.run_id = args.run_id
-        self.downlink_trace = args.downlink_trace
-        self.uplink_trace = args.uplink_trace
+        self.acklink_trace = args.acklink_trace
+        self.datalink_trace = args.datalink_trace
         self.prepend_mm_cmds = args.prepend_mm_cmds
         self.append_mm_cmds = args.append_mm_cmds
         self.extra_mm_link_args = args.extra_mm_link_args
         self.worst_abs_ofst = None
         self.ntp_addr = args.ntp_addr
 
-    def timeout_handler(self, signum, frame):
-        raise
-
-    def get_port(self, process):
-        signal.signal(signal.SIGALRM, self.timeout_handler)
-        signal.alarm(30)
+    def get_port(self, proc):
+        signal.signal(signal.SIGALRM, timeout_handler)
+        signal.alarm(10)
 
         try:
-            port_info = process.stdout.readline().split(': ')
-        except:
-            sys.stderr.write('Cannot get port from sender for 30 seconds\n')
-            exit(1)
+            port_info = proc.stdout.readline().split(': ')
+        except TimeoutError:
+            sys.exit('cannot get port within 10 seconds\n')
         else:
             signal.alarm(0)
 
@@ -54,51 +51,60 @@ class Test:
             else:
                 return None
 
-    def who_goes_first(self):
-        who_goes_first_cmd = ['python', self.src_file, 'who_goes_first']
-        who_goes_first_info = check_output(who_goes_first_cmd)
-        self.first_to_run = who_goes_first_info.split(' ')[0].lower()
+    def who_runs_first(self):
+        cmd = ['python', self.src, 'run_first']
+        self.run_first = check_output(cmd).strip()
 
-        cond = self.first_to_run == 'receiver' or self.first_to_run == 'sender'
-        assert cond, 'Need to specify receiver or sender first'
-
-        self.second_to_run = ('sender' if self.first_to_run == 'receiver'
-                              else 'receiver')
+        if self.run_first == 'receiver':
+            self.run_second = 'sender'
+        elif self.run_first == 'sender':
+            self.run_second = 'receiver'
+        else:
+            sys.exit('Need to specify receiver or sender first')
 
     def setup(self):
-        self.first_to_run_setup_time = 2
-
-        self.test_dir = path.abspath(path.dirname(__file__))
-        src_dir = path.abspath(path.join(self.test_dir, '../src'))
-        self.src_file = path.join(src_dir, self.cc + '.py')
+        # setup commonly used paths
+        self.src = path.join(project_root.DIR, 'src', self.cc + '.py')
+        self.test_dir = path.join(project_root.DIR, 'test')
         self.tunnel_manager = path.join(self.test_dir, 'tunnel_manager.py')
 
-        # record who goes first
-        self.who_goes_first()
+        # record who runs first
+        self.who_runs_first()
 
-        # prepare output logs
-        self.datalink_name = self.cc + '_datalink_run%s' % self.run_id
-        self.acklink_name = self.cc + '_acklink_run%s' % self.run_id
-        self.datalink_log_path = path.join(self.test_dir, self.datalink_name +
-                                           '.log')
-        self.acklink_log_path = path.join(self.test_dir, self.acklink_name +
-                                          '.log')
+        # wait for 2 seconds until run_first is ready
+        self.run_first_setup_time = 2
 
-        if not self.remote:  # local setup
-            uplink_trace = os.path.join(self.test_dir, self.uplink_trace)
-            downlink_trace = os.path.join(self.test_dir, self.downlink_trace)
+        # setup output logs
+        self.datalink_name = self.cc + '_datalink_run%d' % self.run_id
+        self.acklink_name = self.cc + '_acklink_run%d' % self.run_id
 
-            mm_datalink_log = self.cc + '_mm_datalink_run%s.log' % self.run_id
-            mm_acklink_log = self.cc + '_mm_acklink_run%s.log' % self.run_id
+        self.datalink_log = path.join(
+            self.test_dir, self.datalink_name + '.log')
+        self.acklink_log = path.join(
+            self.test_dir, self.acklink_name + '.log')
+
+        if self.remote is None:
+            # local test setup
+            datalink_trace = path.join(self.test_dir, self.datalink_trace)
+            acklink_trace = path.join(self.test_dir, self.acklink_trace)
+
+            mm_datalink_log = self.cc + '_mm_datalink_run%d.log' % self.run_id
+            mm_acklink_log = self.cc + '_mm_acklink_run%d.log' % self.run_id
             self.mm_datalink_log = path.join(self.test_dir, mm_datalink_log)
             self.mm_acklink_log = path.join(self.test_dir, mm_acklink_log)
 
-            if self.first_to_run == 'receiver' or self.flows:
+            if self.run_first == 'receiver' or self.flows > 0:
+                # if receiver runs first OR if test inside pantheon tunnel
                 uplink_log = self.mm_datalink_log
                 downlink_log = self.mm_acklink_log
+                uplink_trace = datalink_trace
+                downlink_trace = acklink_trace
             else:
+                # if sender runs first AND test without pantheon tunnel
                 uplink_log = self.mm_acklink_log
                 downlink_log = self.mm_datalink_log
+                uplink_trace = acklink_trace
+                downlink_trace = datalink_trace
 
             self.mm_link_cmd = []
 
@@ -107,56 +113,56 @@ class Test:
 
             self.mm_link_cmd += [
                 'mm-link', uplink_trace, downlink_trace,
-                '--uplink-log=' + uplink_log, '--downlink-log=' + downlink_log]
+                '--uplink-log=' + uplink_log,
+                '--downlink-log=' + downlink_log]
 
             if self.extra_mm_link_args:
                 self.mm_link_cmd += self.extra_mm_link_args.split()
 
             if self.append_mm_cmds:
                 self.mm_link_cmd += self.append_mm_cmds.split()
-
-            self.rd = {}
-        else:  # remote setup
+        else:
+            # remote test setup
             self.rd = parse_remote(self.remote, self.cc)
 
-    # test congestion control without running mm-tunnelclient/mm-tunnelserver
+    # test congestion control without running pantheon tunnel
     def run_without_tunnel(self):
-        # run the side specified by self.first_to_run
-        cmd = ['python', self.src_file, self.first_to_run]
-        sys.stderr.write('Running %s %s...\n' % (self.cc, self.first_to_run))
+        # run the side specified by self.run_first
+        cmd = ['python', self.src, self.run_first]
+        sys.stderr.write('Running %s %s...\n' % (self.cc, self.run_first))
         proc_first = Popen(cmd, stdout=PIPE, preexec_fn=os.setsid)
 
         # find port printed
         port = None
-        while not port:
+        while port is None:
             port = self.get_port(proc_first)
 
         # sleep just in case the process isn't quite listening yet
         # the cleaner approach might be to try to verify the socket is open
-        time.sleep(self.first_to_run_setup_time)
+        time.sleep(self.run_first_setup_time)
 
-        self.test_start_time = strftime('%a, %d %b %Y %H:%M:%S %z')
-        # run the other side specified by self.second_to_run
-        cmd = ('python %s %s $MAHIMAHI_BASE %s' %
-               (self.src_file, self.second_to_run, port))
+        self.test_start_time = format_time()
+        # run the other side specified by self.run_second
+        cmd = 'python %s %s $MAHIMAHI_BASE %s' % (
+            self.src, self.run_second, port)
         cmd = ' '.join(self.mm_link_cmd) + " -- sh -c '%s'" % cmd
-        sys.stderr.write('Running %s %s...\n' % (self.cc, self.second_to_run))
+        sys.stderr.write('Running %s %s...\n' % (self.cc, self.run_second))
         proc_second = Popen(cmd, stdout=PIPE, shell=True, preexec_fn=os.setsid)
 
-        signal.signal(signal.SIGALRM, self.timeout_handler)
+        signal.signal(signal.SIGALRM, timeout_handler)
         signal.alarm(self.runtime)
 
         try:
+            proc_first.communicate()
             proc_second.communicate()
-        except:
-            self.test_end_time = strftime('%a, %d %b %Y %H:%M:%S %z')
+        except TimeoutError:
+            self.test_end_time = format_time()
         else:
             signal.alarm(0)
-            sys.stderr.write('Test exited before time limit')
-            exit(1)
+            sys.exit('Test exited before time limit')
         finally:
-            os.killpg(os.getpgid(proc_first.pid), signal.SIGTERM)
-            os.killpg(os.getpgid(proc_second.pid), signal.SIGTERM)
+            kill_proc_group(proc_first)
+            kill_proc_group(proc_second)
 
     # read and update worst absolute clock offset
     def update_worst_abs_ofst(self):
@@ -194,18 +200,18 @@ class Test:
             tun_id = i + 1
             uid = uuid.uuid4()
 
-            self.datalink_ingress_logs.append(
-                '/tmp/pantheon-tmp/%s_flow%s_uid%s.log.ingress'
-                % (self.datalink_name, tun_id, uid))
-            self.datalink_egress_logs.append(
-                '/tmp/pantheon-tmp/%s_flow%s_uid%s.log.egress'
-                % (self.datalink_name, tun_id, uid))
-            self.acklink_ingress_logs.append(
-                '/tmp/pantheon-tmp/%s_flow%s_uid%s.log.ingress'
-                % (self.acklink_name, tun_id, uid))
-            self.acklink_egress_logs.append(
-                '/tmp/pantheon-tmp/%s_flow%s_uid%s.log.egress'
-                % (self.acklink_name, tun_id, uid))
+            self.datalink_ingress_logs.append(path.join(
+                TMPDIR, '%s_flow%s_uid%s.log.ingress'
+                % (self.datalink_name, tun_id, uid)))
+            self.datalink_egress_logs.append(path.join(
+                TMPDIR, '%s_flow%s_uid%s.log.egress'
+                % (self.datalink_name, tun_id, uid)))
+            self.acklink_ingress_logs.append(path.join(
+                TMPDIR, '%s_flow%s_uid%s.log.ingress'
+                % (self.acklink_name, tun_id, uid)))
+            self.acklink_egress_logs.append(path.join(
+                TMPDIR, '%s_flow%s_uid%s.log.egress'
+                % (self.acklink_name, tun_id, uid)))
 
         if self.remote and self.ntp_addr:
             self.update_worst_abs_ofst()
@@ -216,7 +222,7 @@ class Test:
                 ts_manager_cmd = ['python', self.tunnel_manager]
             else:
                 ts_manager_cmd = self.rd['ssh_cmd'] + [
-                    'python', self.rd['tun_manager']]
+                    'python', self.rd['tunnel_manager']]
         else:
             ts_manager_cmd = ['python', self.tunnel_manager]
 
@@ -236,7 +242,7 @@ class Test:
         if self.remote:
             if self.server_side == 'local':
                 tc_manager_cmd = self.rd['ssh_cmd'] + [
-                    'python', self.rd['tun_manager']]
+                    'python', self.rd['tunnel_manager']]
             else:
                 tc_manager_cmd = ['python', self.tunnel_manager]
         else:
@@ -354,18 +360,18 @@ class Test:
                         if 'got connection' in got_connection:
                             break
 
-            if self.first_to_run == 'receiver':
+            if self.run_first == 'receiver':
                 if self.sender_side == 'local':
-                    first_src_file = self.rd.get('cc_src', self.src_file)
-                    second_src_file = self.src_file
+                    first_src = self.rd.get('cc_src', self.src)
+                    second_src = self.src
                 else:
-                    first_src_file = self.src_file
-                    second_src_file = self.rd.get('cc_src', self.src_file)
+                    first_src = self.src
+                    second_src = self.rd.get('cc_src', self.src)
 
                 first_cmd = ('tunnel %s python %s receiver\n' %
-                             (tun_id, first_src_file))
+                             (tun_id, first_src))
                 second_cmd = ('tunnel %s python %s sender %s' %
-                              (tun_id, second_src_file, recv_pri_ip))
+                              (tun_id, second_src, recv_pri_ip))
 
                 recv_manager.stdin.write(first_cmd)
 
@@ -377,18 +383,18 @@ class Test:
 
                 second_cmd += ' %s\n' % port
                 second_cmds.append(second_cmd)
-            else:  # self.first_to_run == 'sender'
+            else:  # self.run_first == 'sender'
                 if self.sender_side == 'local':
-                    first_src_file = self.src_file
-                    second_src_file = self.rd.get('cc_src', self.src_file)
+                    first_src = self.src
+                    second_src = self.rd.get('cc_src', self.src)
                 else:
-                    first_src_file = self.rd.get('cc_src', self.src_file)
-                    second_src_file = self.src_file
+                    first_src = self.rd.get('cc_src', self.src)
+                    second_src = self.src
 
                 first_cmd = ('tunnel %s python %s sender\n' %
-                             (tun_id, first_src_file))
+                             (tun_id, first_src))
                 second_cmd = ('tunnel %s python %s receiver %s' %
-                              (tun_id, second_src_file, send_pri_ip))
+                              (tun_id, second_src, send_pri_ip))
 
                 send_manager.stdin.write(first_cmd)
 
@@ -401,16 +407,16 @@ class Test:
                 second_cmd += ' %s\n' % port
                 second_cmds.append(second_cmd)
 
-        time.sleep(self.first_to_run_setup_time)
+        time.sleep(self.run_first_setup_time)
 
         start_time = time.time()
-        self.test_start_time = strftime('%a, %d %b %Y %H:%M:%S %z')
+        self.test_start_time = format_time()
         # start each flow self.interval seconds after the previous one
         for i in xrange(len(second_cmds)):
             if i != 0:
                 time.sleep(self.interval)
             second_cmd = second_cmds[i]
-            if self.first_to_run == 'receiver':
+            if self.run_first == 'receiver':
                 send_manager.stdin.write(second_cmd)
             else:
                 recv_manager.stdin.write(second_cmd)
@@ -423,7 +429,7 @@ class Test:
         ts_manager.stdin.write('halt\n')
         tc_manager.stdin.write('halt\n')
 
-        self.test_end_time = strftime('%a, %d %b %Y %H:%M:%S %z')
+        self.test_end_time = format_time()
 
         if self.remote and self.ntp_addr:
             self.update_worst_abs_ofst()
@@ -454,11 +460,11 @@ class Test:
                                shell=True)
 
             uid = uuid.uuid4()
-            datalink_tun_log = (
-                '/tmp/pantheon-tmp/%s_flow%s_uid%s.log.merged'
+            datalink_tun_log = path.join(
+                TMPDIR, '%s_flow%s_uid%s.log.merged'
                 % (self.datalink_name, tun_id, uid))
-            acklink_tun_log = (
-                '/tmp/pantheon-tmp/%s_flow%s_uid%s.log.merged'
+            acklink_tun_log = path.join(
+                TMPDIR, '%s_flow%s_uid%s.log.merged'
                 % (self.acklink_name, tun_id, uid))
 
             cmd = ['merge-tunnel-logs', 'single', '-i',
@@ -474,13 +480,13 @@ class Test:
             datalink_tun_logs.append(datalink_tun_log)
             acklink_tun_logs.append(acklink_tun_log)
 
-        cmd = ['merge-tunnel-logs', 'multiple', '-o', self.datalink_log_path]
+        cmd = ['merge-tunnel-logs', 'multiple', '-o', self.datalink_log]
         if not self.remote:
             cmd += ['--link-log', self.mm_datalink_log]
         cmd += datalink_tun_logs
         check_call(cmd)
 
-        cmd = ['merge-tunnel-logs', 'multiple', '-o', self.acklink_log_path]
+        cmd = ['merge-tunnel-logs', 'multiple', '-o', self.acklink_log]
         if not self.remote:
             cmd += ['--link-log', self.mm_acklink_log]
         cmd += acklink_tun_logs
@@ -488,7 +494,11 @@ class Test:
         check_call(cmd)
 
     def run_congestion_control(self):
-        self.run_with_tunnel() if self.flows else self.run_without_tunnel()
+        if self.flows > 0:
+            self.run_with_tunnel()
+        else:
+            # test without pantheon tunnel when self.flows = 0
+            self.run_without_tunnel()
 
     def record_time_stats(self):
         stats_log = path.join(self.test_dir,
@@ -510,11 +520,14 @@ class Test:
 
         stats.close()
 
-        sys.stderr.write('Done\n\n')
+        sys.stderr.write(Back.GREEN + 'Done\n' + Style.RESET_ALL)
 
     # congestion control test
     def test(self):
-        # local or remote setup before running tests
+        # initialize colored output
+        colorama.init()
+
+        # setup before running tests
         self.setup()
 
         # run receiver and sender
@@ -525,13 +538,9 @@ class Test:
 
 
 def main():
-    args = parse_arguments(path.basename(__file__))
-
-    test = Test(args)
-    test.test()
+    args = parse_arguments(path.abspath(__file__))
+    Test(args).test()
 
 
 if __name__ == '__main__':
-    DEVNULL = open(os.devnull, 'w')
     main()
-    DEVNULL.close()
