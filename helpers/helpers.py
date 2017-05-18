@@ -2,10 +2,13 @@ import sys
 import os
 from os import path
 import subprocess
+from subprocess import PIPE
+import signal
+from time import strftime
 import yaml
 import project_root
 from parse_arguments import parse_remote, parse_arguments
-from src.helpers import make_sure_path_exists, pantheon_tmp, get_open_port
+from src.helpers import make_sure_path_exists, get_open_port, TMPDIR
 
 
 def print_cmd(cmd):
@@ -45,3 +48,24 @@ def parse_config():
 def update_submodules():
     cmd = 'git submodule update --init --recursive'
     check_call(cmd, shell=True)
+
+
+class TimeoutError(Exception):
+    pass
+
+
+def timeout_handler(signum, frame):
+    raise TimeoutError()
+
+
+def format_time():
+    return strftime('%a, %d %b %Y %H:%M:%S %z')
+
+
+def kill_proc_group(proc):
+    if proc:
+        try:
+            os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+            os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+        except OSError as exception:
+            sys.stderr.write('%s\n' % exception)
