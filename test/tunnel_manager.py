@@ -2,28 +2,24 @@
 
 import os
 import sys
-import signal
-import subprocess
-from subprocess import Popen, PIPE, check_output
-
-
-def destroy(procs):
-    # send SIGTERM signal to all processes and the subprocesses they spawned
-    for proc in procs.itervalues():
-        os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+from subprocess import Popen, PIPE
+import project_root
+from helpers.helpers import kill_proc_group
 
 
 def main():
-    procs = {}  # manage tunnel processes
     prompt = ''
+    procs = {}
+
     sys.stdout.write('tunnel manager is running\n')
     sys.stdout.flush()
 
     while True:
-        raw_cmd = sys.stdin.readline().strip()
-        # print all commands fed to tunnel manager
-        sys.stderr.write(prompt + raw_cmd + '\n')
-        cmd = raw_cmd.split()
+        input_cmd = sys.stdin.readline().strip()
+
+        # print all the commands fed into tunnel manager
+        sys.stderr.write(prompt + input_cmd + '\n')
+        cmd = input_cmd.split()
 
         # manage I/O of multiple tunnels
         if cmd[0] == 'tunnel':
@@ -33,7 +29,7 @@ def main():
 
             try:
                 tun_id = int(cmd[1]) - 1
-            except:
+            except ValueError:
                 sys.stderr.write('error: usage: tunnel ID CMD...\n')
                 continue
 
@@ -68,10 +64,12 @@ def main():
                 sys.stderr.write('error: usage: halt\n')
                 continue
 
-            destroy(procs)
+            for proc in procs.itervalues():
+                kill_proc_group(proc)
+
             sys.exit(0)
         else:
-            sys.stderr.write('unknown command: %s\n' % raw_cmd)
+            sys.stderr.write('unknown command: %s\n' % input_cmd)
             continue
 
 
