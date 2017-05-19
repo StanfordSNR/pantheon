@@ -44,14 +44,13 @@ def main():
         sys.stdout.flush()
 
         verus_tmp = path.join(TMPDIR, 'verus_tmp')
-        cmd = [send_src, '-name', verus_tmp, '-p', port, '-t', '75']
+        cmd = [send_src, '-name', TMPDIR, '-p', port, '-t', '75']
         check_call(cmd)
 
     # run receiver
     if args.option == 'receiver':
-        verus_tmp = path.join(TMPDIR, 'verus_tmp')
         cmd = [recv_src, args.ip, '-p', args.port]
-        check_call(cmd, cwd=verus_tmp)
+        check_call(cmd, cwd=TMPDIR)
 
 
 if __name__ == '__main__':
