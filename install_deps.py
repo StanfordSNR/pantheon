@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
+import argparse
 from os import path
-from helpers.helpers import parse_arguments, check_call, update_submodules
+from subprocess import check_call
 
 
 def install_deps():
@@ -32,7 +33,9 @@ def install_deps():
 
 
 def setup(args):
-    update_submodules()
+    # update submodules
+    cmd = 'git submodule update --init --recursive'
+    check_call(cmd, shell=True)
 
     # install dependencies
     install_deps()
@@ -45,7 +48,10 @@ def setup(args):
 
 
 def main():
-    args = parse_arguments(path.abspath(__file__))
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--interface',
+        help='interface on which to disable reverse path filtering')
+    args = parser.parse_args()
     setup(args)
 
 
