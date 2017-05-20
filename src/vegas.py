@@ -1,42 +1,45 @@
 #!/usr/bin/env python
 
-import sys
-from subprocess import check_call
-from helpers import get_open_port, parse_arguments
+from subprocess import check_call, check_output
+from helpers import get_open_port, print_port_for_tests, parse_arguments
+
+
+def setup_vegas():
+    # enable tcp_vegas kernel module
+    sh_cmd = 'sudo modprobe tcp_vegas'
+    check_call(sh_cmd, shell=True)
+
+    # add vegas to kernel-allowed congestion control list
+    sh_cmd = 'sysctl net.ipv4.tcp_allowed_congestion_control'
+    allowed_cc = check_output(sh_cmd, shell=True)
+    allowed_cc = allowed_cc.split('=')[-1].split()
+
+    if 'vegas' not in allowed_cc:
+        allowed_cc.append('vegas')
+
+        sh_cmd = 'sudo sysctl -w net.ipv4.tcp_allowed_congestion_control="%s"'
+        check_call(sh_cmd % ' '.join(allowed_cc), shell=True)
 
 
 def main():
     args = parse_arguments('receiver_first')
 
-    # print build dependencies (separated by spaces)
     if args.option == 'deps':
         print 'iperf'
 
-    # print which side runs first (sender or receiver)
     if args.option == 'run_first':
         print 'receiver'
 
-    # build the scheme
-    if args.option == 'build':
-        pass
+    if args.option == 'setup_after_reboot':
+        setup_vegas()
 
-    # initialize the scheme before running
-    if args.option == 'init':
-        tcp_allowed_cc = '/proc/sys/net/ipv4/tcp_allowed_congestion_control'
-        cmd = ('sudo modprobe tcp_vegas && '
-               'echo "vegas" | sudo tee -a %s' % tcp_allowed_cc)
-        check_call(cmd, shell=True)
-
-    # run receiver
     if args.option == 'receiver':
         port = get_open_port()
-        print 'Listening on port: %s' % port
-        sys.stdout.flush()
+        print_port_for_tests(port)
 
         cmd = ['iperf', '-Z', 'vegas', '-s', '-p', port]
         check_call(cmd)
 
-    # run sender
     if args.option == 'sender':
         cmd = ['iperf', '-Z', 'vegas', '-c', args.ip, '-p', args.port,
                '-t', '75']

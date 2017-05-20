@@ -11,13 +11,19 @@ import project_root
 
 
 def get_open_port():
-    s = socket.socket(socket.AF_INET)
-    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    sock = socket.socket(socket.AF_INET)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-    s.bind(('', 0))
-    port = s.getsockname()[1]
-    s.close()
+    sock.bind(('', 0))
+    port = sock.getsockname()[1]
+    sock.close()
     return str(port)
+
+
+def print_port_for_tests(port):
+    # print listening on port in a fixed format required by tests
+    sys.stdout.write('Listening on port: %s\n' % port)
+    sys.stdout.flush()
 
 
 def curr_time_sec():
@@ -57,9 +63,11 @@ def parse_arguments(run_first):
     subparsers.add_parser(
         'run_first', help='print which side (sender or receiver) runs first')
     subparsers.add_parser(
-        'build', help='build the scheme')
+        'setup', help='set up the scheme (required to be run at the first '
+        'time; must make persistent changes across reboots)')
     subparsers.add_parser(
-        'init', help='initialize the scheme after building')
+        'setup_after_reboot', help='set up the scheme (required to be run '
+        'every time after reboot)')
 
     receiver_parser = subparsers.add_parser('receiver', help='run receiver')
     sender_parser = subparsers.add_parser('sender', help='run sender')

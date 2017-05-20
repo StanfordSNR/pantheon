@@ -2,15 +2,13 @@ import sys
 import string
 import random
 from os import path
-from helpers import make_sure_path_exists
 
 
 def generate_html(output_dir, size):
-    html = path.join(output_dir, 'index.html')
-    make_sure_path_exists(output_dir)
+    html_path = path.join(output_dir, 'index.html')
 
     # check if index.html already exists
-    if path.isfile(html) and path.getsize(html) > size:
+    if path.isfile(html_path) and path.getsize(html_path) > size:
         sys.stderr.write('index.html already exists\n')
         return
 
@@ -26,13 +24,13 @@ def generate_html(output_dir, size):
                  '</body>\n'
                  '</html>\n')
 
-    f = open(html, 'w')
-    f.write(head_text)
+    html = open(html_path, 'w')
+    html.write(head_text)
 
     num_blocks = int(size) / 1024 + 1
     for _ in xrange(num_blocks):
         block = ''.join(random.choice(string.letters) for _ in xrange(1024))
-        f.write(block + '\n')
+        html.write(block + '\n')
 
-    f.write(foot_text)
-    f.close()
+    html.write(foot_text)
+    html.close()
