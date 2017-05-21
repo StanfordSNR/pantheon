@@ -5,6 +5,7 @@ from os import path
 import sys
 import time
 import uuid
+import random
 import signal
 import colorama
 from colorama import Fore, Back, Style
@@ -557,6 +558,9 @@ def main():
         cc_schemes = args.schemes.split()
 
     for run_id in xrange(1, args.run_times + 1):
+        if args.random_order:
+            random.shuffle(cc_schemes)
+
         for cc in cc_schemes:
             Test(args, run_id, cc).run()
 
