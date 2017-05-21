@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
 from os import path
+from parse_arguments import parse_arguments
 import project_root
 from helpers.helpers import (
-    parse_arguments, check_call, check_output, update_submodules)
+    check_call, check_output, update_submodules, parse_config)
 
 
 def install_deps(cc_src):
@@ -16,29 +17,49 @@ def install_deps(cc_src):
 
 
 def setup(args):
+    # update submodules
     update_submodules()
 
     # enable IP forwarding
-    cmd = 'sudo sysctl -w net.ipv4.ip_forward=1'
-    check_call(cmd, shell=True)
+    sh_cmd = 'sudo sysctl -w net.ipv4.ip_forward=1'
+    check_call(sh_cmd, shell=True)
+
+    if args.interface is not None:
+        # disable reverse path filtering
+        rpf = 'net.ipv4.conf.%s.rp_filter'
+
+        sh_cmd = 'sudo sysctl -w %s=0' % (rpf % 'all')
+        check_call(sh_cmd, shell=True)
+
+        sh_cmd = 'sudo sysctl -w %s=0' % (rpf % args.interface)
+        check_call(sh_cmd, shell=True)
 
     # setup specified schemes
-    for cc in args.cc_schemes:
-        cc_src = path.join(project_root.DIR, 'src', cc + '.py')
+    cc_schemes = None
 
-        if args.install_deps:
+    if args.all:
+        cc_schemes = parse_config().keys()
+    elif args.schemes is not None:
+        cc_schemes = args.schemes.split()
+
+    if cc_schemes is not None:
+        for cc in cc_schemes:
+            cc_src = path.join(project_root.DIR, 'src', cc + '.py')
+
             # install dependencies
-            install_deps(cc_src)
+            if args.install_deps:
+                install_deps(cc_src)
 
-        if args.build:
-            # build the scheme
-            check_call(['python', cc_src, 'build'])
+            # persistent setup across reboots
+            if args.setup:
+                check_call(['python', cc_src, 'setup'])
 
-        check_call(['python', cc_src, 'init'])
+            # setup required every time after reboot
+            check_call(['python', cc_src, 'setup_after_reboot'])
 
 
 def main():
-    args = parse_arguments(path.abspath(__file__))
+    args = parse_arguments(path.basename(__file__))
     setup(args)
 
 
