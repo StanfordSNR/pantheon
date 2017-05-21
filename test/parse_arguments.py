@@ -1,4 +1,16 @@
+import sys
 import argparse
+import project_root
+from helpers.helpers import parse_config
+
+
+def verify_schemes(schemes):
+    schemes = schemes.split()
+    all_schemes = parse_config().keys()
+
+    for cc in schemes:
+        if cc not in all_schemes:
+            sys.exit('%s is not a scheme included in src/config.yml' % cc)
 
 
 def parse_setup():
@@ -13,7 +25,7 @@ def parse_setup():
     # schemes related
     group = parser.add_mutually_exclusive_group()
     group.add_argument('--all', action='store_true',
-                       help='set up all schemes specified in config.yml')
+                       help='set up all schemes specified in src/config.yml')
     group.add_argument('--schemes', metavar='"SCHEME1 SCHEME2..."',
                        help='set up a space-separated list of schemes')
 
@@ -23,6 +35,8 @@ def parse_setup():
                         help='run "setup" on each scheme')
 
     args = parser.parse_args()
+    if args.schemes is not None:
+        verify_schemes(args.schemes)
     return args
 
 
@@ -40,7 +54,7 @@ def parse_test_shared(local, remote):
 
         group = mode.add_mutually_exclusive_group(required=True)
         group.add_argument('--all', action='store_true',
-                           help='test all schemes specified in config.yml')
+                           help='test all schemes specified in src/config.yml')
         group.add_argument('--schemes', metavar='"SCHEME1 SCHEME2..."',
                            help='test a space-separated list of schemes')
 
@@ -48,6 +62,12 @@ def parse_test_shared(local, remote):
                           help='run times of each scheme (default 1)')
         mode.add_argument('--random-order', action='store_true',
                           help='test schemes in random order')
+        mode.add_argument(
+            '--save-metadata', action='store_true',
+            help='save metadata of tests as a json file for future analysis')
+        mode.add_argument(
+            '--pkill-cleanup', action='store_true', help='clean up using pkill'
+            ' (send SIGKILL when necessary) if there were errors during tests')
 
 
 def parse_test_local(local):
@@ -100,6 +120,19 @@ def parse_test_remote(remote):
         help='extra description of the remote side')
 
 
+def verify_test_args(args):
+    if args.runtime > 60 or args.runtime <= 0:
+        sys.exit('runtime cannot be non-positive or greater than 60 s')
+    if args.flows < 0:
+        sys.exit('flow cannot be negative')
+    if args.interval < 0:
+        sys.exit('interval cannot be negative')
+    if args.flows > 0 and args.interval > 0:
+        if (args.flows - 1) * args.interval > args.runtime:
+            sys.exit('interval time between flows is too long to be '
+                     'fit in runtime')
+
+
 def parse_test():
     parser = argparse.ArgumentParser(
         description='perform congestion control tests')
@@ -120,6 +153,9 @@ def parse_test():
     parse_test_remote(remote)
 
     args = parser.parse_args()
+    if args.schemes is not None:
+        verify_schemes(args.schemes)
+    verify_test_args(args)
     return args
 
 

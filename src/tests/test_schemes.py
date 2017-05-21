@@ -11,9 +11,7 @@ from helpers.helpers import parse_config, kill_proc_group
 
 def main():
     src_dir = path.join(project_root.DIR, 'src')
-
-    config = parse_config()
-    schemes = config.keys()
+    schemes = parse_config().keys()
 
     print 'Testing schemes...'
     for scheme in schemes:

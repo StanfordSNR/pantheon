@@ -4,9 +4,8 @@ import os
 from os import path
 import sys
 from subprocess import PIPE
-sys.path.append(path.join(path.dirname(path.abspath(__file__)), os.pardir))
-
-import helpers as h
+import project_root
+import helpers.helpers as h
 
 
 def main():
@@ -24,7 +23,7 @@ def main():
 
     print h.parse_remote('ubuntu@8.8.8.8:~/pantheon')
     print h.get_open_port()
-    h.make_sure_path_exists(h.pantheon_tmp())
+    h.make_sure_path_exists(h.TMPDIR)
     print h.parse_config()
 
 

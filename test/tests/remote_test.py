@@ -25,6 +25,11 @@ def main():
     assert call(cmd) == 0
 
     cmd = ['python', test_py, 'remote', remote, '-t', '5',
+           '--run-times', '2', '--schemes', cc]
+    sys.stderr.write('$ %s\n' % ' '.join(cmd))
+    assert call(cmd) == 0
+
+    cmd = ['python', test_py, 'remote', remote, '-t', '5',
            '--sender', 'remote', '--schemes', cc]
     sys.stderr.write('$ %s\n' % ' '.join(cmd))
     assert call(cmd) == 0
