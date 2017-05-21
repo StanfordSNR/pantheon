@@ -16,52 +16,53 @@ def main():
     # test a receiver-first scheme
     cc = 'default_tcp'
 
-    cmd = ['python', test_py, '-t', '5', '-f', '0',
-           '--datalink-trace', data_trace,
-           '--acklink-trace', ack_trace, cc]
+    cmd = ['python', test_py, 'local', '-t', '5', '-f', '0',
+           '--uplink-trace', data_trace,
+           '--downlink-trace', ack_trace, '--schemes', '%s' % cc]
     sys.stderr.write('$ %s\n' % ' '.join(cmd))
     assert call(cmd) == 0
 
-    cmd = ['python', test_py, '-t', '5', '-f', '1',
-           '--datalink-trace', data_trace,
-           '--acklink-trace', ack_trace, cc]
+    cmd = ['python', test_py, 'local', '-t', '5', '-f', '1',
+           '--uplink-trace', data_trace,
+           '--downlink-trace', ack_trace, '--schemes', '%s' % cc]
     sys.stderr.write('$ %s\n' % ' '.join(cmd))
     assert call(cmd) == 0
 
-    cmd = ['python', test_py, '-t', '5', '-f', '1', '--run-id', '2',
-           '--datalink-trace', data_trace,
-           '--acklink-trace', ack_trace, cc]
+    cmd = ['python', test_py, 'local', '-t', '5', '-f', '1',
+           '--run-times', '2', '--uplink-trace', data_trace,
+           '--downlink-trace', ack_trace, '--schemes', '%s' % cc]
     sys.stderr.write('$ %s\n' % ' '.join(cmd))
     assert call(cmd) == 0
 
-    cmd = ['python', test_py, '-t', '5', '-f', '2', '--interval', '2',
-           '--datalink-trace', data_trace,
-           '--acklink-trace', ack_trace, cc]
+    cmd = ['python', test_py, 'local', '-t', '5', '-f', '2', '--interval', '2',
+           '--uplink-trace', data_trace,
+           '--downlink-trace', ack_trace, '--schemes', '%s' % cc]
     sys.stderr.write('$ %s\n' % ' '.join(cmd))
     assert call(cmd) == 0
 
-    cmd = ['python', test_py, '-t', '5',
-           '--datalink-trace', data_trace,
-           '--acklink-trace', ack_trace,
+    cmd = ['python', test_py, 'local', '-t', '5',
+           '--uplink-trace', data_trace,
+           '--downlink-trace', ack_trace,
            '--extra-mm-link-args',
            '--uplink-queue=droptail --uplink-queue-args=packets=200',
            '--prepend-mm-cmds', 'mm-delay 10',
-           '--append-mm-cmds', 'mm-delay 10', cc]
+           '--append-mm-cmds', 'mm-delay 10',
+           '--schemes', '%s' % cc]
     sys.stderr.write('$ %s\n' % ' '.join(cmd))
     assert call(cmd) == 0
 
     # test a sender-first scheme
     cc = 'verus'
 
-    cmd = ['python', test_py, '-t', '5', '-f', '0',
-           '--datalink-trace', data_trace,
-           '--acklink-trace', ack_trace, cc]
+    cmd = ['python', test_py, 'local', '-t', '5', '-f', '0',
+           '--uplink-trace', data_trace,
+           '--downlink-trace', ack_trace, '--schemes', '%s' % cc]
     sys.stderr.write('$ %s\n' % ' '.join(cmd))
     assert call(cmd) == 0
 
-    cmd = ['python', test_py, '-t', '5', '-f', '1',
-           '--datalink-trace', data_trace,
-           '--acklink-trace', ack_trace, cc]
+    cmd = ['python', test_py, 'local', '-t', '5', '-f', '1',
+           '--uplink-trace', data_trace,
+           '--downlink-trace', ack_trace, '--schemes', '%s' % cc]
     sys.stderr.write('$ %s\n' % ' '.join(cmd))
     assert call(cmd) == 0
 

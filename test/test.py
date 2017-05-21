@@ -12,7 +12,7 @@ from colorama import Fore, Back, Style
 from parse_arguments import parse_arguments
 import project_root
 from helpers.helpers import (
-    Popen, PIPE, check_call, TMPDIR, parse_config, kill_proc_group
+    Popen, PIPE, check_call, TMPDIR, parse_config, kill_proc_group,
     timeout_handler, TimeoutError, format_time)
 from test_helpers import (
     read_port_from_proc, who_runs_first, parse_remote_path, query_clock_offset)

@@ -20,29 +20,29 @@ def main():
     # test a receiver-first scheme
     cc = 'default_tcp'
 
-    cmd = ['python', test_py, '-r', remote, '-t', '5', cc]
+    cmd = ['python', test_py, 'remote', remote, '-t', '5', '--schemes', cc]
     sys.stderr.write('$ %s\n' % ' '.join(cmd))
     assert call(cmd) == 0
 
-    cmd = ['python', test_py, '-r', remote, '-t', '5',
-           '--sender-side', 'remote', cc]
+    cmd = ['python', test_py, 'remote', remote, '-t', '5',
+           '--sender', 'remote', '--schemes', cc]
     sys.stderr.write('$ %s\n' % ' '.join(cmd))
     assert call(cmd) == 0
 
-    cmd = ['python', test_py, '-r', remote, '-t', '5', '-f', '2',
-           '--interval', '2', cc]
+    cmd = ['python', test_py, 'remote', remote, '-t', '5', '-f', '2',
+           '--interval', '2', '--schemes', cc]
     sys.stderr.write('$ %s\n' % ' '.join(cmd))
     assert call(cmd) == 0
 
     # test a sender-first scheme
     cc = 'verus'
 
-    cmd = ['python', test_py, '-r', remote, '-t', '5', cc]
+    cmd = ['python', test_py, 'remote', remote, '-t', '5', '--schemes', cc]
     sys.stderr.write('$ %s\n' % ' '.join(cmd))
     assert call(cmd) == 0
 
-    cmd = ['python', test_py, '-r', remote, '-t', '5',
-           '--sender-side', 'remote', cc]
+    cmd = ['python', test_py, 'remote', remote, '-t', '5',
+           '--sender', 'remote', '--schemes', cc]
     sys.stderr.write('$ %s\n' % ' '.join(cmd))
     assert call(cmd) == 0
 
