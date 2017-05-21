@@ -12,10 +12,11 @@ from colorama import Fore, Back, Style
 from parse_arguments import parse_arguments
 import project_root
 from helpers.helpers import (
-    Popen, PIPE, check_call, TMPDIR, parse_config, kill_proc_group,
+    Popen, PIPE, call, check_call, TMPDIR, parse_config, kill_proc_group,
     timeout_handler, TimeoutError, format_time)
 from test_helpers import (
-    read_port_from_proc, who_runs_first, parse_remote_path, query_clock_offset)
+    read_port_from_proc, who_runs_first, parse_remote_path, query_clock_offset,
+    save_test_metadata)
 
 
 class Test(object):
@@ -28,6 +29,7 @@ class Test(object):
         self.flows = args.flows
         self.runtime = args.runtime
         self.interval = args.interval
+        self.run_times = args.run_times
 
         # local mode
         if self.mode == 'local':
@@ -200,7 +202,8 @@ class Test(object):
 
         sys.stderr.write(Fore.BLUE + '[tunnel server manager (tsm)] ' +
                          Style.RESET_ALL)
-        ts_manager = Popen(ts_manager_cmd, stdin=PIPE, stdout=PIPE)
+        ts_manager = Popen(ts_manager_cmd, stdin=PIPE, stdout=PIPE,
+                           preexec_fn=os.setsid)
 
         while True:
             running = ts_manager.stdout.readline()
@@ -222,7 +225,8 @@ class Test(object):
 
         sys.stderr.write(Fore.BLUE + '[tunnel client manager (tcm)] ' +
                          Style.RESET_ALL)
-        tc_manager = Popen(tc_manager_cmd, stdin=PIPE, stdout=PIPE)
+        tc_manager = Popen(tc_manager_cmd, stdin=PIPE, stdout=PIPE,
+                           preexec_fn=os.setsid)
 
         while True:
             running = tc_manager.stdout.readline()
@@ -530,11 +534,9 @@ class Test(object):
 
     # run congestion control test
     def run(self):
-        # initialize colored output
-        colorama.init()
-
-        sys.stderr.write(
-            Back.BLUE + 'Testing %s...\n' % self.cc + Style.RESET_ALL)
+        msg = 'Testing scheme %s for experiment run %d/%d...\n' % (
+            self.cc, self.run_id, self.run_times)
+        sys.stderr.write(Back.BLUE + msg + Style.RESET_ALL)
 
         # setup before running tests
         self.setup()
@@ -549,8 +551,9 @@ class Test(object):
             Back.GREEN + 'Done testing %s\n' % self.cc + Style.RESET_ALL)
 
 
-def main():
-    args = parse_arguments(path.basename(__file__))
+def run_tests(args):
+    # initialize colored output
+    colorama.init()
 
     if args.all:
         cc_schemes = parse_config().keys()
@@ -563,6 +566,46 @@ def main():
 
         for cc in cc_schemes:
             Test(args, run_id, cc).run()
+
+    args_dict = vars(args)
+    args_dict['cc_schemes'] = sorted(cc_schemes)
+
+    if args.save_metadata:
+        save_test_metadata(args_dict)
+
+
+def pkill(args):
+    if args.mode == 'remote':
+        r = parse_remote_path(args.remote_path)
+        remote_pkill_src = path.join(r['pantheon_dir'], 'helpers', 'pkill.py')
+
+        cmd = r['ssh_cmd'] + [
+            'python', remote_pkill_src, '--kill-dir', r['pantheon_dir']]
+        call(cmd)
+
+    pkill_src = path.join(project_root.DIR, 'helpers', 'pkill.py')
+    cmd = ['python', pkill_src, '--kill-dir', project_root.DIR]
+    call(cmd)
+
+
+def main():
+    args = parse_arguments(path.basename(__file__))
+
+    try:
+        run_tests(args)
+    except:
+        msg = 'Error in tests!'
+        if args.pkill_cleanup:
+            msg += ' Cleaning up using pkill...'
+        msg += '\n'
+        sys.stderr.write(Back.RED + msg + Style.RESET_ALL)
+
+        if args.pkill_cleanup:
+            pkill(args)
+        sys.exit('Error in tests')
+    else:
+        sys.stderr.write(
+            Back.GREEN + 'All tests done!\n' + Style.RESET_ALL)
 
 
 if __name__ == '__main__':

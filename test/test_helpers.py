@@ -1,5 +1,6 @@
 import sys
 from os import path
+import json
 import signal
 import subprocess
 import project_root
@@ -87,3 +88,39 @@ def query_clock_offset(ntp_addr, ssh_cmd=None):
                 break
 
     return worst_clock_offset
+
+
+def get_git_summary(args_dict):
+    sh_cmd = (
+        'echo -n \'git branch: \'; git rev-parse --abbrev-ref @ | head -c -1; '
+        'echo -n \' @ \'; git rev-parse @; git submodule foreach --quiet '
+        '\'echo $path @ `git rev-parse HEAD`; '
+        'git status -s --untracked-files=no --porcelain\'')
+    local_git_summary = check_output(sh_cmd, shell=True, cwd=project_root.DIR)
+
+    if args_dict['mode'] == 'remote':
+        r = parse_remote_path(args_dict['remote_path'])
+        cmd = r['ssh_cmd'] + ['cd %s; %s' % (r['pantheon_dir'], sh_cmd)]
+        remote_git_summary = check_output(cmd)
+
+        if local_git_summary != remote_git_summary:
+            sys.exit('Repository differed between local and remote sides')
+
+    return local_git_summary
+
+
+def save_test_metadata(args_dict):
+    meta = {}
+    meta = args_dict.copy()
+
+    meta.pop('all')
+    meta.pop('schemes')
+    meta.pop('save_metadata')
+    meta['git_summary'] = get_git_summary(args_dict)
+
+    metadata_path = path.join(
+        project_root.DIR, 'test', 'pantheon_metadata.json')
+
+    with open(metadata_path, 'w') as metadata:
+        json.dump(meta, metadata, sort_keys=True, indent=4,
+                  separators=(',', ': '))
