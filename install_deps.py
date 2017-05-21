@@ -1,10 +1,14 @@
 #!/usr/bin/env python
 
+import argparse
 from os import path
 from subprocess import check_call
 
 
 def main():
+    parser = argparse.ArgumentParser(description='install global dependencies')
+    args = parser.parse_args()
+
     # update submodules
     cmd = 'git submodule update --init --recursive'
     check_call(cmd, shell=True)
