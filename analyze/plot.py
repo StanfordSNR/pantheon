@@ -1,79 +1,73 @@
 #!/usr/bin/env python
 
 import os
+from os import path
 import re
 import sys
-import math
-import json
-import pantheon_helpers
+import multiprocessing
+from multiprocessing.pool import ThreadPool
 import numpy as np
 import matplotlib_agg
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-import multiprocessing
+import project_root
+from parse_arguments import parse_arguments
+from analyze_helpers import load_test_metadata, verify_schemes_with_meta
+from helpers.helpers import parse_config
 import tunnel_graph
-from os import path
-from time import strftime
-from datetime import datetime
-from multiprocessing.pool import ThreadPool
-from helpers.pantheon_help import (check_output, get_friendly_names, Popen,
-                                   PIPE, get_color_names, get_marker_names)
-from helpers.parse_arguments import parse_arguments
 
 
-class PlotSummary:
-    def __init__(self, no_plots, include_acklink, data_dir, schemes):
+class Plot(object):
+    def __init__(self, data_dir=path.join(project_root.DIR, 'test'),
+                 schemes=None, include_acklink=False, no_graphs=False):
         self.data_dir = path.abspath(data_dir)
-        analyze_dir = path.dirname(__file__)
-        self.tunnel_graph = path.join(analyze_dir, 'tunnel_graph.py')
-        self.src_dir = path.abspath(path.join(analyze_dir, '../src'))
-
-        # load pantheon_metadata.json as a dictionary
-        metadata_fname = path.join(self.data_dir, 'pantheon_metadata.json')
-        with open(metadata_fname) as metadata_file:
-            metadata_dict = json.load(metadata_file)
-
-        self.run_times = metadata_dict['run_times']
-        self.flows = int(metadata_dict['flows'])
-        self.timezone = None
-        self.runtime = int(metadata_dict['runtime'])
-
         self.include_acklink = include_acklink
-        self.no_plots = no_plots
+        self.no_graphs = no_graphs
 
-        if schemes:
-            self.cc_schemes = schemes.split()
-            assert set(self.cc_schemes).issubset(
-                    set(metadata_dict['cc_schemes'].split())), (
-                    '--analyze-schemes %s has schemes not in experiment '
-                    '(%s)' % (self.cc_schemes,
-                              metadata_dict['cc_schemes'].split()))
-        else:
-            self.cc_schemes = metadata_dict['cc_schemes'].split()
+        metadata_path = path.join(self.data_dir, 'pantheon_metadata.json')
+        meta = load_test_metadata(metadata_path)
+        self.cc_schemes = verify_schemes_with_meta(schemes, meta)
 
-        self.experiment_title = ''
-        if ('remote_information' in metadata_dict and
-                'local_information' in metadata_dict):
+        self.run_times = meta['run_times']
+        self.flows = meta['flows']
+        self.runtime = meta['runtime']
+        self.worst_clock_offset = None
 
-            remote_txt = metadata_dict['remote_information']
-            if 'remote_interface' in metadata_dict:
-                remote_txt += ' ' + metadata_dict['remote_interface']
+        analyze_dir = path.join(project_root.DIR, 'analyze')
+        self.tunnel_graph = path.join(analyze_dir, 'tunnel_graph.py')
+
+        self.expt_title = self.generate_expt_title(meta)
+
+    def generate_expt_title(self, meta):
+        if meta['mode'] == 'local':
+            expt_title = 'local test in mahimahi, '
+        elif meta['mode'] == 'remote':
+            txt = {}
+            for side in ['local', 'remote']:
+                txt[side] = [side]
+
+                if '%s_desc' % side in meta:
+                    txt[side].append(meta['%s_desc' % side])
+                if '%s_if' % side in meta:
+                    txt[side].append(meta['%s_if' % side])
+                else:
+                    txt[side].append('Ethernet')
+
+                txt[side] = ' '.join(txt[side])
+
+            if meta['sender_side'] == 'remote':
+                sender = txt['remote']
+                receiver = txt['local']
             else:
-                remote_txt += ' Ethernet'
+                receiver = txt['remote']
+                sender = txt['local']
 
-            local_txt = metadata_dict['local_information'] + ' Ethernet'
-            if metadata_dict['sender_side'] == 'remote':
-                uploader = remote_txt
-                downloader = local_txt
-            else:
-                uploader = local_txt
-                downloader = remote_txt
+            expt_title = 'test from %s to %s, ' % (sender, receiver)
 
-            self.experiment_title += '%s to %s ' % (uploader, downloader)
+        expt_title += '%s runs of %ss each per scheme' % (
+            meta['run_times'], meta['runtime'])
 
-        self.experiment_title += ('%s runs of %ss each per scheme'
-                                  % (metadata_dict['run_times'],
-                                     metadata_dict['runtime']))
+        return expt_title
 
     def parse_tunnel_log(self, cc, run_id):
         log_prefix = cc
@@ -83,9 +77,8 @@ class PlotSummary:
         tput = None
         delay = None
         loss = None
-        for_stats = None
+        stats = None
 
-        procs = []
         error = False
 
         link_directions = ['datalink']
@@ -101,7 +94,7 @@ class PlotSummary:
                 error = True
                 continue
 
-            if self.no_plots:
+            if self.no_graphs:
                 tput_graph_path = None
                 delay_graph_path = None
             else:
@@ -113,69 +106,73 @@ class PlotSummary:
 
             try:
                 sys.stderr.write("tunnel_graph %s\n" % log_path)
-                run_analysis = tunnel_graph.TunnelGraph(500, log_path,
-                                                        tput_graph_path,
-                                                        delay_graph_path
-                                                        ).tunnel_graph()
-            except:
-                sys.stderr.write('Warning: "tunnel_graph %s" failed with an '
-                                 'exception.\n' % log_path)
+                tunnel_results = tunnel_graph.TunnelGraph(
+                    tunnel_log=log_path,
+                    throughput_graph=tput_graph_path,
+                    delay_graph=delay_graph_path).run()
+            except Exception as exception:
+                sys.stderr.write('Error: %s\n' % exception)
+                sys.stderr.write('Warning: "tunnel_graph %s" failed but '
+                                 'continued to run.\n' % log_path)
                 error = True
 
             if error:
                 continue
 
             if link_t == 'datalink':
-                (tput, delay, loss, test_runtime, for_stats) = run_analysis
-                if (test_runtime / 1000.0 < 0.9 * self.runtime or
-                        test_runtime / 1000.0 > 1.1 * self.runtime):
-                    sys.stderr.write('Warning: "tunnel_graph %s" had duration '
-                                     '%.2f seconds but should have been around'
-                                     ' %d seconds. Ignoring this run.\n' %
-                                     (log_path, (test_runtime / 1000.0),
-                                      self.runtime))
+                tput = tunnel_results['throughput']
+                delay = tunnel_results['delay']
+                loss = tunnel_results['loss']
+                duration = tunnel_results['duration'] / 1000.0
+                stats = tunnel_results['stats']
+
+                if (duration < 0.9 * self.runtime or
+                        duration > 1.1 * self.runtime):
+                    sys.stderr.write(
+                        'Warning: "tunnel_graph %s" had duration %.2f seconds '
+                        'but should have been around %d seconds. Ignoring this'
+                        ' run.\n' % (log_path, duration, self.runtime))
                     error = True
 
         if error:
             return (None, None, None, None)
         else:
-            return (tput, delay, loss, for_stats)
+            return (tput, delay, loss, stats)
 
-    def parse_stats_log(self, cc, run_id, for_stats):
+    def parse_stats_log(self, cc, run_id, stats):
         stats_log_path = path.join(
             self.data_dir, '%s_stats_run%s.log' % (cc, run_id))
+
         if not path.isfile(stats_log_path):
             sys.stderr.write('Warning: %s does not exist\n' % stats_log_path)
             return None
 
-        ofst = None
+        offset = None
+        stats_exists = False
         stats_log = open(stats_log_path, 'r+')
 
-        for_stats_exists = False
         for line in stats_log:
             ret = re.match(r'Worst absolute clock offset: (.*?) ms', line)
-            if ret and not ofst:
-                ofst = float(ret.group(1))
+            if ret and offset is None:
+                offset = float(ret.group(1))
                 continue
 
             ret = re.match(r'# Datalink statistics', line)
             if ret:
-                for_stats_exists = True
+                stats_exists = True
                 break
 
-        if not for_stats_exists and for_stats:
+        if not stats_exists and stats:
             stats_log.seek(0, os.SEEK_END)
             stats_log.write('\n# Datalink statistics (generated by %s)\n'
                             % path.basename(__file__))
-            stats_log.write('%s' % for_stats)
+            stats_log.write('%s' % stats)
 
         stats_log.close()
-        return ofst
+        return offset
 
-    def generate_data(self):
+    def eval_performance(self):
         self.data = {}
-        self.worst_abs_ofst = None
-        time_format = '%a, %d %b %Y %H:%M:%S'
 
         results = {}
         for cc in self.cc_schemes:
@@ -188,8 +185,8 @@ class PlotSummary:
 
         while cc_id < len(self.cc_schemes):
             cc = self.cc_schemes[cc_id]
-            results[cc][run_id] = pool.apply_async(self.parse_tunnel_log,
-                                                   args=(cc, run_id))
+            results[cc][run_id] = pool.apply_async(
+                self.parse_tunnel_log, args=(cc, run_id))
 
             run_id += 1
             if run_id > self.run_times:
@@ -198,41 +195,42 @@ class PlotSummary:
 
         for cc in self.cc_schemes:
             for run_id in xrange(1, 1 + self.run_times):
-                (tput, delay, loss_rate, for_stats) = results[cc][run_id].get()
-                ofst = self.parse_stats_log(cc, run_id, for_stats)
+                (tput, delay, loss, stats) = results[cc][run_id].get()
+                offset = self.parse_stats_log(cc, run_id, stats)
 
-                if not tput or not delay:
+                if tput is None or delay is None:
                     continue
 
-                self.data[cc].append((tput, delay, loss_rate))
-                if ofst:
-                    if not self.worst_abs_ofst or ofst > self.worst_abs_ofst:
-                        self.worst_abs_ofst = ofst
+                self.data[cc].append((tput, delay, loss))
+                if offset:
+                    if (self.worst_clock_offset is None or
+                            offset > self.worst_clock_offset):
+                        self.worst_clock_offset = offset
+
         return self.data
 
     def plot_throughput_delay(self):
         min_delay = None
-        color_names = get_color_names(self.cc_schemes)
-        marker_names = get_marker_names(self.cc_schemes)
 
         fig_raw, ax_raw = plt.subplots()
         fig_mean, ax_mean = plt.subplots()
 
         power_scores = []
 
+        config = parse_config()
         for cc in self.data:
             if not self.data[cc]:
                 continue
 
             value = self.data[cc]
-            cc_name = self.friendly_names[cc]
-            color = color_names[cc]
-            marker = marker_names[cc]
+            cc_name = config[cc]['friendly_name']
+            color = config[cc]['color']
+            marker = config[cc]['marker']
             y_data, x_data, _ = zip(*value)
 
             # find min and max delay
             cc_min_delay = min(x_data)
-            if not min_delay or cc_min_delay < min_delay:
+            if min_delay is None or cc_min_delay < min_delay:
                 min_delay = cc_min_delay
 
             # plot raw values
@@ -244,7 +242,7 @@ class PlotSummary:
             y_mean = sum(y_data) / len(y_data)
             ax_mean.scatter(x_mean, y_mean, color=color, marker=marker,
                             clip_on=False)
-            power_scores.append((float(y_mean)/float(x_mean), color))
+            power_scores.append((float(y_mean) / float(x_mean), color))
             ax_mean.annotate(cc_name, (x_mean, y_mean))
 
         for fig, ax in [(fig_raw, ax_raw), (fig_mean, ax_mean)]:
@@ -258,15 +256,15 @@ class PlotSummary:
                 ax.set_ylim(bottom=0)
 
             xlabel = '95th percentile of per-packet one-way delay (ms)'
-            if self.worst_abs_ofst:
+            if self.worst_clock_offset is not None:
                 xlabel += ('\n(worst absolute clock offset: %s ms)' %
-                           self.worst_abs_ofst)
+                           self.worst_clock_offset)
             ax.set_xlabel(xlabel)
             ax.set_ylabel('Average throughput (Mbit/s)')
             ax.grid()
 
         # save pantheon_summary.png
-        ax_raw.set_title(self.experiment_title, y=1.02, fontsize=12)
+        ax_raw.set_title(self.expt_title, y=1.02, fontsize=12)
         lgd = ax_raw.legend(scatterpoints=1, bbox_to_anchor=(1, 0.5),
                             loc='center left', fontsize=12)
         raw_summary = path.join(self.data_dir, 'pantheon_summary.png')
@@ -274,7 +272,7 @@ class PlotSummary:
                         bbox_inches='tight', pad_inches=0.2)
 
         # save pantheon_summary_mean.png
-        ax_mean.set_title(self.experiment_title +
+        ax_mean.set_title(self.expt_title +
                           '\nmean of all runs by scheme', fontsize=12)
         mean_summary = path.join(
             self.data_dir, 'pantheon_summary_mean.png')
@@ -291,13 +289,13 @@ class PlotSummary:
         for power_score, color in power_scores:
             power_score_line = []
 
-            for x in np.arange(x_min, x_max, (x_max-x_min)/100.):
+            for x in np.arange(x_min, x_max, (x_max - x_min) / 100.0):
                 y = x * power_score
-                if (y <= y_max and y >= y_min):
+                if y <= y_max and y >= y_min:
                     power_score_line.append((x, y))
-            for y in np.arange(y_min, y_max, (y_max-y_min)/100.):
+            for y in np.arange(y_min, y_max, (y_max - y_min) / 100.0):
                 x = y / power_score
-                if (x <= x_max and x >= x_min):
+                if x <= x_max and x >= x_min:
                     power_score_line.append((x, y))
 
             power_score_line.sort()  # can have weird artifacts otherwise
@@ -306,7 +304,7 @@ class PlotSummary:
         for power_score_line, color, power_score in power_score_lines:
             x, y = zip(*power_score_line)
             ax_mean.plot(x, y, '-', color=color)
-            annotate_idx = len(x)/2
+            annotate_idx = len(x) / 2
             ax_mean.annotate('%.2f' % power_score,
                              (x[annotate_idx], y[annotate_idx]),
                              horizontalalignment='right',
@@ -315,37 +313,28 @@ class PlotSummary:
 
         power_summary = path.join(
             self.data_dir, 'pantheon_summary_power.png')
-        ax_mean.set_title(self.experiment_title +
+        ax_mean.set_title(self.expt_title +
                           '\nmean power scores of all runs by scheme',
                           fontsize=12)
         fig_mean.savefig(power_summary, dpi=300,
                          bbox_inches='tight', pad_inches=0.2)
 
-    def autolabel(self, rects, ax, friendly_names):
-        i = 0
-        for rect in rects:
-            ax.text(rect.get_x() + rect.get_width() / 2.0,
-                    rect.get_height() + 0.2,
-                    friendly_names[i], ha='center', va='bottom')
-            i += 1
+    def run(self):
+        self.eval_performance()
 
-    def plot_summary(self):
-        self.friendly_names = get_friendly_names(self.cc_schemes)
-        data = self.generate_data()
-        if not self.no_plots:
+        if not self.no_graphs:
             self.plot_throughput_delay()
-        return data
 
 
 def main():
     args = parse_arguments(path.basename(__file__))
 
-    plot_summary = PlotSummary(args.no_plots, args.include_acklink,
-                               args.data_dir, args.analyze_schemes)
-    plot_summary.plot_summary()
+    plot = Plot(data_dir=args.data_dir,
+                schemes=args.schemes,
+                include_acklink=args.include_acklink,
+                no_graphs=args.no_graphs)
+    plot.run()
 
 
 if __name__ == '__main__':
-    DEVNULL = open(os.devnull, 'w')
     main()
-    DEVNULL.close()
