@@ -90,7 +90,7 @@ def query_clock_offset(ntp_addr, ssh_cmd=None):
     return worst_clock_offset
 
 
-def get_git_summary(args_dict):
+def get_git_summary(meta):
     sh_cmd = (
         'echo -n \'git branch: \'; git rev-parse --abbrev-ref @ | head -c -1; '
         'echo -n \' @ \'; git rev-parse @; git submodule foreach --quiet '
@@ -98,8 +98,8 @@ def get_git_summary(args_dict):
         'git status -s --untracked-files=no --porcelain\'')
     local_git_summary = check_output(sh_cmd, shell=True, cwd=project_root.DIR)
 
-    if args_dict['mode'] == 'remote':
-        r = parse_remote_path(args_dict['remote_path'])
+    if meta['mode'] == 'remote':
+        r = parse_remote_path(meta['remote_path'])
         cmd = r['ssh_cmd'] + ['cd %s; %s' % (r['pantheon_dir'], sh_cmd)]
         remote_git_summary = check_output(cmd)
 
@@ -109,17 +109,27 @@ def get_git_summary(args_dict):
     return local_git_summary
 
 
-def save_test_metadata(args_dict):
-    meta = {}
-    meta = args_dict.copy()
-
+def save_test_metadata(meta):
     meta.pop('all')
     meta.pop('schemes')
     meta.pop('save_metadata')
-    meta['git_summary'] = get_git_summary(args_dict)
+    meta.pop('data_dir')
+    meta.pop('pkill_cleanup')
+
+    # use list in case meta.keys() returns an iterator in Python 3
+    for key in list(meta.keys()):
+        if meta[key] is None:
+            meta.pop(key)
+
+    meta['git_summary'] = get_git_summary(meta)
+
+    if 'uplink_trace' in meta:
+        meta['uplink_trace'] = path.basename(meta['uplink_trace'])
+    if 'downlink_trace' in meta:
+        meta['downlink_trace'] = path.basename(meta['downlink_trace'])
 
     metadata_path = path.join(
-        project_root.DIR, 'test', 'pantheon_metadata.json')
+        project_root.DIR, 'test', 'data', 'pantheon_metadata.json')
 
     with open(metadata_path, 'w') as metadata:
         json.dump(meta, metadata, sort_keys=True, indent=4,

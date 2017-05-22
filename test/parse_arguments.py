@@ -1,7 +1,8 @@
+from os import path
 import sys
 import argparse
 import project_root
-from helpers.helpers import parse_config
+from helpers.helpers import parse_config, make_sure_path_exists
 
 
 def verify_schemes(schemes):
@@ -62,6 +63,10 @@ def parse_test_shared(local, remote):
                           help='run times of each scheme (default 1)')
         mode.add_argument('--random-order', action='store_true',
                           help='test schemes in random order')
+        mode.add_argument('--data-dir', metavar='DIR',
+                          default=path.join(project_root.DIR, 'test', 'data'),
+                          help='directory to save all test logs, graphs, '
+                          'metadata, and report (default pantheon/test/data)')
         mode.add_argument(
             '--save-metadata', action='store_true',
             help='save metadata of tests as a json file for future analysis')
@@ -72,13 +77,15 @@ def parse_test_shared(local, remote):
 
 def parse_test_local(local):
     local.add_argument(
-        '--uplink-trace', metavar='TRACE', default='12mbps.trace',
+        '--uplink-trace', metavar='TRACE',
+        default=path.join(project_root.DIR, 'test', '12mbps.trace'),
         help='uplink trace (from sender to receiver) to pass to mm-link '
-        '(default 12mbps.trace)')
+        '(default pantheon/test/12mbps.trace)')
     local.add_argument(
-        '--downlink-trace', metavar='TRACE', default='12mbps.trace',
+        '--downlink-trace', metavar='TRACE',
+        default=path.join(project_root.DIR, 'test', '12mbps.trace'),
         help='downlink trace (from receiver to sender) to pass to mm-link '
-        '(default 12mbps.trace)')
+        '(default pantheon/test/12mbps.trace)')
     local.add_argument(
         '--prepend-mm-cmds', metavar='"CMD1 CMD2..."',
         help='mahimahi shells to run outside of mm-link')
@@ -156,6 +163,7 @@ def parse_test():
     if args.schemes is not None:
         verify_schemes(args.schemes)
     verify_test_args(args)
+    make_sure_path_exists(args.data_dir)
     return args
 
 

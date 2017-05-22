@@ -1,5 +1,1 @@
-*
-!.gitignore
-!*.py
-!12mbps.trace
-!tests/
+data

@@ -58,26 +58,23 @@ class Test(object):
             self.r = parse_remote_path(args.remote_path, self.cc)
 
     def setup_mm_cmd(self):
-        datalink_trace = path.join(self.test_dir, self.datalink_trace)
-        acklink_trace = path.join(self.test_dir, self.acklink_trace)
-
         mm_datalink_log = self.cc + '_mm_datalink_run%d.log' % self.run_id
         mm_acklink_log = self.cc + '_mm_acklink_run%d.log' % self.run_id
-        self.mm_datalink_log = path.join(self.test_dir, mm_datalink_log)
-        self.mm_acklink_log = path.join(self.test_dir, mm_acklink_log)
+        self.mm_datalink_log = path.join(self.data_dir, mm_datalink_log)
+        self.mm_acklink_log = path.join(self.data_dir, mm_acklink_log)
 
         if self.run_first == 'receiver' or self.flows > 0:
             # if receiver runs first OR if test inside pantheon tunnel
             uplink_log = self.mm_datalink_log
             downlink_log = self.mm_acklink_log
-            uplink_trace = datalink_trace
-            downlink_trace = acklink_trace
+            uplink_trace = self.datalink_trace
+            downlink_trace = self.acklink_trace
         else:
             # if sender runs first AND test without pantheon tunnel
             uplink_log = self.mm_acklink_log
             downlink_log = self.mm_datalink_log
-            uplink_trace = acklink_trace
-            downlink_trace = datalink_trace
+            uplink_trace = self.acklink_trace
+            downlink_trace = self.datalink_trace
 
         self.mm_cmd = []
 
@@ -100,6 +97,7 @@ class Test(object):
         self.cc_src = path.join(project_root.DIR, 'src', self.cc + '.py')
         self.test_dir = path.join(project_root.DIR, 'test')
         self.tunnel_manager = path.join(self.test_dir, 'tunnel_manager.py')
+        self.data_dir = path.join(self.test_dir, 'data')
 
         # record who runs first
         self.run_first, self.run_second = who_runs_first(self.cc)
@@ -112,9 +110,9 @@ class Test(object):
         self.acklink_name = self.cc + '_acklink_run%d' % self.run_id
 
         self.datalink_log = path.join(
-            self.test_dir, self.datalink_name + '.log')
+            self.data_dir, self.datalink_name + '.log')
         self.acklink_log = path.join(
-            self.test_dir, self.acklink_name + '.log')
+            self.data_dir, self.acklink_name + '.log')
 
         if self.flows > 0:
             self.datalink_ingress_logs = []
@@ -514,7 +512,7 @@ class Test(object):
 
     def record_time_stats(self):
         stats_log = path.join(
-            self.test_dir, '%s_stats_run%s.log' % (self.cc, self.run_id))
+            self.data_dir, '%s_stats_run%s.log' % (self.cc, self.run_id))
         stats = open(stats_log, 'w')
 
         # save start time and end time of test
@@ -567,11 +565,10 @@ def run_tests(args):
         for cc in cc_schemes:
             Test(args, run_id, cc).run()
 
-    args_dict = vars(args)
-    args_dict['cc_schemes'] = sorted(cc_schemes)
-
     if args.save_metadata:
-        save_test_metadata(args_dict)
+        meta = vars(args).copy()
+        meta['cc_schemes'] = sorted(cc_schemes)
+        save_test_metadata(meta)
 
 
 def pkill(args):
@@ -588,21 +585,30 @@ def pkill(args):
     call(cmd)
 
 
+def cleanup(args):
+    msg = 'Error in tests!'
+
+    if args.pkill_cleanup:
+        msg += ' Cleaning up using pkill...'
+    msg += '\n'
+    sys.stderr.write(Back.RED + msg + Style.RESET_ALL)
+
+    if args.pkill_cleanup:
+        pkill(args)
+
+    sys.exit('Error!')
+
+
 def main():
     args = parse_arguments(path.basename(__file__))
 
     try:
         run_tests(args)
-    except:
-        msg = 'Error in tests!'
-        if args.pkill_cleanup:
-            msg += ' Cleaning up using pkill...'
-        msg += '\n'
-        sys.stderr.write(Back.RED + msg + Style.RESET_ALL)
-
-        if args.pkill_cleanup:
-            pkill(args)
-        sys.exit('Error in tests')
+    except (KeyboardInterrupt, SystemExit):
+        cleanup(args)
+    except Exception as exception:
+        sys.stderr.write('Error: %s\n' % exception)
+        cleanup(args)
     else:
         sys.stderr.write(
             Back.GREEN + 'All tests done!\n' + Style.RESET_ALL)
