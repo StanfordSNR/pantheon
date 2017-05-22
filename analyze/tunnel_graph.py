@@ -1,44 +1,21 @@
 #!/usr/bin/env python
 
+from os import path
 import sys
 import math
-import argparse
 import numpy as np
 import matplotlib_agg
 import matplotlib.pyplot as plt
+from parse_arguments import parse_arguments
 
 
-def parse_arguments():
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument('ms_per_bin', metavar='ms-per-bin',
-                        help='bin size (ms)')
-    parser.add_argument('tunnel_log', metavar='tunnel-log',
-                        help='tunnel log file')
-    parser.add_argument(
-        '--throughput',
-        metavar='OUTPUT-GRAPH',
-        action='store',
-        dest='throughput_graph',
-        help='throughput graph to save')
-    parser.add_argument(
-        '--delay',
-        metavar='OUTPUT-GRAPH',
-        action='store',
-        dest='delay_graph',
-        help='delay graph to save')
-
-    args = parser.parse_args()
-
-    return args
-
-
-class TunnelGraph:
-    def __init__(self, ms_per_bin, tunnel_log, throughput_graph, delay_graph):
-        self.ms_per_bin = int(ms_per_bin)
+class TunnelGraph(object):
+    def __init__(self, tunnel_log, throughput_graph=None, delay_graph=None,
+                 ms_per_bin=500):
         self.tunnel_log = tunnel_log
         self.throughput_graph = throughput_graph
         self.delay_graph = delay_graph
+        self.ms_per_bin = ms_per_bin
 
     def ms_to_bin(self, ts, first_ts):
         return int((ts - first_ts) / self.ms_per_bin)
@@ -176,7 +153,7 @@ class TunnelGraph:
             capacity_bins = capacities.keys()
             for bin_id in xrange(min(capacity_bins), max(capacity_bins) + 1):
                 self.link_capacity.append(
-                        capacities.get(bin_id, 0) / us_per_bin)
+                    capacities.get(bin_id, 0) / us_per_bin)
                 self.link_capacity_t.append(self.bin_to_s(bin_id))
 
         # calculate ingress and egress throughput for each flow
@@ -214,7 +191,7 @@ class TunnelGraph:
                 ingress_bins = arrivals[flow_id].keys()
                 for bin_id in xrange(min(ingress_bins), max(ingress_bins) + 1):
                     self.ingress_tput[flow_id].append(
-                            arrivals[flow_id].get(bin_id, 0) / us_per_bin)
+                        arrivals[flow_id].get(bin_id, 0) / us_per_bin)
                     self.ingress_t[flow_id].append(self.bin_to_s(bin_id))
 
             if flow_id in departures:
@@ -231,14 +208,14 @@ class TunnelGraph:
                 egress_bins = departures[flow_id].keys()
                 for bin_id in xrange(min(egress_bins), max(egress_bins) + 1):
                     self.egress_tput[flow_id].append(
-                            departures[flow_id].get(bin_id, 0) / us_per_bin)
+                        departures[flow_id].get(bin_id, 0) / us_per_bin)
                     self.egress_t[flow_id].append(self.bin_to_s(bin_id))
 
             # calculate 95th percentile per-packet one-way delay
             self.percentile_delay[flow_id] = None
             if flow_id in self.delays:
                 self.percentile_delay[flow_id] = np.percentile(
-                        self.delays[flow_id], 95, interpolation='nearest')
+                    self.delays[flow_id], 95, interpolation='nearest')
                 total_delays += self.delays[flow_id]
 
             # calculate loss rate for each flow
@@ -249,26 +226,26 @@ class TunnelGraph:
                 self.loss_rate[flow_id] = None
                 if flow_arrivals > 0:
                     self.loss_rate[flow_id] = (
-                            1 - 1.0 * flow_departures / flow_arrivals)
+                        1 - 1.0 * flow_departures / flow_arrivals)
 
         self.total_loss_rate = None
         if total_arrivals > 0:
             self.total_loss_rate = 1 - 1.0 * total_departures / total_arrivals
 
         # calculate total average throughput and 95th percentile delay
-        self.total_avg_egress = 0
+        self.total_avg_egress = None
         if total_last_departure == total_first_departure:
-            self.total_avg_egress = 0
             self.total_duration = 0
+            self.total_avg_egress = 0
         else:
             self.total_duration = total_last_departure - total_first_departure
-            self.total_avg_egress = total_departures / (1000.0 *
-                                                        self.total_duration)
+            self.total_avg_egress = total_departures / (
+                1000.0 * self.total_duration)
 
         self.total_percentile_delay = None
         if total_delays:
             self.total_percentile_delay = np.percentile(
-                    total_delays, 95, interpolation='nearest')
+                total_delays, 95, interpolation='nearest')
 
     def plot_throughput_graph(self):
         empty_graph = True
@@ -349,7 +326,12 @@ class TunnelGraph:
                     bbox_inches='tight', pad_inches=0.2)
 
     def statistics_string(self):
-        ret = '-- Total:\n'
+        if len(self.flows) == 1:
+            flows_str = 'flow'
+        else:
+            flows_str = 'flows'
+        ret = '-- Total of %d %s:\n' % (len(self.flows), flows_str)
+
         if self.avg_capacity is not None:
             ret += 'Average capacity: %.2f Mbit/s\n' % self.avg_capacity
 
@@ -357,8 +339,8 @@ class TunnelGraph:
             ret += 'Average throughput: %.2f Mbit/s' % self.total_avg_egress
 
         if self.avg_capacity is not None and self.total_avg_egress is not None:
-            ret += ' (%.1f%% utilization)' % (100.0 * self.total_avg_egress /
-                                              self.avg_capacity)
+            ret += ' (%.1f%% utilization)' % (
+                100.0 * self.total_avg_egress / self.avg_capacity)
         ret += '\n'
 
         if self.total_percentile_delay is not None:
@@ -369,7 +351,8 @@ class TunnelGraph:
             ret += 'Loss rate: %.2f%%\n' % (self.total_loss_rate * 100.0)
 
         for flow_id in self.flows:
-            ret += '-- Flow %s:\n' % flow_id
+            ret += '-- Flow %d:\n' % flow_id
+
             if (flow_id in self.avg_egress and
                     self.avg_egress[flow_id] is not None):
                 ret += ('Average throughput: %.2f Mbit/s\n' %
@@ -383,28 +366,41 @@ class TunnelGraph:
             if (flow_id in self.loss_rate and
                     self.loss_rate[flow_id] is not None):
                 ret += 'Loss rate: %.2f%%\n' % (self.loss_rate[flow_id] * 100.)
+
         return ret
 
-    def tunnel_graph(self):
+    def run(self):
         self.parse_tunnel_log()
+
         if self.throughput_graph:
             self.plot_throughput_graph()
+
         if self.delay_graph:
             self.plot_delay_graph()
 
         plt.close('all')
-        return (self.total_avg_egress, self.total_percentile_delay,
-                self.total_loss_rate, self.total_duration,
-                self.statistics_string())
+
+        tunnel_results = {}
+        tunnel_results['throughput'] = self.total_avg_egress
+        tunnel_results['delay'] = self.total_percentile_delay
+        tunnel_results['loss'] = self.total_loss_rate
+        tunnel_results['duration'] = self.total_duration
+        tunnel_results['stats'] = self.statistics_string()
+
+        return tunnel_results
 
 
 def main():
-    args = parse_arguments()
+    args = parse_arguments(path.basename(__file__))
 
-    tunnel_graph = TunnelGraph(args.ms_per_bin, args.tunnel_log,
-                               args.throughput_graph, args.delay_graph)
-    tunnel_graph.tunnel_graph()
-    sys.stderr.write(tunnel_graph.statistics_string())
+    tunnel_graph = TunnelGraph(
+        tunnel_log=args.tunnel_log,
+        throughput_graph=args.throughput_graph,
+        delay_graph=args.delay_graph,
+        ms_per_bin=args.ms_per_bin)
+    tunnel_results = tunnel_graph.run()
+
+    sys.stderr.write(tunnel_results['stats'])
 
 
 if __name__ == '__main__':
