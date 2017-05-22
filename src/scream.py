@@ -21,10 +21,10 @@ def main():
 
     if args.option == 'setup':
         sh_cmd = './autogen.sh && ./configure && make -j2'
-        check_call(sh_cmd, shell=True, cwd=scream_dir)
 
         sourdough_dir = path.join(project_root.DIR, 'third_party', 'sourdough')
         check_call(sh_cmd, shell=True, cwd=sourdough_dir)
+        check_call(sh_cmd, shell=True, cwd=scream_dir)
 
     if args.option == 'receiver':
         port = get_open_port()

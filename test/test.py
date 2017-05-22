@@ -604,7 +604,7 @@ def main():
 
     try:
         run_tests(args)
-    except (KeyboardInterrupt, SystemExit):
+    except KeyboardInterrupt:
         cleanup(args)
     except Exception as exception:
         sys.stderr.write('Error: %s\n' % exception)
