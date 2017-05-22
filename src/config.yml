@@ -1,7 +1,7 @@
 default_tcp:
   friendly_name: TCP Cubic
   color: black
-  marker: 'X'
+  marker: 'd'
 vegas:
   friendly_name: TCP Vegas
   color: gold
