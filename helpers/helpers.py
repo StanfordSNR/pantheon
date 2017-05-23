@@ -15,11 +15,14 @@ from src.helpers import make_sure_path_exists, get_open_port, TMPDIR
 def print_cmd(cmd):
     if isinstance(cmd, list):
         cmd_to_print = ' '.join(cmd).strip()
-    elif isinstance(cmd, str):
+    elif isinstance(cmd, str) or isinstance(cmd, unicode):
         cmd_to_print = cmd.strip()
+    else:
+        cmd_to_print = ''
 
-    sys.stderr.write(Fore.BLUE + '$ ' + Style.RESET_ALL)
-    sys.stderr.write(cmd_to_print + '\n')
+    if cmd_to_print:
+        sys.stderr.write(Fore.BLUE + '$ ' + Style.RESET_ALL +
+                         cmd_to_print + '\n')
 
 
 def call(cmd, **kwargs):
