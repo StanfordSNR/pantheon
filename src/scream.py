@@ -3,12 +3,14 @@
 from os import path
 from subprocess import check_call
 import project_root
-from helpers import get_open_port, print_port_for_tests, parse_arguments
+from helpers import (
+    get_open_port, print_port_for_tests, parse_arguments, apply_patch)
 
 
 def main():
     args = parse_arguments('receiver_first')
 
+    cc_repo = path.join(project_root.DIR, 'third_party', 'scream')
     scream_dir = path.join(project_root.DIR, 'src', 'scream')
     recv_src = path.join(scream_dir, 'ScreamServer')
     send_src = path.join(scream_dir, 'ScreamClient')
@@ -20,8 +22,10 @@ def main():
         print 'receiver'
 
     if args.option == 'setup':
-        sh_cmd = './autogen.sh && ./configure && make -j2'
+        # apply patch to add header cmath
+        apply_patch('scream.patch', cc_repo)
 
+        sh_cmd = './autogen.sh && ./configure && make -j2'
         sourdough_dir = path.join(project_root.DIR, 'third_party', 'sourdough')
         check_call(sh_cmd, shell=True, cwd=sourdough_dir)
         check_call(sh_cmd, shell=True, cwd=scream_dir)

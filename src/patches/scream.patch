@@ -1,0 +1,24 @@
+From dc7fee67488a9a7566291c5ba5037a5133ca4ea2 Mon Sep 17 00:00:00 2001
+From: "Francis Y. Yan" <fyy@cs.stanford.edu>
+Date: Mon, 22 May 2017 22:36:54 -0700
+Subject: [PATCH] ScreamTx.cpp: add cmath header for sqrt
+
+---
+ code/ScreamTx.cpp | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/code/ScreamTx.cpp b/code/ScreamTx.cpp
+index a88a121..d9dd362 100644
+--- a/code/ScreamTx.cpp
++++ b/code/ScreamTx.cpp
+@@ -2,6 +2,7 @@
+ #include "ScreamTx.h"
+ #include "ScreamRx.h"
+ #include <cstdint>
++#include <cmath>
+ #include <string.h>
+ #include <iostream>
+ #include <algorithm>
+-- 
+2.7.4
+
