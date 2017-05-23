@@ -42,7 +42,6 @@ def parse_analyze_shared(parser):
         '--schemes', metavar='"SCHEME1 SCHEME2..."',
         help='analyze a space-separated list of schemes '
         '(default: "cc_schemes" in pantheon_metadata.json)')
-
     parser.add_argument(
         '--data-dir', metavar='DIR',
         default=path.join(project_root.DIR, 'test', 'data'),
@@ -84,9 +83,19 @@ def parse_analyze():
         description='call plot.py and report.py')
     parse_analyze_shared(parser)
 
+    parser.add_argument(
+        '--s3-link', metavar='URL', help='URL to download logs from S3')
+    parser.add_argument(
+        '--s3-dst', metavar='DIR', help='directory to save downloaded logs '
+        'from S3 (required if --s3-link is given; will override --data-dir)')
+
     args = parser.parse_args()
     if args.schemes is not None:
         verify_schemes(args.schemes)
+
+    if (args.s3_link is not None and args.s3_dst is None) or (
+            args.s3_link is None and args.s3_dst is not None):
+        sys.exit('--s3-link and --s3-dst must be set together')
 
     return args
 

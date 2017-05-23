@@ -13,7 +13,7 @@ import matplotlib.ticker as ticker
 import project_root
 from parse_arguments import parse_arguments
 from analyze_helpers import load_test_metadata, verify_schemes_with_meta
-from helpers.helpers import parse_config
+from helpers.helpers import parse_config, print_cmd
 import tunnel_graph
 
 
@@ -104,8 +104,8 @@ class Plot(object):
                 delay_graph = cc + '_%s_delay_run%s.png' % (link_t, run_id)
                 delay_graph_path = path.join(self.data_dir, delay_graph)
 
+            print_cmd('tunnel_graph %s\n' % log_path)
             try:
-                sys.stderr.write("tunnel_graph %s\n" % log_path)
                 tunnel_results = tunnel_graph.TunnelGraph(
                     tunnel_log=log_path,
                     throughput_graph=tput_graph_path,

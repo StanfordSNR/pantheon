@@ -1,49 +1,49 @@
 #!/usr/bin/env python
 
-import os
-import pantheon_helpers
+import sys
 from os import path
-from helpers.parse_arguments import parse_arguments
-from helpers.pantheon_help import check_call, check_output
+from parse_arguments import parse_arguments
+import project_root
+from helpers.helpers import check_call
 
 
 def main():
     args = parse_arguments(path.basename(__file__))
-    analyze_dir = path.abspath(path.dirname(__file__))
 
-    if args.s3_link:
+    if args.s3_link and args.s3_dst:
         # download .tar.xz from S3 and decompress
-        os.chdir(args.s3_dir_prefix)
-        tar_name = check_output(['basename', args.s3_link]).strip()
-        tar_dir = tar_name[:-7]
-        check_call(['rm', '-rf', tar_name, tar_dir])
 
-        check_call(['wget', args.s3_link])
-        check_call(['tar', 'xJf', tar_name])
-        os.chdir(tar_dir)
+        tar_name = path.basename(args.s3_link)
+        tar_path = path.join(args.s3_dst, tar_name)
+
+        if path.exists(tar_path):
+            sys.exit('%s already exists' % tar_path)
+
+        check_call(['wget', args.s3_link, '-P', args.s3_dst])
+        check_call(['tar', 'xf', tar_path, '-C', args.s3_dst])
+        data_dir = path.join(args.s3_dst, tar_name.split('.', 1)[0])
     else:
-        os.chdir(args.data_dir)
+        data_dir = args.data_dir
 
-    # prepare scripts path
-    analyze_pre_setup = path.join(analyze_dir, 'analysis_pre_setup.py')
-    plot_summary = path.join(analyze_dir, 'plot_summary.py')
-    generate_report = path.join(analyze_dir, 'generate_report.py')
+    data_dir = path.abspath(data_dir)
 
-    if not args.no_pre_setup:
-        check_call(['python', analyze_pre_setup])
+    analyze_dir = path.join(project_root.DIR, 'analyze')
+    plot = path.join(analyze_dir, 'plot.py')
+    report = path.join(analyze_dir, 'report.py')
 
-    plot_summary_cmd = ['python', plot_summary]
-    generate_report_cmd = ['python', generate_report]
-    if args.include_acklink:
-        plot_summary_cmd.append('--include-acklink')
-        generate_report_cmd.append('--include-acklink')
+    plot_cmd = ['python', plot]
+    report_cmd = ['python', report]
 
-    if args.analyze_schemes:
-        plot_summary_cmd += ['--analyze-schemes', args.analyze_schemes]
-        generate_report_cmd += ['--analyze-schemes', args.analyze_schemes]
+    for cmd in [plot_cmd, report_cmd]:
+        cmd += ['--data-dir', data_dir]
+        if args.schemes:
+            cmd += ['--schemes', args.schemes]
+        if args.include_acklink:
+            cmd += ['--include-acklink']
 
-    check_call(plot_summary_cmd)
-    check_call(generate_report_cmd)
+    check_call(plot_cmd)
+    check_call(report_cmd)
+
 
 if __name__ == '__main__':
     main()
