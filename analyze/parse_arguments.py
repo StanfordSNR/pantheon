@@ -47,14 +47,15 @@ def parse_analyze_shared(parser):
         default=path.join(project_root.DIR, 'test', 'data'),
         help='directory that contains logs and metadata '
         'of pantheon tests (default pantheon/test/data)')
-    parser.add_argument('--include-acklink', action='store_true',
-                        help='include acklink analysis')
 
 
 def parse_plot():
     parser = argparse.ArgumentParser(
         description='plot throughput and delay graphs for schemes in tests')
+
     parse_analyze_shared(parser)
+    parser.add_argument('--include-acklink', action='store_true',
+                        help='include acklink analysis')
     parser.add_argument(
         '--no-graphs', action='store_true', help='only output performance '
         'values of schemes with no graphs generated')
@@ -69,7 +70,10 @@ def parse_plot():
 def parse_report():
     parser = argparse.ArgumentParser(
         description='generate a PDF report that summarizes test results')
+
     parse_analyze_shared(parser)
+    parser.add_argument('--include-acklink', action='store_true',
+                        help='include acklink analysis')
 
     args = parser.parse_args()
     if args.schemes is not None:
@@ -81,8 +85,10 @@ def parse_report():
 def parse_analyze():
     parser = argparse.ArgumentParser(
         description='call plot.py and report.py')
-    parse_analyze_shared(parser)
 
+    parse_analyze_shared(parser)
+    parser.add_argument('--include-acklink', action='store_true',
+                        help='include acklink analysis')
     parser.add_argument(
         '--s3-link', metavar='URL', help='URL to download logs from S3')
     parser.add_argument(
@@ -100,6 +106,25 @@ def parse_analyze():
     return args
 
 
+def parse_over_time():
+    parser = argparse.ArgumentParser(
+        description='plot a throughput-time graph for schemes in tests')
+
+    parse_analyze_shared(parser)
+    parser.add_argument(
+        '--ms-per-bin', metavar='MS-PER-BIN', type=int, default=500,
+        help='bin size in ms (default 500)')
+    parser.add_argument(
+        '--amplify', metavar='FACTOR', type=float, default=1.0,
+        help='amplication factor of output graph\'s x-axis scale ')
+
+    args = parser.parse_args()
+    if args.schemes is not None:
+        verify_schemes(args.schemes)
+
+    return args
+
+
 def parse_arguments(filename):
     if filename == 'tunnel_graph.py':
         return parse_tunnel_graph()
@@ -109,3 +134,5 @@ def parse_arguments(filename):
         return parse_report()
     elif filename == 'analyze.py':
         return parse_analyze()
+    elif filename == 'plot_over_time.py':
+        return parse_over_time()
