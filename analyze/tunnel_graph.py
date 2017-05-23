@@ -73,66 +73,65 @@ class TunnelGraph(object):
 
                 if last_capacity is None or ts > last_capacity:
                     last_capacity = ts
-            else:
-                if event_type == '+':
-                    if len(items) == 4:
-                        flow_id = int(items[-1])
-                    else:
-                        flow_id = 0
+            elif event_type == '+':
+                if len(items) == 4:
+                    flow_id = int(items[-1])
+                else:
+                    flow_id = 0
 
-                    self.flows[flow_id] = True
+                self.flows[flow_id] = True
 
-                    if flow_id not in arrivals:
-                        arrivals[flow_id] = {}
-                        first_arrival[flow_id] = ts
+                if flow_id not in arrivals:
+                    arrivals[flow_id] = {}
+                    first_arrival[flow_id] = ts
 
-                    if flow_id not in last_arrival:
+                if flow_id not in last_arrival:
+                    last_arrival[flow_id] = ts
+                else:
+                    if ts > last_arrival[flow_id]:
                         last_arrival[flow_id] = ts
-                    else:
-                        if ts > last_arrival[flow_id]:
-                            last_arrival[flow_id] = ts
 
-                    old_value = arrivals[flow_id].get(bin_id, 0)
-                    arrivals[flow_id][bin_id] = old_value + num_bits
+                old_value = arrivals[flow_id].get(bin_id, 0)
+                arrivals[flow_id][bin_id] = old_value + num_bits
 
-                    total_arrivals += num_bits
-                elif event_type == '-':
-                    if len(items) == 5:
-                        flow_id = int(items[-1])
-                    else:
-                        flow_id = 0
+                total_arrivals += num_bits
+            elif event_type == '-':
+                if len(items) == 5:
+                    flow_id = int(items[-1])
+                else:
+                    flow_id = 0
 
-                    self.flows[flow_id] = True
+                self.flows[flow_id] = True
 
-                    if flow_id not in departures:
-                        departures[flow_id] = {}
-                        first_departure[flow_id] = ts
+                if flow_id not in departures:
+                    departures[flow_id] = {}
+                    first_departure[flow_id] = ts
 
-                    if flow_id not in last_departure:
+                if flow_id not in last_departure:
+                    last_departure[flow_id] = ts
+                else:
+                    if ts > last_departure[flow_id]:
                         last_departure[flow_id] = ts
-                    else:
-                        if ts > last_departure[flow_id]:
-                            last_departure[flow_id] = ts
 
-                    old_value = departures[flow_id].get(bin_id, 0)
-                    departures[flow_id][bin_id] = old_value + num_bits
+                old_value = departures[flow_id].get(bin_id, 0)
+                departures[flow_id][bin_id] = old_value + num_bits
 
-                    total_departures += num_bits
+                total_departures += num_bits
 
-                    # update total variables
-                    if total_first_departure is None:
-                        total_first_departure = ts
-                    if (total_last_departure is None or
-                            ts > total_last_departure):
-                        total_last_departure = ts
+                # update total variables
+                if total_first_departure is None:
+                    total_first_departure = ts
+                if (total_last_departure is None or
+                        ts > total_last_departure):
+                    total_last_departure = ts
 
-                    # store delays in a list for each flow and sort later
-                    delay = float(items[3])
-                    if flow_id not in self.delays:
-                        self.delays[flow_id] = []
-                        self.delays_t[flow_id] = []
-                    self.delays[flow_id].append(delay)
-                    self.delays_t[flow_id].append((ts - first_ts) / 1000.0)
+                # store delays in a list for each flow and sort later
+                delay = float(items[3])
+                if flow_id not in self.delays:
+                    self.delays[flow_id] = []
+                    self.delays_t[flow_id] = []
+                self.delays[flow_id].append(delay)
+                self.delays_t[flow_id].append((ts - first_ts) / 1000.0)
 
         tunlog.close()
 

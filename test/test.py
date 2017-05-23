@@ -587,7 +587,6 @@ def pkill(args):
 
 def cleanup(args):
     msg = 'Error in tests!'
-
     if args.pkill_cleanup:
         msg += ' Cleaning up using pkill...'
     msg += '\n'
@@ -596,19 +595,15 @@ def cleanup(args):
     if args.pkill_cleanup:
         pkill(args)
 
-    sys.exit('Error!')
-
 
 def main():
     args = parse_arguments(path.basename(__file__))
 
     try:
         run_tests(args)
-    except KeyboardInterrupt:
+    except:  # intended to catch all exceptions
         cleanup(args)
-    except Exception as exception:
-        sys.stderr.write('Error: %s\n' % exception)
-        cleanup(args)
+        raise
     else:
         sys.stderr.write(
             Back.GREEN + 'All tests done!\n' + Style.RESET_ALL)
