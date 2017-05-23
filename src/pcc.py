@@ -24,8 +24,8 @@ def main():
         # apply patch to reduce MTU size
         apply_patch('pcc_mtu.patch', cc_repo)
 
-        check_call(['make', '-j2'], cwd=recv_dir)
-        check_call(['make', '-j2'], cwd=send_dir)
+        check_call(['make'], cwd=recv_dir)
+        check_call(['make'], cwd=send_dir)
 
     if args.option == 'receiver':
         port = get_open_port()
