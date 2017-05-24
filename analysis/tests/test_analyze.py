@@ -16,10 +16,10 @@ def main():
            'default_tcp vegas bbr ledbat pcc verus sprout webrtc'
            ' scream copa taova koho_cc calibrated_koho saturator',
            '-t', '10', '--data-dir', data_dir, '--pkill-cleanup']
-    assert call(cmd) == 0
+    check_call(cmd)
 
     cmd = ['python', analyze_py, '--data-dir', data_dir]
-    assert call(cmd) == 0
+    check_call(cmd)
 
 
 if __name__ == '__main__':
