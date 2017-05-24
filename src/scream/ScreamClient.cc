@@ -118,7 +118,8 @@ int main(int argc, char *argv[])
   RtpQueue *rtpQueue = new RtpQueue();
   /* Adopt the same parameters as in the original scream_01 experiment */
   VideoEnc *videoEnc = new VideoEnc(rtpQueue, frameRate, 0.1f, false, false, 0);
-  screamTx->registerNewStream(rtpQueue, SSRC, 1.0f, 64e3, 5e6);
+  screamTx->registerNewStream(
+      rtpQueue, SSRC, 1.0f, 64e3f, 10e7f, 2e5f, 2.0f, 0.5f, 0.3f);
 
   /* Non-blocking timers for client and video encoder */
   Timerfd txTimer(TFD_NONBLOCK);

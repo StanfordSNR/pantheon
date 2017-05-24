@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 from os import path
 from subprocess import check_call
 import project_root
@@ -36,7 +37,9 @@ def main():
             'offduration=1 onduration=1000000 traffic_params=deterministic,'
             'num_cycles=1 cctype=markovian delta_conf=constant_delta:1'
             % (send_src, args.ip, args.port))
-        check_call(sh_cmd, shell=True)
+        with open(os.devnull, 'w') as devnull:
+            # suppress debugging output to stdout
+            check_call(sh_cmd, shell=True, stdout=devnull)
 
 
 if __name__ == '__main__':

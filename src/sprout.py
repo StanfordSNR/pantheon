@@ -2,9 +2,10 @@
 
 import os
 from os import path
-from subprocess import check_call
+from subprocess import check_call, Popen
 import project_root
-from helpers import parse_arguments, apply_patch
+from helpers import (
+    get_open_port, print_port_for_tests, parse_arguments, apply_patch)
 
 
 def main():
@@ -23,22 +24,27 @@ def main():
 
     if args.option == 'setup':
         # apply patch to reduce MTU size
-        apply_patch('sprout_mtu.patch', cc_repo)
+        apply_patch('sprout.patch', cc_repo)
 
         sh_cmd = './autogen.sh && ./configure --enable-examples && make -j2'
         check_call(sh_cmd, shell=True, cwd=cc_repo)
 
     if args.option == 'receiver':
-        os.environ['SPROUT_MODEL_IN'] = model
+        new_env = os.environ.copy()
+        new_env['SPROUT_MODEL_IN'] = model
 
-        # Sprout will print the port to listen on in a format required by tests
-        check_call([src])
+        port = get_open_port()
+        print_port_for_tests(port)
+
+        cmd = [src, port]
+        Popen(cmd, env=new_env).wait()
 
     if args.option == 'sender':
-        os.environ['SPROUT_MODEL_IN'] = model
+        new_env = os.environ.copy()
+        new_env['SPROUT_MODEL_IN'] = model
 
         cmd = [src, args.ip, args.port]
-        check_call(cmd)
+        Popen(cmd, env=new_env).wait()
 
 
 if __name__ == '__main__':

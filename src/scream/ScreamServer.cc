@@ -67,9 +67,9 @@ void recvRtp(ScreamRx *screamRx, UDPSocket &socket, Timerfd &feedbackTimer)
                     (int) rtpPacket.payload.size(), rtpPacket.header.seq_num);
 
   /* Generate RTCP feedback */
-  if (screamRx->isFeedback()) {
-    uint64_t sinceLastFeedback_us =
-        (timestamp_ms() * 1000) - screamRx->getLastFeedbackT();
+  uint64_t time_us = timestamp_ms() * 1000;
+  if (screamRx->isFeedback(time_us)) {
+    uint64_t sinceLastFeedback_us = time_us - screamRx->getLastFeedbackT();
     if (sinceLastFeedback_us > feedbackInterval_us) {
       sendRtcp(screamRx, socket);
     } else {
