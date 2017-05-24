@@ -38,6 +38,14 @@ def parse_setup():
     args = parser.parse_args()
     if args.schemes is not None:
         verify_schemes(args.schemes)
+
+    if args.install_deps:
+        if not args.all and args.schemes is None:
+            sys.exit('must specify --all or --schemes '
+                     'when --install-deps is given')
+
+        if args.setup or args.interface is not None:
+            sys.exit('cannot perform setup when --install-deps is given')
     return args
 
 

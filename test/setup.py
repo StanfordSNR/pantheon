@@ -20,22 +20,23 @@ def install_deps(cc_src):
 
 
 def setup(args):
-    # update submodules
-    update_submodules()
+    if not args.install_deps:
+        # update submodules
+        update_submodules()
 
-    # enable IP forwarding
-    sh_cmd = 'sudo sysctl -w net.ipv4.ip_forward=1'
-    check_call(sh_cmd, shell=True)
-
-    if args.interface is not None:
-        # disable reverse path filtering
-        rpf = 'net.ipv4.conf.%s.rp_filter'
-
-        sh_cmd = 'sudo sysctl -w %s=0' % (rpf % 'all')
+        # enable IP forwarding
+        sh_cmd = 'sudo sysctl -w net.ipv4.ip_forward=1'
         check_call(sh_cmd, shell=True)
 
-        sh_cmd = 'sudo sysctl -w %s=0' % (rpf % args.interface)
-        check_call(sh_cmd, shell=True)
+        if args.interface is not None:
+            # disable reverse path filtering
+            rpf = 'net.ipv4.conf.%s.rp_filter'
+
+            sh_cmd = 'sudo sysctl -w %s=0' % (rpf % 'all')
+            check_call(sh_cmd, shell=True)
+
+            sh_cmd = 'sudo sysctl -w %s=0' % (rpf % args.interface)
+            check_call(sh_cmd, shell=True)
 
     # setup specified schemes
     cc_schemes = None
@@ -52,13 +53,13 @@ def setup(args):
             # install dependencies
             if args.install_deps:
                 install_deps(cc_src)
+            else:
+                # persistent setup across reboots
+                if args.setup:
+                    check_call(['python', cc_src, 'setup'])
 
-            # persistent setup across reboots
-            if args.setup:
-                check_call(['python', cc_src, 'setup'])
-
-            # setup required every time after reboot
-            check_call(['python', cc_src, 'setup_after_reboot'])
+                # setup required every time after reboot
+                check_call(['python', cc_src, 'setup_after_reboot'])
 
 
 def main():
