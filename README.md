@@ -1,120 +1,124 @@
 [![Build Status](https://travis-ci.org/StanfordSNR/pantheon.svg?branch=master)](https://travis-ci.org/StanfordSNR/pantheon)
 
 # Disclaimer:
-This is unfinished research software.
-Multiple scripts run commands as root to install prerequisite programs, update package lists, etc.
-Our scripts will write to the filesystem in the pantheon folder and in `/tmp/`.
-We have not implemented most of the programs run by our wrappers.
-We never run third party programs as root, but we can not guarantee they will never try to escalate privilege to root.
+This is research software. Our scripts will write to
+the file system in the pantheon folder and in `/tmp/pantheon-tmp`.
+We never run third party programs as root, but we cannot guarantee they will
+never try to escalate privilege to root.
 
-Run at your own risk. Feel free to contact our mailing list: `the name of this repository`@cs.stanford.edu
+Run at your own risk. Feel free to contact our mailing list:
+`the name of this repository`@cs.stanford.edu
 
 # Pantheon of Congestion Control
-The Pantheon has wrappers for many popular and research congestion control schemes.
-It allows them to run over a common interface and has tools to benchmark and compare their performance.
-Pantheon tests can be run locally over an emulated link using [mahimahi](http://mahimahi.mit.edu/) or over the internet to a remote machine.
+The Pantheon has wrappers for many popular and research congestion control
+schemes. It allows them to run over a common interface and has tools to
+benchmark and compare their performance.
+Pantheon tests can be run locally over an emulated link using
+[mahimahi](http://mahimahi.mit.edu/) or over the internet to a remote machine.
 
 ## Preparation
-Many of the tools and programs run by the Pantheon are git submodules in the `third_party` folder.
-To clone this repository, including submodules, run:
+Many of the tools and programs run by the Pantheon are git submodules in the
+`third_party` folder. To clone this repository, including submodules, run:
 
 ```
 git clone --recursive https://github.com/StanfordSNR/pantheon.git
 ```
 
 To add submodules after cloning, run:
+
 ```
 git submodule update --init
 ```
 
+## Dependencies
+We provide a handy script `install_deps.py` to install globally required
+dependencies. But you may want to check the script and install these
+dependencies by yourself.
+
+For those dependencies required by each congestion control scheme `<cc>`,
+run `src/<cc>.py deps` to print a dependency list. Again you could install
+them by yourself. Alternatively, run
+
+```
+test/setup.py --install-deps (--all | --schemes "<cc1> <cc2> ...")
+```
+
+to install dependencies required by all schemes or a list of schemes separated
+by spaces.
+
+## Setup
+After installing dependencies, run
+
+```
+test/setup.py [--setup] [--all | --schemes "<cc1> <cc2> ..."]
+```
+
+to set up schemes. `--setup` is only required the first time when running these
+schemes. Otherwise, `test/setup.py` is required to be run only every time after
+reboots (without `--setup`).
+
 ## Running the Pantheon
-Currently supported schemes can be found in `src/`. Running:
+To test schemes in emulated networks locally, run
 
 ```
-test/run.py
+test/test.py local (--all | --schemes "<cc1> <cc2> ...")
 ```
 
-Will setup and run all congestion control schemes in the Pantheon locally (and remotely if the `-r` flag is used).
-Multiple flows can be run simultaneously with `-f`.
-The running time of each scheme can be specified with `-t` and the entire experiment can be run multiple times using `--run-times`.
-Logs of all packets sent and received will be written to `test/` for later analysis.
+To test schemes over the internet to remote machine, run
 
-
-Run `test/run.py -h` for detailed usage and additional optional arguments.
-
-
-To run over an arbitrary set of mahimahi shells locally run:
 ```
-cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
-
-test/run.py --run-only setup
-mm-delay 50 mm-loss uplink .1 mm-loss downlink .1 mm-link /usr/share/mahimahi/traces/TMobile-LTE-short.up /usr/share/mahimahi/traces/TMobile-LTE-short.down -- sh -c 'test/run.py -r $USER@$MAHIMAHI_BASE:pantheon --run-only test'  # assumes pantheon in home directory
+test/test.py remote (--all | --schemes "<cc1> <cc2> ...") HOSTADDR:PANTHEON-DIR
 ```
+
+Run `test/test.py local -h` and `test/test.py remote -h` for detailed
+usage and additional optional arguments, such as multiple flows, running time,
+arbitrary set of mahimahi shells for local tests, data sender side for
+remote tests, etc.
 
 ## Pantheon analysis
-Before performing analysis run:
+To analyze test results, run
+
 ```
-analysis/analysis_pre_setup.py
+analysis/analyze.py [--data-dir DIR]
 ```
 
-To analyze experiment logs in the `test/` directory run:
-```
-analyze/analyze.py --data-dir test/
-```
-This will generate charts and `pantheon_report.pdf `in the `data-dir` folder
+It will analyze the logs saved by `test/test.py`, then generate charts and
+`pantheon_report.pdf`.
 
-
-To compare two Pantheon experiments, one can use `analyze/compare_two_experiments.py` with directories, xz archives, or archive URLs from Pantheon experiments.
-
+The directory to save data is `test/data` by default,
+but it can be set by `--data-dir` on `test/test.py` and `analysis/analyze.py`.
 
 ## Running a single congestion control scheme
-Before performing experiments individually run:
-```
-test/pre_setup.py
-```
+All the available schemes can be found in `src/config.yml`. To run a single
+congestion control scheme, first follow the **Dependencies** section to install
+required dependencies.
 
-To make and install the `sprout` and it's dependencies run:
+At the first time testing it, run `src/<cc>.py setup`
+to perform setup that is persistent across reboots, such as compilation,
+generating or downloading files to send, etc. Then run
+`src/<cc>.py setup_after_reboot`, which has to be run again every time after
+reboots. In fact, `test/setup.py [--setup]` performs `setup_after_reboot` by
+default, and runs `setup` on schemes when `--setup` is given.
 
+Next, find running order for scheme:
 ```
-test/setup.py sprout
-```
-
-Run `test/setup.py -h` for detailed usage and additional optional arguments.
-
-To test `sprout` over an emulated link run:
-```
-test/test.py [-t RUNTIME] [-f FLOWS] congestion-control
-```
-
-To setup and test `sprout` over the wide area to a remote machine run:
-```
-test/pre_setup.py -r HOSTADDR:PANTHEON-DIR
-test/setup.py -r HOSTADDR:PANTHEON-DIR sprout
-test/test.py -r HOSTADDR:PANTHEON-DIR [-t RUNTIME] [-f FLOWS] sprout
-```
-
-Run `test/test.py -h` for detailed usage and additional optional arguments.
-
-## Running schemes without any logging
-Run `test/pre_setup.py` and `test/setup.py <congestion-control>` first.
-
-Find running order for scheme:
-```
-./<congestion-control>.py run_first
+./<cc>.py run_first
 ```
 
 Depending on the output of `run_first`, run
 
 ```
 # Receiver first
-./<congestion-control>.py receiver
-./<congestion-control>.py sender IP port
+./<cc>.py receiver
+./<cc>.py sender IP port
 ```
 
 or
 
 ```
 # Sender first
-./<congestion-control>.py sender
-./<congestion-control>.py receiver IP port
+./<cc>.py sender
+./<cc>.py receiver IP port
 ```
+
+Run `src/<cc>.py -h` for detailed usage of the common interface.
