@@ -18,7 +18,7 @@ def test_schemes():
 
     for scheme in schemes:
         sys.stderr.write(
-            Back.BLUE + 'Testing %s...\n' % scheme + Style.RESET_ALL)
+            Back.BLUE + 'Testing %s...' % scheme + Style.RESET_ALL + '\n')
         src = path.join(src_dir, scheme + '.py')
 
         run_first = check_output([src, 'run_first']).strip()
@@ -60,7 +60,7 @@ def main():
         raise
     else:
         sys.stderr.write(
-            Back.GREEN + 'Passed all tests!\n' + Style.RESET_ALL)
+            Back.GREEN + 'Passed all tests!' + Style.RESET_ALL + '\n')
 
 
 if __name__ == '__main__':

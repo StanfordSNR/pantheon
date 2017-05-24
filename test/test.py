@@ -533,9 +533,9 @@ class Test(object):
 
     # run congestion control test
     def run(self):
-        msg = 'Testing scheme %s for experiment run %d/%d...\n' % (
+        msg = 'Testing scheme %s for experiment run %d/%d...' % (
             self.cc, self.run_id, self.run_times)
-        sys.stderr.write(Back.BLUE + msg + Style.RESET_ALL)
+        sys.stderr.write(Back.BLUE + msg + Style.RESET_ALL + '\n')
 
         # setup before running tests
         self.setup()
@@ -547,7 +547,7 @@ class Test(object):
         self.record_time_stats()
 
         sys.stderr.write(
-            Back.GREEN + 'Done testing %s\n' % self.cc + Style.RESET_ALL)
+            Back.GREEN + 'Done testing ' + self.cc + Style.RESET_ALL + '\n')
 
 
 def run_tests(args):
@@ -566,7 +566,7 @@ def run_tests(args):
         for cc in cc_schemes:
             Test(args, run_id, cc).run()
 
-    if args.save_metadata:
+    if not args.ignore_metadata:
         meta = vars(args).copy()
         meta['cc_schemes'] = sorted(cc_schemes)
         save_test_metadata(meta, path.abspath(args.data_dir))
@@ -590,8 +590,7 @@ def cleanup(args):
     msg = 'Error in tests!'
     if args.pkill_cleanup:
         msg += ' Cleaning up using pkill...'
-    msg += '\n'
-    sys.stderr.write(Back.RED + msg + Style.RESET_ALL)
+    sys.stderr.write(Back.RED + msg + Style.RESET_ALL + '\n')
 
     if args.pkill_cleanup:
         pkill(args)
@@ -607,7 +606,7 @@ def main():
         raise
     else:
         sys.stderr.write(
-            Back.GREEN + 'All tests done!\n' + Style.RESET_ALL)
+            Back.GREEN + 'All tests done!' + Style.RESET_ALL + '\n')
 
 
 if __name__ == '__main__':
