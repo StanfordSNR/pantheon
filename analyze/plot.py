@@ -18,15 +18,14 @@ import tunnel_graph
 
 
 class Plot(object):
-    def __init__(self, data_dir=path.join(project_root.DIR, 'test'),
-                 schemes=None, include_acklink=False, no_graphs=False):
-        self.data_dir = path.abspath(data_dir)
-        self.include_acklink = include_acklink
-        self.no_graphs = no_graphs
+    def __init__(self, args):
+        self.data_dir = path.abspath(args.data_dir)
+        self.include_acklink = args.include_acklink
+        self.no_graphs = args.no_graphs
 
         metadata_path = path.join(self.data_dir, 'pantheon_metadata.json')
         meta = load_test_metadata(metadata_path)
-        self.cc_schemes = verify_schemes_with_meta(schemes, meta)
+        self.cc_schemes = verify_schemes_with_meta(args.schemes, meta)
 
         self.run_times = meta['run_times']
         self.flows = meta['flows']
@@ -328,12 +327,7 @@ class Plot(object):
 
 def main():
     args = parse_arguments(path.basename(__file__))
-
-    plot = Plot(data_dir=args.data_dir,
-                schemes=args.schemes,
-                include_acklink=args.include_acklink,
-                no_graphs=args.no_graphs)
-    plot.run()
+    Plot(args).run()
 
 
 if __name__ == '__main__':

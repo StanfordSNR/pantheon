@@ -1,17 +1,19 @@
 #!/usr/bin/env python
 
 import os
+from os import path
 import sys
 import signal
 from subprocess import Popen, PIPE
 from colorama import Fore, Style
 import project_root
-from helpers.helpers import kill_proc_group
+from helpers.helpers import kill_proc_group, get_signal_for_cc
 
 
 def main():
     prompt = ''
     procs = {}
+    proc_signals = {}
 
     sys.stdout.write('tunnel manager is running\n')
     sys.stdout.flush()
@@ -45,11 +47,22 @@ def main():
                 procs[tun_id] = Popen(cmd_to_run, stdin=PIPE, stdout=PIPE,
                                       preexec_fn=os.setsid)
             elif cmd[2] == 'python':  # run python scripts inside tunnel
+                if tun_id not in procs:
+                    sys.stderr.write(
+                        'error: run tunnel client or server first\n')
+
                 procs[tun_id].stdin.write(cmd_to_run + '\n')
+
+                cc = path.splitext(path.basename(cmd[3]))[0]
+                proc_signals[tun_id] = get_signal_for_cc(cc)
             elif cmd[2] == 'readline':  # readline from stdout of tunnel
                 if len(cmd) != 3:
                     sys.stderr.write('error: usage: tunnel ID readline\n')
                     continue
+
+                if tun_id not in procs:
+                    sys.stderr.write(
+                        'error: run tunnel client or server first\n')
 
                 sys.stdout.write(procs[tun_id].stdout.readline())
                 sys.stdout.flush()
@@ -68,8 +81,8 @@ def main():
                 sys.stderr.write('error: usage: halt\n')
                 continue
 
-            for proc in procs.itervalues():
-                kill_proc_group(proc, signal.SIGKILL)
+            for tun_id in procs:
+                kill_proc_group(procs[tun_id], proc_signals[tun_id])
 
             sys.exit(0)
         else:

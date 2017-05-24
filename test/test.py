@@ -13,7 +13,7 @@ from parse_arguments import parse_arguments
 import project_root
 from helpers.helpers import (
     Popen, PIPE, call, check_call, TMPDIR, parse_config, kill_proc_group,
-    timeout_handler, TimeoutError, format_time)
+    timeout_handler, TimeoutError, format_time, get_signal_for_cc)
 from test_helpers import (
     read_port_from_proc, who_runs_first, parse_remote_path, query_clock_offset,
     save_test_metadata)
@@ -24,6 +24,7 @@ class Test(object):
         self.mode = args.mode
         self.run_id = run_id
         self.cc = cc
+        self.data_dir = path.abspath(args.data_dir)
 
         # shared arguments between local and remote modes
         self.flows = args.flows
@@ -97,7 +98,6 @@ class Test(object):
         self.cc_src = path.join(project_root.DIR, 'src', self.cc + '.py')
         self.test_dir = path.join(project_root.DIR, 'test')
         self.tunnel_manager = path.join(self.test_dir, 'tunnel_manager.py')
-        self.data_dir = path.join(self.test_dir, 'data')
 
         # record who runs first
         self.run_first, self.run_second = who_runs_first(self.cc)
@@ -184,8 +184,9 @@ class Test(object):
             signal.alarm(0)
             sys.exit('Test exited before time limit')
         finally:
-            kill_proc_group(proc_first, signal.SIGKILL)
-            kill_proc_group(proc_second, signal.SIGKILL)
+            signum = get_signal_for_cc(self.cc)
+            kill_proc_group(proc_first, signum)
+            kill_proc_group(proc_second, signum)
 
     def run_tunnel_managers(self):
         # run tunnel server manager
@@ -568,7 +569,7 @@ def run_tests(args):
     if args.save_metadata:
         meta = vars(args).copy()
         meta['cc_schemes'] = sorted(cc_schemes)
-        save_test_metadata(meta)
+        save_test_metadata(meta, path.abspath(args.data_dir))
 
 
 def pkill(args):

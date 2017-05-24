@@ -73,3 +73,11 @@ def kill_proc_group(proc, signum=signal.SIGTERM):
             os.killpg(os.getpgid(proc.pid), signum)
         except OSError as exception:
             sys.stderr.write('%s\n' % exception)
+
+
+def get_signal_for_cc(cc):
+    # default_tcp and vegas run iperf, which often doesn't respond to SIGTERM
+    if cc == 'default_tcp' or cc == 'vegas':
+        return signal.SIGKILL
+    else:
+        return signal.SIGTERM
