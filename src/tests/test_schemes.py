@@ -2,7 +2,6 @@
 
 import sys
 import time
-import signal
 import os
 from os import path
 import colorama
