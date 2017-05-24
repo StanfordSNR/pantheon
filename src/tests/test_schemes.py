@@ -1,21 +1,24 @@
 #!/usr/bin/env python
 
+import sys
 import time
 import signal
 import os
 from os import path
-from subprocess import check_output, Popen, PIPE
+import colorama
+from colorama import Back, Style
 import project_root
-from helpers.helpers import parse_config, kill_proc_group
+from helpers.helpers import (
+    check_output, call, Popen, PIPE, parse_config, kill_proc_group)
 
 
-def main():
+def test_schemes():
     src_dir = path.join(project_root.DIR, 'src')
     schemes = parse_config().keys()
 
-    print 'Testing schemes...'
     for scheme in schemes:
-        print '\nscheme:', scheme
+        sys.stderr.write(
+            Back.BLUE + 'Testing %s...\n' % scheme + Style.RESET_ALL)
         src = path.join(src_dir, scheme + '.py')
 
         run_first = check_output([src, 'run_first']).strip()
@@ -37,8 +40,27 @@ def main():
         time.sleep(3)
 
         # cleanup
-        kill_proc_group(first_proc, signal.SIGKILL)
-        kill_proc_group(second_proc, signal.SIGKILL)
+        kill_proc_group(first_proc)
+        kill_proc_group(second_proc)
+
+
+def cleanup():
+    pkill_src = path.join(project_root.DIR, 'helpers', 'pkill.py')
+    cmd = ['python', pkill_src, '--kill-dir', project_root.DIR]
+    call(cmd)
+
+
+def main():
+    colorama.init()
+
+    try:
+        test_schemes()
+    except:
+        cleanup()
+        raise
+    else:
+        sys.stderr.write(
+            Back.GREEN + 'Passed all tests!\n' + Style.RESET_ALL)
 
 
 if __name__ == '__main__':
