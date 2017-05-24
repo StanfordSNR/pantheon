@@ -3,7 +3,6 @@
 import os
 from os import path
 import sys
-import signal
 from subprocess import Popen, PIPE
 from colorama import Fore, Style
 import project_root

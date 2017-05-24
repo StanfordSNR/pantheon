@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-import os
-from os import path
-import sys
 import project_root
 import helpers.helpers as h
 
