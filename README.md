@@ -31,7 +31,7 @@ git submodule update --init --recursive
 ```
 
 ## Dependencies
-We provide a handy script `install_deps.py` to install globally required
+We provide a handy script `install_deps.sh` to install globally required
 dependencies. But you may want to check the script and install these
 dependencies by yourself.
 
