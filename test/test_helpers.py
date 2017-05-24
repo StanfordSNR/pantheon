@@ -109,7 +109,7 @@ def get_git_summary(meta):
     return local_git_summary
 
 
-def save_test_metadata(meta):
+def save_test_metadata(meta, data_dir):
     meta.pop('all')
     meta.pop('schemes')
     meta.pop('save_metadata')
@@ -128,8 +128,7 @@ def save_test_metadata(meta):
     if 'downlink_trace' in meta:
         meta['downlink_trace'] = path.basename(meta['downlink_trace'])
 
-    metadata_path = path.join(
-        project_root.DIR, 'test', 'data', 'pantheon_metadata.json')
+    metadata_path = path.join(data_dir, 'pantheon_metadata.json')
 
     with open(metadata_path, 'w') as metadata:
         json.dump(meta, metadata, sort_keys=True, indent=4,
