@@ -8,7 +8,6 @@ from time import strftime
 from colorama import Fore, Style
 import yaml
 import project_root
-from parse_arguments import parse_remote, parse_arguments
 from src.helpers import make_sure_path_exists, get_open_port, TMPDIR
 
 
