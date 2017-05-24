@@ -18,16 +18,16 @@ Pantheon tests can be run locally over an emulated link using
 
 ## Preparation
 Many of the tools and programs run by the Pantheon are git submodules in the
-`third_party` folder. To clone this repository, including submodules, run:
+`third_party` folder. To clone this repository, run:
 
 ```
-git clone --recursive https://github.com/StanfordSNR/pantheon.git
+git clone https://github.com/StanfordSNR/pantheon.git
 ```
 
 To add submodules after cloning, run:
 
 ```
-git submodule update --init
+git submodule update --init --recursive
 ```
 
 ## Dependencies

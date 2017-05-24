@@ -21,8 +21,8 @@ def main():
     assert call(cmd) == 0
 
     cmd = ['python', test_py, 'local', '-t', '5', '-f', '1',
-           '--uplink-trace', data_trace, '--downlink-trace',
-           '--pkill-cleanup', ack_trace, '--schemes', '%s' % cc]
+           '--uplink-trace', data_trace, '--downlink-trace', ack_trace,
+           '--pkill-cleanup', '--schemes', '%s' % cc]
     assert call(cmd) == 0
 
     cmd = ['python', test_py, 'local', '-t', '5', '-f', '1',
@@ -50,13 +50,13 @@ def main():
     cc = 'verus'
 
     cmd = ['python', test_py, 'local', '-t', '5', '-f', '0',
-           '--uplink-trace', data_trace,
-           '--downlink-trace', ack_trace, '--schemes', '%s' % cc]
+           '--uplink-trace', data_trace, '--downlink-trace', ack_trace,
+           '--pkill-cleanup', '--schemes', '%s' % cc]
     assert call(cmd) == 0
 
     cmd = ['python', test_py, 'local', '-t', '5', '-f', '1',
-           '--uplink-trace', data_trace,
-           '--downlink-trace', ack_trace, '--schemes', '%s' % cc]
+           '--uplink-trace', data_trace, '--downlink-trace', ack_trace,
+           '--pkill-cleanup', '--schemes', '%s' % cc]
     assert call(cmd) == 0
 
 

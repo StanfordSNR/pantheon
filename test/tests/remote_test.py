@@ -3,7 +3,7 @@
 from os import path
 import argparse
 import project_root
-from helpers.helpers import call
+from helpers.helpers import check_call
 
 
 def main():
