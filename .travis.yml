@@ -30,7 +30,7 @@ env:
         analysis/tests/test_analyze.py'
 
 script:
-  - ./install_deps.py && eval $CMD
+  - ./install_deps.sh && eval $CMD
 
 notifications:
     email: false

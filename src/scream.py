@@ -15,9 +15,6 @@ def main():
     recv_src = path.join(scream_dir, 'ScreamServer')
     send_src = path.join(scream_dir, 'ScreamClient')
 
-    if args.option == 'deps':
-        print 'dh-autoreconf'
-
     if args.option == 'run_first':
         print 'receiver'
 
