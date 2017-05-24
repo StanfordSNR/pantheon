@@ -34,9 +34,9 @@ def main():
         proc = Popen(cmd, stdin=PIPE)
 
         # send at full speed
-        timeout = curr_time_sec() + 5
+        timeout = curr_time_sec() + 75
         while True:
-            proc.stdin.write(os.urandom(1024 * 1024))
+            proc.stdin.write(os.urandom(1024))
             proc.stdin.flush()
             if curr_time_sec() > timeout:
                 break
