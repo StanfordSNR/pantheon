@@ -4,7 +4,7 @@ services: docker
 
 branches:
   only:
-    - master
+    - refactor
 
 addons:
   apt:
@@ -15,40 +15,16 @@ addons:
 
 install:
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 99
-  - pip install matplotlib numpy pyyaml tabulate
+  - pip install matplotlib numpy tabulate pyyaml colorama
 
 env:
-    global:
-        - EMULATOR_SCHEMES='default_tcp vegas ledbat pcc verus scream sprout quic'
     matrix:
-        # run calibrated emulators on 9 schemes
-        - CMD='travis_extras/calibrated_emulators/run_calibrated_emulator.sh 97.11 1 366 0 0 travis_extras/calibrated_emulators/2017-01-04T07-24-AWS-Brazil-1-to-Brazil-10-runs/ "$EMULATOR_SCHEMES"'
-        - CMD='travis_extras/calibrated_emulators/run_calibrated_emulator.sh 117.65 13 144 0 0 travis_extras/calibrated_emulators/2017-01-02T03-54-India-to-AWS-India-10-runs/ "$EMULATOR_SCHEMES"'
-        - CMD='travis_extras/calibrated_emulators/run_calibrated_emulator.sh 6.25 152 362 .0025 0 travis_extras/calibrated_emulators/2016-12-30T21-38-China-ppp0-to-AWS-Korea-10-runs/ "$EMULATOR_SCHEMES"'
-        - CMD='travis_extras/calibrated_emulators/run_calibrated_emulator.sh 5.65 88 3665 .0026 .0001 travis_extras/calibrated_emulators/2016-12-30T22-50-AWS-Brazil-2-to-Colombia-ppp0-10-runs/ "$EMULATOR_SCHEMES"'
-        - CMD='travis_extras/calibrated_emulators/run_calibrated_emulator.sh 13.38 32 37 .003 0 travis_extras/calibrated_emulators/2017-01-03T21-30-Nepal-to-AWS-India-10-runs/ "$EMULATOR_SCHEMES"'
-        # test ./run.py with -r remote option
-        - CMD='EXTRA_MAHIMAHI_SHELLS="mm-onoff uplink 5 .1 mm-onoff downlink 5 .1 mm-loss uplink .1 mm-loss downlink .1"; travis_extras/travis_test.sh'
-        - CMD='EXTRA_MAHIMAHI_SHELLS="mm-loss uplink .3 mm-loss downlink .3"; RUN_PY_EXTRAS="--sender-side local"; travis_extras/travis_test.sh'
-        # test setup and test for each individual scheme
-        - CMD='test/pre_setup.py && test/setup.py quic            && test/setup.py quic            && test/test.py -f 2 -t 10 quic'
-        - CMD='test/pre_setup.py && test/setup.py webrtc          && test/setup.py webrtc          && test/test.py -f 2 -t 10 webrtc'
-        - CMD='test/pre_setup.py && test/setup.py default_tcp     && test/setup.py default_tcp     && test/test.py -f 2 -t 10 default_tcp'
-        - CMD='test/pre_setup.py && test/setup.py vegas           && test/setup.py vegas           && test/test.py -f 2 -t 10 vegas'
-        - CMD='test/pre_setup.py && test/setup.py koho_cc         && test/setup.py koho_cc         && test/test.py -f 2 -t 10 koho_cc'
-        - CMD='test/pre_setup.py && test/setup.py calibrated_koho && test/setup.py calibrated_koho && test/test.py -f 2 -t 10 calibrated_koho'
-        - CMD='test/pre_setup.py && test/setup.py ledbat          && test/setup.py ledbat          && test/test.py -f 2 -t 10 ledbat'
-        - CMD='test/pre_setup.py && test/setup.py pcc             && test/setup.py pcc             && test/test.py -f 2 -t 10 pcc'
-        - CMD='test/pre_setup.py && test/setup.py verus           && test/setup.py verus           && test/test.py -f 2 -t 10 verus'
-        - CMD='test/pre_setup.py && test/setup.py scream          && test/setup.py scream          && test/test.py -f 2 -t 10 scream'
-        - CMD='test/pre_setup.py && test/setup.py sprout          && test/setup.py sprout          && test/test.py -f 2 -t 10 sprout'
-        - CMD='test/pre_setup.py && test/setup.py taova           && test/setup.py taova           && test/test.py -f 2 -t 10 taova'
-        - CMD='test/pre_setup.py && test/setup.py copa            && test/setup.py copa            && test/test.py -f 2 -t 10 copa'
-        - CMD='test/pre_setup.py && test/setup.py saturator       && test/setup.py saturator       && test/test.py -f 2 -t 10 saturator'
+      - CMD='./test/setup.py --schemes quic --install-deps --setup &&
+        ./test/test.py local --schemes quic -t 10'
+      - CMD='SCHEMES="default_tcp vegas ledbat pcc verus sprout webrtc
+        scream copa taova koho_cc calibrated_koho saturator" &&
+        ./test/setup.py --schemes "$SCHEMES" --install-deps --setup &&
+        ./test/test.py local --schemes "$SCHEMES" -t 10'
 
 script:
-  - eval $CMD
-
-notifications:
-  slack: keithw:WjjCMz8yip3iQrHKBmkFGI1u
-  email: false
+  - ./install_deps.py && eval $CMD
