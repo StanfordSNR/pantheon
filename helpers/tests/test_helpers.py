@@ -3,7 +3,6 @@
 import os
 from os import path
 import sys
-from subprocess import PIPE
 import project_root
 import helpers.helpers as h
 
@@ -16,12 +15,11 @@ def main():
     print ret
     assert ret == '3'
 
-    proc = h.Popen(['echo', '4'], stdout=PIPE)
+    proc = h.Popen(['echo', '4'], stdout=h.PIPE)
     ret = proc.communicate()[0].strip()
     print ret
     assert ret == '4'
 
-    print h.parse_remote('ubuntu@8.8.8.8:~/pantheon')
     print h.get_open_port()
     h.make_sure_path_exists(h.TMPDIR)
     print h.parse_config()

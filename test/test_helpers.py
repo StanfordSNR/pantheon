@@ -91,17 +91,18 @@ def query_clock_offset(ntp_addr, ssh_cmd=None):
 
 
 def get_git_summary(meta):
-    sh_cmd = (
-        'echo -n \'git branch: \'; git rev-parse --abbrev-ref @ | head -c -1; '
-        'echo -n \' @ \'; git rev-parse @; git submodule foreach --quiet '
-        '\'echo $path @ `git rev-parse HEAD`; '
-        'git status -s --untracked-files=no --porcelain\'')
-    local_git_summary = check_output(sh_cmd, shell=True, cwd=project_root.DIR)
+    git_summary_src = path.join(project_root.DIR, 'test', 'git_summary.sh')
+    local_git_summary = check_output(git_summary_src, cwd=project_root.DIR)
 
     if meta['mode'] == 'remote':
         r = parse_remote_path(meta['remote_path'])
-        cmd = r['ssh_cmd'] + ['cd %s; %s' % (r['pantheon_dir'], sh_cmd)]
-        remote_git_summary = check_output(cmd)
+
+        git_summary_src = path.join(
+            r['pantheon_dir'], 'test', 'git_summary.sh')
+        ssh_cmd = 'cd %s; %s' % (r['pantheon_dir'], git_summary_src)
+        ssh_cmd = ' '.join(r['ssh_cmd']) + ' "%s"' % ssh_cmd
+
+        remote_git_summary = check_output(ssh_cmd, shell=True)
 
         if local_git_summary != remote_git_summary:
             sys.exit('Repository differed between local and remote sides')
