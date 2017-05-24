@@ -19,30 +19,30 @@ def main():
 
     cmd = ['python', test_py, 'remote', remote, '--pkill-cleanup',
            '-t', '5', '--schemes', cc]
-    assert call(cmd) == 0
+    check_call(cmd)
 
     cmd = ['python', test_py, 'remote', remote, '-t', '5', '--pkill-cleanup',
            '--run-times', '2', '--schemes', cc]
-    assert call(cmd) == 0
+    check_call(cmd)
 
     cmd = ['python', test_py, 'remote', remote, '-t', '5', '--pkill-cleanup',
            '--sender', 'remote', '--schemes', cc]
-    assert call(cmd) == 0
+    check_call(cmd)
 
     cmd = ['python', test_py, 'remote', remote, '-t', '5', '-f', '2',
            '--pkill-cleanup', '--interval', '2', '--schemes', cc]
-    assert call(cmd) == 0
+    check_call(cmd)
 
     # test a sender-first scheme
     cc = 'verus'
 
     cmd = ['python', test_py, 'remote', remote, '-t', '5', '--pkill-cleanup',
            '--schemes', cc]
-    assert call(cmd) == 0
+    check_call(cmd)
 
     cmd = ['python', test_py, 'remote', remote, '-t', '5', '--pkill-cleanup',
            '--sender', 'remote', '--schemes', cc]
-    assert call(cmd) == 0
+    check_call(cmd)
 
 
 if __name__ == '__main__':

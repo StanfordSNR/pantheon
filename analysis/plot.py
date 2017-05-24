@@ -125,8 +125,7 @@ class Plot(object):
                 duration = tunnel_results['duration'] / 1000.0
                 stats = tunnel_results['stats']
 
-                if (duration < 0.9 * self.runtime or
-                        duration > 1.1 * self.runtime):
+                if duration < 0.9 * self.runtime:
                     sys.stderr.write(
                         'Warning: "tunnel_graph %s" had duration %.2f seconds '
                         'but should have been around %d seconds. Ignoring this'
