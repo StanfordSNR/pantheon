@@ -27,9 +27,9 @@ def main():
 
     data_dir = path.abspath(data_dir)
 
-    analyze_dir = path.join(project_root.DIR, 'analyze')
-    plot = path.join(analyze_dir, 'plot.py')
-    report = path.join(analyze_dir, 'report.py')
+    analysis_dir = path.join(project_root.DIR, 'analysis')
+    plot = path.join(analysis_dir, 'plot.py')
+    report = path.join(analysis_dir, 'report.py')
 
     plot_cmd = ['python', plot]
     report_cmd = ['python', report]

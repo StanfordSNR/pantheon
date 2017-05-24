@@ -32,8 +32,8 @@ class Plot(object):
         self.runtime = meta['runtime']
         self.worst_clock_offset = None
 
-        analyze_dir = path.join(project_root.DIR, 'analyze')
-        self.tunnel_graph = path.join(analyze_dir, 'tunnel_graph.py')
+        analysis_dir = path.join(project_root.DIR, 'analysis')
+        self.tunnel_graph = path.join(analysis_dir, 'tunnel_graph.py')
 
         self.expt_title = self.generate_expt_title(meta)
 
