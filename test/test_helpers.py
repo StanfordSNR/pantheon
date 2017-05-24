@@ -112,7 +112,7 @@ def get_git_summary(meta):
 def save_test_metadata(meta, data_dir):
     meta.pop('all')
     meta.pop('schemes')
-    meta.pop('save_metadata')
+    meta.pop('ignore_metadata')
     meta.pop('data_dir')
     meta.pop('pkill_cleanup')
 
