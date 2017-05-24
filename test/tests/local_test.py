@@ -16,26 +16,27 @@ def main():
     cc = 'default_tcp'
 
     cmd = ['python', test_py, 'local', '-t', '5', '-f', '0',
-           '--uplink-trace', data_trace,
-           '--downlink-trace', ack_trace, '--schemes', '%s' % cc]
+           '--uplink-trace', data_trace, '--downlink-trace', ack_trace,
+           '--pkill-cleanup', '--schemes', '%s' % cc]
     assert call(cmd) == 0
 
     cmd = ['python', test_py, 'local', '-t', '5', '-f', '1',
-           '--uplink-trace', data_trace,
-           '--downlink-trace', ack_trace, '--schemes', '%s' % cc]
+           '--uplink-trace', data_trace, '--downlink-trace',
+           '--pkill-cleanup', ack_trace, '--schemes', '%s' % cc]
     assert call(cmd) == 0
 
     cmd = ['python', test_py, 'local', '-t', '5', '-f', '1',
            '--run-times', '2', '--uplink-trace', data_trace,
-           '--downlink-trace', ack_trace, '--schemes', '%s' % cc]
+           '--downlink-trace', ack_trace, '--pkill-cleanup',
+           '--schemes', '%s' % cc]
     assert call(cmd) == 0
 
     cmd = ['python', test_py, 'local', '-t', '5', '-f', '2', '--interval', '2',
-           '--uplink-trace', data_trace,
-           '--downlink-trace', ack_trace, '--schemes', '%s' % cc]
+           '--uplink-trace', data_trace, '--downlink-trace', ack_trace,
+           '--pkill-cleanup', '--schemes', '%s' % cc]
     assert call(cmd) == 0
 
-    cmd = ['python', test_py, 'local', '-t', '5',
+    cmd = ['python', test_py, 'local', '-t', '5', '--pkill-cleanup',
            '--uplink-trace', data_trace,
            '--downlink-trace', ack_trace,
            '--extra-mm-link-args',
