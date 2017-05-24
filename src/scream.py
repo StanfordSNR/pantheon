@@ -19,7 +19,7 @@ def main():
         print 'receiver'
 
     if args.option == 'setup':
-        # apply patch to add header cmath
+        # apply patch to add header <cmath>
         apply_patch('scream.patch', cc_repo)
 
         sh_cmd = './autogen.sh && ./configure && make -j2'

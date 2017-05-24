@@ -19,7 +19,7 @@ def main():
 
     if args.option == 'setup':
         # apply patch to reduce MTU size
-        apply_patch('koho_cc_mtu.patch', cc_repo)
+        apply_patch('calibrated_koho.patch', cc_repo)
 
         sh_cmd = './autogen.sh && ./configure && make -j2'
         check_call(sh_cmd, shell=True, cwd=cc_repo)

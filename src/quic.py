@@ -46,8 +46,13 @@ def generate_html(output_dir, size):
 
 
 def setup_quic(cc_repo, cert_dir, html_dir):
+    os.environ['PROTO_QUIC_ROOT'] = path.join(cc_repo, 'src')
     os.environ['PATH'] += os.pathsep + path.join(cc_repo, 'depot_tools')
-    cmd = ('gclient runhooks && ninja -C out/Release '
+
+    cmd = path.join(cc_repo, 'proto_quic_tools', 'sync.sh')
+    check_call(cmd, shell=True, cwd=path.join(cc_repo, 'src'))
+
+    cmd = ('gn gen out/Default && ninja -C out/Default '
            'quic_client quic_server')
     check_call(cmd, shell=True, cwd=path.join(cc_repo, 'src'))
 
@@ -75,8 +80,8 @@ def main():
     args = parse_arguments('sender_first')
 
     cc_repo = path.join(project_root.DIR, 'third_party', 'proto-quic')
-    send_src = path.join(cc_repo, 'src', 'out', 'Release', 'quic_server')
-    recv_src = path.join(cc_repo, 'src', 'out', 'Release', 'quic_client')
+    send_src = path.join(cc_repo, 'src', 'out', 'Default', 'quic_server')
+    recv_src = path.join(cc_repo, 'src', 'out', 'Default', 'quic_client')
 
     cert_dir = path.join(project_root.DIR, 'src', 'quic-certs')
     html_dir = path.join(cc_repo, 'www.example.org')
@@ -96,7 +101,7 @@ def main():
         print_port_for_tests(port)
 
         cmd = [send_src, '--port=%s' % port,
-               '--quic_in_memory_cache_dir=%s' % html_dir,
+               '--quic_response_cache_dir=%s' % html_dir,
                '--certificate_file=%s' % path.join(cert_dir, 'leaf_cert.pem'),
                '--key_file=%s' % path.join(cert_dir, 'leaf_cert.pkcs8')]
         check_call(cmd)

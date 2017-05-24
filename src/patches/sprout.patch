@@ -12,10 +12,30 @@ index 3e364f7..57d3998 100644
    const string _name;
  
 diff --git a/src/examples/sproutbt2.cc b/src/examples/sproutbt2.cc
-index c6389ea..abc4bf9 100644
+index bce3143..f638b49 100644
 --- a/src/examples/sproutbt2.cc
 +++ b/src/examples/sproutbt2.cc
-@@ -73,7 +73,7 @@ int main( int argc, char *argv[] )
+@@ -18,7 +18,7 @@ int main( int argc, char *argv[] )
+ 
+   bool server = true;
+ 
+-  if ( argc > 1 ) {
++  if ( argc > 2 ) {
+     /* client */
+ 
+     server = false;
+@@ -27,6 +27,10 @@ int main( int argc, char *argv[] )
+     port = atoi( argv[ 2 ] );
+ 
+     net = new Network::SproutConnection( "4h/Td1v//4jkYhqhLGgegw", ip, port );
++  } else if ( argc == 2 ) {
++    net = new Network::SproutConnection( NULL, argv[ 1 ] );
++
++    printf( "Listening on port: %d\n", net->port() );
+   } else {
+     net = new Network::SproutConnection( NULL, NULL );
+ 
+@@ -68,7 +72,7 @@ int main( int argc, char *argv[] )
      /* actually send, maybe */
      if ( ( bytes_to_send > 0 ) || ( time_of_next_transmission <= timestamp() ) ) {
        do {
@@ -23,19 +43,6 @@ index c6389ea..abc4bf9 100644
 +	int this_packet_size = std::min( 1400, bytes_to_send );
  	bytes_to_send -= this_packet_size;
  	assert( bytes_to_send >= 0 );
- 
-diff --git a/src/network/network.h b/src/network/network.h
-index ccbffbc..75b9bbc 100644
---- a/src/network/network.h
-+++ b/src/network/network.h
-@@ -98,7 +98,7 @@ namespace Network {
- 
-   class Connection {
-   private:
--    static const int SEND_MTU = 1480;
-+    static const int SEND_MTU = 1444;
-     static const uint64_t MIN_RTO = 50; /* ms */
-     static const uint64_t MAX_RTO = 5000; /* ms */
  
 diff --git a/src/network/sproutconn.cc b/src/network/sproutconn.cc
 index e471a34..292c892 100644

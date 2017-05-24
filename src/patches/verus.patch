@@ -12,7 +12,7 @@ index 499d69f..f52c5f1 100644
  #define  CURVE_TIMER 1e6  // timer in microseconds, how often do we update the curve
  #define  EPOCH 5e3 // Verus epoch in microseconds
 diff --git a/tools/plot.py b/tools/plot.py
-index 328bca8..fabace8 100755
+index 328bca8..330f583 100755
 --- a/tools/plot.py
 +++ b/tools/plot.py
 @@ -29,15 +29,15 @@ fig = plt.figure(figsize=(8,3), facecolor='w')
@@ -20,7 +20,7 @@ index 328bca8..fabace8 100755
  trace = open (args.client_file, 'r')
  throughput = []
 -bytes = 1492 #MTU of verus is 1450 + 42 UDP/IP overhead
-+bytes = 1456 #MTU of verus is 1414 + 42 UDP/IP overhead
++bytes = 1456 #MTU of verus is 1450 + 42 UDP/IP overhead
  startTime = trace.readline().strip().split(",")[0]
  
  for time in trace:
