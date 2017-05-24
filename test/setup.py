@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
+import sys
 from os import path
 from parse_arguments import parse_arguments
 import project_root
 from helpers.helpers import (
-    check_call, check_output, update_submodules, parse_config)
+    call, check_call, check_output, update_submodules, parse_config)
 
 
 def install_deps(cc_src):
@@ -13,7 +14,9 @@ def install_deps(cc_src):
 
     if deps:
         cmd = 'sudo apt-get -y install ' + deps
-        check_call(cmd, shell=True)
+        if call(cmd, shell=True) != 0:
+            sys.stderr.write('Some dependencies failed to install '
+                             'but assuming things okay.\n')
 
 
 def setup(args):
