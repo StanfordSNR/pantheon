@@ -4,8 +4,12 @@ default_tcp:
   marker: 'd'
 vegas:
   friendly_name: TCP Vegas
-  color: gold
+  color: silver
   marker: 'h'
+bbr:
+  friendly_name: TCP BBR
+  color: gold
+  marker: '1'
 ledbat:
   friendly_name: LEDBAT
   color: green

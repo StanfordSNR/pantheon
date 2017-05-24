@@ -22,7 +22,7 @@ env:
       - CMD='test/setup.py --schemes quic --install-deps &&
         test/setup.py --schemes quic --setup &&
         test/test.py local --schemes quic -t 10'
-      - CMD='SCHEMES="default_tcp vegas ledbat pcc verus sprout webrtc
+      - CMD='SCHEMES="default_tcp vegas bbr ledbat pcc verus sprout webrtc
         scream copa taova koho_cc calibrated_koho saturator" &&
         test/setup.py --schemes "$SCHEMES" --install-deps &&
         test/setup.py --schemes "$SCHEMES" --setup &&
