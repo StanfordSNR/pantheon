@@ -43,7 +43,7 @@ def main():
 
     if args.option == 'deps':
         print ('chromium-browser xvfb xfonts-100dpi xfonts-75dpi '
-               'xfonts-cyrillic xorg dbus-x11 nodejs npm')
+               'xfonts-cyrillic xorg dbus-x11 npm nodejs nodejs-legacy')
 
     if args.option == 'run_first':
         print 'sender'
@@ -62,7 +62,7 @@ def main():
 
         # run signaling server on the sender side
         signaling_server_src = path.join(cc_repo, 'app.js')
-        Popen(['nodejs', signaling_server_src, port])
+        Popen(['node', signaling_server_src, port])
 
         user_data_dir = path.join(TMPDIR, 'webrtc-%s' % uuid.uuid4())
         cmd = ['chromium-browser', '--app=http://localhost:%s/sender' % port,
