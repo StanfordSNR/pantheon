@@ -32,8 +32,8 @@ git submodule update --init --recursive
 
 ## Dependencies
 We provide a handy script `install_deps.sh` to install globally required
-dependencies. But you may want to check the script and install these
-dependencies by yourself.
+dependencies. But you may want to inspect the contents of this script and
+install these dependencies by yourself.
 
 For those dependencies required by each congestion control scheme `<cc>`,
 run `src/<cc>.py deps` to print a dependency list. Again you could install
