@@ -52,12 +52,12 @@ class Report(object):
         if meta['mode'] == 'local':
             mm_cmd = []
             if 'prepend_mm_cmds' in meta:
-                mm_cmd += meta['prepend_mm_cmds']
+                mm_cmd.append(meta['prepend_mm_cmds'])
             mm_cmd += ['mm-link', meta['uplink_trace'], meta['downlink_trace']]
             if 'extra_mm_link_args' in meta:
-                mm_cmd += meta['extra_mm_link_args']
+                mm_cmd.append(meta['extra_mm_link_args'])
             if 'append_mm_cmds' in meta:
-                mm_cmd += meta['append_mm_cmds']
+                mm_cmd.append(meta['append_mm_cmds'])
 
             mm_cmd = ' '.join(mm_cmd).replace('_', '\\_')
 
