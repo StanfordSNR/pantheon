@@ -12,30 +12,10 @@ index 3e364f7..57d3998 100644
    const string _name;
  
 diff --git a/src/examples/sproutbt2.cc b/src/examples/sproutbt2.cc
-index bce3143..f638b49 100644
+index 3196130..f638b49 100644
 --- a/src/examples/sproutbt2.cc
 +++ b/src/examples/sproutbt2.cc
-@@ -18,7 +18,7 @@ int main( int argc, char *argv[] )
- 
-   bool server = true;
- 
--  if ( argc > 1 ) {
-+  if ( argc > 2 ) {
-     /* client */
- 
-     server = false;
-@@ -27,6 +27,10 @@ int main( int argc, char *argv[] )
-     port = atoi( argv[ 2 ] );
- 
-     net = new Network::SproutConnection( "4h/Td1v//4jkYhqhLGgegw", ip, port );
-+  } else if ( argc == 2 ) {
-+    net = new Network::SproutConnection( NULL, argv[ 1 ] );
-+
-+    printf( "Listening on port: %d\n", net->port() );
-   } else {
-     net = new Network::SproutConnection( NULL, NULL );
- 
-@@ -68,7 +72,7 @@ int main( int argc, char *argv[] )
+@@ -72,7 +72,7 @@ int main( int argc, char *argv[] )
      /* actually send, maybe */
      if ( ( bytes_to_send > 0 ) || ( time_of_next_transmission <= timestamp() ) ) {
        do {
