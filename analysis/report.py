@@ -178,7 +178,8 @@ class Report(object):
                         'Run %(run_id)s: '
                         'Report of %(cc_name)s --- ACK Link\n\n'
                         '\\PantheonFig{%(acklink_throughput)s}\n\n'
-                        '\\PantheonFig{%(acklink_delay)s}\n\n' % str_dict)
+                        '\\PantheonFig{%(acklink_delay)s}\n\n'
+                        '\\newpage\n\n' % str_dict)
 
         self.latex.write('\\end{document}')
 
