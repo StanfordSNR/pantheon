@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 
+import sys
 import os
 from os import path
 import uuid
+import colorama
+from colorama import Back, Style
 import project_root
 from parse_arguments import parse_arguments
 from helpers.helpers import (
@@ -184,6 +187,8 @@ class Report(object):
         self.latex.write('\\end{document}')
 
     def run(self):
+        colorama.init()
+
         latex_path = path.join(TMPDIR, 'pantheon-report-%s.tex' % uuid.uuid4())
         self.latex = open(latex_path, 'w')
         self.include_summary()
@@ -197,6 +202,10 @@ class Report(object):
         pdf_src_path = path.join(TMPDIR, 'pantheon_report.pdf')
         pdf_dst_path = path.join(self.data_dir, 'pantheon_report.pdf')
         os.rename(pdf_src_path, pdf_dst_path)
+
+        sys.stderr.write(
+            Back.GREEN + 'Saved pantheon_report.pdf in %s' % self.data_dir +
+            Style.RESET_ALL + '\n')
 
 
 def main():

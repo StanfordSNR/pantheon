@@ -57,8 +57,8 @@ def parse_plot():
     parser.add_argument('--include-acklink', action='store_true',
                         help='include acklink analysis')
     parser.add_argument(
-        '--no-graphs', action='store_true', help='only output performance '
-        'values of schemes with no graphs generated')
+        '--no-graphs', action='store_true', help='only append datalink '
+        'statistics to stats files with no graphs generated')
 
     args = parser.parse_args()
     if args.schemes is not None:
