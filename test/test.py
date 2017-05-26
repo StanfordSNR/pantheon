@@ -559,10 +559,10 @@ def run_tests(args):
     elif args.schemes is not None:
         cc_schemes = args.schemes.split()
 
-    for run_id in xrange(1, args.run_times + 1):
-        if args.random_order:
-            random.shuffle(cc_schemes)
+    if args.random_order:
+        random.shuffle(cc_schemes)
 
+    for run_id in xrange(1, args.run_times + 1):
         for cc in cc_schemes:
             Test(args, run_id, cc).run()
 
