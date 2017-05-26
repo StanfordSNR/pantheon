@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 
+import sys
 from os import path
 import math
 import time
 import matplotlib_agg
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+import colorama
+from colorama import Back, Style
 from parse_arguments import parse_arguments
 import project_root
 from analyze_helpers import load_test_metadata, verify_schemes_with_meta
@@ -97,6 +100,8 @@ class PlotThroughputTime(object):
         return clock_time, throughput
 
     def run(self):
+        colorama.init()
+
         fig, ax = plt.subplots()
         total_min_time = None
         total_max_time = None
@@ -152,11 +157,15 @@ class PlotThroughputTime(object):
         start_datetime = time.strftime('%a, %d %b %Y %H:%M:%S',
                                        time.localtime(total_min_time))
         start_datetime += ' ' + time.strftime('%z')
-        ax.set_xlabel('Time (s) since ' + start_datetime)
-        ax.set_ylabel('Throughput (Mbit/s)')
+        ax.set_xlabel('Time (s) since ' + start_datetime, fontsize=12)
+        ax.set_ylabel('Throughput (Mbit/s)', fontsize=12)
 
         fig_path = path.join(self.data_dir, 'pantheon_throughput_time.png')
         fig.savefig(fig_path, bbox_inches='tight', pad_inches=0.2)
+
+        sys.stderr.write(
+            Back.GREEN + 'Saved pantheon_throughput_time.png in %s' %
+            self.data_dir + Style.RESET_ALL + '\n')
 
 
 def main():

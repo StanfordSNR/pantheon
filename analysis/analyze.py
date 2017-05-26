@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import sys
 from os import path
 from parse_arguments import parse_arguments
 import project_root
