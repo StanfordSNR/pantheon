@@ -272,8 +272,8 @@ class TunnelGraph(object):
             sys.stderr.write('No valid throughput graph is generated\n')
             return
 
-        ax.set_xlabel('Time (s)')
-        ax.set_ylabel('Throughput (Mbit/s)')
+        ax.set_xlabel('Time (s)', fontsize=12)
+        ax.set_ylabel('Throughput (Mbit/s)', fontsize=12)
 
         if self.link_capacity and self.avg_capacity:
             ax.set_title('Average capacity %.2f Mbit/s (shaded region)'
@@ -314,8 +314,8 @@ class TunnelGraph(object):
             return
 
         ax.set_xlim(0, int(math.ceil(max_delay)))
-        ax.set_xlabel('Time (s)')
-        ax.set_ylabel('Per-packet one-way delay (ms)')
+        ax.set_xlabel('Time (s)', fontsize=12)
+        ax.set_ylabel('Per-packet one-way delay (ms)', fontsize=12)
         ax.grid()
         lgd = ax.legend(scatterpoints=1, bbox_to_anchor=(0.5, -0.1),
                         loc='upper center', ncol=2, fontsize=12)

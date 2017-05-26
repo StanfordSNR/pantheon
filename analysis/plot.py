@@ -31,10 +31,6 @@ class Plot(object):
         self.flows = meta['flows']
         self.runtime = meta['runtime']
         self.worst_clock_offset = None
-
-        analysis_dir = path.join(project_root.DIR, 'analysis')
-        self.tunnel_graph = path.join(analysis_dir, 'tunnel_graph.py')
-
         self.expt_title = self.generate_expt_title(meta)
 
     def generate_expt_title(self, meta):
@@ -170,11 +166,11 @@ class Plot(object):
         return offset
 
     def eval_performance(self):
-        self.data = {}
+        data = {}
 
         results = {}
         for cc in self.cc_schemes:
-            self.data[cc] = []
+            data[cc] = []
             results[cc] = {}
 
         cc_id = 0
@@ -199,15 +195,15 @@ class Plot(object):
                 if tput is None or delay is None:
                     continue
 
-                self.data[cc].append((tput, delay, loss))
+                data[cc].append((tput, delay, loss))
                 if offset:
                     if (self.worst_clock_offset is None or
                             offset > self.worst_clock_offset):
                         self.worst_clock_offset = offset
 
-        return self.data
+        return data
 
-    def plot_throughput_delay(self):
+    def plot_throughput_delay(self, data):
         min_delay = None
 
         fig_raw, ax_raw = plt.subplots()
@@ -216,11 +212,11 @@ class Plot(object):
         power_scores = []
 
         config = parse_config()
-        for cc in self.data:
-            if not self.data[cc]:
+        for cc in data:
+            if not data[cc]:
                 continue
 
-            value = self.data[cc]
+            value = data[cc]
             cc_name = config[cc]['friendly_name']
             color = config[cc]['color']
             marker = config[cc]['marker']
@@ -257,8 +253,8 @@ class Plot(object):
             if self.worst_clock_offset is not None:
                 xlabel += ('\n(worst absolute clock offset: %s ms)' %
                            self.worst_clock_offset)
-            ax.set_xlabel(xlabel)
-            ax.set_ylabel('Average throughput (Mbit/s)')
+            ax.set_xlabel(xlabel, fontsize=12)
+            ax.set_ylabel('Average throughput (Mbit/s)', fontsize=12)
             ax.grid()
 
         # save pantheon_summary.png
@@ -318,10 +314,10 @@ class Plot(object):
                          bbox_inches='tight', pad_inches=0.2)
 
     def run(self):
-        self.eval_performance()
+        data = self.eval_performance()
 
         if not self.no_graphs:
-            self.plot_throughput_delay()
+            self.plot_throughput_delay(data)
 
 
 def main():
