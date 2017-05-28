@@ -8,7 +8,7 @@ import uuid
 import random
 import signal
 import colorama
-from colorama import Fore, Back, Style
+from colorama import Fore, Style
 from parse_arguments import parse_arguments
 import project_root
 from helpers.helpers import (
@@ -535,7 +535,7 @@ class Test(object):
     def run(self):
         msg = 'Testing scheme %s for experiment run %d/%d...' % (
             self.cc, self.run_id, self.run_times)
-        sys.stderr.write(Back.BLUE + msg + Style.RESET_ALL + '\n')
+        sys.stderr.write(Fore.BLUE + msg + Style.RESET_ALL + '\n')
 
         # setup before running tests
         self.setup()
@@ -547,7 +547,7 @@ class Test(object):
         self.record_time_stats()
 
         sys.stderr.write(
-            Back.GREEN + 'Done testing ' + self.cc + Style.RESET_ALL + '\n')
+            Fore.GREEN + 'Done testing ' + self.cc + Style.RESET_ALL + '\n')
 
 
 def run_tests(args):
@@ -590,7 +590,7 @@ def cleanup(args):
     msg = 'Error in tests!'
     if args.pkill_cleanup:
         msg += ' Cleaning up using pkill...'
-    sys.stderr.write(Back.RED + msg + Style.RESET_ALL + '\n')
+    sys.stderr.write(Fore.RED + msg + Style.RESET_ALL + '\n')
 
     if args.pkill_cleanup:
         pkill(args)
@@ -606,7 +606,7 @@ def main():
         raise
     else:
         sys.stderr.write(
-            Back.GREEN + 'All tests done!' + Style.RESET_ALL + '\n')
+            Fore.GREEN + 'All tests done!' + Style.RESET_ALL + '\n')
 
 
 if __name__ == '__main__':

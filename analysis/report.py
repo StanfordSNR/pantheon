@@ -5,7 +5,7 @@ import os
 from os import path
 import uuid
 import colorama
-from colorama import Back, Style
+from colorama import Fore, Style
 import project_root
 from parse_arguments import parse_arguments
 from helpers.helpers import (
@@ -189,22 +189,23 @@ class Report(object):
     def run(self):
         colorama.init()
 
-        latex_path = path.join(TMPDIR, 'pantheon-report-%s.tex' % uuid.uuid4())
+        report_uid = uuid.uuid4()
+        latex_path = path.join(TMPDIR, 'pantheon_report_%s.tex' % report_uid)
         self.latex = open(latex_path, 'w')
         self.include_summary()
         self.include_runs()
         self.latex.close()
 
-        cmd = ['pdflatex', '-halt-on-error', '-jobname', 'pantheon_report',
-               latex_path]
+        cmd = ['pdflatex', '-halt-on-error', '-jobname',
+               'pantheon_report_%s' % report_uid, latex_path]
         check_call(cmd, cwd=TMPDIR)
 
-        pdf_src_path = path.join(TMPDIR, 'pantheon_report.pdf')
+        pdf_src_path = path.join(TMPDIR, 'pantheon_report_%s.pdf' % report_uid)
         pdf_dst_path = path.join(self.data_dir, 'pantheon_report.pdf')
         os.rename(pdf_src_path, pdf_dst_path)
 
         sys.stderr.write(
-            Back.GREEN + 'Saved pantheon_report.pdf in %s' % self.data_dir +
+            Fore.GREEN + 'Saved pantheon_report.pdf in %s' % self.data_dir +
             Style.RESET_ALL + '\n')
 
 

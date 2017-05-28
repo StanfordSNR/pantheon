@@ -5,7 +5,7 @@ import time
 import os
 from os import path
 import colorama
-from colorama import Back, Style
+from colorama import Fore, Style
 import project_root
 from helpers.helpers import (
     check_output, call, Popen, PIPE, parse_config, kill_proc_group)
@@ -17,7 +17,7 @@ def test_schemes():
 
     for scheme in schemes:
         sys.stderr.write(
-            Back.BLUE + 'Testing %s...' % scheme + Style.RESET_ALL + '\n')
+            Fore.BLUE + 'Testing %s...' % scheme + Style.RESET_ALL + '\n')
         src = path.join(src_dir, scheme + '.py')
 
         run_first = check_output([src, 'run_first']).strip()
@@ -59,7 +59,7 @@ def main():
         raise
     else:
         sys.stderr.write(
-            Back.GREEN + 'Passed all tests!' + Style.RESET_ALL + '\n')
+            Fore.GREEN + 'Passed all tests!' + Style.RESET_ALL + '\n')
 
 
 if __name__ == '__main__':
