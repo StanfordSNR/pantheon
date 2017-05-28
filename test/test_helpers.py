@@ -45,7 +45,8 @@ def parse_remote_path(remote_path, cc=None):
 
     ret['host_addr'], ret['pantheon_dir'] = remote_path.split(':')
     ret['ip'] = ret['host_addr'].split('@')[-1]
-    ret['ssh_cmd'] = ['ssh', ret['host_addr']]
+    ret['ssh_cmd'] = ['ssh', '-o', 'StrictHostKeyChecking=no',
+                      ret['host_addr']]
 
     ret['src_dir'] = path.join(ret['pantheon_dir'], 'src')
     if cc is not None:
