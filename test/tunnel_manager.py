@@ -4,7 +4,6 @@ import os
 from os import path
 import sys
 from subprocess import Popen, PIPE
-from colorama import Fore, Style
 import project_root
 from helpers.helpers import kill_proc_group, get_signal_for_cc
 
@@ -22,7 +21,7 @@ def main():
 
         # print all the commands fed into tunnel manager
         if prompt:
-            sys.stderr.write(Fore.BLUE + prompt + Style.RESET_ALL)
+            sys.stderr.write(prompt)
         sys.stderr.write(input_cmd + '\n')
         cmd = input_cmd.split()
 

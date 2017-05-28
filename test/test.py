@@ -7,8 +7,6 @@ import time
 import uuid
 import random
 import signal
-import colorama
-from colorama import Fore, Style
 from parse_arguments import parse_arguments
 import project_root
 from helpers.helpers import (
@@ -199,8 +197,7 @@ class Test(object):
         else:
             ts_manager_cmd = ['python', self.tunnel_manager]
 
-        sys.stderr.write(Fore.BLUE + '[tunnel server manager (tsm)] ' +
-                         Style.RESET_ALL)
+        sys.stderr.write('[tunnel server manager (tsm)] ')
         ts_manager = Popen(ts_manager_cmd, stdin=PIPE, stdout=PIPE,
                            preexec_fn=os.setsid)
 
@@ -222,8 +219,7 @@ class Test(object):
         else:
             tc_manager_cmd = self.mm_cmd + ['python', self.tunnel_manager]
 
-        sys.stderr.write(Fore.BLUE + '[tunnel client manager (tcm)] ' +
-                         Style.RESET_ALL)
+        sys.stderr.write('[tunnel client manager (tcm)] ')
         tc_manager = Popen(tc_manager_cmd, stdin=PIPE, stdout=PIPE,
                            preexec_fn=os.setsid)
 
@@ -535,7 +531,7 @@ class Test(object):
     def run(self):
         msg = 'Testing scheme %s for experiment run %d/%d...' % (
             self.cc, self.run_id, self.run_times)
-        sys.stderr.write(Fore.BLUE + msg + Style.RESET_ALL + '\n')
+        sys.stderr.write(msg + '\n')
 
         # setup before running tests
         self.setup()
@@ -546,14 +542,10 @@ class Test(object):
         # write runtimes and clock offsets to file
         self.record_time_stats()
 
-        sys.stderr.write(
-            Fore.GREEN + 'Done testing ' + self.cc + Style.RESET_ALL + '\n')
+        sys.stderr.write('Done testing %s\n' % self.cc)
 
 
 def run_tests(args):
-    # initialize colored output
-    colorama.init()
-
     if args.all:
         cc_schemes = parse_config().keys()
     elif args.schemes is not None:
@@ -590,7 +582,7 @@ def cleanup(args):
     msg = 'Error in tests!'
     if args.pkill_cleanup:
         msg += ' Cleaning up using pkill...'
-    sys.stderr.write(Fore.RED + msg + Style.RESET_ALL + '\n')
+    sys.stderr.write(msg + '\n')
 
     if args.pkill_cleanup:
         pkill(args)
@@ -605,8 +597,7 @@ def main():
         cleanup(args)
         raise
     else:
-        sys.stderr.write(
-            Fore.GREEN + 'All tests done!' + Style.RESET_ALL + '\n')
+        sys.stderr.write('All tests done!\n')
 
 
 if __name__ == '__main__':

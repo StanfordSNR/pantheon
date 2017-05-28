@@ -5,7 +5,6 @@ import subprocess
 from subprocess import PIPE
 import signal
 from time import strftime
-from colorama import Fore, Style
 import yaml
 import project_root
 from src.helpers import make_sure_path_exists, get_open_port, TMPDIR
@@ -20,8 +19,7 @@ def print_cmd(cmd):
         cmd_to_print = ''
 
     if cmd_to_print:
-        sys.stderr.write(Fore.BLUE + '$ ' + Style.RESET_ALL +
-                         cmd_to_print + '\n')
+        sys.stderr.write('$ %s\n' % cmd_to_print)
 
 
 def call(cmd, **kwargs):

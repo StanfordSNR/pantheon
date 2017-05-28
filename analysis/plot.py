@@ -10,8 +10,6 @@ import numpy as np
 import matplotlib_agg
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-import colorama
-from colorama import Fore, Style
 import project_root
 from parse_arguments import parse_arguments
 from analyze_helpers import load_test_metadata, verify_schemes_with_meta
@@ -227,9 +225,8 @@ class Plot(object):
                             offset > self.worst_clock_offset):
                         self.worst_clock_offset = offset
 
-        sys.stderr.write(
-            Fore.GREEN + 'Appended datalink statistics to stats files in '
-            '%s' % self.data_dir + Style.RESET_ALL + '\n')
+        sys.stderr.write('Appended datalink statistics to stats files in %s\n'
+                         % self.data_dir)
         return data
 
     def plot_throughput_delay(self, data):
@@ -343,12 +340,10 @@ class Plot(object):
                          bbox_inches='tight', pad_inches=0.2)
 
         sys.stderr.write(
-            Fore.GREEN + 'Saved throughput graphs, delay graphs, and summary '
-            'graphs in %s' % self.data_dir + Style.RESET_ALL + '\n')
+            'Saved throughput graphs, delay graphs, and summary '
+            'graphs in %s\n' % self.data_dir)
 
     def run(self):
-        colorama.init()
-
         data = self.eval_performance()
 
         if not self.no_graphs:
