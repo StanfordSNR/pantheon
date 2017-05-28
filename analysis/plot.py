@@ -11,7 +11,7 @@ import matplotlib_agg
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import colorama
-from colorama import Back, Style
+from colorama import Fore, Style
 import project_root
 from parse_arguments import parse_arguments
 from analyze_helpers import load_test_metadata, verify_schemes_with_meta
@@ -228,7 +228,7 @@ class Plot(object):
                         self.worst_clock_offset = offset
 
         sys.stderr.write(
-            Back.GREEN + 'Appended datalink statistics to stats files in '
+            Fore.GREEN + 'Appended datalink statistics to stats files in '
             '%s' % self.data_dir + Style.RESET_ALL + '\n')
         return data
 
@@ -343,7 +343,7 @@ class Plot(object):
                          bbox_inches='tight', pad_inches=0.2)
 
         sys.stderr.write(
-            Back.GREEN + 'Saved throughput graphs, delay graphs, and summary '
+            Fore.GREEN + 'Saved throughput graphs, delay graphs, and summary '
             'graphs in %s' % self.data_dir + Style.RESET_ALL + '\n')
 
     def run(self):

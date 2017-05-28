@@ -8,7 +8,7 @@ import matplotlib_agg
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import colorama
-from colorama import Back, Style
+from colorama import Fore, Style
 from parse_arguments import parse_arguments
 import project_root
 from analyze_helpers import load_test_metadata, verify_schemes_with_meta
@@ -164,7 +164,7 @@ class PlotThroughputTime(object):
         fig.savefig(fig_path, bbox_inches='tight', pad_inches=0.2)
 
         sys.stderr.write(
-            Back.GREEN + 'Saved pantheon_throughput_time.png in %s' %
+            Fore.GREEN + 'Saved pantheon_throughput_time.png in %s' %
             self.data_dir + Style.RESET_ALL + '\n')
 
 
