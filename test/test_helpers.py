@@ -77,7 +77,10 @@ def query_clock_offset(ntp_addr, ssh_cmd=None):
                 break
 
             try:
-                offset = check_output(cmd).rsplit(' ', 2)[-2]
+                offset = check_output(cmd)
+                sys.stderr.write(offset)
+
+                offset = offset.rsplit(' ', 2)[-2]
                 offset = abs(float(offset)) * 1000
             except subprocess.CalledProcessError:
                 sys.stderr.write('Failed to get clock offset\n')
