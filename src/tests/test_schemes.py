@@ -4,8 +4,6 @@ import sys
 import time
 import os
 from os import path
-import colorama
-from colorama import Fore, Style
 import project_root
 from helpers.helpers import (
     check_output, call, Popen, PIPE, parse_config, kill_proc_group)
@@ -16,8 +14,7 @@ def test_schemes():
     schemes = parse_config().keys()
 
     for scheme in schemes:
-        sys.stderr.write(
-            Fore.BLUE + 'Testing %s...' % scheme + Style.RESET_ALL + '\n')
+        sys.stderr.write('Testing %s...\n' % scheme)
         src = path.join(src_dir, scheme + '.py')
 
         run_first = check_output([src, 'run_first']).strip()
@@ -50,16 +47,13 @@ def cleanup():
 
 
 def main():
-    colorama.init()
-
     try:
         test_schemes()
     except:
         cleanup()
         raise
     else:
-        sys.stderr.write(
-            Fore.GREEN + 'Passed all tests!' + Style.RESET_ALL + '\n')
+        sys.stderr.write('Passed all tests!\n')
 
 
 if __name__ == '__main__':

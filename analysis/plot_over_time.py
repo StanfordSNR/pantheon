@@ -7,8 +7,6 @@ import time
 import matplotlib_agg
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-import colorama
-from colorama import Fore, Style
 from parse_arguments import parse_arguments
 import project_root
 from analyze_helpers import load_test_metadata, verify_schemes_with_meta
@@ -100,8 +98,6 @@ class PlotThroughputTime(object):
         return clock_time, throughput
 
     def run(self):
-        colorama.init()
-
         fig, ax = plt.subplots()
         total_min_time = None
         total_max_time = None
@@ -164,8 +160,7 @@ class PlotThroughputTime(object):
         fig.savefig(fig_path, bbox_inches='tight', pad_inches=0.2)
 
         sys.stderr.write(
-            Fore.GREEN + 'Saved pantheon_throughput_time.png in %s' %
-            self.data_dir + Style.RESET_ALL + '\n')
+            'Saved pantheon_throughput_time.png in %s\n' % self.data_dir)
 
 
 def main():
