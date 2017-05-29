@@ -7,6 +7,7 @@ import time
 import uuid
 import random
 import signal
+import traceback
 from parse_arguments import parse_arguments
 import project_root
 from helpers.helpers import (
@@ -594,8 +595,11 @@ def main():
     try:
         run_tests(args)
     except:  # intended to catch all exceptions
+        # dump traceback ahead in case pkill kills the program
+        sys.stderr.write(traceback.format_exc())
+
         cleanup(args)
-        raise
+        sys.exit(1)
     else:
         sys.stderr.write('All tests done!\n')
 
