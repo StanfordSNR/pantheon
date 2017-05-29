@@ -50,6 +50,7 @@ def main():
                         'error: run tunnel client or server first\n')
 
                 procs[tun_id].stdin.write(cmd_to_run + '\n')
+                procs[tun_id].stdin.flush()
 
                 cc = path.splitext(path.basename(cmd[3]))[0]
                 proc_signals[tun_id] = get_signal_for_cc(cc)

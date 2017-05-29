@@ -209,6 +209,7 @@ class Test(object):
                 break
 
         ts_manager.stdin.write('prompt [tsm]\n')
+        ts_manager.stdin.flush()
 
         # run tunnel client manager
         if self.mode == 'remote':
@@ -231,6 +232,7 @@ class Test(object):
                 break
 
         tc_manager.stdin.write('prompt [tcm]\n')
+        tc_manager.stdin.flush()
 
         return ts_manager, tc_manager
 
@@ -254,10 +256,12 @@ class Test(object):
 
         ts_cmd = 'tunnel %s %s\n' % (tun_id, ts_cmd)
         ts_manager.stdin.write(ts_cmd)
+        ts_manager.stdin.flush()
 
         # read the command to run tunnel client
         readline_cmd = 'tunnel %s readline\n' % tun_id
         ts_manager.stdin.write(readline_cmd)
+        ts_manager.stdin.flush()
 
         cmd_to_run_tc = ts_manager.stdout.readline().split()
         return cmd_to_run_tc
@@ -305,8 +309,10 @@ class Test(object):
                 sys.exit('Cannot establish tunnel\n')
 
             tc_manager.stdin.write(tc_cmd)
+            tc_manager.stdin.flush()
             while True:
                 tc_manager.stdin.write(readline_cmd)
+                tc_manager.stdin.flush()
 
                 signal.signal(signal.SIGALRM, timeout_handler)
                 signal.alarm(20)
@@ -342,11 +348,13 @@ class Test(object):
                 tun_id, second_src, recv_pri_ip)
 
             recv_manager.stdin.write(first_cmd)
+            recv_manager.stdin.flush()
 
             # find printed port
             port = None
             while port is None:
                 recv_manager.stdin.write(readline_cmd)
+                recv_manager.stdin.flush()
                 port = read_port_from_proc(recv_manager)
 
             second_cmd += ' %s\n' % port
@@ -363,11 +371,13 @@ class Test(object):
                 tun_id, second_src, send_pri_ip)
 
             send_manager.stdin.write(first_cmd)
+            send_manager.stdin.flush()
 
             # find printed port
             port = None
             while port is None:
                 send_manager.stdin.write(readline_cmd)
+                send_manager.stdin.flush()
                 port = read_port_from_proc(send_manager)
 
             second_cmd += ' %s\n' % port
@@ -387,8 +397,10 @@ class Test(object):
             second_cmd = second_cmds[i]
             if self.run_first == 'receiver':
                 send_manager.stdin.write(second_cmd)
+                send_manager.stdin.flush()
             else:
                 recv_manager.stdin.write(second_cmd)
+                recv_manager.stdin.flush()
 
         elapsed_time = time.time() - start_time
         if elapsed_time > self.runtime:
@@ -439,7 +451,9 @@ class Test(object):
 
         # stop all the running flows and quit tunnel managers
         ts_manager.stdin.write('halt\n')
+        ts_manager.stdin.flush()
         tc_manager.stdin.write('halt\n')
+        tc_manager.stdin.flush()
 
         # process tunnel logs
         self.process_tunnel_logs()
