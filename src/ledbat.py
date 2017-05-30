@@ -4,8 +4,7 @@ import os
 from os import path
 from subprocess import check_call, PIPE, Popen
 import project_root
-from helpers import (
-    curr_time_sec, get_open_port, print_port_for_tests, parse_arguments)
+from helpers import curr_time_sec, parse_arguments
 
 
 def main():
@@ -21,10 +20,7 @@ def main():
         check_call(['make', '-j2'], cwd=cc_repo)
 
     if args.option == 'receiver':
-        port = get_open_port()
-        print_port_for_tests(port)
-
-        cmd = [src, '-l', '-p', port]
+        cmd = [src, '-l', '-p', args.port]
         # suppress stdout as it prints all the bytes received
         with open(os.devnull, 'w') as devnull:
             check_call(cmd, stdout=devnull)

@@ -3,11 +3,22 @@ import os
 from os import path
 import subprocess
 from subprocess import PIPE
+import socket
 import signal
 from time import strftime
 import yaml
 import project_root
-from src.helpers import make_sure_path_exists, get_open_port, TMPDIR
+from src.helpers import make_sure_path_exists, TMPDIR
+
+
+def get_open_port():
+    sock = socket.socket(socket.AF_INET)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+    sock.bind(('', 0))
+    port = sock.getsockname()[1]
+    sock.close()
+    return str(port)
 
 
 def print_cmd(cmd):

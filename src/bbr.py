@@ -2,7 +2,7 @@
 
 import sys
 from subprocess import call, check_call, check_output
-from helpers import get_open_port, print_port_for_tests, parse_arguments
+from helpers import parse_arguments
 
 
 def setup_bbr():
@@ -36,10 +36,7 @@ def main():
         setup_bbr()
 
     if args.option == 'receiver':
-        port = get_open_port()
-        print_port_for_tests(port)
-
-        cmd = ['iperf', '-Z', 'bbr', '-s', '-p', port]
+        cmd = ['iperf', '-Z', 'bbr', '-s', '-p', args.port]
         if call(cmd) != 0:
             sys.exit('Error: BBR is not enabled yet')
 

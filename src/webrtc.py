@@ -6,8 +6,7 @@ import os
 from os import path
 from subprocess import call, check_call, check_output, Popen
 import project_root
-from helpers import (
-    get_open_port, print_port_for_tests, parse_arguments, TMPDIR)
+from helpers import parse_arguments, TMPDIR
 
 
 def xvfb_in_use(display):
@@ -57,15 +56,13 @@ def main():
         new_env = os.environ.copy()
         new_env['DISPLAY'] = ':1'
 
-        port = get_open_port()
-        print_port_for_tests(port)
-
         # run signaling server on the sender side
         signaling_server_src = path.join(cc_repo, 'app.js')
-        Popen(['node', signaling_server_src, port])
+        Popen(['node', signaling_server_src, args.port])
 
         user_data_dir = path.join(TMPDIR, 'webrtc-%s' % uuid.uuid4())
-        cmd = ['chromium-browser', '--app=http://localhost:%s/sender' % port,
+        cmd = ['chromium-browser',
+               '--app=http://localhost:%s/sender' % args.port,
                '--use-fake-ui-for-media-stream',
                '--use-fake-device-for-media-stream',
                '--use-file-for-fake-video-capture=%s' % video,

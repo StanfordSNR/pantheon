@@ -8,9 +8,7 @@ import random
 import shutil
 from subprocess import check_call
 import project_root
-from helpers import (
-    get_open_port, print_port_for_tests, parse_arguments,
-    make_sure_path_exists)
+from helpers import parse_arguments, make_sure_path_exists
 
 
 def generate_html(output_dir, size):
@@ -97,10 +95,7 @@ def main():
         setup_quic(cc_repo, cert_dir, html_dir)
 
     if args.option == 'sender':
-        port = get_open_port()
-        print_port_for_tests(port)
-
-        cmd = [send_src, '--port=%s' % port,
+        cmd = [send_src, '--port=%s' % args.port,
                '--quic_response_cache_dir=%s' % html_dir,
                '--certificate_file=%s' % path.join(cert_dir, 'leaf_cert.pem'),
                '--key_file=%s' % path.join(cert_dir, 'leaf_cert.pkcs8')]

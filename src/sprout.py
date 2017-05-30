@@ -4,8 +4,7 @@ import os
 from os import path
 from subprocess import check_call, Popen
 import project_root
-from helpers import (
-    get_open_port, print_port_for_tests, parse_arguments, apply_patch)
+from helpers import parse_arguments, apply_patch
 
 
 def main():
@@ -33,10 +32,7 @@ def main():
         new_env = os.environ.copy()
         new_env['SPROUT_MODEL_IN'] = model
 
-        port = get_open_port()
-        print_port_for_tests(port)
-
-        cmd = [src, port]
+        cmd = [src, args.port]
         Popen(cmd, env=new_env).wait()
 
     if args.option == 'sender':
