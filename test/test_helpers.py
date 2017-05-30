@@ -1,7 +1,6 @@
 import sys
 from os import path
 import json
-import signal
 import subprocess
 import project_root
 from helpers.helpers import check_output, timeout_handler, TimeoutError
