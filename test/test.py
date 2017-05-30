@@ -100,8 +100,8 @@ class Test(object):
         # record who runs first
         self.run_first, self.run_second = who_runs_first(self.cc)
 
-        # wait for 2 seconds until run_first is ready
-        self.run_first_setup_time = 2
+        # wait for 3 seconds until run_first is ready
+        self.run_first_setup_time = 3
 
         # setup output logs
         self.datalink_name = self.cc + '_datalink_run%d' % self.run_id
@@ -173,11 +173,13 @@ class Test(object):
             proc_first.wait()
             proc_second.wait()
         except TimeoutError:
-            self.test_end_time = format_time()
+            pass
         else:
             signal.alarm(0)
-            sys.exit('Test exited before time limit')
+            sys.stderr.write('Warning: test exited before time limit\n')
         finally:
+            self.test_end_time = format_time()
+
             signum = get_signal_for_cc(self.cc)
             kill_proc_group(proc_first, signum)
             kill_proc_group(proc_second, signum)
@@ -325,8 +327,6 @@ class Test(object):
 
     def run_first_side(self, tun_id, send_manager, recv_manager,
                        send_pri_ip, recv_pri_ip):
-        readline_cmd = 'tunnel %s readline\n' % tun_id
-
         first_src = self.cc_src
         second_src = self.cc_src
 
