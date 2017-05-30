@@ -3,7 +3,7 @@
 from os import path
 from subprocess import check_call
 import project_root
-from helpers import get_open_port, print_port_for_tests, parse_arguments
+from helpers import parse_arguments
 
 
 def main():
@@ -24,10 +24,7 @@ def main():
         check_call(['makepp'], cwd=cc_repo)
 
     if args.option == 'receiver':
-        port = get_open_port()
-        print_port_for_tests(port)
-
-        cmd = [recv_src, port]
+        cmd = [recv_src, args.port]
         check_call(cmd)
 
     if args.option == 'sender':

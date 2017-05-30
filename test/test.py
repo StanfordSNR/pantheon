@@ -11,11 +11,10 @@ import traceback
 from parse_arguments import parse_arguments
 import project_root
 from helpers.helpers import (
-    Popen, PIPE, call, check_call, TMPDIR, parse_config, kill_proc_group,
-    timeout_handler, TimeoutError, format_time, get_signal_for_cc)
+    Popen, PIPE, call, check_call, TMPDIR, kill_proc_group, get_signal_for_cc,
+    timeout_handler, TimeoutError, format_time, get_open_port, parse_config)
 from test_helpers import (
-    read_port_from_proc, who_runs_first, parse_remote_path, query_clock_offset,
-    save_test_metadata)
+    who_runs_first, parse_remote_path, query_clock_offset, save_test_metadata)
 
 
 class Test(object):
@@ -148,15 +147,12 @@ class Test(object):
 
     # test congestion control without running pantheon tunnel
     def run_without_tunnel(self):
-        # run the side specified by self.run_first
-        cmd = ['python', self.cc_src, self.run_first]
-        sys.stderr.write('Running %s %s...\n' % (self.cc, self.run_first))
-        proc_first = Popen(cmd, stdout=PIPE, preexec_fn=os.setsid)
+        port = get_open_port()
 
-        # find port printed
-        port = None
-        while port is None:
-            port = read_port_from_proc(proc_first)
+        # run the side specified by self.run_first
+        cmd = ['python', self.cc_src, self.run_first, port]
+        sys.stderr.write('Running %s %s...\n' % (self.cc, self.run_first))
+        proc_first = Popen(cmd, preexec_fn=os.setsid)
 
         # sleep just in case the process isn't quite listening yet
         # the cleaner approach might be to try to verify the socket is open
@@ -168,15 +164,14 @@ class Test(object):
             self.cc_src, self.run_second, port)
         sh_cmd = ' '.join(self.mm_cmd) + " -- sh -c '%s'" % sh_cmd
         sys.stderr.write('Running %s %s...\n' % (self.cc, self.run_second))
-        proc_second = Popen(sh_cmd, stdout=PIPE, shell=True,
-                            preexec_fn=os.setsid)
+        proc_second = Popen(sh_cmd, shell=True, preexec_fn=os.setsid)
 
         signal.signal(signal.SIGALRM, timeout_handler)
         signal.alarm(self.runtime)
 
         try:
-            proc_first.communicate()
-            proc_second.communicate()
+            proc_first.wait()
+            proc_second.wait()
         except TimeoutError:
             self.test_end_time = format_time()
         else:
@@ -342,22 +337,15 @@ class Test(object):
                 else:
                     second_src = self.r['cc_src']
 
-            first_cmd = 'tunnel %s python %s receiver\n' % (
-                tun_id, first_src)
-            second_cmd = 'tunnel %s python %s sender %s' % (
-                tun_id, second_src, recv_pri_ip)
+            port = get_open_port()
+
+            first_cmd = 'tunnel %s python %s receiver %s\n' % (
+                tun_id, first_src, port)
+            second_cmd = 'tunnel %s python %s sender %s %s\n' % (
+                tun_id, second_src, recv_pri_ip, port)
 
             recv_manager.stdin.write(first_cmd)
             recv_manager.stdin.flush()
-
-            # find printed port
-            port = None
-            while port is None:
-                recv_manager.stdin.write(readline_cmd)
-                recv_manager.stdin.flush()
-                port = read_port_from_proc(recv_manager)
-
-            second_cmd += ' %s\n' % port
         else:  # self.run_first == 'sender'
             if self.mode == 'remote':
                 if self.sender_side == 'local':
@@ -365,22 +353,15 @@ class Test(object):
                 else:
                     first_src = self.r['cc_src']
 
-            first_cmd = 'tunnel %s python %s sender\n' % (
-                tun_id, first_src)
-            second_cmd = 'tunnel %s python %s receiver %s' % (
-                tun_id, second_src, send_pri_ip)
+            port = get_open_port()
+
+            first_cmd = 'tunnel %s python %s sender %s\n' % (
+                tun_id, first_src, port)
+            second_cmd = 'tunnel %s python %s receiver %s %s\n' % (
+                tun_id, second_src, send_pri_ip, port)
 
             send_manager.stdin.write(first_cmd)
             send_manager.stdin.flush()
-
-            # find printed port
-            port = None
-            while port is None:
-                send_manager.stdin.write(readline_cmd)
-                send_manager.stdin.flush()
-                port = read_port_from_proc(send_manager)
-
-            second_cmd += ' %s\n' % port
 
         return second_cmd
 

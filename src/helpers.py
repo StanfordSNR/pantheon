@@ -1,29 +1,12 @@
 import sys
 import time
 import errno
-import socket
 import tempfile
 import argparse
 import os
 from os import path
 from subprocess import call
 import project_root
-
-
-def get_open_port():
-    sock = socket.socket(socket.AF_INET)
-    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
-    sock.bind(('', 0))
-    port = sock.getsockname()[1]
-    sock.close()
-    return str(port)
-
-
-def print_port_for_tests(port):
-    # print listening on port in a fixed format required by tests
-    sys.stdout.write('Listening on port: %s\n' % port)
-    sys.stdout.flush()
 
 
 def curr_time_sec():
@@ -73,10 +56,12 @@ def parse_arguments(run_first):
     sender_parser = subparsers.add_parser('sender', help='run sender')
 
     if run_first == 'receiver_first':
+        receiver_parser.add_argument('port', help='port to listen on')
         sender_parser.add_argument(
             'ip', metavar='IP', help='IP address of receiver')
         sender_parser.add_argument('port', help='port of receiver')
     else:
+        sender_parser.add_argument('port', help='port to listen on')
         receiver_parser.add_argument(
             'ip', metavar='IP', help='IP address of sender')
         receiver_parser.add_argument('port', help='port of sender')

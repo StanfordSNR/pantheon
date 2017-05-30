@@ -6,7 +6,8 @@ import os
 from os import path
 import project_root
 from helpers.helpers import (
-    check_output, call, Popen, PIPE, parse_config, kill_proc_group)
+    get_open_port, check_output, call, Popen, PIPE, parse_config,
+    kill_proc_group)
 
 
 def test_schemes():
@@ -20,10 +21,11 @@ def test_schemes():
         run_first = check_output([src, 'run_first']).strip()
         run_second = 'receiver' if run_first == 'sender' else 'sender'
 
+        port = get_open_port()
+
         # run first to run
-        cmd = [src, run_first]
-        first_proc = Popen(cmd, preexec_fn=os.setsid, stdout=PIPE)
-        port = first_proc.stdout.readline().split()[-1]
+        cmd = [src, run_first, port]
+        first_proc = Popen(cmd, preexec_fn=os.setsid)
 
         # wait for 'run_first' to be ready
         time.sleep(3)

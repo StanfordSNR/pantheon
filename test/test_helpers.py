@@ -7,23 +7,6 @@ import project_root
 from helpers.helpers import check_output, timeout_handler, TimeoutError
 
 
-def read_port_from_proc(proc):
-    signal.signal(signal.SIGALRM, timeout_handler)
-    signal.alarm(10)
-
-    try:
-        port_info = proc.stdout.readline().split(':')
-    except TimeoutError:
-        sys.exit('Cannot get port within 10 seconds\n')
-    else:
-        signal.alarm(0)
-
-        if port_info[0] == 'Listening on port':
-            return port_info[1].strip()
-        else:
-            return None
-
-
 def who_runs_first(cc):
     cc_src = path.join(project_root.DIR, 'src', cc + '.py')
 
