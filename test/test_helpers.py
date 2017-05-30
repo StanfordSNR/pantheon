@@ -40,48 +40,52 @@ def parse_remote_path(remote_path, cc=None):
     return ret
 
 
-def query_clock_offset(ntp_addr, ssh_cmd=None):
-    worst_clock_offset = None
+def query_clock_offset(ntp_addr, ssh_cmd):
+    local_clock_offset = None
+    remote_clock_offset = None
 
-    ntp_cmd = [['ntpdate', '-quv', ntp_addr]]
-    if ssh_cmd is not None:
-        cmd = ssh_cmd + ntp_cmd[0]
-        ntp_cmd.append(cmd)
+    ntp_cmds = {}
+    ntpdate_cmd = ['ntpdate', '-t', '5', '-quv', ntp_addr]
 
-    for cmd in ntp_cmd:
-        max_run = 5
-        curr_run = 0
+    ntp_cmds['local'] = ntpdate_cmd
+    ntp_cmds['remote'] = ssh_cmd + ntpdate_cmd
 
-        while True:
-            curr_run += 1
-            if curr_run > max_run:
-                sys.stderr.write('Failed after 5 attempts\n')
-                break
+    for side in ['local', 'remote']:
+        cmd = ntp_cmds[side]
 
+        fail = True
+        for _ in xrange(3):
             try:
                 offset = check_output(cmd)
                 sys.stderr.write(offset)
 
                 offset = offset.rsplit(' ', 2)[-2]
-                offset = abs(float(offset)) * 1000
+                offset = float(offset) * 1000
             except subprocess.CalledProcessError:
                 sys.stderr.write('Failed to get clock offset\n')
             except ValueError:
                 sys.stderr.write('Cannot convert clock offset to float\n')
             else:
-                if worst_clock_offset is None or offset > worst_clock_offset:
-                    worst_clock_offset = offset
+                if side == 'local':
+                    local_clock_offset = offset
+                else:
+                    remote_clock_offset = offset
+
+                fail = False
                 break
 
-    return worst_clock_offset
+        if fail:
+            sys.stderr.write('Failed after 3 queries to NTP server\n')
+
+    return local_clock_offset, remote_clock_offset
 
 
-def get_git_summary(meta):
+def get_git_summary(mode='local', remote_path=None):
     git_summary_src = path.join(project_root.DIR, 'test', 'git_summary.sh')
     local_git_summary = check_output(git_summary_src, cwd=project_root.DIR)
 
-    if meta['mode'] == 'remote':
-        r = parse_remote_path(meta['remote_path'])
+    if mode == 'remote':
+        r = parse_remote_path(remote_path)
 
         git_summary_src = path.join(
             r['pantheon_dir'], 'test', 'git_summary.sh')
@@ -91,12 +95,16 @@ def get_git_summary(meta):
         remote_git_summary = check_output(ssh_cmd, shell=True)
 
         if local_git_summary != remote_git_summary:
+            sys.stderr.write(
+                '--- local git summary ---\n%s\n' % local_git_summary)
+            sys.stderr.write(
+                '--- remote git summary ---\n%s\n' % remote_git_summary)
             sys.exit('Repository differed between local and remote sides')
 
     return local_git_summary
 
 
-def save_test_metadata(meta, data_dir):
+def save_test_metadata(meta, data_dir, git_summary):
     meta.pop('all')
     meta.pop('schemes')
     meta.pop('ignore_metadata')
@@ -108,7 +116,7 @@ def save_test_metadata(meta, data_dir):
         if meta[key] is None:
             meta.pop(key)
 
-    meta['git_summary'] = get_git_summary(meta)
+    meta['git_summary'] = git_summary
 
     if 'uplink_trace' in meta:
         meta['uplink_trace'] = path.basename(meta['uplink_trace'])

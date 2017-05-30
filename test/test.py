@@ -14,7 +14,8 @@ from helpers.helpers import (
     Popen, PIPE, call, check_call, TMPDIR, kill_proc_group, get_signal_for_cc,
     timeout_handler, TimeoutError, format_time, get_open_port, parse_config)
 from test_helpers import (
-    who_runs_first, parse_remote_path, query_clock_offset, save_test_metadata)
+    who_runs_first, parse_remote_path, query_clock_offset, get_git_summary,
+    save_test_metadata)
 
 
 class Test(object):
@@ -51,8 +52,10 @@ class Test(object):
             self.remote_if = args.remote_if
             self.local_desc = args.local_desc
             self.remote_desc = args.remote_desc
+
             self.ntp_addr = args.ntp_addr
-            self.worst_clock_offset = None
+            self.local_ofst = None
+            self.remote_ofst = None
 
             self.r = parse_remote_path(args.remote_path, self.cc)
 
@@ -137,13 +140,10 @@ class Test(object):
         if self.mode == 'local':
             self.setup_mm_cmd()
         else:
-            # update worst (absolute) clock offset
+            # record local and remote clock offset
             if self.ntp_addr is not None:
-                offset = query_clock_offset(self.ntp_addr, self.r['ssh_cmd'])
-
-                if (self.worst_clock_offset is None or
-                        offset > self.worst_clock_offset):
-                    self.worst_clock_offset = offset
+                self.local_ofst, self.remote_ofst = query_clock_offset(
+                    self.ntp_addr, self.r['ssh_cmd'])
 
     # test congestion control without running pantheon tunnel
     def run_without_tunnel(self):
@@ -515,11 +515,17 @@ class Test(object):
         sys.stderr.write(test_run_duration)
         stats.write(test_run_duration)
 
-        if self.mode == 'remote' and self.worst_clock_offset is not None:
-            offset_info = ('Worst absolute clock offset: %s ms\n'
-                           % self.worst_clock_offset)
-            sys.stderr.write(offset_info)
-            stats.write(offset_info)
+        if self.mode == 'remote':
+            ofst_info = ''
+            if self.local_ofst is not None:
+                ofst_info += 'Local clock offset: %s ms\n' % self.local_ofst
+
+            if self.remote_ofst is not None:
+                ofst_info += 'Remote clock offset: %s ms\n' % self.remote_ofst
+
+            if ofst_info:
+                sys.stderr.write(ofst_info)
+                stats.write(ofst_info)
 
         stats.close()
 
@@ -542,6 +548,9 @@ class Test(object):
 
 
 def run_tests(args):
+    git_summary = get_git_summary(
+        args.mode, getattr(args, 'remote_path', None))
+
     if args.all:
         cc_schemes = parse_config().keys()
     elif args.schemes is not None:
@@ -557,7 +566,7 @@ def run_tests(args):
     if not args.ignore_metadata:
         meta = vars(args).copy()
         meta['cc_schemes'] = sorted(cc_schemes)
-        save_test_metadata(meta, path.abspath(args.data_dir))
+        save_test_metadata(meta, path.abspath(args.data_dir), git_summary)
 
 
 def pkill(args):
