@@ -25,17 +25,15 @@ def who_runs_first(cc):
 def parse_remote_path(remote_path, cc=None):
     ret = {}
 
-    ret['host_addr'], ret['pantheon_dir'] = remote_path.split(':')
+    ret['host_addr'], ret['pantheon_dir'] = remote_path.rsplit(':', 1)
     ret['ip'] = ret['host_addr'].split('@')[-1]
     ret['ssh_cmd'] = ['ssh', '-o', 'StrictHostKeyChecking=no',
                       ret['host_addr']]
+    ret['tunnel_manager'] = path.join(
+        ret['pantheon_dir'], 'test', 'tunnel_manager.py')
 
-    ret['src_dir'] = path.join(ret['pantheon_dir'], 'src')
     if cc is not None:
-        ret['cc_src'] = path.join(ret['src_dir'], cc + '.py')
-
-    ret['test_dir'] = path.join(ret['pantheon_dir'], 'test')
-    ret['tunnel_manager'] = path.join(ret['test_dir'], 'tunnel_manager.py')
+        ret['cc_src'] = path.join(ret['pantheon_dir'], 'src', cc + '.py')
 
     return ret
 

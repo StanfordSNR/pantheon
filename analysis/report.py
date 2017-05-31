@@ -70,10 +70,10 @@ class Report(object):
 
                 if '%s_desc' % side in meta:
                     txt[side].append(meta['%s_desc' % side])
-                if '%s_addr' % side in meta:
-                    txt[side].append(meta['%s_addr' % side])
                 if '%s_if' % side in meta:
-                    txt[side].append('on interface %s' % meta['%s_if' % side])
+                    txt[side].append(meta['%s_if' % side])
+                else:
+                    txt[side].append('Ethernet')
 
                 txt[side] = ' '.join(txt[side]).replace('_', '\\_')
 
@@ -84,7 +84,8 @@ class Report(object):
                 sender = txt['local']
                 receiver = txt['remote']
 
-            desc += 'Data path FROM %s TO %s.\n\n' % (sender, receiver)
+            desc += 'Data path \\textbf{from} %s \\textbf{to} %s.\n\n' % (
+                sender, receiver)
 
         if 'ntp_addr' in meta:
             ntp_addr = meta['ntp_addr']
@@ -121,7 +122,7 @@ class Report(object):
             '\\end{figure}}\n\n'
             '\\begin{document}\n\n'
             '\\textbf{Pantheon Summary} '
-            '(Generated on %s with pantheon version %s)\n\n'
+            '(Generated at %s with pantheon version \\texttt{%s})\n\n'
             '%s'
             '\\PantheonFig{%s}\n\n'
             '\\PantheonFig{%s}\n\n'
