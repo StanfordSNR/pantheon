@@ -115,8 +115,8 @@ def parse_test_remote(remote):
         action='store', dest='server_side',
         help='the side to run pantheon tunnel server on (default remote)')
     remote.add_argument(
-        '--local-addr', metavar='ADDR',
-        help='local address that can be reached from remote host, '
+        '--local-addr', metavar='IP',
+        help='local IP address that can be reached from remote host, '
         'required if "--tunnel-server local" is given')
     remote.add_argument(
         '--local-if', metavar='INTERFACE',
@@ -125,7 +125,7 @@ def parse_test_remote(remote):
         '--remote-if', metavar='INTERFACE',
         help='remote interface to run pantheon tunnel on')
     remote.add_argument(
-        '--ntp-addr', metavar='ADDR',
+        '--ntp-addr', metavar='HOST',
         help='address of an NTP server to query clock offset')
     remote.add_argument(
         '--local-desc', metavar='DESC',
@@ -159,9 +159,8 @@ def parse_test():
         'remote', help='test schemes between local and remote in '
         'real-life networks')
     remote.add_argument(
-        'remote_path', metavar='HOSTADDR:PANTHEON-DIR',
-        help='HOSTADDR ([user@]hostname) and PANTHEON-DIR (remote pantheon '
-        'directory)')
+        'remote_path', metavar='HOST:PANTHEON-DIR',
+        help='HOST ([user@]IP) and PANTHEON-DIR (remote pantheon directory)')
 
     parse_test_shared(local, remote)
     parse_test_local(local)
