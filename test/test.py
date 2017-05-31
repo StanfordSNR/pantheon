@@ -11,7 +11,7 @@ import traceback
 from parse_arguments import parse_arguments
 import project_root
 from helpers.helpers import (
-    Popen, PIPE, call, check_call, TMPDIR, kill_proc_group, get_signal_for_cc,
+    Popen, PIPE, call, TMPDIR, kill_proc_group, get_signal_for_cc,
     timeout_handler, TimeoutError, format_time, get_open_port, parse_config)
 from test_helpers import (
     who_runs_first, parse_remote_path, query_clock_offset, get_git_summary,
@@ -451,15 +451,15 @@ class Test(object):
                 cmd += '%(log)s %(log)s'
 
                 if self.sender_side == 'remote':
-                    check_call(cmd % {'log': self.acklink_ingress_logs[i]},
-                               shell=True)
-                    check_call(cmd % {'log': self.datalink_egress_logs[i]},
-                               shell=True)
+                    call(cmd % {'log': self.acklink_ingress_logs[i]},
+                         shell=True)
+                    call(cmd % {'log': self.datalink_egress_logs[i]},
+                         shell=True)
                 else:
-                    check_call(cmd % {'log': self.datalink_ingress_logs[i]},
-                               shell=True)
-                    check_call(cmd % {'log': self.acklink_egress_logs[i]},
-                               shell=True)
+                    call(cmd % {'log': self.datalink_ingress_logs[i]},
+                         shell=True)
+                    call(cmd % {'log': self.acklink_egress_logs[i]},
+                         shell=True)
 
             uid = uuid.uuid4()
             datalink_tun_log = path.join(
@@ -473,13 +473,13 @@ class Test(object):
                    '-i', self.datalink_ingress_logs[i],
                    '-e', self.datalink_egress_logs[i],
                    '-o', datalink_tun_log]
-            check_call(cmd)
+            call(cmd)
 
             cmd = ['merge-tunnel-logs', 'single',
                    '-i', self.acklink_ingress_logs[i],
                    '-e', self.acklink_egress_logs[i],
                    '-o', acklink_tun_log]
-            check_call(cmd)
+            call(cmd)
 
             datalink_tun_logs.append(datalink_tun_log)
             acklink_tun_logs.append(acklink_tun_log)
@@ -488,13 +488,13 @@ class Test(object):
         if self.mode == 'local':
             cmd += ['--link-log', self.mm_datalink_log]
         cmd += datalink_tun_logs
-        check_call(cmd)
+        call(cmd)
 
         cmd = ['merge-tunnel-logs', 'multiple', '-o', self.acklink_log]
         if self.mode == 'local':
             cmd += ['--link-log', self.mm_acklink_log]
         cmd += acklink_tun_logs
-        check_call(cmd)
+        call(cmd)
 
     def run_congestion_control(self):
         if self.flows > 0:
