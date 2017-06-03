@@ -39,10 +39,13 @@ class Plot(object):
         elif meta['mode'] == 'remote':
             txt = {}
             for side in ['local', 'remote']:
-                txt[side] = [side]
+                txt[side] = []
 
                 if '%s_desc' % side in meta:
                     txt[side].append(meta['%s_desc' % side])
+                else:
+                    txt[side].append(side)
+
                 if '%s_if' % side in meta:
                     txt[side].append(meta['%s_if' % side])
                 else:
