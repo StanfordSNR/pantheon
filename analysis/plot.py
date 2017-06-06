@@ -4,6 +4,7 @@ import os
 from os import path
 import re
 import sys
+import math
 import multiprocessing
 from multiprocessing.pool import ThreadPool
 import numpy as np
@@ -62,8 +63,9 @@ class Plot(object):
 
             expt_title = 'test from %s to %s, ' % (sender, receiver)
 
-        expt_title += '%s runs of %ss each per scheme' % (
-            meta['run_times'], meta['runtime'])
+        runs_str = 'run' if meta['run_times'] == 1 else 'runs'
+        expt_title += '%s %s of %ss each per scheme' % (
+            runs_str, meta['run_times'], meta['runtime'])
 
         return expt_title
 
@@ -131,9 +133,10 @@ class Plot(object):
                         ' run.\n' % (log_path, duration, self.runtime))
                     error = True
 
-        if not error:
-            return (tput, delay, loss, stats)
-        return (None, None, None, None)
+        if error:
+            return (None, None, None, None)
+
+        return (tput, delay, loss, stats)
 
     def update_stats_log(self, cc, run_id, stats):
         stats_log_path = path.join(
@@ -220,8 +223,39 @@ class Plot(object):
                          % self.data_dir)
         return data
 
+    def xaxis_log_scale(self, ax, min_delay, max_delay):
+        if min_delay <= 0:
+            return
+
+        if min_delay <= 2:
+            x_min = 0
+        else:
+            x_min = pow(2, int(math.log(min_delay, 2)))
+
+        x_max = pow(2, int(math.ceil(math.log(max_delay, 2))))
+        ax.set_xlim(x_min, x_max)
+
+        ax.set_xscale('log', basex=2)
+
+        if x_max <= 4 * x_min:
+            log_min = math.log(x_min, 2)
+            log_max = math.log(x_max, 2)
+            step = (log_max - log_min) / 4
+
+            mid_ticks = []
+            for i in xrange(1, 4):
+                mid_ticks.append(int(round(math.pow(2, log_min + i * step))))
+
+            ticks = [x_min] + mid_ticks + [x_max]
+            ax.xaxis.set_ticks(ticks)
+
+        ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
+
     def plot_throughput_delay(self, data):
-        min_delay = None
+        min_raw_delay = sys.maxint
+        min_mean_delay = sys.maxint
+        max_raw_delay = -sys.maxint
+        max_mean_delay = -sys.maxint
 
         fig_raw, ax_raw = plt.subplots()
         fig_mean, ax_mean = plt.subplots()
@@ -239,10 +273,9 @@ class Plot(object):
             marker = config[cc]['marker']
             y_data, x_data, _ = zip(*value)
 
-            # find min and max delay
-            cc_min_delay = min(x_data)
-            if min_delay is None or cc_min_delay < min_delay:
-                min_delay = cc_min_delay
+            # update min and max raw delay
+            min_raw_delay = min(min(x_data), min_raw_delay)
+            max_raw_delay = max(max(x_data), max_raw_delay)
 
             # plot raw values
             ax_raw.scatter(x_data, y_data, color=color, marker=marker,
@@ -251,15 +284,22 @@ class Plot(object):
             # plot the average of raw values
             x_mean = sum(x_data) / len(x_data)
             y_mean = sum(y_data) / len(y_data)
+
+            # update min and max mean delay
+            min_mean_delay = min(x_mean, min_mean_delay)
+            max_mean_delay = max(x_mean, max_mean_delay)
+
             ax_mean.scatter(x_mean, y_mean, color=color, marker=marker,
                             clip_on=False)
             power_scores.append((float(y_mean) / float(x_mean), color))
             ax_mean.annotate(cc_name, (x_mean, y_mean))
 
-        for fig, ax in [(fig_raw, ax_raw), (fig_mean, ax_mean)]:
-            if min_delay > 0:
-                ax.set_xscale('log', basex=2)
-                ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
+        for fig_type, fig, ax in [('raw', fig_raw, ax_raw),
+                                  ('mean', fig_mean, ax_mean)]:
+            if fig_type == 'raw':
+                self.xaxis_log_scale(ax, min_raw_delay, max_raw_delay)
+            else:
+                self.xaxis_log_scale(ax, min_mean_delay, max_mean_delay)
             ax.invert_xaxis()
 
             yticks = ax.get_yticks()
