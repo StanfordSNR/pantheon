@@ -1,6 +1,7 @@
 import sys
 import time
 import errno
+import signal
 import tempfile
 import argparse
 import os
@@ -31,6 +32,23 @@ def make_sure_path_exists(target_path):
 
 TMPDIR = path.join(tempfile.gettempdir(), 'pantheon-tmp')
 make_sure_path_exists(TMPDIR)
+
+
+def kill_proc_group(proc, signum=signal.SIGTERM):
+    if proc:
+        try:
+            os.killpg(os.getpgid(proc.pid), signum)
+        except OSError as exception:
+            sys.stderr.write('kill_proc_group: %s\n' % exception)
+
+
+def wait_and_kill_iperf(proc):
+    try:
+        proc.wait()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        kill_proc_group(proc, signal.SIGKILL)
 
 
 def parse_arguments(run_first):

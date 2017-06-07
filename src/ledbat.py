@@ -3,8 +3,8 @@
 import os
 from os import path
 from subprocess import check_call, PIPE, Popen
+from src_helpers import curr_time_sec, parse_arguments
 import project_root
-from helpers import curr_time_sec, parse_arguments
 
 
 def main():

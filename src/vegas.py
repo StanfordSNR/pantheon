@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
-from subprocess import check_call, check_output
-from helpers import parse_arguments
+import os
+from subprocess import Popen, check_call, check_output
+from src_helpers import parse_arguments, wait_and_kill_iperf
 
 
 def setup_vegas():
@@ -35,12 +36,12 @@ def main():
 
     if args.option == 'receiver':
         cmd = ['iperf', '-Z', 'vegas', '-s', '-p', args.port]
-        check_call(cmd)
+        wait_and_kill_iperf(Popen(cmd, preexec_fn=os.setsid))
 
     if args.option == 'sender':
         cmd = ['iperf', '-Z', 'vegas', '-c', args.ip, '-p', args.port,
                '-t', '75']
-        check_call(cmd)
+        wait_and_kill_iperf(Popen(cmd, preexec_fn=os.setsid))
 
 
 if __name__ == '__main__':

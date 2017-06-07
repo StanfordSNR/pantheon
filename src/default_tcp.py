@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
-from subprocess import check_call
-from helpers import parse_arguments
+import os
+from subprocess import Popen
+from src_helpers import parse_arguments, wait_and_kill_iperf
 
 
 def main():
@@ -15,11 +16,11 @@ def main():
 
     if args.option == 'receiver':
         cmd = ['iperf', '-s', '-p', args.port]
-        check_call(cmd)
+        wait_and_kill_iperf(Popen(cmd, preexec_fn=os.setsid))
 
     if args.option == 'sender':
         cmd = ['iperf', '-c', args.ip, '-p', args.port, '-t', '75']
-        check_call(cmd)
+        wait_and_kill_iperf(Popen(cmd, preexec_fn=os.setsid))
 
 
 if __name__ == '__main__':

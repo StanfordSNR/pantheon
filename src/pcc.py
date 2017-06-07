@@ -3,8 +3,8 @@
 import os
 from os import path
 from subprocess import check_call, Popen
+from src_helpers import parse_arguments, apply_patch
 import project_root
-from helpers import parse_arguments, apply_patch
 
 
 def main():

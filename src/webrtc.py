@@ -5,8 +5,8 @@ import uuid
 import os
 from os import path
 from subprocess import call, check_call, check_output, Popen
+from src_helpers import parse_arguments, TMPDIR
 import project_root
-from helpers import parse_arguments, TMPDIR
 
 
 def xvfb_in_use(display):
