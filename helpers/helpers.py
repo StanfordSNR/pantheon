@@ -84,8 +84,8 @@ def kill_proc_group(proc, signum=signal.SIGTERM):
 
 
 def get_signal_for_cc(cc):
-    # default_tcp and vegas run iperf, which often doesn't respond to SIGTERM
-    if cc == 'default_tcp' or cc == 'vegas':
+    # iperf often doesn't respond to SIGTERM
+    if cc == 'default_tcp' or cc == 'vegas' or cc == 'bbr':
         return signal.SIGKILL
     else:
         return signal.SIGTERM
