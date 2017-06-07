@@ -26,6 +26,7 @@ env:
         scream copa taova koho_cc calibrated_koho saturator" &&
         test/setup.py --schemes "$SCHEMES" --install-deps &&
         test/setup.py --schemes "$SCHEMES" --setup &&
+        src/tests/test_schemes.py &&
         test/tests/local_test.py &&
         analysis/tests/test_analyze.py'
 
