@@ -126,7 +126,7 @@ class Plot(object):
                 duration = tunnel_results['duration'] / 1000.0
                 stats = tunnel_results['stats']
 
-                if duration < 0.9 * self.runtime:
+                if duration < 0.8 * self.runtime:
                     sys.stderr.write(
                         'Warning: "tunnel_graph %s" had duration %.2f seconds '
                         'but should have been around %d seconds. Ignoring this'
@@ -224,32 +224,39 @@ class Plot(object):
         return data
 
     def xaxis_log_scale(self, ax, min_delay, max_delay):
-        if min_delay <= 0:
-            return
-
-        if min_delay <= 2:
+        if min_delay < -2:
+            x_min = int(-math.pow(2, math.ceil(math.log(-min_delay, 2))))
+        elif min_delay < 0:
+            x_min = -2
+        elif min_delay < 2:
             x_min = 0
         else:
-            x_min = pow(2, int(math.log(min_delay, 2)))
+            x_min = int(math.pow(2, math.floor(math.log(min_delay, 2))))
 
-        x_max = pow(2, int(math.ceil(math.log(max_delay, 2))))
-        ax.set_xlim(x_min, x_max)
+        if max_delay < -2:
+            x_max = int(-math.pow(2, math.floor(math.log(-max_delay, 2))))
+        elif max_delay < 0:
+            x_max = 0
+        elif max_delay < 2:
+            x_max = 2
+        else:
+            x_max = int(math.pow(2, math.ceil(math.log(max_delay, 2))))
 
-        ax.set_xscale('log', basex=2)
+        symlog = False
+        if x_min <= -2:
+            if x_max >= 2:
+                symlog = True
+        elif x_min == 0:
+            if x_max >= 8:
+                symlog = True
+        elif x_min >= 2:
+            if x_max > 4 * x_min:
+                symlog = True
 
-        if x_max <= 4 * x_min:
-            log_min = math.log(x_min, 2)
-            log_max = math.log(x_max, 2)
-            step = (log_max - log_min) / 4
-
-            mid_ticks = []
-            for i in xrange(1, 4):
-                mid_ticks.append(int(round(math.pow(2, log_min + i * step))))
-
-            ticks = [x_min] + mid_ticks + [x_max]
-            ax.xaxis.set_ticks(ticks)
-
-        ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
+        if symlog:
+            ax.set_xscale('symlog', basex=2, linthreshx=2, linscalex=0.5)
+            ax.set_xlim(x_min, x_max)
+            ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
 
     def plot_throughput_delay(self, data):
         min_raw_delay = sys.maxint
