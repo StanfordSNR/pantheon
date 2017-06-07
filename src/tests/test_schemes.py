@@ -38,9 +38,9 @@ def test_schemes():
         cmd = [src, run_second, '127.0.0.1', port]
         second_proc = Popen(cmd, preexec_fn=os.setsid)
 
-        # test lasts for 5 seconds
+        # test lasts for 3 seconds
         signal.signal(signal.SIGALRM, timeout_handler)
-        signal.alarm(5)
+        signal.alarm(3)
 
         try:
             for proc in [first_proc, second_proc]:

@@ -7,8 +7,8 @@ import string
 import random
 import shutil
 from subprocess import check_call
+from src_helpers import parse_arguments, make_sure_path_exists
 import project_root
-from helpers import parse_arguments, make_sure_path_exists
 
 
 def generate_html(output_dir, size):

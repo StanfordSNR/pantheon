@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
+import os
 import sys
-from subprocess import call, check_call, check_output
-from helpers import parse_arguments
+from subprocess import Popen, call, check_call, check_output
+from src_helpers import parse_arguments, wait_and_kill_iperf
 
 
 def setup_bbr():
@@ -37,14 +38,12 @@ def main():
 
     if args.option == 'receiver':
         cmd = ['iperf', '-Z', 'bbr', '-s', '-p', args.port]
-        if call(cmd) != 0:
-            sys.exit('Error: BBR is not enabled yet')
+        wait_and_kill_iperf(Popen(cmd, preexec_fn=os.setsid))
 
     if args.option == 'sender':
         cmd = ['iperf', '-Z', 'bbr', '-c', args.ip, '-p', args.port,
                '-t', '75']
-        if call(cmd) != 0:
-            sys.exit('Error: BBR is not enabled yet')
+        wait_and_kill_iperf(Popen(cmd, preexec_fn=os.setsid))
 
 
 if __name__ == '__main__':

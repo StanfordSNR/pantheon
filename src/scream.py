@@ -2,14 +2,13 @@
 
 from os import path
 from subprocess import check_call
+from src_helpers import parse_arguments
 import project_root
-from helpers import parse_arguments, apply_patch
 
 
 def main():
     args = parse_arguments('receiver_first')
 
-    cc_repo = path.join(project_root.DIR, 'third_party', 'scream')
     scream_dir = path.join(project_root.DIR, 'src', 'scream')
     recv_src = path.join(scream_dir, 'ScreamServer')
     send_src = path.join(scream_dir, 'ScreamClient')

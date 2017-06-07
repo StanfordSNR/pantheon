@@ -5,10 +5,11 @@ import subprocess
 from subprocess import PIPE
 import socket
 import signal
+import errno
+import tempfile
 from time import strftime
 import yaml
 import project_root
-from src.helpers import make_sure_path_exists, TMPDIR
 
 
 def get_open_port():
@@ -19,6 +20,18 @@ def get_open_port():
     port = sock.getsockname()[1]
     sock.close()
     return str(port)
+
+
+def make_sure_path_exists(target_path):
+    try:
+        os.makedirs(target_path)
+    except OSError as exception:
+        if exception.errno != errno.EEXIST:
+            raise
+
+
+TMPDIR = path.join(tempfile.gettempdir(), 'pantheon-tmp')
+make_sure_path_exists(TMPDIR)
 
 
 def print_cmd(cmd):
@@ -80,7 +93,7 @@ def kill_proc_group(proc, signum=signal.SIGTERM):
         try:
             os.killpg(os.getpgid(proc.pid), signum)
         except OSError as exception:
-            sys.stderr.write('%s\n' % exception)
+            sys.stderr.write('kill_proc_group: %s\n' % exception)
 
 
 def get_signal_for_cc(cc):
