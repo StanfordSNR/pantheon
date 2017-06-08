@@ -30,7 +30,8 @@ def setup_bbr():
     if default_qdisc != 'fq':
         sys.exit('Your default packet scheduler is "%s" currently. Please run '
                  '"sudo sysctl -w net.core.default_qdisc=fq" to use fair '
-                 'queue as the default one for BBR to work.' % default_qdisc)
+                 'queue for BBR to work, and change it back after testing BBR.'
+                 % default_qdisc)
 
 
 def main():
