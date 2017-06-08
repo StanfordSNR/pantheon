@@ -3,15 +3,25 @@
 import os
 from os import path
 import sys
+import signal
 from subprocess import Popen, PIPE
 import project_root
-from helpers.helpers import kill_proc_group, get_signal_for_cc
+from helpers.helpers import kill_proc_group
 
 
 def main():
     prompt = ''
     procs = {}
-    proc_signals = {}
+
+    # register SIGINT and SIGTERM events to clean up gracefully before quit
+    def stop_signal_handler(signum, frame):
+        sys.stderr.write('tunnel_manager: caught signal %s and cleanning '
+                         'up...\n' % signum)
+        for tun_id in procs:
+            kill_proc_group(procs[tun_id])
+
+    signal.signal(signal.SIGINT, stop_signal_handler)
+    signal.signal(signal.SIGTERM, stop_signal_handler)
 
     sys.stdout.write('tunnel manager is running\n')
     sys.stdout.flush()
@@ -41,7 +51,7 @@ def main():
 
             if cmd[2] == 'mm-tunnelclient' or cmd[2] == 'mm-tunnelserver':
                 # expand $MAHIMAHI_BASE
-                cmd_to_run = os.path.expandvars(cmd_to_run).split()
+                cmd_to_run = path.expandvars(cmd_to_run).split()
                 procs[tun_id] = Popen(cmd_to_run, stdin=PIPE, stdout=PIPE,
                                       preexec_fn=os.setsid)
             elif cmd[2] == 'python':  # run python scripts inside tunnel
@@ -51,9 +61,6 @@ def main():
 
                 procs[tun_id].stdin.write(cmd_to_run + '\n')
                 procs[tun_id].stdin.flush()
-
-                cc = path.splitext(path.basename(cmd[3]))[0]
-                proc_signals[tun_id] = get_signal_for_cc(cc)
             elif cmd[2] == 'readline':  # readline from stdout of tunnel
                 if len(cmd) != 3:
                     sys.stderr.write('error: usage: tunnel ID readline\n')
@@ -81,7 +88,7 @@ def main():
                 continue
 
             for tun_id in procs:
-                kill_proc_group(procs[tun_id], proc_signals[tun_id])
+                kill_proc_group(procs[tun_id])
 
             sys.exit(0)
         else:

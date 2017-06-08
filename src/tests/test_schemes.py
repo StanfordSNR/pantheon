@@ -8,7 +8,7 @@ import signal
 import project_root
 from helpers.helpers import (
     get_open_port, check_output, call, Popen, PIPE, parse_config,
-    kill_proc_group, timeout_handler, TimeoutError, get_signal_for_cc)
+    kill_proc_group, timeout_handler, TimeoutError)
 
 
 def test_schemes():
@@ -49,14 +49,15 @@ def test_schemes():
                     sys.exit('%s failed in tests\n' % scheme)
         except TimeoutError:
             pass
+        except Exception as exception:
+            sys.exit('test_schemes.py: %s\n' % exception)
         else:
             signal.alarm(0)
             sys.exit('test exited before time limit')
         finally:
             # cleanup
-            signum = get_signal_for_cc(scheme)
-            kill_proc_group(first_proc, signum)
-            kill_proc_group(second_proc, signum)
+            kill_proc_group(first_proc)
+            kill_proc_group(second_proc)
 
 
 def cleanup():

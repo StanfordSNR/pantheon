@@ -76,7 +76,7 @@ def parse_test_shared(local, remote):
                           help='directory to save all test logs, graphs, '
                           'metadata, and report (default pantheon/test/data)')
         mode.add_argument(
-            '--ignore-metadata', action='store_true',
+            '--no-metadata', action='store_true',
             help='don\'t save metadata (in JSON) of tests for future analysis')
         mode.add_argument(
             '--pkill-cleanup', action='store_true', help='clean up using pkill'
