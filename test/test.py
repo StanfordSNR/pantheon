@@ -11,8 +11,8 @@ import traceback
 from parse_arguments import parse_arguments
 import project_root
 from helpers.helpers import (
-    Popen, PIPE, call, TMPDIR, kill_proc_group, get_signal_for_cc,
-    timeout_handler, TimeoutError, format_time, get_open_port, parse_config)
+    Popen, PIPE, call, TMPDIR, kill_proc_group, parse_config,
+    timeout_handler, TimeoutError, format_time, get_open_port)
 from test_helpers import (
     who_runs_first, parse_remote_path, query_clock_offset, get_git_summary,
     save_test_metadata)
@@ -30,6 +30,12 @@ class Test(object):
         self.runtime = args.runtime
         self.interval = args.interval
         self.run_times = args.run_times
+
+        # used for cleanup
+        self.proc_first = None
+        self.proc_second = None
+        self.ts_manager = None
+        self.tc_manager = None
 
         # local mode
         if self.mode == 'local':
@@ -152,7 +158,7 @@ class Test(object):
         # run the side specified by self.run_first
         cmd = ['python', self.cc_src, self.run_first, port]
         sys.stderr.write('Running %s %s...\n' % (self.cc, self.run_first))
-        proc_first = Popen(cmd, preexec_fn=os.setsid)
+        self.proc_first = Popen(cmd, preexec_fn=os.setsid)
 
         # sleep just in case the process isn't quite listening yet
         # the cleaner approach might be to try to verify the socket is open
@@ -164,14 +170,14 @@ class Test(object):
             self.cc_src, self.run_second, port)
         sh_cmd = ' '.join(self.mm_cmd) + " -- sh -c '%s'" % sh_cmd
         sys.stderr.write('Running %s %s...\n' % (self.cc, self.run_second))
-        proc_second = Popen(sh_cmd, shell=True, preexec_fn=os.setsid)
+        self.proc_second = Popen(sh_cmd, shell=True, preexec_fn=os.setsid)
 
         signal.signal(signal.SIGALRM, timeout_handler)
         signal.alarm(self.runtime)
 
         try:
-            proc_first.wait()
-            proc_second.wait()
+            self.proc_first.wait()
+            self.proc_second.wait()
         except TimeoutError:
             pass
         else:
@@ -179,10 +185,6 @@ class Test(object):
             sys.stderr.write('Warning: test exited before time limit\n')
         finally:
             self.test_end_time = format_time()
-
-            signum = get_signal_for_cc(self.cc)
-            kill_proc_group(proc_first, signum)
-            kill_proc_group(proc_second, signum)
 
     def run_tunnel_managers(self):
         # run tunnel server manager
@@ -196,8 +198,9 @@ class Test(object):
             ts_manager_cmd = ['python', self.tunnel_manager]
 
         sys.stderr.write('[tunnel server manager (tsm)] ')
-        ts_manager = Popen(ts_manager_cmd, stdin=PIPE, stdout=PIPE,
-                           preexec_fn=os.setsid)
+        self.ts_manager = Popen(ts_manager_cmd, stdin=PIPE, stdout=PIPE,
+                                preexec_fn=os.setsid)
+        ts_manager = self.ts_manager
 
         while True:
             running = ts_manager.stdout.readline()
@@ -219,8 +222,9 @@ class Test(object):
             tc_manager_cmd = self.mm_cmd + ['python', self.tunnel_manager]
 
         sys.stderr.write('[tunnel client manager (tcm)] ')
-        tc_manager = Popen(tc_manager_cmd, stdin=PIPE, stdout=PIPE,
-                           preexec_fn=os.setsid)
+        self.tc_manager = Popen(tc_manager_cmd, stdin=PIPE, stdout=PIPE,
+                                preexec_fn=os.setsid)
+        tc_manager = self.tc_manager
 
         while True:
             running = tc_manager.stdout.readline()
@@ -498,10 +502,18 @@ class Test(object):
 
     def run_congestion_control(self):
         if self.flows > 0:
-            self.run_with_tunnel()
+            try:
+                self.run_with_tunnel()
+            finally:
+                kill_proc_group(self.ts_manager)
+                kill_proc_group(self.tc_manager)
         else:
             # test without pantheon tunnel when self.flows = 0
-            self.run_without_tunnel()
+            try:
+                self.run_without_tunnel()
+            finally:
+                kill_proc_group(self.proc_first)
+                kill_proc_group(self.proc_second)
 
     def record_time_stats(self):
         stats_log = path.join(
@@ -563,13 +575,16 @@ def run_tests(args):
         for cc in cc_schemes:
             Test(args, run_id, cc).run()
 
-    if not args.ignore_metadata:
+    if not args.no_metadata:
         meta = vars(args).copy()
         meta['cc_schemes'] = sorted(cc_schemes)
         save_test_metadata(meta, path.abspath(args.data_dir), git_summary)
 
 
 def pkill(args):
+    sys.stderr.write('Cleaning up using pkill...'
+                     '(enabled by --pkill-cleanup)\n')
+
     if args.mode == 'remote':
         r = parse_remote_path(args.remote_path)
         remote_pkill_src = path.join(r['pantheon_dir'], 'helpers', 'pkill.py')
@@ -583,27 +598,18 @@ def pkill(args):
     call(cmd)
 
 
-def cleanup(args):
-    msg = 'Error in tests!'
-    if args.pkill_cleanup:
-        msg += ' Cleaning up using pkill...'
-    sys.stderr.write(msg + '\n')
-
-    if args.pkill_cleanup:
-        pkill(args)
-
-
 def main():
     args = parse_arguments(path.basename(__file__))
 
     try:
         run_tests(args)
     except:  # intended to catch all exceptions
-        # dump traceback ahead in case pkill kills the program
-        sys.stderr.write(traceback.format_exc())
+        if args.pkill_cleanup:
+            # dump traceback ahead in case pkill kills the program
+            sys.stderr.write(traceback.format_exc())
+            pkill(args)
 
-        cleanup(args)
-        sys.exit(1)
+        sys.exit('Error in tests!\n')
     else:
         sys.stderr.write('All tests done!\n')
 

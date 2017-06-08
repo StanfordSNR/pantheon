@@ -91,14 +91,8 @@ def format_time():
 def kill_proc_group(proc, signum=signal.SIGTERM):
     if proc:
         try:
+            sys.stderr.write('kill_proc_group: killed process group with pgid '
+                             '%s\n' % os.getpgid(proc.pid))
             os.killpg(os.getpgid(proc.pid), signum)
         except OSError as exception:
             sys.stderr.write('kill_proc_group: %s\n' % exception)
-
-
-def get_signal_for_cc(cc):
-    # iperf often doesn't respond to SIGTERM
-    if cc == 'default_tcp' or cc == 'vegas' or cc == 'bbr':
-        return signal.SIGKILL
-    else:
-        return signal.SIGTERM

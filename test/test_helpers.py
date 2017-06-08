@@ -3,7 +3,7 @@ from os import path
 import json
 import subprocess
 import project_root
-from helpers.helpers import check_output, timeout_handler, TimeoutError
+from helpers.helpers import check_output
 
 
 def who_runs_first(cc):
@@ -105,7 +105,7 @@ def get_git_summary(mode='local', remote_path=None):
 def save_test_metadata(meta, data_dir, git_summary):
     meta.pop('all')
     meta.pop('schemes')
-    meta.pop('ignore_metadata')
+    meta.pop('no_metadata')
     meta.pop('data_dir')
     meta.pop('pkill_cleanup')
 
