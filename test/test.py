@@ -11,11 +11,11 @@ import traceback
 from parse_arguments import parse_arguments
 import project_root
 from helpers.helpers import (
-    Popen, PIPE, call, TMPDIR, kill_proc_group, parse_config,
+    Popen, PIPE, call, check_output, TMPDIR, kill_proc_group, parse_config,
     timeout_handler, TimeoutError, format_time, get_open_port)
 from test_helpers import (
     who_runs_first, parse_remote_path, query_clock_offset, get_git_summary,
-    save_test_metadata)
+    save_test_metadata, get_default_qdisc, set_default_qdisc)
 
 
 class Test(object):
@@ -307,7 +307,7 @@ class Test(object):
         while 'got connection' not in got_connection:
             curr_run += 1
             if curr_run > max_run:
-                sys.exit('Cannot establish tunnel\n')
+                sys.exit('Cannot establish tunnel')
 
             tc_manager.stdin.write(tc_cmd)
             tc_manager.stdin.flush()
@@ -573,7 +573,18 @@ def run_tests(args):
 
     for run_id in xrange(1, args.run_times + 1):
         for cc in cc_schemes:
-            Test(args, run_id, cc).run()
+            if cc == 'bbr':
+                curr_qdisc = get_default_qdisc()
+                sys.stderr.write(
+                    'Current default packet scheduler is %s\n' % curr_qdisc)
+
+                try:
+                    set_default_qdisc('fq')
+                    Test(args, run_id, cc).run()
+                finally:
+                    set_default_qdisc(curr_qdisc)
+            else:
+                Test(args, run_id, cc).run()
 
     if not args.no_metadata:
         meta = vars(args).copy()
@@ -604,12 +615,13 @@ def main():
     try:
         run_tests(args)
     except:  # intended to catch all exceptions
+        # dump traceback ahead in case pkill kills the program
+        sys.stderr.write(traceback.format_exc())
+
         if args.pkill_cleanup:
-            # dump traceback ahead in case pkill kills the program
-            sys.stderr.write(traceback.format_exc())
             pkill(args)
 
-        sys.exit('Error in tests!\n')
+        sys.exit('Error in tests!')
     else:
         sys.stderr.write('All tests done!\n')
 

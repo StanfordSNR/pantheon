@@ -3,7 +3,7 @@ from os import path
 import json
 import subprocess
 import project_root
-from helpers.helpers import check_output
+from helpers.helpers import check_output, call
 
 
 def who_runs_first(cc):
@@ -126,3 +126,21 @@ def save_test_metadata(meta, data_dir, git_summary):
     with open(metadata_path, 'w') as metadata:
         json.dump(meta, metadata, sort_keys=True, indent=4,
                   separators=(',', ': '))
+
+
+def get_default_qdisc():
+    sh_cmd = 'sysctl net.core.default_qdisc'
+    curr_qdisc = check_output(sh_cmd, shell=True)
+    curr_qdisc = curr_qdisc.split('=')[-1].strip()
+
+    return curr_qdisc
+
+
+def set_default_qdisc(qdisc):
+    sh_cmd = 'sudo sysctl -w net.core.default_qdisc=%s' % qdisc
+
+    if call(sh_cmd, shell=True) != 0:
+        sys.stderr.write(
+            'Failed to set default packet scheduler to %s\n' % qdisc)
+    else:
+        sys.stderr.write('Set default packet scheduler to %s\n' % qdisc)
