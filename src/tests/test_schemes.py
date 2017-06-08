@@ -46,7 +46,7 @@ def test_schemes():
             for proc in [first_proc, second_proc]:
                 proc.wait()
                 if proc.returncode != 0:
-                    sys.exit('%s failed in tests\n' % scheme)
+                    sys.exit('%s failed in tests' % scheme)
         except TimeoutError:
             pass
         except Exception as exception:
