@@ -136,6 +136,13 @@ def parse_test_remote(remote):
 
 
 def verify_test_args(args):
+    if args.flows == 0:
+        prepend = getattr(args, 'prepend_mm_cmds', None)
+        append = getattr(args, 'append_mm_cmds', None)
+        if append is not None or prepend is not None:
+            sys.exit('Cannot apply --prepend-mm-cmds or --append-mm-cmds '
+                     'while testing without pantheon tunnels')
+
     if args.runtime > 60 or args.runtime <= 0:
         sys.exit('runtime cannot be non-positive or greater than 60 s')
     if args.flows < 0:
