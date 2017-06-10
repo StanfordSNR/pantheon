@@ -128,19 +128,36 @@ def save_test_metadata(meta, data_dir, git_summary):
                   separators=(',', ': '))
 
 
-def get_default_qdisc():
+def get_default_qdisc(ssh_cmd):
     sh_cmd = 'sysctl net.core.default_qdisc'
-    curr_qdisc = check_output(sh_cmd, shell=True)
-    curr_qdisc = curr_qdisc.split('=')[-1].strip()
+    local_qdisc = check_output(sh_cmd, shell=True)
+    local_qdisc = local_qdisc.split('=')[-1].strip()
+    sys.stderr.write('local default_qdisc: %s\n' % local_qdisc)
 
-    return curr_qdisc
+    if ssh_cmd is not None:
+        remote_qdisc = check_output(ssh_cmd + [sh_cmd])
+        remote_qdisc = remote_qdisc.split('=')[-1].strip()
+        sys.stderr.write('remote default_qdisc: %s\n' % remote_qdisc)
+
+        if local_qdisc != remote_qdisc:
+            sys.exit('default_qdisc differs on local and remote sides')
+
+    return local_qdisc
 
 
-def set_default_qdisc(qdisc):
+def set_default_qdisc(qdisc, ssh_cmd):
     sh_cmd = 'sudo sysctl -w net.core.default_qdisc=%s' % qdisc
 
     if call(sh_cmd, shell=True) != 0:
-        sys.stderr.write(
-            'Failed to set default packet scheduler to %s\n' % qdisc)
+        sys.stderr.write('Failed to set local default packet scheduler '
+                         'to %s\n' % qdisc)
     else:
-        sys.stderr.write('Set default packet scheduler to %s\n' % qdisc)
+        sys.stderr.write('Set local default packet scheduler to %s\n' % qdisc)
+
+    if ssh_cmd is not None:
+        if call(ssh_cmd + [sh_cmd]) != 0:
+            sys.stderr.write('Failed to set remote default packet scheduler '
+                             'to %s\n' % qdisc)
+        else:
+            sys.stderr.write('Set remote default packet scheduler to %s\n' %
+                             qdisc)
