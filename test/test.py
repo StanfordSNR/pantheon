@@ -571,19 +571,24 @@ def run_tests(args):
     if args.random_order:
         random.shuffle(cc_schemes)
 
+    ssh_cmd = None
+    if args.mode == 'remote':
+        r = parse_remote_path(args.remote_path)
+        ssh_cmd = r['ssh_cmd']
+
     for run_id in xrange(1, args.run_times + 1):
         for cc in cc_schemes:
             if cc == 'bbr':
-                curr_qdisc = get_default_qdisc()
-                sys.stderr.write(
-                    'Current default packet scheduler is %s\n' % curr_qdisc)
-
                 try:
-                    set_default_qdisc('fq')
+                    set_default_qdisc('fq', ssh_cmd)
                     Test(args, run_id, cc).run()
                 finally:
-                    set_default_qdisc(curr_qdisc)
+                    set_default_qdisc('pfifo_fast', ssh_cmd)
             else:
+                if get_default_qdisc(ssh_cmd) != 'pfifo_fast':
+                    sys.exit('Default packet scheduler is not "pfifo_fast" '
+                             'while testing schemes other than BBR')
+
                 Test(args, run_id, cc).run()
 
     if not args.no_metadata:
