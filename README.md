@@ -1,20 +1,29 @@
 [![Build Status](https://travis-ci.org/StanfordSNR/pantheon.svg?branch=master)](https://travis-ci.org/StanfordSNR/pantheon)
 
-# Disclaimer:
-This is research software. Our scripts will write to
-the file system in the pantheon folder and in `/tmp/pantheon-tmp`.
-We never run third party programs as root, but we cannot guarantee they will
-never try to escalate privilege to root.
-
-Run at your own risk. Feel free to contact our mailing list:
-`the name of this repository`@cs.stanford.edu
-
 # Pantheon of Congestion Control
 The Pantheon has wrappers for many popular and research congestion control
 schemes. It allows them to run over a common interface and has tools to
 benchmark and compare their performance.
 Pantheon tests can be run locally over an emulated link using
 [mahimahi](http://mahimahi.mit.edu/) or over the internet to a remote machine.
+
+Our website is <http://pantheon.stanford.edu>, where you could find more
+introduction to Pantheon and search for real-world experiments results that we
+have collected so far.
+
+## Disclaimer
+This is research software. Our scripts will write to the file system in the
+`pantheon` folder and `/tmp/pantheon-tmp`. We never run third party programs
+as root, but we cannot guarantee they will never try to escalate privilege to
+root.
+
+You might want to install dependencies and run setup on your own, because
+our handy scripts will install packages and perform some system-wide settings
+(e.g., enable IP forwarding, `modprobe tcp_vegas`) as root. Please run at your
+own risk.
+
+Feel free to contact our mailing list:
+`the name of this repository`@cs.stanford.edu.
 
 ## Preparation
 Many of the tools and programs run by the Pantheon are git submodules in the
@@ -109,7 +118,7 @@ Depending on the output of `run_first`, run
 
 ```
 # Receiver first
-./<cc>.py receiver
+./<cc>.py receiver port
 ./<cc>.py sender IP port
 ```
 
@@ -117,8 +126,31 @@ or
 
 ```
 # Sender first
-./<cc>.py sender
+./<cc>.py sender port
 ./<cc>.py receiver IP port
 ```
 
 Run `src/<cc>.py -h` for detailed usage of the common interface.
+
+## How to add your own congestion control
+Adding your own congestion control to Pantheon is easy! Just follow these
+steps:
+
+1. Fork this repository.
+
+2. Add your congestion control repository as a submodule to `pantheon`:
+
+   ```
+   git submodule add <your-cc-repo-url> third_party/<your-cc-name>
+   ```
+
+3. In `pantheon/src`, create `<your-cc-name>.py` following the other schemes
+   as examples. Basically you only need to feed in several options such as
+   `deps`, `run_first`, `setup`, `setup_after_reboot`, `receiver`, `sender`.
+
+4. Add your scheme to `pantheon/src/config.yml` along with settings of
+   `friendly_name`, `color` and `marker`, so that `test/test.py` is able to
+   find your scheme and `analysis/analyze.py` is able to generate plots with
+   your specified settings.
+
+5. Send us a pull request and that's it!
