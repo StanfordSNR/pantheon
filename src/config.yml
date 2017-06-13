@@ -58,3 +58,7 @@ saturator:
   friendly_name: Saturator
   color: pink
   marker: '+'
+rlcc:
+  friendly_name: RLCC
+  color: teal
+  marker: '2'
