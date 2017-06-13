@@ -27,8 +27,7 @@ def parse_remote_path(remote_path, cc=None):
 
     ret['host_addr'], ret['pantheon_dir'] = remote_path.rsplit(':', 1)
     ret['ip'] = ret['host_addr'].split('@')[-1]
-    ret['ssh_cmd'] = ['ssh', '-o', 'StrictHostKeyChecking=no',
-                      ret['host_addr']]
+    ret['ssh_cmd'] = ['ssh', ret['host_addr']]
     ret['tunnel_manager'] = path.join(
         ret['pantheon_dir'], 'test', 'tunnel_manager.py')
 
