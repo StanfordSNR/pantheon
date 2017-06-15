@@ -65,7 +65,7 @@ class Plot(object):
 
         runs_str = 'run' if meta['run_times'] == 1 else 'runs'
         expt_title += '%s %s of %ss each per scheme' % (
-            runs_str, meta['run_times'], meta['runtime'])
+            meta['run_times'], runs_str, meta['runtime'])
 
         return expt_title
 
