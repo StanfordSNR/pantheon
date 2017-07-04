@@ -64,8 +64,12 @@ class Plot(object):
             expt_title = 'test from %s to %s, ' % (sender, receiver)
 
         runs_str = 'run' if meta['run_times'] == 1 else 'runs'
-        expt_title += '%s %s of %ss each per scheme' % (
+        expt_title += '%s %s of %ss each per scheme\n' % (
             meta['run_times'], runs_str, meta['runtime'])
+
+        if meta['flows'] > 1:
+            expt_title += '%s flows with %ss interval between flows' % (
+                meta['flows'], meta['interval'])
 
         return expt_title
 
@@ -129,7 +133,7 @@ class Plot(object):
                 if duration < 0.8 * self.runtime:
                     sys.stderr.write(
                         'Warning: "tunnel_graph %s" had duration %.2f seconds '
-                        'but should have been around %d seconds. Ignoring this'
+                        'but should have been around %s seconds. Ignoring this'
                         ' run.\n' % (log_path, duration, self.runtime))
                     error = True
 
@@ -323,7 +327,7 @@ class Plot(object):
             ax.grid()
 
         # save pantheon_summary.png
-        ax_raw.set_title(self.expt_title, y=1.02, fontsize=12)
+        ax_raw.set_title(self.expt_title.strip(), y=1.02, fontsize=12)
         lgd = ax_raw.legend(scatterpoints=1, bbox_to_anchor=(1, 0.5),
                             loc='center left', fontsize=12)
         raw_summary = path.join(self.data_dir, 'pantheon_summary.png')
@@ -332,7 +336,7 @@ class Plot(object):
 
         # save pantheon_summary_mean.png
         ax_mean.set_title(self.expt_title +
-                          '\nmean of all runs by scheme', fontsize=12)
+                          ' (mean of all runs by scheme)', fontsize=12)
         mean_summary = path.join(
             self.data_dir, 'pantheon_summary_mean.png')
         fig_mean.savefig(mean_summary, dpi=300,

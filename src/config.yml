@@ -27,7 +27,7 @@ sprout:
   color: orange
   marker: 'p'
 quic:
-  friendly_name: QUIC Cubic (toy)
+  friendly_name: QUIC Cubic
   color: magenta
   marker: '8'
 scream:
