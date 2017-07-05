@@ -7,7 +7,6 @@ import sys
 import math
 import multiprocessing
 from multiprocessing.pool import ThreadPool
-import numpy as np
 import matplotlib_agg
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
@@ -272,8 +271,6 @@ class Plot(object):
         fig_raw, ax_raw = plt.subplots()
         fig_mean, ax_mean = plt.subplots()
 
-        power_scores = []
-
         config = parse_config()
         for cc in data:
             if not data[cc]:
@@ -303,7 +300,6 @@ class Plot(object):
 
             ax_mean.scatter(x_mean, y_mean, color=color, marker=marker,
                             clip_on=False)
-            power_scores.append((float(y_mean) / float(x_mean), color))
             ax_mean.annotate(cc_name, (x_mean, y_mean))
 
         for fig_type, fig, ax in [('raw', fig_raw, ax_raw),
@@ -340,46 +336,6 @@ class Plot(object):
         mean_summary = path.join(
             self.data_dir, 'pantheon_summary_mean.png')
         fig_mean.savefig(mean_summary, dpi=300,
-                         bbox_inches='tight', pad_inches=0.2)
-
-        # make and save pantheon_summary_power.png
-        x_max, x_min = ax_mean.get_xlim()
-        y_min, y_max = ax_mean.get_ylim()
-        power_score_lines = []
-
-        ax_mean.set_autoscale_on(False)
-
-        for power_score, color in power_scores:
-            power_score_line = []
-
-            for x in np.arange(x_min, x_max, (x_max - x_min) / 100.0):
-                y = x * power_score
-                if y <= y_max and y >= y_min:
-                    power_score_line.append((x, y))
-            for y in np.arange(y_min, y_max, (y_max - y_min) / 100.0):
-                x = y / power_score
-                if x <= x_max and x >= x_min:
-                    power_score_line.append((x, y))
-
-            power_score_line.sort()  # can have weird artifacts otherwise
-            power_score_lines.append((power_score_line, color, power_score))
-
-        for power_score_line, color, power_score in power_score_lines:
-            x, y = zip(*power_score_line)
-            ax_mean.plot(x, y, '-', color=color)
-            annotate_idx = len(x) / 2
-            ax_mean.annotate('%.2f' % power_score,
-                             (x[annotate_idx], y[annotate_idx]),
-                             horizontalalignment='right',
-                             verticalalignment='top', xytext=(0, -10),
-                             textcoords="offset pixels")
-
-        power_summary = path.join(
-            self.data_dir, 'pantheon_summary_power.png')
-        ax_mean.set_title(self.expt_title +
-                          '\nmean power scores of all runs by scheme',
-                          fontsize=12)
-        fig_mean.savefig(power_summary, dpi=300,
                          bbox_inches='tight', pad_inches=0.2)
 
         sys.stderr.write(
