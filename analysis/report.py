@@ -106,8 +106,6 @@ class Report(object):
         raw_summary = path.join(self.data_dir, 'pantheon_summary.png')
         mean_summary = path.join(
             self.data_dir, 'pantheon_summary_mean.png')
-        power_summary = path.join(
-            self.data_dir, 'pantheon_summary_power.png')
 
         metadata_desc = self.describe_metadata()
         git_head = check_output(
@@ -129,10 +127,9 @@ class Report(object):
             '%s'
             '\\PantheonFig{%s}\n\n'
             '\\PantheonFig{%s}\n\n'
-            '\\PantheonFig{%s}\n\n'
             '\\newpage\n\n'
             % (format_time(), git_head, metadata_desc,
-               mean_summary, raw_summary, power_summary))
+               mean_summary, raw_summary))
 
     def include_runs(self):
         config = parse_config()
