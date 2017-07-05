@@ -86,7 +86,7 @@ def main():
     make_sure_path_exists(html_dir)
 
     if args.option == 'deps':
-        print 'libnss3-tools'
+        print 'libnss3-tools libgconf-2-4'
 
     if args.option == 'run_first':
         print 'sender'
