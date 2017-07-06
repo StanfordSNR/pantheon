@@ -3,6 +3,7 @@
 from os import path
 import sys
 import math
+import itertools
 import numpy as np
 import matplotlib_agg
 import matplotlib.pyplot as plt
@@ -246,6 +247,9 @@ class TunnelGraph(object):
             self.total_percentile_delay = np.percentile(
                 total_delays, 95, interpolation='nearest')
 
+    def flip(self, items, ncol):
+        return itertools.chain(*[items[i::ncol] for i in range(ncol)])
+
     def plot_throughput_graph(self):
         empty_graph = True
         fig, ax = plt.subplots()
@@ -255,18 +259,28 @@ class TunnelGraph(object):
             ax.fill_between(self.link_capacity_t, 0, self.link_capacity,
                             facecolor='linen')
 
+        colors = ['r', 'g', 'b', 'y', 'c', 'm']
+        color_i = 0
         for flow_id in self.flows:
+            color = colors[color_i]
+
             if flow_id in self.ingress_tput and flow_id in self.ingress_t:
                 empty_graph = False
                 ax.plot(self.ingress_t[flow_id], self.ingress_tput[flow_id],
                         label='Flow %s ingress (mean %.2f Mbit/s)'
-                        % (flow_id, self.avg_ingress.get(flow_id, 0)))
+                        % (flow_id, self.avg_ingress.get(flow_id, 0)),
+                        color=color, linestyle='dashed')
 
             if flow_id in self.egress_tput and flow_id in self.egress_t:
                 empty_graph = False
                 ax.plot(self.egress_t[flow_id], self.egress_tput[flow_id],
                         label='Flow %s egress (mean %.2f Mbit/s)'
-                        % (flow_id, self.avg_egress.get(flow_id, 0)))
+                        % (flow_id, self.avg_egress.get(flow_id, 0)),
+                        color=color)
+
+            color_i += 1
+            if color_i == len(colors):
+                color_i = 0
 
         if empty_graph:
             sys.stderr.write('No valid throughput graph is generated\n')
@@ -280,7 +294,9 @@ class TunnelGraph(object):
                          % self.avg_capacity)
 
         ax.grid()
-        lgd = ax.legend(scatterpoints=1, bbox_to_anchor=(0.5, -0.1),
+        handles, labels = ax.get_legend_handles_labels()
+        lgd = ax.legend(self.flip(handles, 2), self.flip(labels, 2),
+                        scatterpoints=1, bbox_to_anchor=(0.5, -0.1),
                         loc='upper center', ncol=2, fontsize=12)
 
         fig.set_size_inches(12, 6)
@@ -292,7 +308,7 @@ class TunnelGraph(object):
         fig, ax = plt.subplots()
 
         max_delay = 0
-        colors = ['r', 'y', 'b', 'g', 'c', 'm']
+        colors = ['r', 'g', 'b', 'y', 'c', 'm']
         color_i = 0
         for flow_id in self.flows:
             color = colors[color_i]
@@ -301,8 +317,8 @@ class TunnelGraph(object):
                 max_delay = max(max_delay, max(self.delays_t[flow_id]))
 
                 ax.scatter(self.delays_t[flow_id], self.delays[flow_id], s=1,
-                           color=color, marker='.', label='Flow %s per-packet'
-                           ' one-way delay (95th percentile %.3f ms)'
+                           color=color, marker='.',
+                           label='Flow %s (95th percentile %.2f ms)'
                            % (flow_id, self.percentile_delay.get(flow_id, 0)))
 
                 color_i += 1
@@ -316,9 +332,13 @@ class TunnelGraph(object):
         ax.set_xlim(0, int(math.ceil(max_delay)))
         ax.set_xlabel('Time (s)', fontsize=12)
         ax.set_ylabel('Per-packet one-way delay (ms)', fontsize=12)
+
         ax.grid()
-        lgd = ax.legend(scatterpoints=1, bbox_to_anchor=(0.5, -0.1),
-                        loc='upper center', ncol=2, fontsize=12)
+        handles, labels = ax.get_legend_handles_labels()
+        lgd = ax.legend(self.flip(handles, 3), self.flip(labels, 3),
+                        scatterpoints=1, bbox_to_anchor=(0.5, -0.1),
+                        loc='upper center', ncol=3, fontsize=12,
+                        markerscale=5, handletextpad=0)
 
         fig.set_size_inches(12, 6)
         fig.savefig(self.delay_graph, bbox_extra_artists=(lgd,),
