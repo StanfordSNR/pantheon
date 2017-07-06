@@ -3,7 +3,9 @@
 import sys
 import os
 from os import path
+import re
 import uuid
+import numpy as np
 import project_root
 from parse_arguments import parse_arguments
 from helpers.helpers import (
@@ -22,6 +24,7 @@ class Report(object):
 
         self.run_times = self.meta['run_times']
         self.flows = self.meta['flows']
+        self.config = parse_config()
 
     def describe_metadata(self):
         meta = self.meta
@@ -102,6 +105,119 @@ class Report(object):
 
         return desc
 
+    def create_table(self, data):
+        col_cnt = 3 + 2 * self.flows
+
+        align = ' r | r |'
+        for data_t in ['tput', 'delay', 'loss']:
+            for _ in xrange(self.flows):
+                align += ' R'
+
+            if data_t != 'loss':
+                align += ' |'
+
+        flow_cols = []
+        for flow_id in xrange(1, self.flows + 1):
+            flow_cols.append('flow %d' % flow_id)
+
+        table = (
+            '\\begin{landscape}\n'
+            '\\centering\n'
+            '\\begin{tabular}{%(align)s}\n'
+            '& & \\multicolumn{%(flows)d}{c|}{median avg. tput (Mbit/s)}'
+            ' & \\multicolumn{%(flows)d}{c|}{median 95th-\\%%ile delay (ms)}'
+            ' & \\multicolumn{%(flows)d}{c}{median loss rate (\\%%)} \\\\\n'
+            'scheme & \\# runs & %(flow_cols)s & %(flow_cols)s & %(flow_cols)s'
+            ' \\\\\n'
+            '\\hline\n'
+        ) % {'align': align, 'flows': self.flows,
+             'flow_cols': ' & '.join(flow_cols)}
+
+        for cc in self.cc_schemes:
+            flow_data = {}
+            for data_t in ['tput', 'delay', 'loss']:
+                flow_data[data_t] = []
+                for flow_id in xrange(1, self.flows + 1):
+                    med = np.median(data[cc][flow_id][data_t])
+                    flow_data[data_t].append('%.2f' % med)
+
+            table += (
+                '%(friendly_name)s & %(valid_runs)s & %(flow_tputs)s & '
+                '%(flow_delays)s & %(flow_losses)s \\\\\n'
+            ) % {'friendly_name': data[cc]['friendly_name'],
+                 'valid_runs': data[cc]['valid_runs'],
+                 'flow_tputs': ' & '.join(flow_data['tput']),
+                 'flow_delays': ' & '.join(flow_data['delay']),
+                 'flow_losses': ' & '.join(flow_data['loss'])}
+
+        table += (
+            '\\end{tabular}\n'
+            '\\end{landscape}\n'
+        )
+
+        return table
+
+    def summary_table(self):
+        data = {}
+
+        re_tput = lambda x: re.match(r'Average throughput: (.*?) Mbit/s', x)
+        re_delay = lambda x: re.match(
+            r'95th percentile per-packet one-way delay: (.*?) ms', x)
+        re_loss = lambda x: re.match(r'Loss rate: (.*?)%', x)
+
+        for cc in self.cc_schemes:
+            data[cc] = {}
+            data[cc]['valid_runs'] = 0
+
+            cc_name = self.config[cc]['friendly_name']
+            cc_name = cc_name.strip().replace('_', '\\_')
+            data[cc]['friendly_name'] = cc_name
+
+            for flow_id in xrange(1, self.flows + 1):
+                data[cc][flow_id] = {}
+
+                data[cc][flow_id]['tput'] = []
+                data[cc][flow_id]['delay'] = []
+                data[cc][flow_id]['loss'] = []
+
+            for run_id in xrange(1, 1 + self.run_times):
+                fname = '%s_stats_run%s.log' % (cc, run_id)
+                stats_log_path = path.join(self.data_dir, fname)
+
+                if path.isfile(stats_log_path):
+                    data[cc]['valid_runs'] += 1
+
+                    stats_log = open(stats_log_path)
+
+                    for flow_id in xrange(1, self.flows + 1):
+                        while True:
+                            line = stats_log.readline()
+                            if not line:
+                                break
+
+                            if 'Flow %d' % flow_id not in line:
+                                continue
+                            else:
+                                ret = re_tput(stats_log.readline())
+                                if ret:
+                                    ret = float(ret.group(1))
+                                    data[cc][flow_id]['tput'].append(ret)
+
+                                ret = re_delay(stats_log.readline())
+                                if ret:
+                                    ret = float(ret.group(1))
+                                    data[cc][flow_id]['delay'].append(ret)
+
+                                ret = re_loss(stats_log.readline())
+                                if ret:
+                                    ret = float(ret.group(1))
+                                    data[cc][flow_id]['loss'].append(ret)
+                                break
+
+                    stats_log.close()
+
+        return self.create_table(data)
+
     def include_summary(self):
         raw_summary = path.join(self.data_dir, 'pantheon_summary.png')
         mean_summary = path.join(
@@ -115,6 +231,7 @@ class Report(object):
             '\\documentclass{article}\n'
             '\\usepackage{pdfpages, graphicx, float}\n'
             '\\usepackage{float}\n\n'
+            '\\usepackage{array, pdflscape}\n\n'
             '\\newcommand{\PantheonFig}[1]{%%\n'
             '\\begin{figure}[H]\n'
             '\\centering\n'
@@ -122,6 +239,7 @@ class Report(object):
             '{Figure is missing}\n'
             '\\end{figure}}\n\n'
             '\\begin{document}\n\n'
+            '\\newcolumntype{R}{>{\\raggedleft\\arraybackslash}p{35pt}}'
             '\\textbf{Pantheon Summary} '
             '(Generated at %s with pantheon version \\texttt{%s})\n\n'
             '%s'
@@ -131,13 +249,14 @@ class Report(object):
             % (format_time(), git_head, metadata_desc,
                mean_summary, raw_summary))
 
-    def include_runs(self):
-        config = parse_config()
+        self.latex.write('%s\\newpage\n\n' % self.summary_table())
 
+    def include_runs(self):
         cc_id = 0
         for cc in self.cc_schemes:
             cc_id += 1
-            cc_name = config[cc]['friendly_name'].strip().replace('_', '\\_')
+            cc_name = self.config[cc]['friendly_name']
+            cc_name = cc_name.strip().replace('_', '\\_')
 
             for run_id in xrange(1, 1 + self.run_times):
                 fname = '%s_stats_run%s.log' % (cc, run_id)
