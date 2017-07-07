@@ -5,6 +5,7 @@ from os import path
 import re
 import sys
 import math
+import numpy as np
 import multiprocessing
 from multiprocessing.pool import ThreadPool
 import matplotlib_agg
@@ -291,8 +292,8 @@ class Plot(object):
                            label=cc_name, clip_on=False)
 
             # plot the average of raw values
-            x_mean = sum(x_data) / len(x_data)
-            y_mean = sum(y_data) / len(y_data)
+            x_mean = np.mean(x_data)
+            y_mean = np.mean(y_data)
 
             # update min and max mean delay
             min_mean_delay = min(x_mean, min_mean_delay)

@@ -106,40 +106,37 @@ class Report(object):
         return desc
 
     def create_table(self, data):
-        col_cnt = 3 + 2 * self.flows
-
-        align = ' r | r |'
+        align = ' c | c'
         for data_t in ['tput', 'delay', 'loss']:
-            for _ in xrange(self.flows):
-                align += ' R'
+            align += ' | ' + ' '.join(['Y' for _ in xrange(self.flows)])
+        align += ' '
 
-            if data_t != 'loss':
-                align += ' |'
+        flow_cols = ' & '.join(
+            ['flow %d' % flow_id for flow_id in xrange(1, 1 + self.flows)])
 
-        flow_cols = []
-        for flow_id in xrange(1, self.flows + 1):
-            flow_cols.append('flow %d' % flow_id)
-
+        table_width = 0.9 if self.flows == 1 else ''
         table = (
             '\\begin{landscape}\n'
             '\\centering\n'
-            '\\begin{tabular}{%(align)s}\n'
-            '& & \\multicolumn{%(flows)d}{c|}{median avg. tput (Mbit/s)}'
-            ' & \\multicolumn{%(flows)d}{c|}{median 95th-\\%%ile delay (ms)}'
-            ' & \\multicolumn{%(flows)d}{c}{median loss rate (\\%%)} \\\\\n'
+            '\\begin{tabularx}{%(width)s\linewidth}{%(align)s}\n'
+            '& & \\multicolumn{%(flows)d}{c|}{mean avg tput (Mbit/s)}'
+            ' & \\multicolumn{%(flows)d}{c|}{mean 95th-\\%%ile delay (ms)}'
+            ' & \\multicolumn{%(flows)d}{c}{mean loss rate (\\%%)} \\\\\n'
             'scheme & \\# runs & %(flow_cols)s & %(flow_cols)s & %(flow_cols)s'
             ' \\\\\n'
             '\\hline\n'
-        ) % {'align': align, 'flows': self.flows,
-             'flow_cols': ' & '.join(flow_cols)}
+        ) % {'width': table_width,
+             'align': align,
+             'flows': self.flows,
+             'flow_cols': flow_cols}
 
         for cc in self.cc_schemes:
             flow_data = {}
             for data_t in ['tput', 'delay', 'loss']:
                 flow_data[data_t] = []
                 for flow_id in xrange(1, self.flows + 1):
-                    med = np.median(data[cc][flow_id][data_t])
-                    flow_data[data_t].append('%.2f' % med)
+                    mean_value = np.mean(data[cc][flow_id][data_t])
+                    flow_data[data_t].append('%.2f' % mean_value)
 
             table += (
                 '%(friendly_name)s & %(valid_runs)s & %(flow_tputs)s & '
@@ -151,7 +148,7 @@ class Report(object):
                  'flow_losses': ' & '.join(flow_data['loss'])}
 
         table += (
-            '\\end{tabular}\n'
+            '\\end{tabularx}\n'
             '\\end{landscape}\n'
         )
 
@@ -231,7 +228,8 @@ class Report(object):
             '\\documentclass{article}\n'
             '\\usepackage{pdfpages, graphicx, float}\n'
             '\\usepackage{float}\n\n'
-            '\\usepackage{array, pdflscape}\n\n'
+            '\\usepackage{tabularx, pdflscape}\n\n'
+            '\\newcolumntype{Y}{>{\\centering\\arraybackslash}X}\n'
             '\\newcommand{\PantheonFig}[1]{%%\n'
             '\\begin{figure}[H]\n'
             '\\centering\n'
@@ -239,7 +237,6 @@ class Report(object):
             '{Figure is missing}\n'
             '\\end{figure}}\n\n'
             '\\begin{document}\n\n'
-            '\\newcolumntype{R}{>{\\raggedleft\\arraybackslash}p{35pt}}'
             '\\textbf{Pantheon Summary} '
             '(Generated at %s with pantheon version \\texttt{%s})\n\n'
             '%s'
