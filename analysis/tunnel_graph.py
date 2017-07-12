@@ -259,7 +259,7 @@ class TunnelGraph(object):
             ax.fill_between(self.link_capacity_t, 0, self.link_capacity,
                             facecolor='linen')
 
-        colors = ['r', 'g', 'b', 'y', 'c', 'm']
+        colors = ['b', 'g', 'r', 'y', 'c', 'm']
         color_i = 0
         for flow_id in self.flows:
             color = colors[color_i]
@@ -308,7 +308,7 @@ class TunnelGraph(object):
         fig, ax = plt.subplots()
 
         max_delay = 0
-        colors = ['r', 'g', 'b', 'y', 'c', 'm']
+        colors = ['b', 'g', 'r', 'y', 'c', 'm']
         color_i = 0
         for flow_id in self.flows:
             color = colors[color_i]

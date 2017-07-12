@@ -447,17 +447,34 @@ class Test(object):
         datalink_tun_logs = []
         acklink_tun_logs = []
 
+        apply_ofst = False
+        if self.mode == 'remote':
+            if self.remote_ofst is not None and self.local_ofst is not None:
+                apply_ofst = True
+
+                if self.sender_side == 'remote':
+                    data_e_ofst = self.remote_ofst
+                    ack_i_ofst = self.remote_ofst
+                    data_i_ofst = self.local_ofst
+                    ack_e_ofst = self.local_ofst
+                else:
+                    data_i_ofst = self.remote_ofst
+                    ack_e_ofst = self.remote_ofst
+                    data_e_ofst = self.local_ofst
+                    ack_i_ofst = self.local_ofst
+
         for i in xrange(self.flows):
             tun_id = i + 1
+
             if self.mode == 'remote':
                 # download logs from remote side
                 cmd = 'scp -C %s:' % self.r['host_addr']
                 cmd += '%(log)s %(log)s'
 
                 if self.sender_side == 'remote':
-                    call(cmd % {'log': self.acklink_ingress_logs[i]},
-                         shell=True)
                     call(cmd % {'log': self.datalink_egress_logs[i]},
+                         shell=True)
+                    call(cmd % {'log': self.acklink_ingress_logs[i]},
                          shell=True)
                 else:
                     call(cmd % {'log': self.datalink_ingress_logs[i]},
@@ -477,12 +494,18 @@ class Test(object):
                    '-i', self.datalink_ingress_logs[i],
                    '-e', self.datalink_egress_logs[i],
                    '-o', datalink_tun_log]
+            if apply_ofst:
+                cmd += ['-i-clock-offset', data_i_ofst,
+                        '-e-clock-offset', data_e_ofst]
             call(cmd)
 
             cmd = ['merge-tunnel-logs', 'single',
                    '-i', self.acklink_ingress_logs[i],
                    '-e', self.acklink_egress_logs[i],
                    '-o', acklink_tun_log]
+            if apply_ofst:
+                cmd += ['-i-clock-offset', ack_i_ofst,
+                        '-e-clock-offset', ack_e_ofst]
             call(cmd)
 
             datalink_tun_logs.append(datalink_tun_log)
