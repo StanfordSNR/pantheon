@@ -73,8 +73,6 @@ class Report(object):
 
                 if '%s_desc' % side in meta:
                     txt[side].append(meta['%s_desc' % side])
-                else:
-                    txt[side].append(side)
 
                 if '%s_if' % side in meta:
                     txt[side].append(meta['%s_if' % side])
@@ -84,18 +82,18 @@ class Report(object):
                 txt[side] = ' '.join(txt[side]).replace('_', '\\_')
 
             if meta['sender_side'] == 'remote':
-                sender = txt['remote']
-                receiver = txt['local']
+                desc += ('Data path: %s (\\textit{remote}) \\textrightarrow '
+                         '%s (\\textit{local}).\n\n') % (
+                         txt['remote'], txt['local'])
             else:
-                sender = txt['local']
-                receiver = txt['remote']
-
-            desc += 'Data path \\textbf{from} %s \\textbf{to} %s.\n\n' % (
-                sender, receiver)
+                desc += ('Data path: %s (\\textit{local}) \\textrightarrow '
+                         '%s (\\textit{remote}).\n\n') % (
+                         txt['local'], txt['remote'])
 
         if 'ntp_addr' in meta:
             ntp_addr = meta['ntp_addr']
-            desc += '\n\nNTP offset measured against %s.' % ntp_addr
+            desc += ('NTP offset measured against %s and has been applied '
+                     'to correct the timestamps in logs.\n\n' % ntp_addr)
 
         desc += (
             '\\begin{verbatim}\n'
@@ -227,8 +225,8 @@ class Report(object):
         self.latex.write(
             '\\documentclass{article}\n'
             '\\usepackage{pdfpages, graphicx, float}\n'
-            '\\usepackage{float}\n\n'
-            '\\usepackage{tabularx, pdflscape}\n\n'
+            '\\usepackage{tabularx, pdflscape}\n'
+            '\\usepackage{textcomp}\n\n'
             '\\newcolumntype{Y}{>{\\centering\\arraybackslash}X}\n'
             '\\newcommand{\PantheonFig}[1]{%%\n'
             '\\begin{figure}[H]\n'

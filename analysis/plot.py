@@ -31,7 +31,6 @@ class Plot(object):
         self.run_times = meta['run_times']
         self.flows = meta['flows']
         self.runtime = meta['runtime']
-        self.worst_ofst_diff = None
         self.expt_title = self.generate_expt_title(meta)
 
     def generate_expt_title(self, meta):
@@ -150,27 +149,14 @@ class Plot(object):
             sys.stderr.write('Warning: %s does not exist\n' % stats_log_path)
             return None
 
-        local_ofst = None
-        remote_ofst = None
         saved_lines = ''
 
         # back up old stats logs
         with open(stats_log_path) as stats_log:
             for line in stats_log:
-                if 'Start at:' in line or 'End at: ' in line:
+                if any([x in line for x in [
+                    'Start at:', 'End at:', 'clock offset:']]):
                     saved_lines += line
-                elif 'Local clock offset:' in line:
-                    saved_lines += line
-
-                    ret = re.match(r'Local clock offset: (.*?) ms', line)
-                    if ret:
-                        local_ofst = float(ret.group(1))
-                elif 'Remote clock offset:' in line:
-                    saved_lines += line
-
-                    ret = re.match(r'Remote clock offset: (.*?) ms', line)
-                    if ret:
-                        remote_ofst = float(ret.group(1))
                 else:
                     continue
 
@@ -183,10 +169,6 @@ class Plot(object):
                                 (path.basename(__file__), format_time()))
                 stats_log.write('# Datalink statistics\n')
                 stats_log.write('%s' % stats)
-
-        if local_ofst is not None and remote_ofst is not None:
-            return abs(local_ofst - remote_ofst)
-        return None
 
     def eval_performance(self):
         data = {}
@@ -213,16 +195,12 @@ class Plot(object):
         for cc in self.cc_schemes:
             for run_id in xrange(1, 1 + self.run_times):
                 (tput, delay, loss, stats) = results[cc][run_id].get()
-                ofst_diff = self.update_stats_log(cc, run_id, stats)
+                self.update_stats_log(cc, run_id, stats)
 
                 if tput is None or delay is None:
                     continue
 
                 data[cc].append((tput, delay, loss))
-                if ofst_diff:
-                    if (self.worst_ofst_diff is None or
-                            ofst_diff > self.worst_ofst_diff):
-                        self.worst_ofst_diff = ofst_diff
 
         sys.stderr.write('Appended datalink statistics to stats files in %s\n'
                          % self.data_dir)
@@ -315,10 +293,7 @@ class Plot(object):
             if yticks[0] < 0:
                 ax.set_ylim(bottom=0)
 
-            xlabel = '95th percentile of per-packet one-way delay (ms)'
-            if self.worst_ofst_diff is not None:
-                xlabel += ('\n(worst absolute difference of clock offset: '
-                           '%s ms)' % self.worst_ofst_diff)
+            xlabel = '95th percentile one-way delay (ms)'
             ax.set_xlabel(xlabel, fontsize=12)
             ax.set_ylabel('Average throughput (Mbit/s)', fontsize=12)
             ax.grid()
