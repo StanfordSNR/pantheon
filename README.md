@@ -1,15 +1,21 @@
 [![Build Status](https://travis-ci.org/StanfordSNR/pantheon.svg?branch=master)](https://travis-ci.org/StanfordSNR/pantheon)
 
 # Pantheon of Congestion Control
-The Pantheon has wrappers for many popular and research congestion control
-schemes. It allows them to run over a common interface and has tools to
-benchmark and compare their performance.
-Pantheon tests can be run locally over an emulated link using
-[mahimahi](http://mahimahi.mit.edu/) or over the internet to a remote machine.
+The Pantheon contains wrappers for many popular practical and research congestion 
+control schemes. The Pantheon enables them to run on a common interface, and has 
+tools to benchmark and compare their performances.
+Pantheon tests can be run locally over emulated links using
+[mahimahi](http://mahimahi.mit.edu/) or over the Internet to a remote machine.
 
-Our website is <http://pantheon.stanford.edu>, where you could find more
-introduction to Pantheon and search for real-world experiments results that we
-have collected so far.
+Our website is <http://pantheon.stanford.edu>, where you can find more
+information about Pantheon, including supported schemes, our real-world 
+experiment results so far, and how to get involved.
+
+To discuss and talk about Pantheon-related topics and issues, 
+
+Feel free to contact our mailing list:
+`pantheon-stanford <at> googlegroups <dot> com`\
+(Changed from `the name of this repository`@cs.stanford.edu)
 
 ## Disclaimer
 This is research software. Our scripts will write to the file system in the
@@ -17,13 +23,10 @@ This is research software. Our scripts will write to the file system in the
 as root, but we cannot guarantee they will never try to escalate privilege to
 root.
 
-You might want to install dependencies and run setup on your own, because
+You might want to install dependencies and run the setup on your own, because
 our handy scripts will install packages and perform some system-wide settings
 (e.g., enable IP forwarding, `modprobe tcp_vegas`) as root. Please run at your
 own risk.
-
-Feel free to contact our mailing list:
-`the name of this repository`@cs.stanford.edu.
 
 ## Preparation
 Many of the tools and programs run by the Pantheon are git submodules in the
@@ -42,11 +45,11 @@ git submodule update --init --recursive
 ## Dependencies
 We provide a handy script `install_deps.sh` to install globally required
 dependencies. But you may want to inspect the contents of this script and
-install these dependencies by yourself.
+install these dependencies yourself.
 
 For those dependencies required by each congestion control scheme `<cc>`,
-run `src/<cc>.py deps` to print a dependency list. Again you could install
-them by yourself. Alternatively, run
+run `src/<cc>.py deps` to print a dependency list. Again, you could install
+them yourself. Alternatively, run
 
 ```
 test/setup.py --install-deps (--all | --schemes "<cc1> <cc2> ...")
@@ -62,9 +65,9 @@ After installing dependencies, run
 test/setup.py [--setup] [--all | --schemes "<cc1> <cc2> ..."]
 ```
 
-to set up schemes. `--setup` is only required the first time when running these
-schemes. Otherwise, `test/setup.py` is required to be run only every time after
-reboots (without `--setup`).
+to set up supported congestion control schemes. `--setup` is only required the 
+first time when running these schemes. Otherwise, `test/setup.py` is 
+required to be run only every reboot (without `--setup`).
 
 ## Running the Pantheon
 To test schemes in emulated networks locally, run
@@ -73,7 +76,7 @@ To test schemes in emulated networks locally, run
 test/test.py local (--all | --schemes "<cc1> <cc2> ...")
 ```
 
-To test schemes over the internet to remote machine, run
+To test schemes over the Internet to remote machine, run
 
 ```
 test/test.py remote (--all | --schemes "<cc1> <cc2> ...") HOSTADDR:PANTHEON-DIR
@@ -92,7 +95,7 @@ analysis/analyze.py [--data-dir DIR]
 ```
 
 It will analyze the logs saved by `test/test.py`, then generate charts and
-`pantheon_report.pdf`.
+a report called `pantheon_report.pdf`.
 
 The directory to save data is `test/data` by default,
 but it can be set by `--data-dir` on `test/test.py` and `analysis/analyze.py`.
@@ -100,16 +103,16 @@ but it can be set by `--data-dir` on `test/test.py` and `analysis/analyze.py`.
 ## Running a single congestion control scheme
 All the available schemes can be found in `src/config.yml`. To run a single
 congestion control scheme, first follow the **Dependencies** section to install
-required dependencies.
+the  required dependencies.
 
-At the first time testing it, run `src/<cc>.py setup`
-to perform setup that is persistent across reboots, such as compilation,
+During the first time testing, run `src/<cc>.py setup`
+to perform the setup persistent across reboots, such as compilation,
 generating or downloading files to send, etc. Then run
 `src/<cc>.py setup_after_reboot`, which has to be run again every time after
-reboots. In fact, `test/setup.py [--setup]` performs `setup_after_reboot` by
+a reboot. In fact, `test/setup.py [--setup]` performs `setup_after_reboot` by
 default, and runs `setup` on schemes when `--setup` is given.
 
-Next, find running order for scheme:
+Next, execute the following command to find the running order for a scheme:
 ```
 ./<cc>.py run_first
 ```
@@ -145,7 +148,7 @@ steps:
    ```
 
 3. In `pantheon/src`, create `<your-cc-name>.py` following the other schemes
-   as examples. Basically you only need to feed in several options such as
+   as examples. Basically, you only need to feed in several options such as
    `deps`, `run_first`, `setup`, `setup_after_reboot`, `receiver`, `sender`.
 
 4. Add your scheme to `pantheon/src/config.yml` along with settings of
@@ -153,4 +156,4 @@ steps:
    find your scheme and `analysis/analyze.py` is able to generate plots with
    your specified settings.
 
-5. Send us a pull request and that's it!
+5. Send us a pull request and that's it, you're in the Pantheon!
