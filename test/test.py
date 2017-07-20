@@ -15,7 +15,8 @@ from helpers.helpers import (
     timeout_handler, TimeoutError, format_time, get_open_port)
 from test_helpers import (
     who_runs_first, parse_remote_path, query_clock_offset, get_git_summary,
-    save_test_metadata, get_default_qdisc, set_default_qdisc)
+    save_test_metadata, get_default_qdisc, set_default_qdisc, 
+    get_receive_sock_bufsizes, set_receive_sock_bufsizes, new_receive_bufsizes)
 
 
 class Test(object):
@@ -586,8 +587,10 @@ def run_tests(args):
     git_summary = get_git_summary(
         args.mode, getattr(args, 'remote_path', None))
 
+    schemes_config = parse_config()
+
     if args.all:
-        cc_schemes = parse_config().keys()
+        cc_schemes = schemes_config.keys()
     elif args.schemes is not None:
         cc_schemes = args.schemes.split()
 
@@ -599,20 +602,23 @@ def run_tests(args):
         r = parse_remote_path(args.remote_path)
         ssh_cmd = r['ssh_cmd']
 
+    new_receive_sock_bufsizes = new_receive_bufsizes()
+
     for run_id in xrange(1, args.run_times + 1):
         for cc in cc_schemes:
-            if cc == 'bbr':
-                try:
-                    set_default_qdisc('fq', ssh_cmd)
-                    Test(args, run_id, cc).run()
-                finally:
-                    set_default_qdisc('pfifo_fast', ssh_cmd)
-            else:
-                if get_default_qdisc(ssh_cmd) != 'pfifo_fast':
-                    sys.exit('Default packet scheduler is not "pfifo_fast" '
-                             'while testing schemes other than BBR')
+            default_qdisc = get_default_qdisc(ssh_cmd)
+            old_receive_bufsizes = get_receive_sock_bufsizes(ssh_cmd)
+            try:
+                test_qdisc = 'pfifo_fast'       # Default qdisc for now.
+                if 'qdisc' in schemes_config[cc]:
+                    test_qdisc = schemes_config[cc]['qdisc']
 
+                set_default_qdisc(test_qdisc, ssh_cmd)
+                set_receive_sock_bufsizes(new_receive_sock_bufsizes, ssh_cmd)
                 Test(args, run_id, cc).run()
+            finally:
+                set_default_qdisc(default_qdisc, ssh_cmd)
+                set_receive_sock_bufsizes(old_receive_bufsizes, ssh_cmd)
 
     if not args.no_metadata:
         meta = vars(args).copy()
