@@ -4,10 +4,11 @@ import sys
 import time
 import os
 from os import path
+from subprocess import PIPE
 import signal
 import project_root
 from helpers.helpers import (
-    get_open_port, check_output, call, Popen, PIPE, parse_config,
+    get_open_port, check_output, call, Popen, parse_config,
     kill_proc_group, timeout_handler, TimeoutError)
 
 

@@ -3,8 +3,7 @@ from os import path
 import json
 import subprocess
 import project_root
-from helpers.helpers import (
-        check_output, call, get_kernel_attr, set_kernel_attr)
+from helpers.helpers import (check_output, get_kernel_attr, set_kernel_attr)
 
 
 def who_runs_first(cc):
@@ -129,7 +128,7 @@ def save_test_metadata(meta, data_dir, git_summary):
 
 
 def get_recv_sock_bufsizes(ssh_cmd=None):
-    buf_sizes = { 'remote': {}, 'local': {} }
+    buf_sizes = {'remote': {}, 'local': {}}
 
     max_sh_cmd = 'sysctl net.core.rmem_max'
     default_sh_cmd = 'sysctl net.core.rmem_default'

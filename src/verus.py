@@ -2,7 +2,7 @@
 
 from os import path
 from subprocess import check_call
-from src_helpers import parse_arguments, apply_patch, TMPDIR
+from src_helpers import parse_arguments, apply_patch, TMPDIR, check_default_qdisc
 import project_root
 
 
@@ -25,6 +25,9 @@ def main():
 
         sh_cmd = './bootstrap.sh && ./configure && make -j2'
         check_call(sh_cmd, shell=True, cwd=cc_repo)
+        
+    if args.option == 'setup_after_reboot':
+        check_default_qdisc('verus')
 
     if args.option == 'sender':
         cmd = [send_src, '-name', TMPDIR, '-p', args.port, '-t', '75']

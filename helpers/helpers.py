@@ -2,7 +2,6 @@ import sys
 import os
 from os import path
 import subprocess
-from subprocess import PIPE
 import socket
 import signal
 import errno
@@ -37,7 +36,7 @@ make_sure_path_exists(TMPDIR)
 def print_cmd(cmd):
     if isinstance(cmd, list):
         cmd_to_print = ' '.join(cmd).strip()
-    elif isinstance(cmd, str) or isinstance(cmd, unicode):
+    elif isinstance(cmd, (str, unicode)):
         cmd_to_print = cmd.strip()
     else:
         cmd_to_print = ''

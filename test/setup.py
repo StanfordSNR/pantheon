@@ -59,12 +59,9 @@ def setup(args):
                     check_call(['python', cc_src, 'setup'])
 
                 # setup required every time after reboot
-                if cc == 'bbr':
-                    if call(['python', cc_src, 'setup_after_reboot']) != 0:
-                        sys.stderr.write('Warning: "%s.py setup_after_reboot"'
-                                         ' failed but continuing\n' % cc)
-                else:
-                    check_call(['python', cc_src, 'setup_after_reboot'])
+                if call(['python', cc_src, 'setup_after_reboot']) != 0:
+                    sys.stderr.write('Warning: "%s.py setup_after_reboot"'
+                                     ' failed but continuing\n' % cc)
 
 
 def main():

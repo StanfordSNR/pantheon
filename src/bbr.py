@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
 import sys
-from subprocess import Popen, call, check_call, check_output
-from src_helpers import parse_arguments, wait_and_kill_iperf
-from helpers.helpers import get_kernel_attr, get_default_qdisc
+from subprocess import Popen, call, check_call
+from src_helpers import (parse_arguments, wait_and_kill_iperf,
+                             check_default_qdisc)
+from helpers.helpers import get_kernel_attr
 
 
 def setup_bbr():
@@ -22,14 +23,7 @@ def setup_bbr():
         sh_cmd = 'sudo sysctl -w net.ipv4.tcp_allowed_congestion_control="%s"'
         check_call(sh_cmd % ' '.join(allowed_cc), shell=True)
 
-    # use fair queue as the default packet scheduler
-    default_qdisc = get_default_qdisc(debug=False)
-
-    if default_qdisc != 'fq':
-        sys.exit('Your default packet scheduler is "%s" currently. Please run '
-                 '"sudo sysctl -w net.core.default_qdisc=fq" to use fair '
-                 'queue for BBR to work, and change it back after testing BBR.'
-                 % default_qdisc)
+    check_default_qdisc('bbr')
 
 
 def main():
@@ -50,7 +44,7 @@ def main():
 
     if args.option == 'sender':
         cmd = ['iperf', '-Z', 'bbr', '-c', args.ip, '-p', args.port,
-               '-t', '45']
+               '-t', '75']
         wait_and_kill_iperf(Popen(cmd))
 
 
