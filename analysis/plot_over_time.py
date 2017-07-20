@@ -8,7 +8,6 @@ import matplotlib_agg
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from parse_arguments import parse_arguments
-import project_root
 from analyze_helpers import load_test_metadata, verify_schemes_with_meta
 from helpers.helpers import parse_config
 
@@ -109,7 +108,7 @@ class PlotThroughputTime(object):
 
         schemes_config = parse_config()['schemes']
         for cc in self.cc_schemes:
-            cc_name = config[cc]['friendly_name']
+            cc_name = schemes_config[cc]['friendly_name']
 
             for run_id in xrange(1, self.run_times + 1):
                 tunnel_log_path = path.join(

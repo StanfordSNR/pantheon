@@ -8,15 +8,16 @@ import uuid
 import random
 import signal
 import traceback
+from subprocess import PIPE
 from parse_arguments import parse_arguments
 import project_root
 from helpers.helpers import (
-    Popen, PIPE, call, check_output, TMPDIR, kill_proc_group, parse_config,
+    Popen, call, TMPDIR, kill_proc_group, parse_config,
     timeout_handler, TimeoutError, format_time, get_open_port,
     get_default_qdisc, set_default_qdisc)
 from test_helpers import (
     who_runs_first, parse_remote_path, query_clock_offset, get_git_summary,
-    save_test_metadata, 
+    save_test_metadata,
     get_recv_sock_bufsizes, set_recv_sock_bufsizes)
 
 
@@ -610,9 +611,11 @@ def run_tests(args):
             old_recv_bufsizes = get_recv_sock_bufsizes(ssh_cmd)
             try:
                 test_recv_sock_bufs = config['kernel_attrs']['sock_recv_bufs']
-                test_qdisc = config['kernel_attrs']['default_qdisc']
+
                 if 'qdisc' in schemes_config[cc]:
                     test_qdisc = schemes_config[cc]['qdisc']
+                else:
+                    test_qdisc = config['kernel_attrs']['default_qdisc']
 
                 set_default_qdisc(test_qdisc, ssh_cmd)
                 set_recv_sock_bufsizes(test_recv_sock_bufs, ssh_cmd)

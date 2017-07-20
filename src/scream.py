@@ -2,7 +2,7 @@
 
 from os import path
 from subprocess import check_call
-from src_helpers import parse_arguments
+from src_helpers import parse_arguments, check_default_qdisc
 import project_root
 
 
@@ -21,6 +21,9 @@ def main():
         sourdough_dir = path.join(project_root.DIR, 'third_party', 'sourdough')
         check_call(sh_cmd, shell=True, cwd=sourdough_dir)
         check_call(sh_cmd, shell=True, cwd=scream_dir)
+
+    if args.option == 'setup_after_reboot':
+        check_default_qdisc('scream')
 
     if args.option == 'receiver':
         cmd = [recv_src, args.port]

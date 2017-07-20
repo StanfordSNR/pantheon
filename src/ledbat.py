@@ -3,7 +3,7 @@
 import os
 from os import path
 from subprocess import check_call, PIPE, Popen
-from src_helpers import curr_time_sec, parse_arguments
+from src_helpers import curr_time_sec, parse_arguments, check_default_qdisc
 import project_root
 
 
@@ -18,6 +18,9 @@ def main():
 
     if args.option == 'setup':
         check_call(['make', '-j2'], cwd=cc_repo)
+
+    if args.option == 'setup_after_reboot':
+        check_default_qdisc('ledbat')
 
     if args.option == 'receiver':
         cmd = [src, '-l', '-p', args.port]

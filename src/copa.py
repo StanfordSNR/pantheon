@@ -3,7 +3,7 @@
 import os
 from os import path
 from subprocess import check_call
-from src_helpers import parse_arguments
+from src_helpers import parse_arguments, check_default_qdisc
 import project_root
 
 
@@ -23,6 +23,9 @@ def main():
 
     if args.option == 'setup':
         check_call(['makepp'], cwd=cc_repo)
+
+    if args.option == 'setup_after_reboot':
+        check_default_qdisc('copa')
 
     if args.option == 'receiver':
         cmd = [recv_src, args.port]

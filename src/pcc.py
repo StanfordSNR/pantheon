@@ -3,7 +3,7 @@
 import os
 from os import path
 from subprocess import check_call, Popen
-from src_helpers import parse_arguments, apply_patch
+from src_helpers import parse_arguments, apply_patch, check_default_qdisc
 import project_root
 
 
@@ -25,6 +25,9 @@ def main():
 
         check_call(['make'], cwd=recv_dir)
         check_call(['make'], cwd=send_dir)
+
+    if args.option == 'setup_after_reboot':
+        check_default_qdisc('pcc')
 
     if args.option == 'receiver':
         new_env = os.environ.copy()

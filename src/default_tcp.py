@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from subprocess import Popen
-from src_helpers import parse_arguments, wait_and_kill_iperf
+from src_helpers import parse_arguments, wait_and_kill_iperf, check_default_qdisc
 
 
 def main():
@@ -12,6 +12,9 @@ def main():
 
     if args.option == 'run_first':
         print 'receiver'
+
+    if args.option == 'setup_after_reboot':
+        check_default_qdisc('default_tcp')
 
     if args.option == 'receiver':
         cmd = ['iperf', '-s', '-p', args.port]
