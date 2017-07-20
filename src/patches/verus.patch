@@ -1,0 +1,36 @@
+diff --git a/src/verus.hpp b/src/verus.hpp
+index 499d69f..f52c5f1 100644
+--- a/src/verus.hpp
++++ b/src/verus.hpp
+@@ -33,7 +33,7 @@
+ #include <boost/assign/std/vector.hpp>
+ 
+ // VERUS PARAMETERS
+-#define  MTU 1450
++#define  MTU 1414
+ #define  VERUS_M_DECREASE 0.7
+ #define  CURVE_TIMER 1e6  // timer in microseconds, how often do we update the curve
+ #define  EPOCH 5e3 // Verus epoch in microseconds
+diff --git a/tools/plot.py b/tools/plot.py
+index 328bca8..330f583 100755
+--- a/tools/plot.py
++++ b/tools/plot.py
+@@ -29,15 +29,15 @@ fig = plt.figure(figsize=(8,3), facecolor='w')
+ # processing the verus receiver log file to plot the throughput
+ trace = open (args.client_file, 'r')
+ throughput = []
+-bytes = 1492 #MTU of verus is 1450 + 42 UDP/IP overhead
++bytes = 1456 #MTU of verus is 1450 + 42 UDP/IP overhead
+ startTime = trace.readline().strip().split(",")[0]
+ 
+ for time in trace:
+ 	if (float(time.strip().split(",")[0]) - float(startTime)) <= 1.0:
+-		bytes += 1492
++		bytes += 1456
+ 	else:
+ 		throughput.append(bytes*8/1000000.0)
+-		bytes = 1492
++		bytes = 1456
+ 		startTime = time.strip().split(",")[0]
+ throughput.insert(0, 0.0)
+ 

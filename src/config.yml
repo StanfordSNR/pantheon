@@ -1,0 +1,60 @@
+default_tcp:
+  friendly_name: TCP Cubic
+  color: black
+  marker: 'd'
+vegas:
+  friendly_name: TCP Vegas
+  color: silver
+  marker: 'h'
+bbr:
+  friendly_name: TCP BBR
+  color: gold
+  marker: '1'
+ledbat:
+  friendly_name: LEDBAT
+  color: green
+  marker: '<'
+pcc:
+  friendly_name: PCC
+  color: cyan
+  marker: '>'
+verus:
+  friendly_name: Verus
+  color: skyblue
+  marker: 'H'
+sprout:
+  friendly_name: Sprout
+  color: orange
+  marker: 'p'
+quic:
+  friendly_name: QUIC Cubic
+  color: magenta
+  marker: '8'
+scream:
+  friendly_name: SCReAM
+  color: brown
+  marker: 's'
+webrtc:
+  friendly_name: WebRTC media
+  color: yellow
+  marker: 'v'
+copa:
+  friendly_name: Copa
+  color: red
+  marker: 'o'
+taova:
+  friendly_name: TaoVA-100x
+  color: gray
+  marker: '*'
+koho_cc:
+  friendly_name: KohoCC
+  color: blue
+  marker: '^'
+calibrated_koho:
+  friendly_name: CalibratedKoho
+  color: olive
+  marker: 'D'
+saturator:
+  friendly_name: Saturator
+  color: pink
+  marker: '+'

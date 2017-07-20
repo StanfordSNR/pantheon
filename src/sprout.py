@@ -1,71 +1,46 @@
 #!/usr/bin/env python
 
 import os
-import sys
-import usage
-from subprocess import call, check_call, CalledProcessError
+from os import path
+from subprocess import check_call, Popen
+from src_helpers import parse_arguments, apply_patch
+import project_root
 
 
 def main():
-    usage.check_args(sys.argv, os.path.basename(__file__), 'receiver_first')
-    option = sys.argv[1]
-    src_dir = os.path.abspath(os.path.dirname(__file__))
-    submodule_dir = os.path.abspath(
-        os.path.join(src_dir, '../third_party/sprout'))
-    src_file = os.path.join(submodule_dir, 'src/examples/sproutbt2')
+    args = parse_arguments('receiver_first')
 
-    # build dependencies
-    if option == 'deps':
-        deps_list = ('libboost-math-dev libssl-dev '
-                     'libprotobuf-dev protobuf-compiler libncurses5-dev')
-        print deps_list
+    cc_repo = path.join(project_root.DIR, 'third_party', 'sprout')
+    model = path.join(cc_repo, 'src', 'examples', 'sprout.model')
+    src = path.join(cc_repo, 'src', 'examples', 'sproutbt2')
 
-    # build
-    if option == 'build':
+    if args.option == 'deps':
+        print ('libboost-math-dev libssl-dev libprotobuf-dev '
+               'protobuf-compiler libncurses5-dev')
+
+    if args.option == 'run_first':
+        print 'receiver'
+
+    if args.option == 'setup':
         # apply patch to reduce MTU size
-        patch = os.path.join(src_dir, 'sprout_mtu.patch')
-        cmd = 'cd %s && git apply %s' % (submodule_dir, patch)
-        try:
-            check_call(cmd, shell=True)
-        except CalledProcessError:
-            sys.stderr.write('patch apply failed but assuming things okay '
-                             '(patch applied previously?)\n')
+        apply_patch('sprout.patch', cc_repo)
 
-        # make alone sufficient if autogen.sh and configure already run
-        cmd = 'cd %s && make -j4' % submodule_dir
-        if call(cmd, shell=True) is not 0:
-            cmd = ('cd %s && ./autogen.sh && ./configure --enable-examples && '
-                   'make -j4' % submodule_dir)
-            check_call(cmd, shell=True)
+        sh_cmd = './autogen.sh && ./configure --enable-examples && make -j2'
+        check_call(sh_cmd, shell=True, cwd=cc_repo)
 
-    # commands to be run after building and before running
-    if option == 'init':
-        pass
+    if args.option == 'receiver':
+        new_env = os.environ.copy()
+        new_env['SPROUT_MODEL_IN'] = model
 
-    # who goes first
-    if option == 'who_goes_first':
-        print 'Receiver first'
+        cmd = [src, args.port]
+        Popen(cmd, env=new_env).wait()
 
-    # friendly name
-    if option == 'friendly_name':
-        print 'Sprout'
+    if args.option == 'sender':
+        new_env = os.environ.copy()
+        new_env['SPROUT_MODEL_IN'] = model
 
-    # receiver
-    if option == 'receiver':
-        os.environ['SPROUT_MODEL_IN'] = os.path.join(
-            submodule_dir, 'src/examples/sprout.model')
-        # sproutbt2 prints the 'listening on port' message to stdout
-        cmd = [src_file]
-        check_call(cmd)
-
-    # sender
-    if option == 'sender':
-        os.environ['SPROUT_MODEL_IN'] = os.path.join(
-            submodule_dir, 'src/examples/sprout.model')
-        ip = sys.argv[2]
-        port = sys.argv[3]
-        cmd = [src_file, ip, port]
-        check_call(cmd)
+        cmd = [src, args.ip, args.port]
+        Popen(cmd, env=new_env).wait()
 
 
 if __name__ == '__main__':

@@ -1,107 +1,85 @@
 #!/usr/bin/env python
 
-import os
 import sys
-import time
-import usage
 import uuid
-import subprocess
-from subprocess import check_call, check_output, PIPE, Popen
-from get_open_port import get_open_udp_port
+import os
+from os import path
+from subprocess import call, check_call, check_output, Popen
+from src_helpers import parse_arguments, TMPDIR
+import project_root
 
 
 def xvfb_in_use(display):
-    try:
-        cmd = 'xdpyinfo -display :%d >/dev/null 2>&1' % display
-        check_call(cmd, shell=True)
-    except subprocess.CalledProcessError:
-        return 0
+    cmd = 'xdpyinfo -display :%d >/dev/null 2>&1' % display
+    if call(cmd, shell=True) == 0:
+        return True
+    return False
+
+
+def setup_webrtc(cc_repo, video):
+    check_call(['npm', 'install'], cwd=cc_repo)
+
+    # check if video already exists and if its md5 checksum is correct
+    video_md5 = 'a4ef8836e546bbef4276346d0b86e81b'
+    if path.isfile(video):
+        md5_out = check_output(['md5sum', video]).split()[0]
     else:
-        return 1
+        md5_out = None
+
+    if md5_out != video_md5:
+        cmd = ['wget', '-O', video,
+               'https://media.xiph.org/video/derf/y4m/blue_sky_1080p25.y4m']
+        check_call(cmd)
+    else:
+        sys.stderr.write('video already exists\n')
 
 
 def main():
-    usage.check_args(sys.argv, os.path.basename(__file__), 'sender_first')
-    option = sys.argv[1]
-    src_dir = os.path.abspath(os.path.dirname(__file__))
-    submodule_dir = os.path.abspath(
-        os.path.join(src_dir, '../third_party/webrtc'))
-    src_file = os.path.join(submodule_dir, 'app.js')
-    video_file = os.path.join(submodule_dir, 'video.y4m')
-    video_md5 = 'a4ef8836e546bbef4276346d0b86e81b'
+    args = parse_arguments('sender_first')
 
-    # build dependencies
-    if option == 'deps':
-        deps_list = ('chromium-browser nodejs npm xvfb xfonts-100dpi '
-                     'xfonts-75dpi xfonts-cyrillic xorg dbus-x11')
-        print deps_list
+    cc_repo = path.join(project_root.DIR, 'third_party', 'webrtc')
+    video = path.join(cc_repo, 'video.y4m')
 
-    # build
-    if option == 'build':
-        cmd = 'cd %s && npm install' % submodule_dir
-        check_call(cmd, shell=True)
+    if args.option == 'deps':
+        print ('chromium-browser xvfb xfonts-100dpi xfonts-75dpi '
+               'xfonts-cyrillic xorg dbus-x11 npm nodejs nodejs-legacy')
 
-    # commands to be run after building and before running
-    if option == 'init':
-        # check if video already exists and if its md5 checksum is correct
-        cmd = ['md5sum', video_file]
-        md5_proc = Popen(cmd, stdout=PIPE)
-        md5_out = md5_proc.communicate()[0]
+    if args.option == 'run_first':
+        print 'sender'
 
-        if md5_proc.returncode != 0 or md5_out.split()[0] != video_md5:
-            video_url = (
-                'https://media.xiph.org/video/derf/y4m/blue_sky_1080p25.y4m')
-            cmd = ['wget', '-O', video_file, video_url]
-            check_call(cmd)
+    if args.option == 'setup':
+        setup_webrtc(cc_repo, video)
 
-            cmd = ['md5sum', video_file]
-            assert(check_output(cmd).split()[0] == video_md5)
-        else:
-            sys.stderr.write('video already exists\n')
-
-    # who goes first
-    if option == 'who_goes_first':
-        print 'Sender first'
-
-    # friendly name
-    if option == 'friendly_name':
-        print 'WebRTC media'
-
-    # sender
-    if option == 'sender':
+    if args.option == 'sender':
         if not xvfb_in_use(1):
-            cmd = ['Xvfb', ':1']
-            xvfb = Popen(cmd)
-        os.environ['DISPLAY'] = ':1'
+            Popen(['Xvfb', ':1'])
+        new_env = os.environ.copy()
+        new_env['DISPLAY'] = ':1'
 
-        port = get_open_udp_port()
-        cmd = ['nodejs', src_file, port]
-        signaling_server = Popen(cmd)
-        print 'Listening on port: %s' % port
-        sys.stdout.flush()
+        # run signaling server on the sender side
+        signaling_server_src = path.join(cc_repo, 'app.js')
+        Popen(['node', signaling_server_src, args.port])
 
-        cmd = ('chromium-browser --app=http://localhost:%s/sender '
-               '--use-fake-ui-for-media-stream '
-               '--use-fake-device-for-media-stream '
-               '--use-file-for-fake-video-capture=%s '
-               '--user-data-dir=/tmp/pantheon-tmp/webrtc-%s'
-               % (port, video_file, uuid.uuid4()))
-        check_call(cmd, shell=True)
+        user_data_dir = path.join(TMPDIR, 'webrtc-%s' % uuid.uuid4())
+        cmd = ['chromium-browser',
+               '--app=http://localhost:%s/sender' % args.port,
+               '--use-fake-ui-for-media-stream',
+               '--use-fake-device-for-media-stream',
+               '--use-file-for-fake-video-capture=%s' % video,
+               '--user-data-dir=%s' % user_data_dir]
+        Popen(cmd, env=new_env).wait()
 
-    # receiver
-    if option == 'receiver':
+    if args.option == 'receiver':
         if not xvfb_in_use(2):
-            cmd = ['Xvfb', ':2']
-            xvfb = Popen(cmd)
-        os.environ['DISPLAY'] = ':2'
+            Popen(['Xvfb', ':2'])
+        new_env = os.environ.copy()
+        new_env['DISPLAY'] = ':2'
 
-        ip = sys.argv[2]
-        port = sys.argv[3]
-        cmd = ('chromium-browser --app=http://%s:%s/receiver '
-               '--user-data-dir=/tmp/pantheon-tmp/webrtc-%s'
-               % (ip, port, uuid.uuid4()))
-
-        check_call(cmd, shell=True)
+        user_data_dir = path.join(TMPDIR, 'webrtc-%s' % uuid.uuid4())
+        cmd = ['chromium-browser',
+               '--app=http://%s:%s/receiver' % (args.ip, args.port),
+               '--user-data-dir=%s' % user_data_dir]
+        Popen(cmd, env=new_env).wait()
 
 
 if __name__ == '__main__':

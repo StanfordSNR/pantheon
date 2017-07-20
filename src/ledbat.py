@@ -1,67 +1,44 @@
 #!/usr/bin/env python
 
 import os
-import sys
-import time
-import usage
+from os import path
 from subprocess import check_call, PIPE, Popen
-from get_open_port import get_open_udp_port
+from src_helpers import curr_time_sec, parse_arguments
+import project_root
 
 
 def main():
-    usage.check_args(sys.argv, os.path.basename(__file__), 'receiver_first')
-    option = sys.argv[1]
-    src_dir = os.path.abspath(os.path.dirname(__file__))
-    submodule_dir = os.path.abspath(
-        os.path.join(src_dir, '../third_party/libutp'))
-    src_file = os.path.join(submodule_dir, 'ucat-static')
-    DEVNULL = open(os.devnull, 'w')
+    args = parse_arguments('receiver_first')
 
-    # build dependencies
-    if option == 'deps':
-        pass
+    cc_repo = path.join(project_root.DIR, 'third_party', 'libutp')
+    src = path.join(cc_repo, 'ucat-static')
 
-    # build commands
-    if option == 'build':
-        cmd = 'cd %s && make -j4' % submodule_dir
-        check_call(cmd, shell=True)
+    if args.option == 'run_first':
+        print 'receiver'
 
-    # commands to be run after building and before running
-    if option == 'init':
-        pass
+    if args.option == 'setup':
+        check_call(['make', '-j2'], cwd=cc_repo)
 
-    # who goes first
-    if option == 'who_goes_first':
-        print 'Receiver first'
-
-    # friendly name
-    if option == 'friendly_name':
-        print 'LEDBAT'
-
-    # receiver
-    if option == 'receiver':
-        port = get_open_udp_port()
-        print 'Listening on port: %s' % port
-        sys.stdout.flush()
-        cmd = [src_file, '-l', '-p', port]
+    if args.option == 'receiver':
+        cmd = [src, '-l', '-p', args.port]
         # suppress stdout as it prints all the bytes received
-        check_call(cmd, stdout=DEVNULL)
+        with open(os.devnull, 'w') as devnull:
+            check_call(cmd, stdout=devnull)
 
-    # sender
-    if option == 'sender':
-        ip = sys.argv[2]
-        port = sys.argv[3]
-        cmd = [src_file, ip, port]
+    if args.option == 'sender':
+        cmd = [src, args.ip, args.port]
         proc = Popen(cmd, stdin=PIPE)
 
-        timeout = time.time() + 75
+        # send at full speed
+        timeout = curr_time_sec() + 75
         while True:
-            proc.stdin.write(os.urandom(1024 * 1024))
-            if time.time() > timeout:
+            proc.stdin.write(os.urandom(1024))
+            proc.stdin.flush()
+            if curr_time_sec() > timeout:
                 break
-        proc.stdin.close()
 
-    DEVNULL.close()
+        if proc:
+            proc.kill()
 
 
 if __name__ == '__main__':

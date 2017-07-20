@@ -2,25 +2,26 @@
 
 from os import path
 from subprocess import check_call
-from src_helpers import parse_arguments
+from src_helpers import parse_arguments, apply_patch
 import project_root
 
 
 def main():
     args = parse_arguments('receiver_first')
 
-    scream_dir = path.join(project_root.DIR, 'src', 'scream')
-    recv_src = path.join(scream_dir, 'ScreamServer')
-    send_src = path.join(scream_dir, 'ScreamClient')
+    cc_repo = path.join(project_root.DIR, 'third_party', 'calibrated_koho')
+    recv_src = path.join(cc_repo, 'datagrump', 'receiver')
+    send_src = path.join(cc_repo, 'datagrump', 'sender')
 
     if args.option == 'run_first':
         print 'receiver'
 
     if args.option == 'setup':
+        # apply patch to reduce MTU size
+        apply_patch('calibrated_koho.patch', cc_repo)
+
         sh_cmd = './autogen.sh && ./configure && make -j2'
-        sourdough_dir = path.join(project_root.DIR, 'third_party', 'sourdough')
-        check_call(sh_cmd, shell=True, cwd=sourdough_dir)
-        check_call(sh_cmd, shell=True, cwd=scream_dir)
+        check_call(sh_cmd, shell=True, cwd=cc_repo)
 
     if args.option == 'receiver':
         cmd = [recv_src, args.port]

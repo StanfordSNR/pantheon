@@ -1,6 +1,0 @@
-# mkdir -p ~/.ssh/controlmasters
-
-Host *
-    ControlMaster auto
-    ControlPath ~/.ssh/controlmasters/%r@%h:%p
-    ControlPersist 5m

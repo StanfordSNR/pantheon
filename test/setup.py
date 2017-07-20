@@ -1,72 +1,76 @@
 #!/usr/bin/env python
 
-import os
 import sys
-import pantheon_helpers
 from os import path
-from helpers.parse_arguments import parse_arguments
-from helpers.pantheon_help import (call, check_call, check_output,
-                                   parse_remote, sanity_check_gitmodules)
+from parse_arguments import parse_arguments
+import project_root
+from helpers.helpers import (
+    call, check_call, check_output, update_submodules, parse_config)
 
 
-class Setup:
-    def __init__(self, args):
-        self.cc = args.cc.lower()
-        self.remote = args.remote
-        self.test_dir = path.abspath(path.dirname(__file__))
-        sanity_check_gitmodules()
+def install_deps(cc_src):
+    cmd = ['python', cc_src, 'deps']
+    deps = check_output(cmd).strip()
 
-    def install(self):
-        cmd = ['python', self.src_file, 'deps']
-        deps = check_output(cmd).strip()
+    if deps:
+        cmd = 'sudo apt-get -y install ' + deps
+        if call(cmd, shell=True) != 0:
+            sys.stderr.write('Some dependencies failed to install '
+                             'but assuming things okay.\n')
 
-        if deps:
-            sys.stderr.write('Installing dependencies...\n')
-            cmd = 'sudo apt-get -yq --force-yes install ' + deps
-            check_call(cmd, shell=True)
 
-    def build(self):
-        sys.stderr.write('Building...\n')
-        cmd = ['python', self.src_file, 'build']
-        check_call(cmd)
+def setup(args):
+    if not args.install_deps:
+        # update submodules
+        update_submodules()
 
-    def initialize(self):
-        sys.stderr.write('Performing intialization commands...\n')
-        cmd = ['python', self.src_file, 'init']
-        check_call(cmd)
+        # enable IP forwarding
+        sh_cmd = 'sudo sysctl -w net.ipv4.ip_forward=1'
+        check_call(sh_cmd, shell=True)
 
-    def setup_congestion_control(self):
-        src_dir = path.abspath(path.join(self.test_dir, '../src'))
-        self.src_file = path.join(src_dir, self.cc + '.py')
+        if args.interface is not None:
+            # disable reverse path filtering
+            rpf = 'net.ipv4.conf.%s.rp_filter'
 
-        # get build dependencies
-        self.install()
+            sh_cmd = 'sudo sysctl -w %s=0' % (rpf % 'all')
+            check_call(sh_cmd, shell=True)
 
-        # run build commands
-        self.build()
+            sh_cmd = 'sudo sysctl -w %s=0' % (rpf % args.interface)
+            check_call(sh_cmd, shell=True)
 
-        # run initialize commands
-        self.initialize()
+    # setup specified schemes
+    cc_schemes = None
 
-    # congestion control setup
-    def setup(self):
-        self.setup_congestion_control()
+    if args.all:
+        cc_schemes = parse_config().keys()
+    elif args.schemes is not None:
+        cc_schemes = args.schemes.split()
 
-        # run remote setup.py
-        if self.remote:
-            rd = parse_remote(self.remote)
-            cmd = rd['ssh_cmd'] + ['python', rd['setup'], self.cc]
-            check_call(cmd)
+    if cc_schemes is not None:
+        for cc in cc_schemes:
+            cc_src = path.join(project_root.DIR, 'src', cc + '.py')
+
+            # install dependencies
+            if args.install_deps:
+                install_deps(cc_src)
+            else:
+                # persistent setup across reboots
+                if args.setup:
+                    check_call(['python', cc_src, 'setup'])
+
+                # setup required every time after reboot
+                if cc == 'bbr':
+                    if call(['python', cc_src, 'setup_after_reboot']) != 0:
+                        sys.stderr.write('Warning: "%s.py setup_after_reboot"'
+                                         ' failed but continuing\n' % cc)
+                else:
+                    check_call(['python', cc_src, 'setup_after_reboot'])
 
 
 def main():
     args = parse_arguments(path.basename(__file__))
-
-    setup = Setup(args)
-    setup.setup()
+    setup(args)
 
 
 if __name__ == '__main__':
-    DEVNULL = open(os.devnull, 'w')
     main()
-    DEVNULL.close()

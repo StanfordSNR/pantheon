@@ -1,29 +1,39 @@
 #!/usr/bin/env python
 
 import os
+from os import path
 import sys
 import signal
-import subprocess
-from subprocess import Popen, PIPE, check_output
-
-
-def destroy(procs):
-    # send SIGTERM signal to all processes and the subprocesses they spawned
-    for proc in procs.itervalues():
-        os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+from subprocess import Popen, PIPE
+import project_root
+from helpers.helpers import kill_proc_group
 
 
 def main():
-    procs = {}  # manage tunnel processes
     prompt = ''
+    procs = {}
+
+    # register SIGINT and SIGTERM events to clean up gracefully before quit
+    def stop_signal_handler(signum, frame):
+        sys.stderr.write('tunnel_manager: caught signal %s and cleanning '
+                         'up...\n' % signum)
+        for tun_id in procs:
+            kill_proc_group(procs[tun_id])
+
+    signal.signal(signal.SIGINT, stop_signal_handler)
+    signal.signal(signal.SIGTERM, stop_signal_handler)
+
     sys.stdout.write('tunnel manager is running\n')
     sys.stdout.flush()
 
     while True:
-        raw_cmd = sys.stdin.readline().strip()
-        # print all commands fed to tunnel manager
-        sys.stderr.write(prompt + raw_cmd + '\n')
-        cmd = raw_cmd.split()
+        input_cmd = sys.stdin.readline().strip()
+
+        # print all the commands fed into tunnel manager
+        if prompt:
+            sys.stderr.write(prompt)
+        sys.stderr.write(input_cmd + '\n')
+        cmd = input_cmd.split()
 
         # manage I/O of multiple tunnels
         if cmd[0] == 'tunnel':
@@ -33,7 +43,7 @@ def main():
 
             try:
                 tun_id = int(cmd[1]) - 1
-            except:
+            except ValueError:
                 sys.stderr.write('error: usage: tunnel ID CMD...\n')
                 continue
 
@@ -41,15 +51,24 @@ def main():
 
             if cmd[2] == 'mm-tunnelclient' or cmd[2] == 'mm-tunnelserver':
                 # expand $MAHIMAHI_BASE
-                cmd_to_run = os.path.expandvars(cmd_to_run).split()
+                cmd_to_run = path.expandvars(cmd_to_run).split()
                 procs[tun_id] = Popen(cmd_to_run, stdin=PIPE, stdout=PIPE,
                                       preexec_fn=os.setsid)
             elif cmd[2] == 'python':  # run python scripts inside tunnel
+                if tun_id not in procs:
+                    sys.stderr.write(
+                        'error: run tunnel client or server first\n')
+
                 procs[tun_id].stdin.write(cmd_to_run + '\n')
+                procs[tun_id].stdin.flush()
             elif cmd[2] == 'readline':  # readline from stdout of tunnel
                 if len(cmd) != 3:
                     sys.stderr.write('error: usage: tunnel ID readline\n')
                     continue
+
+                if tun_id not in procs:
+                    sys.stderr.write(
+                        'error: run tunnel client or server first\n')
 
                 sys.stdout.write(procs[tun_id].stdout.readline())
                 sys.stdout.flush()
@@ -68,10 +87,12 @@ def main():
                 sys.stderr.write('error: usage: halt\n')
                 continue
 
-            destroy(procs)
+            for tun_id in procs:
+                kill_proc_group(procs[tun_id])
+
             sys.exit(0)
         else:
-            sys.stderr.write('unknown command: %s\n' % raw_cmd)
+            sys.stderr.write('unknown command: %s\n' % input_cmd)
             continue
 
 

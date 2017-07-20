@@ -2,6 +2,10 @@ language: python
 sudo: required
 services: docker
 
+branches:
+  only:
+    - master
+
 addons:
   apt:
     sources:
@@ -11,27 +15,23 @@ addons:
 
 install:
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 99
+  - pip install matplotlib numpy tabulate pyyaml
 
 env:
     matrix:
-        - CMD='travis_extras/travis_test.sh'
-        - CMD='test/setup.py quic        && test/test.py -f 2 -t 10 quic'
-        - CMD='test/setup.py webrtc      && test/test.py -f 2 -t 10 webrtc'
-        - CMD='test/setup.py default_tcp && test/test.py -f 2 -t 10 default_tcp'
-        - CMD='test/setup.py vegas       && test/test.py -f 2 -t 10 vegas'
-        - CMD='test/setup.py koho_cc     && test/test.py -f 2 -t 10 koho_cc'
-        - CMD='test/setup.py ledbat      && test/test.py -f 2 -t 10 ledbat'
-        - CMD='test/setup.py pcc         && test/test.py -f 2 -t 10 pcc'
-        - CMD='test/setup.py verus       && test/test.py -f 2 -t 10 verus'
-        - CMD='test/setup.py scream      && test/test.py -f 2 -t 10 scream'
-        - CMD='test/setup.py sprout      && test/test.py -f 2 -t 10 sprout'
-        - CMD='test/setup.py taova       && test/test.py -f 2 -t 10 taova'
-        - CMD='test/setup.py copa        && test/test.py -f 2 -t 10 copa'
+      - CMD='test/setup.py --schemes quic --install-deps &&
+        test/setup.py --schemes quic --setup &&
+        test/test.py local --schemes quic -t 10'
+      - CMD='SCHEMES="default_tcp vegas bbr ledbat pcc verus sprout webrtc
+        scream copa taova koho_cc calibrated_koho saturator" &&
+        test/setup.py --schemes "$SCHEMES" --install-deps &&
+        test/setup.py --schemes "$SCHEMES" --setup &&
+        src/tests/test_schemes.py &&
+        test/tests/local_test.py &&
+        analysis/tests/test_analyze.py'
 
 script:
-  - test/pre_setup.py
-  - eval $CMD
+  - ./install_deps.sh && eval $CMD
 
 notifications:
-  slack: keithw:WjjCMz8yip3iQrHKBmkFGI1u
-  email: false
+    email: false

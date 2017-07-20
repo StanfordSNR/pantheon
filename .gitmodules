@@ -16,7 +16,7 @@
   ignore = dirty
 [submodule "third_party/webrtc"]
   path = third_party/webrtc
-  url = https://github.com/StanfordLPNG/webrtc.git
+  url = https://github.com/StanfordSNR/webrtc.git
   ignore = dirty
 [submodule "third_party/sprout"]
   path = third_party/sprout
@@ -36,9 +36,18 @@
   ignore = dirty
 [submodule "third_party/pantheon-tunnel"]
   path = third_party/pantheon-tunnel
-  url = https://github.com/StanfordLPNG/pantheon-tunnel.git
+  url = https://github.com/StanfordSNR/pantheon-tunnel.git
   ignore = dirty
 [submodule "third_party/genericCC"]
-	path = third_party/genericCC
-	url = https://github.com/venkatarun95/genericCC
+  path = third_party/genericCC
+  url = https://github.com/venkatarun95/genericCC
+  ignore = dirty
+[submodule "third_party/pantheon-stimuli"]
+  path = third_party/pantheon-stimuli
+  url = https://github.com/StanfordSNR/pantheon-stimuli.git
+  ignore = dirty
+[submodule "third_party/calibrated_koho"]
+  path = third_party/calibrated_koho
+  url = https://github.com/greghill/koho_cc.git
+  branch = calibrated_koho
   ignore = dirty

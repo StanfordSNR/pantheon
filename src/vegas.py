@@ -1,56 +1,46 @@
 #!/usr/bin/env python
 
-import os
-import sys
-import usage
-from subprocess import check_call
-from get_open_port import get_open_tcp_port
+from subprocess import Popen, check_call, check_output
+from src_helpers import parse_arguments, wait_and_kill_iperf
+
+
+def setup_vegas():
+    # enable tcp_vegas kernel module
+    sh_cmd = 'sudo modprobe tcp_vegas'
+    check_call(sh_cmd, shell=True)
+
+    # add vegas to kernel-allowed congestion control list
+    sh_cmd = 'sysctl net.ipv4.tcp_allowed_congestion_control'
+    allowed_cc = check_output(sh_cmd, shell=True)
+    allowed_cc = allowed_cc.split('=')[-1].split()
+
+    if 'vegas' not in allowed_cc:
+        allowed_cc.append('vegas')
+
+        sh_cmd = 'sudo sysctl -w net.ipv4.tcp_allowed_congestion_control="%s"'
+        check_call(sh_cmd % ' '.join(allowed_cc), shell=True)
 
 
 def main():
-    usage.check_args(sys.argv, os.path.basename(__file__), 'receiver_first')
-    option = sys.argv[1]
-    src_dir = os.path.abspath(os.path.dirname(__file__))
-    src_file = 'iperf'
+    args = parse_arguments('receiver_first')
 
-    # build dependencies
-    if option == 'deps':
+    if args.option == 'deps':
         print 'iperf'
 
-    # build
-    if option == 'build':
-        pass
+    if args.option == 'run_first':
+        print 'receiver'
 
-    # commands to be run after building and before running
-    if option == 'init':
-        cmd = 'sudo modprobe tcp_vegas'
-        check_call(cmd, shell=True)
-        cmd = ('echo "vegas" | '
-               'sudo tee /proc/sys/net/ipv4/tcp_allowed_congestion_control')
-        check_call(cmd, shell=True)
+    if args.option == 'setup_after_reboot':
+        setup_vegas()
 
-    # who goes first
-    if option == 'who_goes_first':
-        print 'Receiver first'
+    if args.option == 'receiver':
+        cmd = ['iperf', '-Z', 'vegas', '-s', '-p', args.port]
+        wait_and_kill_iperf(Popen(cmd))
 
-    # friendly name
-    if option == 'friendly_name':
-        print 'TCP Vegas'
-
-    # receiver
-    if option == 'receiver':
-        port = get_open_tcp_port()
-        print 'Listening on port: %s' % port
-        sys.stdout.flush()
-        cmd = [src_file, '-Z', 'vegas', '-s', '-p', port]
-        check_call(cmd)
-
-    # sender
-    if option == 'sender':
-        ip = sys.argv[2]
-        port = sys.argv[3]
-        cmd = [src_file, '-Z', 'vegas', '-c', ip, '-p', port, '-t', '75']
-        check_call(cmd)
+    if args.option == 'sender':
+        cmd = ['iperf', '-Z', 'vegas', '-c', args.ip, '-p', args.port,
+               '-t', '75']
+        wait_and_kill_iperf(Popen(cmd))
 
 
 if __name__ == '__main__':

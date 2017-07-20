@@ -1,0 +1,48 @@
+diff --git a/src/examples/cellsim.cc b/src/examples/cellsim.cc
+index 3e364f7..57d3998 100644
+--- a/src/examples/cellsim.cc
++++ b/src/examples/cellsim.cc
+@@ -35,7 +35,7 @@ private:
+     PartialPacket( int s_b_e, const DelayedPacket & s_packet ) : bytes_earned( s_b_e ), packet( s_packet ) {}
+   };
+ 
+-  static const int SERVICE_PACKET_SIZE = 1500;
++  static const int SERVICE_PACKET_SIZE = 1464;
+ 
+   const string _name;
+ 
+diff --git a/src/examples/sproutbt2.cc b/src/examples/sproutbt2.cc
+index 3196130..f638b49 100644
+--- a/src/examples/sproutbt2.cc
++++ b/src/examples/sproutbt2.cc
+@@ -72,7 +72,7 @@ int main( int argc, char *argv[] )
+     /* actually send, maybe */
+     if ( ( bytes_to_send > 0 ) || ( time_of_next_transmission <= timestamp() ) ) {
+       do {
+-	int this_packet_size = std::min( 1440, bytes_to_send );
++	int this_packet_size = std::min( 1400, bytes_to_send );
+ 	bytes_to_send -= this_packet_size;
+ 	assert( bytes_to_send >= 0 );
+ 
+diff --git a/src/network/sproutconn.cc b/src/network/sproutconn.cc
+index e471a34..292c892 100644
+--- a/src/network/sproutconn.cc
++++ b/src/network/sproutconn.cc
+@@ -56,7 +56,7 @@ void SproutConnection::update_queue_estimate( void )
+ 				    operative_forecast.counts_size() - 1 );
+ 
+   while ( current_forecast_tick < new_forecast_tick ) {
+-    current_queue_bytes_estimate -= 1440 * operative_forecast.counts( current_forecast_tick );
++    current_queue_bytes_estimate -= 1400 * operative_forecast.counts( current_forecast_tick );
+     if ( current_queue_bytes_estimate < 0 ) current_queue_bytes_estimate = 0;
+ 
+     current_forecast_tick++;
+@@ -89,7 +89,7 @@ int SproutConnection::window_size( void )
+     cumulative_delivery_tick = operative_forecast.counts_size() - 1;
+   }
+ 
+-  int cumulative_delivery_forecast = 1440 * ( operative_forecast.counts( cumulative_delivery_tick )
++  int cumulative_delivery_forecast = 1400 * ( operative_forecast.counts( cumulative_delivery_tick )
+ 					      - operative_forecast.counts( current_forecast_tick ) );
+ 
+   int bytes_to_send = cumulative_delivery_forecast - current_queue_bytes_estimate;

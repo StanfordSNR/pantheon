@@ -1,68 +1,34 @@
 #!/usr/bin/env python
 
-import os
-import sys
-import usage
-from subprocess import call, check_call, CalledProcessError
-from get_open_port import get_open_udp_port
+from os import path
+from subprocess import check_call
+from src_helpers import parse_arguments, apply_patch
+import project_root
 
 
 def main():
-    usage.check_args(sys.argv, os.path.basename(__file__), 'receiver_first')
-    option = sys.argv[1]
-    src_dir = os.path.abspath(os.path.dirname(__file__))
-    submodule_dir = os.path.abspath(
-        os.path.join(src_dir, '../third_party/koho_cc'))
-    send_file = os.path.join(submodule_dir, 'datagrump/sender')
-    recv_file = os.path.join(submodule_dir, 'datagrump/receiver')
+    args = parse_arguments('receiver_first')
 
-    # build dependencies
-    if option == 'deps':
-        pass
+    cc_repo = path.join(project_root.DIR, 'third_party', 'koho_cc')
+    recv_src = path.join(cc_repo, 'datagrump', 'receiver')
+    send_src = path.join(cc_repo, 'datagrump', 'sender')
 
-    # build
-    if option == 'build':
+    if args.option == 'run_first':
+        print 'receiver'
+
+    if args.option == 'setup':
         # apply patch to reduce MTU size
-        patch = os.path.join(src_dir, 'koho_cc_mtu.patch')
-        cmd = 'cd %s && git apply %s' % (submodule_dir, patch)
-        try:
-            check_call(cmd, shell=True)
-        except CalledProcessError:
-            sys.stderr.write('patch apply failed but assuming things okay '
-                             '(patch applied previously?)\n')
+        apply_patch('koho_cc.patch', cc_repo)
 
-        # make alone sufficient if autogen.sh and configure already run
-        cmd = 'cd %s && make -j4' % submodule_dir
-        if call(cmd, shell=True) is not 0:
-            cmd = ('cd %s && ./autogen.sh && ./configure && make -j4' %
-                   submodule_dir)
-            check_call(cmd, shell=True)
+        sh_cmd = './autogen.sh && ./configure && make -j2'
+        check_call(sh_cmd, shell=True, cwd=cc_repo)
 
-    # commands to be run after building and before running
-    if option == 'init':
-        pass
-
-    # who goes first
-    if option == 'who_goes_first':
-        print 'Receiver first'
-
-    # friendly name
-    if option == 'friendly_name':
-        print 'KohoCC'
-
-    # receiver
-    if option == 'receiver':
-        port = get_open_udp_port()
-        print 'Listening on port: %s' % port
-        sys.stdout.flush()
-        cmd = [recv_file, port]
+    if args.option == 'receiver':
+        cmd = [recv_src, args.port]
         check_call(cmd)
 
-    # sender
-    if option == 'sender':
-        ip = sys.argv[2]
-        port = sys.argv[3]
-        cmd = [send_file, ip, port]
+    if args.option == 'sender':
+        cmd = [send_src, args.ip, args.port]
         check_call(cmd)
 
 

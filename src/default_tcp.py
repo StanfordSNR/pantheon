@@ -1,52 +1,25 @@
 #!/usr/bin/env python
 
-import os
-import sys
-import usage
-from subprocess import check_call
-from get_open_port import get_open_tcp_port
+from subprocess import Popen
+from src_helpers import parse_arguments, wait_and_kill_iperf
 
 
 def main():
-    usage.check_args(sys.argv, os.path.basename(__file__), 'receiver_first')
-    option = sys.argv[1]
-    src_dir = os.path.abspath(os.path.dirname(__file__))
-    src_file = 'iperf'
+    args = parse_arguments('receiver_first')
 
-    # build dependencies
-    if option == 'deps':
+    if args.option == 'deps':
         print 'iperf'
 
-    # build commands
-    if option == 'build':
-        pass
+    if args.option == 'run_first':
+        print 'receiver'
 
-    # commands to be run after building and before running
-    if option == 'init':
-        pass
+    if args.option == 'receiver':
+        cmd = ['iperf', '-s', '-p', args.port]
+        wait_and_kill_iperf(Popen(cmd))
 
-    # who goes first
-    if option == 'who_goes_first':
-        print 'Receiver first'
-
-    # friendly name
-    if option == 'friendly_name':
-        print 'TCP Cubic'
-
-    # receiver
-    if option == 'receiver':
-        port = get_open_tcp_port()
-        print 'Listening on port: %s' % port
-        sys.stdout.flush()
-        cmd = [src_file, '-s', '-p', port]
-        check_call(cmd)
-
-    # sender
-    if option == 'sender':
-        ip = sys.argv[2]
-        port = sys.argv[3]
-        cmd = [src_file, '-c', ip, '-p', port, '-t', '75']
-        check_call(cmd)
+    if args.option == 'sender':
+        cmd = ['iperf', '-c', args.ip, '-p', args.port, '-t', '75']
+        wait_and_kill_iperf(Popen(cmd))
 
 
 if __name__ == '__main__':
