@@ -167,28 +167,30 @@ def get_receive_sock_bufsizes(ssh_cmd):
     default_sh_cmd = 'sysctl net.core.rmem_default'
     local_max_bufsize = get_kernel_attr(max_sh_cmd)
     local_default_bufsize = get_kernel_attr(default_sh_cmd)
-    
+
     buf_sizes['local']['max'] = local_max_bufsize
     buf_sizes['local']['default'] = local_default_bufsize
 
     if ssh_cmd is not None:
         remote_max_bufsize = get_kernel_attr(max_sh_cmd, ssh_cmd)
         remote_default_bufsize = get_kernel_attr(default_sh_cmd, ssh_cmd)
-        
+
         buf_sizes['remote']['max'] = remote_max_bufsize
         buf_sizes['remote']['default'] = remote_default_bufsize
 
-    return buf_sizes 
+    return buf_sizes
 
 
 def set_receive_sock_bufsizes(bufsizes, ssh_cmd):
     max_sh_cmd = 'sudo sysctl -w net.core.rmem_max=%s'
     default_sh_cmd = 'sudo sysctl -w net.core.rmem_default=%s'
 
-    set_kernel_attr(max_sh_cmd % bufsizes['local']['max'])
-    set_kernel_attr(default_sh_cmd % bufsizes['local']['default'])
-    set_kernel_attr(max_sh_cmd % bufsizes['remote']['max'], ssh_cmd)
-    set_kernel_attr(default_sh_cmd % bufsizes['remote']['default'], ssh_cmd)
+    if 'local' in bufsizes:
+        set_kernel_attr(max_sh_cmd % bufsizes['local']['max'])
+        set_kernel_attr(default_sh_cmd % bufsizes['local']['default'])
+    if 'remote' in bufsizes:
+        set_kernel_attr(max_sh_cmd % bufsizes['remote']['max'], ssh_cmd)
+        set_kernel_attr(default_sh_cmd % bufsizes['remote']['default'], ssh_cmd)
 
 
 def get_kernel_attr(sh_cmd, ssh_cmd=None):
@@ -198,7 +200,7 @@ def get_kernel_attr(sh_cmd, ssh_cmd=None):
         kernel_attr = check_output(sh_cmd, shell=True)
 
     is_local = 'local' if ssh_cmd is None else 'remote'
-    sys.stderr.write('%s %s' % (is_local, kernel_attr))
+    sys.stderr.write('Got %s %s' % (is_local, kernel_attr))
     kernel_attr = kernel_attr.split('=')[-1].strip()
     return kernel_attr
 
@@ -213,6 +215,6 @@ def set_kernel_attr(sh_cmd, ssh_cmd=None):
 
     if res != 0:
         sys.stderr.write(
-                'Failed to set %s %s to %s' % (is_local, kernel_attr, attr_val))
-    else
-        sys.stderr.write('Set %s %s to %s' % (is_local, kernel_attr, attr_val))
+                'Failed to set %s %s to %s\n' % (is_local, kernel_attr, attr_val))
+    else:
+        sys.stderr.write('Set %s %s to %s\n' % (is_local, kernel_attr, attr_val))

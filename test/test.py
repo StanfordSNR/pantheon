@@ -609,7 +609,7 @@ def run_tests(args):
             default_qdisc = get_default_qdisc(ssh_cmd)
             old_receive_bufsizes = get_receive_sock_bufsizes(ssh_cmd)
             try:
-                test_qdisc = 'pfifo_fast'       # Default qdisc for now.
+                test_qdisc = default_qdisc       # Use default qdisc for now.
                 if 'qdisc' in schemes_config[cc]:
                     test_qdisc = schemes_config[cc]['qdisc']
 
