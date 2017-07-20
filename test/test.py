@@ -12,10 +12,11 @@ from parse_arguments import parse_arguments
 import project_root
 from helpers.helpers import (
     Popen, PIPE, call, check_output, TMPDIR, kill_proc_group, parse_config,
-    timeout_handler, TimeoutError, format_time, get_open_port)
+    timeout_handler, TimeoutError, format_time, get_open_port,
+    get_default_qdisc, set_default_qdisc)
 from test_helpers import (
     who_runs_first, parse_remote_path, query_clock_offset, get_git_summary,
-    save_test_metadata, get_default_qdisc, set_default_qdisc, 
+    save_test_metadata, 
     get_receive_sock_bufsizes, set_receive_sock_bufsizes, new_receive_bufsizes)
 
 
