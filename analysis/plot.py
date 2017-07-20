@@ -250,15 +250,15 @@ class Plot(object):
         fig_raw, ax_raw = plt.subplots()
         fig_mean, ax_mean = plt.subplots()
 
-        config = parse_config()
+        schemes_config = parse_config()['schemes']
         for cc in data:
             if not data[cc]:
                 continue
 
             value = data[cc]
-            cc_name = config[cc]['friendly_name']
-            color = config[cc]['color']
-            marker = config[cc]['marker']
+            cc_name = schemes_config[cc]['friendly_name']
+            color = schemes_config[cc]['color']
+            marker = schemes_config[cc]['marker']
             y_data, x_data, _ = zip(*value)
 
             # update min and max raw delay

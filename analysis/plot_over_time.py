@@ -107,7 +107,7 @@ class PlotThroughputTime(object):
         else:
             datalink_fmt_str = '%s_mm_datalink_run%s.log'
 
-        config = parse_config()
+        schemes_config = parse_config()['schemes']
         for cc in self.cc_schemes:
             cc_name = config[cc]['friendly_name']
 

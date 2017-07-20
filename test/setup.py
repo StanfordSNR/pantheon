@@ -42,7 +42,7 @@ def setup(args):
     cc_schemes = None
 
     if args.all:
-        cc_schemes = parse_config().keys()
+        cc_schemes = parse_config()['schemes'].keys()
     elif args.schemes is not None:
         cc_schemes = args.schemes.split()
 
