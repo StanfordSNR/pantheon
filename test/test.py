@@ -17,7 +17,7 @@ from helpers.helpers import (
 from test_helpers import (
     who_runs_first, parse_remote_path, query_clock_offset, get_git_summary,
     save_test_metadata, 
-    get_receive_sock_bufsizes, set_receive_sock_bufsizes, new_receive_bufsizes)
+    get_recv_sock_bufsizes, set_recv_sock_bufsizes)
 
 
 class Test(object):
@@ -588,7 +588,8 @@ def run_tests(args):
     git_summary = get_git_summary(
         args.mode, getattr(args, 'remote_path', None))
 
-    schemes_config = parse_config()
+    config = parse_config()
+    schemes_config = config['schemes']
 
     if args.all:
         cc_schemes = schemes_config.keys()
@@ -603,23 +604,22 @@ def run_tests(args):
         r = parse_remote_path(args.remote_path)
         ssh_cmd = r['ssh_cmd']
 
-    new_receive_sock_bufsizes = new_receive_bufsizes()
-
     for run_id in xrange(1, args.run_times + 1):
         for cc in cc_schemes:
             default_qdisc = get_default_qdisc(ssh_cmd)
-            old_receive_bufsizes = get_receive_sock_bufsizes(ssh_cmd)
+            old_recv_bufsizes = get_recv_sock_bufsizes(ssh_cmd)
             try:
-                test_qdisc = default_qdisc       # Use default qdisc for now.
+                test_recv_sock_bufs = config['kernel_attrs']['sock_recv_bufs']
+                test_qdisc = config['kernel_attrs']['default_qdisc']
                 if 'qdisc' in schemes_config[cc]:
                     test_qdisc = schemes_config[cc]['qdisc']
 
                 set_default_qdisc(test_qdisc, ssh_cmd)
-                set_receive_sock_bufsizes(new_receive_sock_bufsizes, ssh_cmd)
+                set_recv_sock_bufsizes(test_recv_sock_bufs, ssh_cmd)
                 Test(args, run_id, cc).run()
             finally:
                 set_default_qdisc(default_qdisc, ssh_cmd)
-                set_receive_sock_bufsizes(old_receive_bufsizes, ssh_cmd)
+                set_recv_sock_bufsizes(old_recv_bufsizes, ssh_cmd)
 
     if not args.no_metadata:
         meta = vars(args).copy()
