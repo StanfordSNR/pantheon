@@ -129,15 +129,10 @@ def save_test_metadata(meta, data_dir, git_summary):
 
 def get_default_qdisc(ssh_cmd):
     sh_cmd = 'sysctl net.core.default_qdisc'
-    local_qdisc = check_output(sh_cmd, shell=True)
-    local_qdisc = local_qdisc.split('=')[-1].strip()
-    sys.stderr.write('local default_qdisc: %s\n' % local_qdisc)
+    local_qdisc = get_kernel_attr(sh_cmd)
 
     if ssh_cmd is not None:
-        remote_qdisc = check_output(ssh_cmd + [sh_cmd])
-        remote_qdisc = remote_qdisc.split('=')[-1].strip()
-        sys.stderr.write('remote default_qdisc: %s\n' % remote_qdisc)
-
+        remote_qdisc = get_kernel_attr(sh_cmd, ssh_cmd)
         if local_qdisc != remote_qdisc:
             sys.exit('default_qdisc differs on local and remote sides')
 
@@ -146,17 +141,78 @@ def get_default_qdisc(ssh_cmd):
 
 def set_default_qdisc(qdisc, ssh_cmd):
     sh_cmd = 'sudo sysctl -w net.core.default_qdisc=%s' % qdisc
+    set_kernel_attr(sh_cmd, ssh_cmd)
 
-    if call(sh_cmd, shell=True) != 0:
-        sys.stderr.write('Failed to set local default packet scheduler '
-                         'to %s\n' % qdisc)
-    else:
-        sys.stderr.write('Set local default packet scheduler to %s\n' % qdisc)
+
+def new_receive_bufsizes():
+    """ Returns fixed new receive socket buffer sizes (bytes)
+    ensuring no packets are dropped by the tunnel UDP socket.
+    """
+    return {
+        'remote': {
+            'max': '33554432',
+            'default': '16777216'
+        },
+        'local': {
+            'max': '33554432',
+            'default': '16777216'
+        }
+    }
+
+
+def get_receive_sock_bufsizes(ssh_cmd):
+    buf_sizes = { 'remote': {}, 'local': {} }
+
+    max_sh_cmd = 'sysctl net.core.rmem_max'
+    default_sh_cmd = 'sysctl net.core.rmem_default'
+    local_max_bufsize = get_kernel_attr(max_sh_cmd)
+    local_default_bufsize = get_kernel_attr(default_sh_cmd)
+    
+    buf_sizes['local']['max'] = local_max_bufsize
+    buf_sizes['local']['default'] = local_default_bufsize
 
     if ssh_cmd is not None:
-        if call(ssh_cmd + [sh_cmd]) != 0:
-            sys.stderr.write('Failed to set remote default packet scheduler '
-                             'to %s\n' % qdisc)
-        else:
-            sys.stderr.write('Set remote default packet scheduler to %s\n' %
-                             qdisc)
+        remote_max_bufsize = get_kernel_attr(max_sh_cmd, ssh_cmd)
+        remote_default_bufsize = get_kernel_attr(default_sh_cmd, ssh_cmd)
+        
+        buf_sizes['remote']['max'] = remote_max_bufsize
+        buf_sizes['remote']['default'] = remote_default_bufsize
+
+    return buf_sizes 
+
+
+def set_receive_sock_bufsizes(bufsizes, ssh_cmd):
+    max_sh_cmd = 'sudo sysctl -w net.core.rmem_max=%s'
+    default_sh_cmd = 'sudo sysctl -w net.core.rmem_default=%s'
+
+    set_kernel_attr(max_sh_cmd % bufsizes['local']['max'])
+    set_kernel_attr(default_sh_cmd % bufsizes['local']['default'])
+    set_kernel_attr(max_sh_cmd % bufsizes['remote']['max'], ssh_cmd)
+    set_kernel_attr(default_sh_cmd % bufsizes['remote']['default'], ssh_cmd)
+
+
+def get_kernel_attr(sh_cmd, ssh_cmd=None):
+    if ssh_cmd is not None:
+        kernel_attr = check_output(ssh_cmd + [sh_cmd])
+    else:
+        kernel_attr = check_output(sh_cmd, shell=True)
+
+    is_local = 'local' if ssh_cmd is None else 'remote'
+    sys.stderr.write('%s %s' % (is_local, kernel_attr))
+    kernel_attr = kernel_attr.split('=')[-1].strip()
+    return kernel_attr
+
+def set_kernel_attr(sh_cmd, ssh_cmd=None):
+    if ssh_cmd is not None:
+        res = call(ssh_cmd + [sh_cmd])
+    else:
+        res = call(sh_cmd, shell=True)
+
+    is_local = 'local' if ssh_cmd is None else 'remote'
+    kernel_attr, attr_val = sh_cmd.split()[-1].split('=')
+
+    if res != 0:
+        sys.stderr.write(
+                'Failed to set %s %s to %s' % (is_local, kernel_attr, attr_val))
+    else
+        sys.stderr.write('Set %s %s to %s' % (is_local, kernel_attr, attr_val))
