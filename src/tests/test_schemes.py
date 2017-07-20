@@ -13,7 +13,7 @@ from helpers.helpers import (
 
 def test_schemes():
     src_dir = path.join(project_root.DIR, 'src')
-    schemes = parse_config().keys()
+    schemes = parse_config()['schemes'].keys()
 
     for scheme in schemes:
         if scheme == 'bbr' or scheme == 'quic':  # skip them on Travis

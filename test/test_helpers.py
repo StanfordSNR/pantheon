@@ -128,23 +128,7 @@ def save_test_metadata(meta, data_dir, git_summary):
                   separators=(',', ': '))
 
 
-def new_receive_bufsizes():
-    """ Returns fixed new receive socket buffer sizes (bytes)
-    ensuring no packets are dropped by the tunnel UDP socket.
-    """
-    return {
-        'remote': {
-            'max': '33554432',
-            'default': '16777216'
-        },
-        'local': {
-            'max': '33554432',
-            'default': '16777216'
-        }
-    }
-
-
-def get_receive_sock_bufsizes(ssh_cmd=None):
+def get_recv_sock_bufsizes(ssh_cmd=None):
     buf_sizes = { 'remote': {}, 'local': {} }
 
     max_sh_cmd = 'sysctl net.core.rmem_max'
@@ -165,7 +149,7 @@ def get_receive_sock_bufsizes(ssh_cmd=None):
     return buf_sizes
 
 
-def set_receive_sock_bufsizes(bufsizes, ssh_cmd=None):
+def set_recv_sock_bufsizes(bufsizes, ssh_cmd=None):
     max_sh_cmd = 'sudo sysctl -w net.core.rmem_max=%s'
     default_sh_cmd = 'sudo sysctl -w net.core.rmem_default=%s'
 
