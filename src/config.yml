@@ -10,6 +10,7 @@ bbr:
   friendly_name: TCP BBR
   color: gold
   marker: '1'
+  qdisc: 'fq'
 ledbat:
   friendly_name: LEDBAT
   color: green
