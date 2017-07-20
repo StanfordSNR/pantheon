@@ -2,7 +2,7 @@
 
 from os import path
 from subprocess import check_call
-from src_helpers import parse_arguments, apply_patch
+from src_helpers import parse_arguments, apply_patch, check_default_qdisc
 import project_root
 
 
@@ -22,6 +22,9 @@ def main():
 
         sh_cmd = './autogen.sh && ./configure && make -j2'
         check_call(sh_cmd, shell=True, cwd=cc_repo)
+
+    if args.option == 'setup_after_reboot':
+        check_default_qdisc('calibrated_koho')
 
     if args.option == 'receiver':
         cmd = [recv_src, args.port]

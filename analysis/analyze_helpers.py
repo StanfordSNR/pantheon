@@ -12,12 +12,12 @@ def verify_schemes_with_meta(schemes, meta):
 
     if schemes is None:
         return all_schemes
-    else:
-        cc_schemes = schemes.split()
 
-        for cc in cc_schemes:
-            if cc not in all_schemes:
-                sys.exit('%s is not a scheme included in '
-                         'pantheon_metadata.json' % cc)
+    cc_schemes = schemes.split()
 
-        return cc_schemes
+    for cc in cc_schemes:
+        if cc not in all_schemes:
+            sys.exit('%s is not a scheme included in '
+                     'pantheon_metadata.json' % cc)
+
+    return cc_schemes

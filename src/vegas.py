@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 from subprocess import Popen, check_call, check_output
-from src_helpers import parse_arguments, wait_and_kill_iperf
+from src_helpers import (parse_arguments, wait_and_kill_iperf,
+                         check_default_qdisc)
 
 
 def setup_vegas():
@@ -19,6 +20,8 @@ def setup_vegas():
 
         sh_cmd = 'sudo sysctl -w net.ipv4.tcp_allowed_congestion_control="%s"'
         check_call(sh_cmd % ' '.join(allowed_cc), shell=True)
+
+    check_default_qdisc('vegas')
 
 
 def main():

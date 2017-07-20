@@ -5,7 +5,7 @@ import uuid
 import os
 from os import path
 from subprocess import call, check_call, check_output, Popen
-from src_helpers import parse_arguments, TMPDIR
+from src_helpers import parse_arguments, TMPDIR, check_default_qdisc
 import project_root
 
 
@@ -49,6 +49,9 @@ def main():
 
     if args.option == 'setup':
         setup_webrtc(cc_repo, video)
+
+    if args.option == 'setup_after_reboot':
+        check_default_qdisc('webrtc')
 
     if args.option == 'sender':
         if not xvfb_in_use(1):
