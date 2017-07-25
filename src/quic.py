@@ -7,7 +7,8 @@ import string
 import random
 import shutil
 from subprocess import check_call
-from src_helpers import parse_arguments, make_sure_path_exists
+from src_helpers import (parse_arguments, make_sure_path_exists,
+                         check_default_qdisc)
 import project_root
 
 
@@ -93,6 +94,9 @@ def main():
 
     if args.option == 'setup':
         setup_quic(cc_repo, cert_dir, html_dir)
+
+    if args.option == 'setup_after_reboot':
+        check_default_qdisc('quic')
 
     if args.option == 'sender':
         cmd = [send_src, '--port=%s' % args.port,

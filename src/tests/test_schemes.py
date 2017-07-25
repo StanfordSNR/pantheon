@@ -4,16 +4,17 @@ import sys
 import time
 import os
 from os import path
+from subprocess import PIPE
 import signal
 import project_root
 from helpers.helpers import (
-    get_open_port, check_output, call, Popen, PIPE, parse_config,
+    get_open_port, check_output, call, Popen, parse_config,
     kill_proc_group, timeout_handler, TimeoutError)
 
 
 def test_schemes():
     src_dir = path.join(project_root.DIR, 'src')
-    schemes = parse_config().keys()
+    schemes = parse_config()['schemes'].keys()
 
     for scheme in schemes:
         if scheme == 'bbr' or scheme == 'quic':  # skip them on Travis

@@ -1,17 +1,14 @@
 #!/usr/bin/env python
 
-import os
 from os import path
-import re
 import sys
 import math
-import numpy as np
 import multiprocessing
 from multiprocessing.pool import ThreadPool
+import numpy as np
 import matplotlib_agg
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-import project_root
 from parse_arguments import parse_arguments
 from analyze_helpers import load_test_metadata, verify_schemes_with_meta
 from helpers.helpers import parse_config, print_cmd, format_time
@@ -155,7 +152,7 @@ class Plot(object):
         with open(stats_log_path) as stats_log:
             for line in stats_log:
                 if any([x in line for x in [
-                    'Start at:', 'End at:', 'clock offset:']]):
+                        'Start at:', 'End at:', 'clock offset:']]):
                     saved_lines += line
                 else:
                     continue
@@ -250,15 +247,15 @@ class Plot(object):
         fig_raw, ax_raw = plt.subplots()
         fig_mean, ax_mean = plt.subplots()
 
-        config = parse_config()
+        schemes_config = parse_config()['schemes']
         for cc in data:
             if not data[cc]:
                 continue
 
             value = data[cc]
-            cc_name = config[cc]['friendly_name']
-            color = config[cc]['color']
-            marker = config[cc]['marker']
+            cc_name = schemes_config[cc]['friendly_name']
+            color = schemes_config[cc]['color']
+            marker = schemes_config[cc]['marker']
             y_data, x_data, _ = zip(*value)
 
             # update min and max raw delay

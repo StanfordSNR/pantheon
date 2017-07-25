@@ -7,7 +7,7 @@ from helpers.helpers import parse_config
 
 def verify_schemes(schemes):
     schemes = schemes.split()
-    all_schemes = parse_config().keys()
+    all_schemes = parse_config()['schemes'].keys()
 
     for cc in schemes:
         if cc not in all_schemes:

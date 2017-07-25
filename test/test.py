@@ -8,14 +8,17 @@ import uuid
 import random
 import signal
 import traceback
+from subprocess import PIPE
 from parse_arguments import parse_arguments
 import project_root
 from helpers.helpers import (
-    Popen, PIPE, call, check_output, TMPDIR, kill_proc_group, parse_config,
-    timeout_handler, TimeoutError, format_time, get_open_port)
+    Popen, call, TMPDIR, kill_proc_group, parse_config,
+    timeout_handler, TimeoutError, format_time, get_open_port,
+    get_default_qdisc, set_default_qdisc)
 from test_helpers import (
     who_runs_first, parse_remote_path, query_clock_offset, get_git_summary,
-    save_test_metadata, get_default_qdisc, set_default_qdisc)
+    save_test_metadata,
+    get_recv_sock_bufsizes, set_recv_sock_bufsizes)
 
 
 class Test(object):
@@ -586,8 +589,11 @@ def run_tests(args):
     git_summary = get_git_summary(
         args.mode, getattr(args, 'remote_path', None))
 
+    config = parse_config()
+    schemes_config = config['schemes']
+
     if args.all:
-        cc_schemes = parse_config().keys()
+        cc_schemes = schemes_config.keys()
     elif args.schemes is not None:
         cc_schemes = args.schemes.split()
 
@@ -601,18 +607,22 @@ def run_tests(args):
 
     for run_id in xrange(1, args.run_times + 1):
         for cc in cc_schemes:
-            if cc == 'bbr':
-                try:
-                    set_default_qdisc('fq', ssh_cmd)
-                    Test(args, run_id, cc).run()
-                finally:
-                    set_default_qdisc('pfifo_fast', ssh_cmd)
-            else:
-                if get_default_qdisc(ssh_cmd) != 'pfifo_fast':
-                    sys.exit('Default packet scheduler is not "pfifo_fast" '
-                             'while testing schemes other than BBR')
+            default_qdisc = get_default_qdisc(ssh_cmd)
+            old_recv_bufsizes = get_recv_sock_bufsizes(ssh_cmd)
+            try:
+                test_recv_sock_bufs = config['kernel_attrs']['sock_recv_bufs']
 
+                if 'qdisc' in schemes_config[cc]:
+                    test_qdisc = schemes_config[cc]['qdisc']
+                else:
+                    test_qdisc = config['kernel_attrs']['default_qdisc']
+
+                set_default_qdisc(test_qdisc, ssh_cmd)
+                set_recv_sock_bufsizes(test_recv_sock_bufs, ssh_cmd)
                 Test(args, run_id, cc).run()
+            finally:
+                set_default_qdisc(default_qdisc, ssh_cmd)
+                set_recv_sock_bufsizes(old_recv_bufsizes, ssh_cmd)
 
     if not args.no_metadata:
         meta = vars(args).copy()

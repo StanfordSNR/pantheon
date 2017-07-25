@@ -84,11 +84,11 @@ class Report(object):
             if meta['sender_side'] == 'remote':
                 desc += ('Data path: %s (\\textit{remote}) \\textrightarrow '
                          '%s (\\textit{local}).\n\n') % (
-                         txt['remote'], txt['local'])
+                             txt['remote'], txt['local'])
             else:
                 desc += ('Data path: %s (\\textit{local}) \\textrightarrow '
                          '%s (\\textit{remote}).\n\n') % (
-                         txt['local'], txt['remote'])
+                             txt['local'], txt['remote'])
 
         if 'ntp_addr' in meta:
             ntp_addr = meta['ntp_addr']
@@ -164,7 +164,7 @@ class Report(object):
             data[cc] = {}
             data[cc]['valid_runs'] = 0
 
-            cc_name = self.config[cc]['friendly_name']
+            cc_name = self.config['schemes'][cc]['friendly_name']
             cc_name = cc_name.strip().replace('_', '\\_')
             data[cc]['friendly_name'] = cc_name
 
@@ -250,7 +250,7 @@ class Report(object):
         cc_id = 0
         for cc in self.cc_schemes:
             cc_id += 1
-            cc_name = self.config[cc]['friendly_name']
+            cc_name = self.config['schemes'][cc]['friendly_name']
             cc_name = cc_name.strip().replace('_', '\\_')
 
             for run_id in xrange(1, 1 + self.run_times):

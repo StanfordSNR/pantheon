@@ -3,7 +3,7 @@ from os import path
 import json
 import subprocess
 import project_root
-from helpers.helpers import check_output, call
+from helpers.helpers import (check_output, get_kernel_attr, set_kernel_attr)
 
 
 def who_runs_first(cc):
@@ -127,36 +127,34 @@ def save_test_metadata(meta, data_dir, git_summary):
                   separators=(',', ': '))
 
 
-def get_default_qdisc(ssh_cmd):
-    sh_cmd = 'sysctl net.core.default_qdisc'
-    local_qdisc = check_output(sh_cmd, shell=True)
-    local_qdisc = local_qdisc.split('=')[-1].strip()
-    sys.stderr.write('local default_qdisc: %s\n' % local_qdisc)
+def get_recv_sock_bufsizes(ssh_cmd=None):
+    buf_sizes = {'remote': {}, 'local': {}}
+
+    max_sh_cmd = 'sysctl net.core.rmem_max'
+    default_sh_cmd = 'sysctl net.core.rmem_default'
+    local_max_bufsize = get_kernel_attr(max_sh_cmd)
+    local_default_bufsize = get_kernel_attr(default_sh_cmd)
+
+    buf_sizes['local']['max'] = local_max_bufsize
+    buf_sizes['local']['default'] = local_default_bufsize
 
     if ssh_cmd is not None:
-        remote_qdisc = check_output(ssh_cmd + [sh_cmd])
-        remote_qdisc = remote_qdisc.split('=')[-1].strip()
-        sys.stderr.write('remote default_qdisc: %s\n' % remote_qdisc)
+        remote_max_bufsize = get_kernel_attr(max_sh_cmd, ssh_cmd)
+        remote_default_bufsize = get_kernel_attr(default_sh_cmd, ssh_cmd)
 
-        if local_qdisc != remote_qdisc:
-            sys.exit('default_qdisc differs on local and remote sides')
+        buf_sizes['remote']['max'] = remote_max_bufsize
+        buf_sizes['remote']['default'] = remote_default_bufsize
 
-    return local_qdisc
+    return buf_sizes
 
 
-def set_default_qdisc(qdisc, ssh_cmd):
-    sh_cmd = 'sudo sysctl -w net.core.default_qdisc=%s' % qdisc
+def set_recv_sock_bufsizes(bufsizes, ssh_cmd=None):
+    max_sh_cmd = 'sudo sysctl -w net.core.rmem_max=%s'
+    default_sh_cmd = 'sudo sysctl -w net.core.rmem_default=%s'
 
-    if call(sh_cmd, shell=True) != 0:
-        sys.stderr.write('Failed to set local default packet scheduler '
-                         'to %s\n' % qdisc)
-    else:
-        sys.stderr.write('Set local default packet scheduler to %s\n' % qdisc)
-
-    if ssh_cmd is not None:
-        if call(ssh_cmd + [sh_cmd]) != 0:
-            sys.stderr.write('Failed to set remote default packet scheduler '
-                             'to %s\n' % qdisc)
-        else:
-            sys.stderr.write('Set remote default packet scheduler to %s\n' %
-                             qdisc)
+    if 'local' in bufsizes:
+        set_kernel_attr(max_sh_cmd % bufsizes['local']['max'])
+        set_kernel_attr(default_sh_cmd % bufsizes['local']['default'])
+    if 'remote' in bufsizes and ssh_cmd is not None:
+        set_kernel_attr(max_sh_cmd % bufsizes['remote']['max'], ssh_cmd)
+        set_kernel_attr(default_sh_cmd % bufsizes['remote']['default'], ssh_cmd)
