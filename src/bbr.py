@@ -3,7 +3,7 @@
 import sys
 from subprocess import Popen, call, check_call
 from src_helpers import (parse_arguments, wait_and_kill_iperf,
-                             check_default_qdisc)
+                         check_default_qdisc)
 from helpers.helpers import get_kernel_attr
 
 
