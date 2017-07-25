@@ -22,7 +22,7 @@ def main():
 
         sh_cmd = './autogen.sh && ./configure && make -j2'
         check_call(sh_cmd, shell=True, cwd=cc_repo)
-                
+
     if args.option == 'setup_after_reboot':
         check_default_qdisc('koho_cc')
 

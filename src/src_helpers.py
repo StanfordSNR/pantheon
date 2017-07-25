@@ -24,7 +24,7 @@ def check_default_qdisc(cc):
     else:
         required_qdisc = config['kernel_attrs']['default_qdisc']
 
-    if kernel_qdisc != required_qdisc: 
+    if kernel_qdisc != required_qdisc:
         sys.exit('Your default packet scheduler is "%s" currently. Please run '
                  '"sudo sysctl -w net.core.default_qdisc=%s" to use the '
                  'appropriate queueing discipline for %s to work, and change '
