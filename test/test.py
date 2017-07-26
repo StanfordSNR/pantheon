@@ -605,6 +605,9 @@ def run_tests(args):
         r = parse_remote_path(args.remote_path)
         ssh_cmd = r['ssh_cmd']
 
+    # For each run of each scheme, change the queueing discipline and
+    # receiving socket buffer sizes before and after the test.
+    # Check config.yml for values.
     for run_id in xrange(1, args.run_times + 1):
         for cc in cc_schemes:
             default_qdisc = get_default_qdisc(ssh_cmd)
@@ -617,7 +620,9 @@ def run_tests(args):
                 else:
                     test_qdisc = config['kernel_attrs']['default_qdisc']
 
-                set_default_qdisc(test_qdisc, ssh_cmd)
+                if default_qdisc != test_qdisc:
+                    set_default_qdisc(test_qdisc, ssh_cmd)
+
                 set_recv_sock_bufsizes(test_recv_sock_bufs, ssh_cmd)
                 Test(args, run_id, cc).run()
             finally:
