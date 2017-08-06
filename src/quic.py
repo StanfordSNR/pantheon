@@ -13,6 +13,8 @@ import project_root
 
 
 def generate_html(output_dir, size):
+    sys.stderr.write('Generating HTML to send...\n')
+
     html_path = path.join(output_dir, 'index.html')
 
     # check if index.html already exists
@@ -72,7 +74,7 @@ def setup_quic(cc_repo, cert_dir, html_dir):
     check_call(cmd, shell=True)
 
     # generate a html of size that can be transferred longer than 60 s
-    generate_html(html_dir, 8e8)
+    generate_html(html_dir, 5e8)
 
 
 def main():

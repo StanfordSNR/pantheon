@@ -102,7 +102,9 @@ def parse_test_local(local):
         help='mahimahi shells to run inside of mm-link')
     local.add_argument(
         '--extra-mm-link-args', metavar='"ARG1 ARG2..."',
-        help='extra arguments to pass to mm-link when running locally')
+        help='extra arguments to pass to mm-link when running locally. Note '
+        'that uplink (downlink) always represents the link from sender to '
+        'receiver (from receiver to sender)')
 
 
 def parse_test_remote(remote):
@@ -139,9 +141,10 @@ def verify_test_args(args):
     if args.flows == 0:
         prepend = getattr(args, 'prepend_mm_cmds', None)
         append = getattr(args, 'append_mm_cmds', None)
-        if append is not None or prepend is not None:
-            sys.exit('Cannot apply --prepend-mm-cmds or --append-mm-cmds '
-                     'while testing without pantheon tunnels')
+        extra = getattr(args, 'extra_mm_link_args', None)
+        if append is not None or prepend is not None or extra is not None:
+            sys.exit('Cannot apply --prepend-mm-cmds, --append-mm-cmds or '
+                     '--extra-mm-link-args without pantheon tunnels')
 
     if args.runtime > 60 or args.runtime <= 0:
         sys.exit('runtime cannot be non-positive or greater than 60 s')
