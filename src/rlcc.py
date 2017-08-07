@@ -8,7 +8,7 @@ from src_helpers import parse_arguments
 def main():
     args = parse_arguments('sender_first')
 
-    send_src = path.expanduser('~/RLCC/a3c/run_sender.py')
+    send_src = path.expanduser('~/RLCC/dagger/run_sender.py')
     recv_src = path.expanduser('~/RLCC/env/run_receiver.py')
 
     if args.option == 'run_first':
