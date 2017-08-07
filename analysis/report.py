@@ -9,7 +9,7 @@ import numpy as np
 import project_root
 from parse_arguments import parse_arguments
 from helpers.helpers import (
-    parse_config, check_call, check_output, TMPDIR, format_time)
+    parse_config, check_call, check_output, TMPDIR, utc_time)
 from analyze_helpers import load_test_metadata, verify_schemes_with_meta
 
 
@@ -27,31 +27,11 @@ class Report(object):
         self.config = parse_config()
 
     def describe_metadata(self):
+        desc = '\\centerline{\\textbf{\\large{Pantheon Report}}}\n'
+        desc += '\\vspace{20pt}\n\n'
+        desc += 'Generated at %s (UTC).\n\n' % utc_time()
+
         meta = self.meta
-
-        if meta['flows'] == 1:
-            flows = '1 flow'
-        else:
-            flows = ('%s flows with %s-second interval between two flows' %
-                     (meta['flows'], meta['interval']))
-
-        if meta['runtime'] == 1:
-            runtime = '1 second'
-        else:
-            runtime = '%s seconds' % meta['runtime']
-
-        run_times = meta['run_times']
-        if run_times == 1:
-            times = 'once'
-        elif run_times == 2:
-            times = 'twice'
-        else:
-            times = '%s times' % run_times
-
-        desc = (
-            'Repeated the test of %d congestion control schemes %s.\n\n'
-            'Each test lasted for %s running %s.\n\n'
-            % (len(self.cc_schemes), times, runtime, flows))
 
         if meta['mode'] == 'local':
             mm_cmd = []
@@ -90,13 +70,45 @@ class Report(object):
                          '%s (\\textit{remote}).\n\n') % (
                              txt['local'], txt['remote'])
 
+        if meta['flows'] == 1:
+            flows = '1 flow'
+        else:
+            flows = ('%s flows with %s-second interval between two flows' %
+                     (meta['flows'], meta['interval']))
+
+        if meta['runtime'] == 1:
+            runtime = '1 second'
+        else:
+            runtime = '%s seconds' % meta['runtime']
+
+        run_times = meta['run_times']
+        if run_times == 1:
+            times = 'once'
+        elif run_times == 2:
+            times = 'twice'
+        else:
+            times = '%s times' % run_times
+
+        desc += (
+            'Repeated the test of %d congestion control schemes %s.\n\n'
+            'Each test lasted for %s running %s.\n\n'
+            % (len(self.cc_schemes), times, runtime, flows))
+
+        desc += (
+            'Increased UDP receive buffer to 16 MB (default) and '
+            '32 MB (max).\n\n'
+            'Tested BBR with qdisc of Fair Queuing (\\texttt{fq}), and '
+            'other schemes with the default Linux qdisc '
+            '(\\texttt{pfifo\_fast}).\n\n')
+
         if 'ntp_addr' in meta:
-            ntp_addr = meta['ntp_addr']
-            desc += ('NTP offset measured against %s and has been applied '
-                     'to correct the timestamps in logs.\n\n' % ntp_addr)
+            desc += ('NTP offsets were measured against \\texttt{%s} and have '
+                     'been applied to correct the timestamps in logs.\n\n'
+                     % meta['ntp_addr'])
 
         desc += (
             '\\begin{verbatim}\n'
+            'Git summary:\n'
             '%s'
             '\\end{verbatim}\n\n' % meta['git_summary'])
         desc += '\\newpage\n\n'
@@ -133,8 +145,11 @@ class Report(object):
             for data_t in ['tput', 'delay', 'loss']:
                 flow_data[data_t] = []
                 for flow_id in xrange(1, self.flows + 1):
-                    mean_value = np.mean(data[cc][flow_id][data_t])
-                    flow_data[data_t].append('%.2f' % mean_value)
+                    if data[cc][flow_id][data_t]:
+                        mean_value = np.mean(data[cc][flow_id][data_t])
+                        flow_data[data_t].append('%.2f' % mean_value)
+                    else:
+                        flow_data[data_t].append('N/A')
 
             table += (
                 '%(friendly_name)s & %(valid_runs)s & %(flow_tputs)s & '
@@ -147,7 +162,7 @@ class Report(object):
 
         table += (
             '\\end{tabularx}\n'
-            '\\end{landscape}\n'
+            '\\end{landscape}\n\n'
         )
 
         return table
@@ -179,37 +194,46 @@ class Report(object):
                 fname = '%s_stats_run%s.log' % (cc, run_id)
                 stats_log_path = path.join(self.data_dir, fname)
 
-                if path.isfile(stats_log_path):
+                if not path.isfile(stats_log_path):
+                    continue
+
+                stats_log = open(stats_log_path)
+
+                valid_run = False
+                flow_id = 1
+
+                while True:
+                    line = stats_log.readline()
+                    if not line:
+                        break
+
+                    if 'Datalink statistics' in line:
+                        valid_run = True
+                        continue
+
+                    if 'Flow %d' % flow_id in line:
+                        ret = re_tput(stats_log.readline())
+                        if ret:
+                            ret = float(ret.group(1))
+                            data[cc][flow_id]['tput'].append(ret)
+
+                        ret = re_delay(stats_log.readline())
+                        if ret:
+                            ret = float(ret.group(1))
+                            data[cc][flow_id]['delay'].append(ret)
+
+                        ret = re_loss(stats_log.readline())
+                        if ret:
+                            ret = float(ret.group(1))
+                            data[cc][flow_id]['loss'].append(ret)
+
+                        if flow_id < self.flows:
+                            flow_id += 1
+
+                stats_log.close()
+
+                if valid_run:
                     data[cc]['valid_runs'] += 1
-
-                    stats_log = open(stats_log_path)
-
-                    for flow_id in xrange(1, self.flows + 1):
-                        while True:
-                            line = stats_log.readline()
-                            if not line:
-                                break
-
-                            if 'Flow %d' % flow_id not in line:
-                                continue
-                            else:
-                                ret = re_tput(stats_log.readline())
-                                if ret:
-                                    ret = float(ret.group(1))
-                                    data[cc][flow_id]['tput'].append(ret)
-
-                                ret = re_delay(stats_log.readline())
-                                if ret:
-                                    ret = float(ret.group(1))
-                                    data[cc][flow_id]['delay'].append(ret)
-
-                                ret = re_loss(stats_log.readline())
-                                if ret:
-                                    ret = float(ret.group(1))
-                                    data[cc][flow_id]['loss'].append(ret)
-                                break
-
-                    stats_log.close()
 
         return self.create_table(data)
 
@@ -219,8 +243,6 @@ class Report(object):
             self.data_dir, 'pantheon_summary_mean.png')
 
         metadata_desc = self.describe_metadata()
-        git_head = check_output(
-            ['git', 'rev-parse', 'HEAD'], cwd=project_root.DIR).strip()
 
         self.latex.write(
             '\\documentclass{article}\n'
@@ -234,15 +256,12 @@ class Report(object):
             '\\IfFileExists{#1}{\includegraphics[width=\\textwidth]{#1}}'
             '{Figure is missing}\n'
             '\\end{figure}}\n\n'
-            '\\begin{document}\n\n'
-            '\\textbf{Pantheon Summary} '
-            '(Generated at %s with pantheon version \\texttt{%s})\n\n'
+            '\\begin{document}\n'
             '%s'
             '\\PantheonFig{%s}\n\n'
             '\\PantheonFig{%s}\n\n'
             '\\newpage\n\n'
-            % (format_time(), git_head, metadata_desc,
-               mean_summary, raw_summary))
+            % (metadata_desc, mean_summary, raw_summary))
 
         self.latex.write('%s\\newpage\n\n' % self.summary_table())
 
