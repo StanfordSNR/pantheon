@@ -20,7 +20,7 @@ def main():
     if args.option == 'run_first':
         print 'receiver'
 
-    if args.option == 'build':
+    if args.option == 'setup':
         check_call(['makepp'], cwd=cc_repo)
 
     if args.option == 'setup_after_reboot':
