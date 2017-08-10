@@ -7,6 +7,7 @@ import project_root
 import argparse
 import sys
 import os
+from os import path
 import signal
 import matplotlib.pyplot as plt
 from subprocess import check_call, check_output, Popen, PIPE
@@ -36,7 +37,7 @@ def create_cwnd_change_plot(bandwidth, delay):
     plt.plot(steps, cwnds, 'r-')
     plt.xlabel('step num.', fontsize=18)
     plt.ylabel('cwnd size (packets)', fontsize=18)
-    plt.title('Cwnd changes for RlCC')
+    plt.title('Cwnd changes for RLCC')
     plt.tight_layout()
     plt.savefig('%smbps-%sdelay/cwnd.png' % (bandwidth, delay))
     plt.clf()
@@ -49,20 +50,20 @@ def main():
             '--schemes', default='rlcc', metavar='"SCHEME1 SCHEME2..."',
             help='schemes to run (default: rlcc)')
     parser.add_argument(
-            '--rlcc-dir', default='/home/jestinm/RLCC',
-            help='RLCC path to create traces (default: /home/jestinm/RLCC)')
+            '--rlcc-dir', default='/home/francisyyan/RLCC',
+            help='RLCC path to create traces (default: /home/francisyyan/RLCC)')
     parser.add_argument(
-            '--pantheon-dir', default='/home/jestinm/pantheon',
-            help='path to pantheon/ (default: /home/jestinm/pantheon)')
+            '--pantheon-dir', default='/home/francisyyan/pantheon',
+            help='path to pantheon/ (default: /home/francisyyan/pantheon)')
     parser.add_argument(
-            '--trace-folder', default='/tmp/traces',
-            help='path to bandwidth traces (default: /tmp/traces)')
-    parser.add_argument(
-            "--delays", metavar='"DELAY1 DELAY2..."',
-            help="one way propagation delays in ms")
+            '--trace-folder', default='/home/francisyyan/pantheon/test',
+            help='path to bandwidth traces (default: /home/francisyyan/pantheon/test)')
     parser.add_argument(
             "--bandwidths", metavar='"BW1 BW2..."',
             help="(link rates)")
+    parser.add_argument(
+            "--delays", metavar='"DELAY1 DELAY2..."',
+            help="one way propagation delays in ms")
     parser.add_argument(
             "--keep-analysis", action='store_true',
             help="keep all output of analysis.py not just pantheon_report.pdf "
@@ -80,16 +81,16 @@ def main():
     assert len(bandwidths) > 0, 'Must have at least one bandwidth to test'
 
     for bandwidth in bandwidths:
-        check_call('%s/helpers/generate_trace.py --bandwidth %s --output-dir %s'
-                    % (args.rlcc_dir, bandwidth, args.trace_folder),
-                    shell=True)
+        if not path.isfile('%s/%smbps.trace' % (args.trace_folder, bandwidth)):
+            check_call('%s/helpers/generate_trace.py --bandwidth %s --output-dir %s'
+                       % (args.rlcc_dir, bandwidth, args.trace_folder), shell=True)
 
     # filter out invalid schemes
     all_schemes = parse_config()['schemes']
     schemes = args.schemes.split()
     valid_schemes = [scheme for scheme in schemes if scheme in all_schemes]
     valid_schemes_str = ' '.join(valid_schemes)
-    
+
     # for each combination of bandwidth & trace & scheme, run a test
     for delay in args.delays.split():
         for bandwidth in bandwidths:

@@ -102,11 +102,11 @@ def plot(data, output_dir, delay_suffix):
 
     ax.grid()
     ax.set_xticks(x_data)
-    ax.legend(loc='upper right', fontsize=12)
 
     plot_path = path.join(output_dir, 'linkspeed_score_%s_delay.png' %
                          (delay_suffix))
-    fig.savefig(plot_path, dpi=300,
+    lgd = ax.legend(bbox_to_anchor=(1, 0.5), loc='center left', fontsize=12)
+    fig.savefig(plot_path, dpi=300, bbox_extra_artists=(lgd,),
                 bbox_inches='tight', pad_inches=0.2)
 
 
