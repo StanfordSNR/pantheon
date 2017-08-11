@@ -105,6 +105,7 @@ def parse_test_local(local):
         help='extra arguments to pass to mm-link when running locally. Note '
         'that uplink (downlink) always represents the link from sender to '
         'receiver (from receiver to sender)')
+    local.add_argument('--cwnd', metavar='GUESS', help='used by RLCC only')
 
 
 def parse_test_remote(remote):

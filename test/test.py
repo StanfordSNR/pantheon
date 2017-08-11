@@ -28,6 +28,9 @@ class Test(object):
         self.cc = cc
         self.data_dir = path.abspath(args.data_dir)
 
+        if self.cc == 'rlcc':
+            self.cwnd_guess = args.cwnd
+
         # shared arguments between local and remote modes
         self.flows = args.flows
         self.runtime = args.runtime
@@ -351,6 +354,10 @@ class Test(object):
             second_cmd = 'tunnel %s python %s sender %s %s\n' % (
                 tun_id, second_src, recv_pri_ip, port)
 
+            if self.cc == 'rlcc':
+                second_cmd = second_cmd.strip()
+                second_cmd += ' --cwnd %s\n' % self.cwnd_guess
+
             recv_manager.stdin.write(first_cmd)
             recv_manager.stdin.flush()
         else:  # self.run_first == 'sender'
@@ -366,6 +373,10 @@ class Test(object):
                 tun_id, first_src, port)
             second_cmd = 'tunnel %s python %s receiver %s %s\n' % (
                 tun_id, second_src, send_pri_ip, port)
+
+            if self.cc == 'rlcc':
+                first_cmd = first_cmd.strip()
+                first_cmd += ' --cwnd %s\n' % self.cwnd_guess
 
             send_manager.stdin.write(first_cmd)
             send_manager.stdin.flush()
