@@ -81,7 +81,6 @@ def plot(data, output_dir, delay_suffix):
 
         sorted_bw_list = sorted(data[cc].keys())
         for bw in sorted_bw_list:
-
             x_data.append(bw)
 
             normalized_tput = 100.0 * data[cc][bw]['tput'] / bw
@@ -96,6 +95,10 @@ def plot(data, output_dir, delay_suffix):
         if color_i == len(colors):
             color_i = 0
 
+    # plot omniscient
+    x_data = sorted(data['rlcc'].keys())
+    y_data = [np.log(100.0) - np.log(float(delay_suffix)) for _ in x_data]
+    ax.plot(x_data, y_data, label='omniscient', color='k')
 
     ax.set_xlabel('Link speed (Mbps)', fontsize=12)
     ax.set_ylabel('log(normalized throughput) - log(delay)', fontsize=12)
