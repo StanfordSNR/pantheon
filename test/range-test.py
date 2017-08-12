@@ -115,7 +115,7 @@ def main():
             check_call('%s/test/plot_linkrate_score.py --data-dir . --delay %s '
                        '--suffix mbps-%sdelay --bandwidths "%s" --schemes "%s"'
                        % (args.pantheon_dir, delay, delay,
-                          args.bandwidths, ','.join(valid_schemes)),
+                          args.bandwidths, ' '.join(valid_schemes)),
                        shell=True)
 
         # delete files after using them to create link score png
