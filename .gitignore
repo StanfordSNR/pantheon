@@ -6,3 +6,5 @@
 *.pyc
 *.log
 *.svg
+*mbps*delay
+linkspeed_score_*_delay.png

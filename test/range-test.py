@@ -7,6 +7,7 @@ import project_root
 import argparse
 import sys
 import os
+import os.path
 import signal
 import matplotlib.pyplot as plt
 from subprocess import check_call, check_output, Popen, PIPE
@@ -80,9 +81,10 @@ def main():
     assert len(bandwidths) > 0, 'Must have at least one bandwidth to test'
 
     for bandwidth in bandwidths:
-        check_call('%s/helpers/generate_trace.py --bandwidth %s --output-dir %s'
-                    % (args.rlcc_dir, bandwidth, args.trace_folder),
-                    shell=True)
+        if not os.path.isfile('%smbps.trace' % bandwidth):
+            check_call('%s/helpers/generate_trace.py --bandwidth %s --output-dir %s'
+                        % (args.rlcc_dir, bandwidth, args.trace_folder),
+                        shell=True)
 
     # filter out invalid schemes
     all_schemes = parse_config()['schemes']
