@@ -37,7 +37,7 @@ def create_cwnd_change_plot(bandwidth, delay):
     plt.plot(steps, cwnds, 'r-')
     plt.xlabel('step num.', fontsize=18)
     plt.ylabel('cwnd size (packets)', fontsize=18)
-    plt.title('Cwnd changes for RlCC')
+    plt.title('Cwnd changes for RLCC')
     plt.tight_layout()
     plt.savefig('%smbps-%sdelay/cwnd.png' % (bandwidth, delay))
     plt.clf()
@@ -56,14 +56,14 @@ def main():
             '--pantheon-dir', default='/home/jestinm/pantheon',
             help='path to pantheon/ (default: /home/jestinm/pantheon)')
     parser.add_argument(
-            '--trace-folder', default='/tmp/traces',
-            help='path to bandwidth traces (default: /tmp/traces)')
-    parser.add_argument(
-            "--delays", metavar='"DELAY1 DELAY2..."',
-            help="one way propagation delays in ms")
+            '--trace-folder', default='/home/jestinm/pantheon/test/traces',
+            help='path to bandwidth traces (default: /home/jestinm/pantheon/test/traces)')
     parser.add_argument(
             "--bandwidths", metavar='"BW1 BW2..."',
             help="(link rates)")
+    parser.add_argument(
+            "--delays", metavar='"DELAY1 DELAY2..."',
+            help="one way propagation delays in ms")
     parser.add_argument(
             "--keep-analysis", action='store_true',
             help="keep all output of analysis.py not just pantheon_report.pdf "
@@ -91,7 +91,7 @@ def main():
     schemes = args.schemes.split()
     valid_schemes = [scheme for scheme in schemes if scheme in all_schemes]
     valid_schemes_str = ' '.join(valid_schemes)
-    
+
     # for each combination of bandwidth & trace & scheme, run a test
     for delay in args.delays.split():
         for bandwidth in bandwidths:
