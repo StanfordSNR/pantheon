@@ -83,8 +83,15 @@ def plot(data, output_dir, delay_suffix):
         for bw in sorted_bw_list:
             x_data.append(bw)
 
-            normalized_tput = 100.0 * data[cc][bw]['tput'] / bw
-            delay = data[cc][bw]['delay']
+            if 'tput' in data[cc][bw]:
+                normalized_tput = 100.0 * data[cc][bw]['tput'] / bw
+            else:
+                normalized_tput = 150.0     # signal failure by impossibility
+
+            if 'delay' in data[cc][bw]:
+                delay = data[cc][bw]['delay']
+            else:
+                delay = float(delay_suffix)
 
             y_data.append(np.log(normalized_tput) - np.log(delay))
 
