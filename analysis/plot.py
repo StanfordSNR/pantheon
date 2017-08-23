@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from os import path
+import pickle
 import sys
 import math
 import multiprocessing
@@ -320,6 +321,16 @@ class Plot(object):
 
         if not self.no_graphs:
             self.plot_throughput_delay(data)
+
+        # change data names to displyable names
+        schemes_config = parse_config()['schemes']
+        for cc in data:
+            cc_name = schemes_config[cc]['friendly_name']
+            data[cc_name] = data.pop(cc)
+
+        perf_data_path = path.join(self.data_dir, 'perf_data.pkl')
+        with open(perf_data_path, 'wb') as f:
+            pickle.dump(data, f)
 
 
 def main():
