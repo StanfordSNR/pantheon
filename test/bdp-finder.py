@@ -96,9 +96,14 @@ def main():
                               (bandwidth, delay, cwnd, tput, perc_delay, score))
 
                 if util >= 90 and stop_condition(scores):
-                    break
+                    if int(bandwidth) == 100:
+                        if float(tput) >= 95.0:
+                            break
+                    else:
+                        if float(bandwidth) - float(tput) <= 2.0:
+                            break
                 else:
-                    cwnd += 20
+                    cwnd += 10
 
     history.close()
 
