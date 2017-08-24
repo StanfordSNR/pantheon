@@ -170,11 +170,13 @@ class Plot(object):
 
     def eval_performance(self):
         data = {}
-
         results = {}
+        stats = {}
+
         for cc in self.cc_schemes:
             data[cc] = []
             results[cc] = {}
+            stats[cc] = {}
 
         cc_id = 0
         run_id = 1
@@ -199,10 +201,11 @@ class Plot(object):
                     continue
 
                 data[cc].append((tput, delay, loss))
+                stats[cc][run_id] = stats
 
         sys.stderr.write('Appended datalink statistics to stats files in %s\n'
                          % self.data_dir)
-        return data
+        return stats, data
 
     def xaxis_log_scale(self, ax, min_delay, max_delay):
         if min_delay < -2:
@@ -317,20 +320,20 @@ class Plot(object):
             'graphs in %s\n' % self.data_dir)
 
     def run(self):
-        data = self.eval_performance()
+        stats_logs, data = self.eval_performance()
 
         if not self.no_graphs:
             self.plot_throughput_delay(data)
 
         # change data names to displyable names
         schemes_config = parse_config()['schemes']
-        for cc in data:
+        for cc in stats_logs:
             cc_name = schemes_config[cc]['friendly_name']
-            data[cc_name] = data.pop(cc)
+            stats_logs[cc_name] = stats_logs.pop(cc)
 
         perf_data_path = path.join(self.data_dir, 'perf_data.pkl')
         with open(perf_data_path, 'wb') as f:
-            pickle.dump(data, f)
+            pickle.dump(stats_logs, f)
 
 
 def main():
