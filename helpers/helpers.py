@@ -6,7 +6,7 @@ import socket
 import signal
 import errno
 import tempfile
-from time import strftime
+from datetime import datetime
 import yaml
 import project_root
 
@@ -83,8 +83,8 @@ def timeout_handler(signum, frame):
     raise TimeoutError()
 
 
-def format_time():
-    return strftime('%a, %d %b %Y %H:%M:%S %z')
+def utc_time():
+    return datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
 
 
 def kill_proc_group(proc, signum=signal.SIGTERM):
@@ -109,6 +109,7 @@ def get_kernel_attr(sh_cmd, ssh_cmd=None, debug=True):
 
     kernel_attr = kernel_attr.split('=')[-1].strip()
     return kernel_attr
+
 
 def set_kernel_attr(sh_cmd, ssh_cmd=None, debug=True):
     if ssh_cmd is not None:

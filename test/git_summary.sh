@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo -n 'git branch: '
+echo -n 'branch: '
 git rev-parse --abbrev-ref @ | head -c -1
 echo -n ' @ '
 git rev-parse @

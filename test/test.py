@@ -13,7 +13,7 @@ from parse_arguments import parse_arguments
 import project_root
 from helpers.helpers import (
     Popen, call, TMPDIR, kill_proc_group, parse_config,
-    timeout_handler, TimeoutError, format_time, get_open_port,
+    timeout_handler, TimeoutError, utc_time, get_open_port,
     get_default_qdisc, set_default_qdisc)
 from test_helpers import (
     who_runs_first, parse_remote_path, query_clock_offset, get_git_summary,
@@ -167,7 +167,7 @@ class Test(object):
         # the cleaner approach might be to try to verify the socket is open
         time.sleep(self.run_first_setup_time)
 
-        self.test_start_time = format_time()
+        self.test_start_time = utc_time()
         # run the other side specified by self.run_second
         sh_cmd = 'python %s %s $MAHIMAHI_BASE %s' % (
             self.cc_src, self.run_second, port)
@@ -187,7 +187,7 @@ class Test(object):
             signal.alarm(0)
             sys.stderr.write('Warning: test exited before time limit\n')
         finally:
-            self.test_end_time = format_time()
+            self.test_end_time = utc_time()
 
     def run_tunnel_managers(self):
         # run tunnel server manager
@@ -376,7 +376,7 @@ class Test(object):
         time.sleep(self.run_first_setup_time)
 
         start_time = time.time()
-        self.test_start_time = format_time()
+        self.test_start_time = utc_time()
 
         # start each flow self.interval seconds after the previous one
         for i in xrange(len(second_cmds)):
@@ -395,7 +395,7 @@ class Test(object):
             sys.exit('Interval time between flows is too long')
         time.sleep(self.runtime - elapsed_time)
 
-        self.test_end_time = format_time()
+        self.test_end_time = utc_time()
 
     # test congestion control using tunnel client and tunnel server
     def run_with_tunnel(self):
@@ -605,6 +605,9 @@ def run_tests(args):
         r = parse_remote_path(args.remote_path)
         ssh_cmd = r['ssh_cmd']
 
+    # For each run of each scheme, change the queueing discipline and
+    # receiving socket buffer sizes before and after the test.
+    # Check config.yml for values.
     for run_id in xrange(1, args.run_times + 1):
         for cc in cc_schemes:
             default_qdisc = get_default_qdisc(ssh_cmd)
@@ -617,7 +620,9 @@ def run_tests(args):
                 else:
                     test_qdisc = config['kernel_attrs']['default_qdisc']
 
-                set_default_qdisc(test_qdisc, ssh_cmd)
+                if default_qdisc != test_qdisc:
+                    set_default_qdisc(test_qdisc, ssh_cmd)
+
                 set_recv_sock_bufsizes(test_recv_sock_bufs, ssh_cmd)
                 Test(args, run_id, cc).run()
             finally:
