@@ -13,7 +13,8 @@ def main():
     analyze_py = path.join(project_root.DIR, 'analysis', 'analyze.py')
 
     schemes = ('default_tcp vegas bbr ledbat pcc verus sprout webrtc '
-               'scream copa taova koho_cc calibrated_koho saturator')
+               'scream copa copa-tcp copa-const taova koho_cc '
+               'calibrated_koho saturator')
     cmd = ['python', test_py, 'local', '--schemes', schemes,
            '-t', '10', '--data-dir', data_dir, '--pkill-cleanup',
            '--prepend-mm-cmds', 'mm-delay 20', '--extra-mm-link-args',

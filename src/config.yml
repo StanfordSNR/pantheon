@@ -44,6 +44,14 @@ schemes:
     friendly_name: Copa
     color: red
     marker: 'o'
+  copa-tcp:
+    friendly_name: Copa (TCP)
+    color: red
+    marker: 'x'
+  copa-const:
+    friendly_name: Copa (const)
+    color: red
+    marker: 'X'
   taova:
     friendly_name: TaoVA-100x
     color: gray
