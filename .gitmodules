@@ -51,3 +51,8 @@
   url = https://github.com/greghill/koho_cc.git
   branch = calibrated_koho
   ignore = dirty
+[submodule "third_party/indigo"]
+  path = third_party/indigo
+  url = https://github.com/StanfordSNR/RLCC.git
+  branch = indigo
+  ignore = dirty

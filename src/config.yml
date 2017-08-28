@@ -60,6 +60,10 @@ schemes:
     friendly_name: Saturator
     color: pink
     marker: '+'
+  indigo:
+    friendly_name: Indigo
+    color: indigo
+    marker: '2'
 
 kernel_attrs:
   default_qdisc: pfifo_fast
