@@ -7,7 +7,7 @@ from src_helpers import parse_arguments, check_default_qdisc
 import project_root
 
 
-def main():
+def main(delta_conf):
     args = parse_arguments('receiver_first')
 
     cc_repo = path.join(project_root.DIR, 'third_party', 'genericCC')
@@ -35,12 +35,12 @@ def main():
         sh_cmd = (
             'export MIN_RTT=1000000 && %s serverip=%s serverport=%s '
             'offduration=1 onduration=1000000 traffic_params=deterministic,'
-            'num_cycles=1 cctype=markovian delta_conf=constant_delta:1'
-            % (send_src, args.ip, args.port))
+            'num_cycles=1 cctype=markovian delta_conf=%s'
+            % (send_src, args.ip, args.port, delta_conf))
         with open(os.devnull, 'w') as devnull:
             # suppress debugging output to stdout
             check_call(sh_cmd, shell=True, stdout=devnull)
 
 
 if __name__ == '__main__':
-    main()
+    main("do_ss:auto")
