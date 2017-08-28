@@ -299,21 +299,26 @@ class Plot(object):
             ax.set_ylabel('Average throughput (Mbit/s)', fontsize=12)
             ax.grid()
 
-        # save pantheon_summary.png
+        # save pantheon_summary.svg and .pdf
         ax_raw.set_title(self.expt_title.strip(), y=1.02, fontsize=12)
         lgd = ax_raw.legend(scatterpoints=1, bbox_to_anchor=(1, 0.5),
                             loc='center left', fontsize=12)
-        raw_summary = path.join(self.data_dir, 'pantheon_summary.png')
-        fig_raw.savefig(raw_summary, dpi=300, bbox_extra_artists=(lgd,),
-                        bbox_inches='tight', pad_inches=0.2)
 
-        # save pantheon_summary_mean.png
+        for graph_format in ['svg', 'pdf']:
+            raw_summary = path.join(
+                self.data_dir, 'pantheon_summary.%s' % graph_format)
+            fig_raw.savefig(raw_summary, dpi=300, bbox_extra_artists=(lgd,),
+                            bbox_inches='tight', pad_inches=0.2)
+
+        # save pantheon_summary_mean.svg and .pdf
         ax_mean.set_title(self.expt_title +
                           ' (mean of all runs by scheme)', fontsize=12)
-        mean_summary = path.join(
-            self.data_dir, 'pantheon_summary_mean.png')
-        fig_mean.savefig(mean_summary, dpi=300,
-                         bbox_inches='tight', pad_inches=0.2)
+
+        for graph_format in ['svg', 'pdf']:
+            mean_summary = path.join(
+                self.data_dir, 'pantheon_summary_mean.%s' % graph_format)
+            fig_mean.savefig(mean_summary, dpi=300,
+                             bbox_inches='tight', pad_inches=0.2)
 
         sys.stderr.write(
             'Saved throughput graphs, delay graphs, and summary '

@@ -238,9 +238,9 @@ class Report(object):
         return self.create_table(data)
 
     def include_summary(self):
-        raw_summary = path.join(self.data_dir, 'pantheon_summary.png')
+        raw_summary = path.join(self.data_dir, 'pantheon_summary.pdf')
         mean_summary = path.join(
-            self.data_dir, 'pantheon_summary_mean.png')
+            self.data_dir, 'pantheon_summary_mean.pdf')
 
         metadata_desc = self.describe_metadata()
 
