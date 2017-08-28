@@ -325,15 +325,16 @@ class Plot(object):
         if not self.no_graphs:
             self.plot_throughput_delay(data)
 
-        # change data names to displyable names
+        # change data names to displayable names
         schemes_config = parse_config()['schemes']
+        stats_logs_display = {}
         for cc in stats_logs:
             cc_name = schemes_config[cc]['friendly_name']
-            stats_logs[cc_name] = stats_logs.pop(cc)
+            stats_logs_display[cc_name] = stats_logs[cc]
 
         perf_data_path = path.join(self.data_dir, 'perf_data.pkl')
         with open(perf_data_path, 'wb') as f:
-            pickle.dump(stats_logs, f)
+            pickle.dump(stats_logs_display, f)
 
 
 def main():
