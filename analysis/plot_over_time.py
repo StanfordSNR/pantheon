@@ -155,11 +155,13 @@ class PlotThroughputTime(object):
         ax.set_xlabel('Time (s) since ' + start_datetime, fontsize=12)
         ax.set_ylabel('Throughput (Mbit/s)', fontsize=12)
 
-        fig_path = path.join(self.data_dir, 'pantheon_throughput_time.png')
-        fig.savefig(fig_path, bbox_inches='tight', pad_inches=0.2)
+        for graph_format in ['svg', 'pdf']:
+            fig_path = path.join(
+                self.data_dir, 'pantheon_throughput_time.%s' % graph_format)
+            fig.savefig(fig_path, bbox_inches='tight', pad_inches=0.2)
 
         sys.stderr.write(
-            'Saved pantheon_throughput_time.png in %s\n' % self.data_dir)
+            'Saved pantheon_throughput_time in %s\n' % self.data_dir)
 
 
 def main():
