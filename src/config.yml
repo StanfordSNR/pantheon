@@ -10,7 +10,7 @@ schemes:
   bbr:
     friendly_name: TCP BBR
     color: gold
-    marker: '1'
+    marker: '^'
     qdisc: 'fq'
   ledbat:
     friendly_name: LEDBAT
@@ -34,11 +34,11 @@ schemes:
     marker: '8'
   scream:
     friendly_name: SCReAM
-    color: brown
-    marker: 's'
+    color: pink
+    marker: '1'
   webrtc:
     friendly_name: WebRTC media
-    color: yellow
+    color: brown
     marker: 'v'
   copa:
     friendly_name: Copa
@@ -51,19 +51,15 @@ schemes:
   koho_cc:
     friendly_name: KohoCC
     color: blue
-    marker: '^'
+    marker: '+'
   calibrated_koho:
     friendly_name: CalibratedKoho
     color: olive
     marker: 'D'
-  saturator:
-    friendly_name: Saturator
-    color: pink
-    marker: '+'
   indigo:
     friendly_name: Indigo
     color: indigo
-    marker: '2'
+    marker: 's'
 
 kernel_attrs:
   default_qdisc: pfifo_fast
