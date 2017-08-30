@@ -609,6 +609,12 @@ def run_tests(args):
     # receiving socket buffer sizes before and after the test.
     # Check config.yml for values.
     for run_id in xrange(1, args.run_times + 1):
+        # clean the contents in /tmp/pantheon-tmp
+        clean_tmp_cmd = 'rm -rf /tmp/pantheon-tmp/*'
+        if args.mode == 'remote':
+            call(ssh_cmd + [clean_tmp_cmd])
+        call(clean_tmp_cmd, shell=True)
+
         for cc in cc_schemes:
             default_qdisc = get_default_qdisc(ssh_cmd)
             old_recv_bufsizes = get_recv_sock_bufsizes(ssh_cmd)
