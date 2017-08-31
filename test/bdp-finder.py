@@ -88,22 +88,30 @@ def main():
                 tput = float(tunnel_results['throughput'])
                 perc_delay = float(tunnel_results['delay'])
 
-                util = 100.0 * float(tput) / float(bandwidth)
+                util = 100.0 * tput / float(bandwidth)
                 score = np.log(util) - np.log(perc_delay)
                 scores.append(score)
 
                 history.write('%s %s %s %s %s %s\n' %
                               (bandwidth, delay, cwnd, tput, perc_delay, score))
 
-                if util >= 90 and stop_condition(scores):
-                    if int(bandwidth) == 100:
-                        if float(tput) >= 95.0:
+                bw = int(bandwidth)
+                if stop_condition(scores):
+                    if bw >= 100:
+                        if util >= 95 or perc_delay - float(delay) >= 30:
                             break
                     else:
-                        if float(bandwidth) - float(tput) <= 2.0:
+                        if bw - tput <= 1:
                             break
-                else:
+
+                if bw >= 500:
+                    cwnd += 40
+                elif bw >= 200:
+                    cwnd += 20
+                elif bw >= 10:
                     cwnd += 10
+                else:
+                    cwnd += 5
 
     history.close()
 
