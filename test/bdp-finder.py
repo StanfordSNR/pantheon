@@ -2,6 +2,7 @@
 
 import os
 from os import path
+import shutil
 import sys
 import argparse
 import numpy as np
@@ -95,9 +96,11 @@ def main():
                 history.write('%s %s %s %s %s %s\n' %
                               (bandwidth, delay, cwnd, tput, perc_delay, score))
 
+                shutil.rmtree(data_dir)
+
                 bw = int(bandwidth)
                 if stop_condition(scores):
-                    if bw >= 100:
+                    if bw > 200:
                         if util >= 95 or perc_delay - float(delay) >= 30:
                             break
                     else:
