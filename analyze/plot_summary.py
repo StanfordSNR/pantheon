@@ -44,12 +44,12 @@ class PlotSummary:
         if schemes:
             self.cc_schemes = schemes.split()
             assert set(self.cc_schemes).issubset(
-                    set(metadata_dict['cc_schemes'].split())), (
+                    set(metadata_dict['cc_schemes'])), (
                     '--analyze-schemes %s has schemes not in experiment '
                     '(%s)' % (self.cc_schemes,
-                              metadata_dict['cc_schemes'].split()))
+                              metadata_dict['cc_schemes']))
         else:
-            self.cc_schemes = metadata_dict['cc_schemes'].split()
+            self.cc_schemes = metadata_dict['cc_schemes']
 
         self.experiment_title = ''
         if ('remote_information' in metadata_dict and

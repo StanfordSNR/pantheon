@@ -2,6 +2,10 @@ language: python
 sudo: required
 services: docker
 
+branches:
+  only:
+    - master
+
 addons:
   apt:
     sources:
