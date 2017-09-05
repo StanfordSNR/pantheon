@@ -181,7 +181,7 @@ class PlotSummary:
 
         for cc in self.cc_schemes:
             self.data[cc] = []
-            cc_name = self.friendly_names[cc]
+            # cc_name = self.friendly_names[cc]
 
             pool = ThreadPool(processes=min(multiprocessing.cpu_count(),
                                             self.run_times))
@@ -283,7 +283,7 @@ class PlotSummary:
     def plot_summary(self):
 
         numpy.median([1, 2]) # break early if no numpy
-        self.friendly_names = get_friendly_names(self.cc_schemes)
+        # self.friendly_names = get_friendly_names(self.cc_schemes)
         data = self.generate_data()
         if not self.no_plots:
             self.plot_throughput_delay()
