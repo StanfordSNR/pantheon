@@ -54,7 +54,7 @@ def wait_and_kill_iperf(proc):
     proc.wait()
 
 
-def parse_arguments(run_first):
+def parse_arguments(run_first, note=None):
     if run_first != 'receiver_first' and run_first != 'sender_first':
         sys.exit('Specify "receiver_first" or "sender_first" '
                  'in parse_arguments()')
@@ -86,6 +86,10 @@ def parse_arguments(run_first):
         receiver_parser.add_argument(
             'ip', metavar='IP', help='IP address of sender')
         receiver_parser.add_argument('port', help='port of sender')
+
+    if note == 'poisson':
+        sender_parser.add_argument(
+            '--rate', help='sending rate (Mbps) of Poisson cross traffic')
 
     args = parser.parse_args()
     return args

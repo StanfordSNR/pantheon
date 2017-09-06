@@ -60,6 +60,8 @@ schemes:
     friendly_name: Indigo
     color: indigo
     marker: 's'
+  poisson:
+    friendly_name: Poisson cross traffic
 
 kernel_attrs:
   default_qdisc: pfifo_fast

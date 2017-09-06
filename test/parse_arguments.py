@@ -105,6 +105,9 @@ def parse_test_local(local):
         help='extra arguments to pass to mm-link when running locally. Note '
         'that uplink (downlink) always represents the link from sender to '
         'receiver (from receiver to sender)')
+    local.add_argument(
+        '--cross-traffic-rate', metavar='Mbps',
+        help='sending rate of Poisson cross traffic')
 
 
 def parse_test_remote(remote):

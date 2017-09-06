@@ -47,6 +47,11 @@ class Test(object):
             self.prepend_mm_cmds = args.prepend_mm_cmds
             self.append_mm_cmds = args.append_mm_cmds
             self.extra_mm_link_args = args.extra_mm_link_args
+            self.ct_rate = args.cross_traffic_rate
+
+            if self.ct_rate is not None:
+                self.flows = 2  # run the Poisson cross traffic as the 2nd flow
+                self.interval = 0
 
             # for convenience
             self.sender_side = 'remote'
@@ -334,10 +339,17 @@ class Test(object):
 
     def run_first_side(self, tun_id, send_manager, recv_manager,
                        send_pri_ip, recv_pri_ip):
-        first_src = self.cc_src
-        second_src = self.cc_src
+        if tun_id == self.flows and self.ct_rate is not None:
+            ct_src = path.join(project_root.DIR, 'src', 'poisson.py')
+            first_src = ct_src
+            second_src = ct_src
+            run_first = 'sender'
+        else:
+            first_src = self.cc_src
+            second_src = self.cc_src
+            run_first = self.run_first
 
-        if self.run_first == 'receiver':
+        if run_first == 'receiver':
             if self.mode == 'remote':
                 if self.sender_side == 'local':
                     first_src = self.r['cc_src']
@@ -353,7 +365,7 @@ class Test(object):
 
             recv_manager.stdin.write(first_cmd)
             recv_manager.stdin.flush()
-        else:  # self.run_first == 'sender'
+        else:  # run_first == 'sender'
             if self.mode == 'remote':
                 if self.sender_side == 'local':
                     second_src = self.r['cc_src']
@@ -362,8 +374,13 @@ class Test(object):
 
             port = get_open_port()
 
-            first_cmd = 'tunnel %s python %s sender %s\n' % (
-                tun_id, first_src, port)
+            if tun_id == self.flows and self.ct_rate is not None:
+                first_cmd = 'tunnel %s python %s sender %s --rate %s\n' % (
+                    tun_id, first_src, port, self.ct_rate)
+            else:
+                first_cmd = 'tunnel %s python %s sender %s\n' % (
+                    tun_id, first_src, port)
+
             second_cmd = 'tunnel %s python %s receiver %s %s\n' % (
                 tun_id, second_src, send_pri_ip, port)
 
@@ -383,7 +400,13 @@ class Test(object):
             if i != 0:
                 time.sleep(self.interval)
             second_cmd = second_cmds[i]
-            if self.run_first == 'receiver':
+
+            if i == len(second_cmds) - 1 and self.ct_rate is not None:
+                run_first = 'sender'
+            else:
+                run_first = self.run_first
+
+            if run_first == 'receiver':
                 send_manager.stdin.write(second_cmd)
                 send_manager.stdin.flush()
             else:
