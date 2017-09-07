@@ -6,11 +6,11 @@ from os import path
 import re
 import uuid
 import numpy as np
-import project_root
 from parse_arguments import parse_arguments
+from analyze_helpers import load_test_metadata, verify_schemes_with_meta
+import project_root
 from helpers.helpers import (
     parse_config, check_call, check_output, TMPDIR, utc_time)
-from analyze_helpers import load_test_metadata, verify_schemes_with_meta
 
 
 class Report(object):
