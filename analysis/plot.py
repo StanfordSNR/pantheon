@@ -12,8 +12,9 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from parse_arguments import parse_arguments
 from analyze_helpers import load_test_metadata, verify_schemes_with_meta
-from helpers.helpers import parse_config, print_cmd, utc_time
 import tunnel_graph
+import project_root
+from helpers.helpers import parse_config, print_cmd, utc_time
 
 
 class Plot(object):
@@ -254,6 +255,7 @@ class Plot(object):
         schemes_config = parse_config()['schemes']
         for cc in data:
             if not data[cc]:
+                sys.stderr.write('No performance data for scheme %s\n' % cc)
                 continue
 
             value = data[cc]
