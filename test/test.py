@@ -40,6 +40,9 @@ class Test(object):
         self.ts_manager = None
         self.tc_manager = None
 
+        self.test_start_time = None
+        self.test_end_time = None
+
         # local mode
         if self.mode == 'local':
             self.datalink_trace = args.uplink_trace
@@ -189,6 +192,8 @@ class Test(object):
         finally:
             self.test_end_time = utc_time()
 
+        return True
+
     def run_tunnel_managers(self):
         # run tunnel server manager
         if self.mode == 'remote':
@@ -310,7 +315,8 @@ class Test(object):
         while 'got connection' not in got_connection:
             curr_run += 1
             if curr_run > max_run:
-                sys.exit('Cannot establish tunnel')
+                sys.stderr.write('Unable to establish tunnel\n')
+                return False
 
             tc_manager.stdin.write(tc_cmd)
             tc_manager.stdin.flush()
@@ -327,10 +333,16 @@ class Test(object):
                 except TimeoutError:
                     sys.stderr.write('Tunnel connection timeout\n')
                     break
+                except IOError:
+                    sys.stderr.write('Tunnel client failed to connect to '
+                                     'tunnel server\n')
+                    return False
                 else:
                     signal.alarm(0)
                     if 'got connection' in got_connection:
                         break
+
+        return True
 
     def run_first_side(self, tun_id, send_manager, recv_manager,
                        send_pri_ip, recv_pri_ip):
@@ -392,10 +404,13 @@ class Test(object):
 
         elapsed_time = time.time() - start_time
         if elapsed_time > self.runtime:
-            sys.exit('Interval time between flows is too long')
-        time.sleep(self.runtime - elapsed_time)
+            sys.stderr.write('Interval time between flows is too long')
+            return False
 
+        time.sleep(self.runtime - elapsed_time)
         self.test_end_time = utc_time()
+
+        return True
 
     # test congestion control using tunnel client and tunnel server
     def run_with_tunnel(self):
@@ -417,7 +432,8 @@ class Test(object):
             cmd_to_run_tc = self.run_tunnel_server(tun_id, ts_manager)
 
             # run tunnel client for tunnel tun_id
-            self.run_tunnel_client(tun_id, tc_manager, cmd_to_run_tc)
+            if not self.run_tunnel_client(tun_id, tc_manager, cmd_to_run_tc):
+                return False
 
             tc_pri_ip = cmd_to_run_tc[3]  # tunnel client private IP
             ts_pri_ip = cmd_to_run_tc[4]  # tunnel server private IP
@@ -435,7 +451,8 @@ class Test(object):
             second_cmds.append(second_cmd)
 
         # run the side that runs second
-        self.run_second_side(send_manager, recv_manager, second_cmds)
+        if not self.run_second_side(send_manager, recv_manager, second_cmds):
+            return False
 
         # stop all the running flows and quit tunnel managers
         ts_manager.stdin.write('halt\n')
@@ -445,6 +462,8 @@ class Test(object):
 
         # process tunnel logs
         self.process_tunnel_logs()
+
+        return True
 
     def process_tunnel_logs(self):
         datalink_tun_logs = []
@@ -529,14 +548,14 @@ class Test(object):
     def run_congestion_control(self):
         if self.flows > 0:
             try:
-                self.run_with_tunnel()
+                return self.run_with_tunnel()
             finally:
                 kill_proc_group(self.ts_manager)
                 kill_proc_group(self.tc_manager)
         else:
             # test without pantheon tunnel when self.flows = 0
             try:
-                self.run_without_tunnel()
+                return self.run_without_tunnel()
             finally:
                 kill_proc_group(self.proc_first)
                 kill_proc_group(self.proc_second)
@@ -547,11 +566,12 @@ class Test(object):
         stats = open(stats_log, 'w')
 
         # save start time and end time of test
-        test_run_duration = (
-            'Start at: %s\nEnd at: %s\n' %
-            (self.test_start_time, self.test_end_time))
-        sys.stderr.write(test_run_duration)
-        stats.write(test_run_duration)
+        if self.test_start_time is not None and self.test_end_time is not None:
+            test_run_duration = (
+                'Start at: %s\nEnd at: %s\n' %
+                (self.test_start_time, self.test_end_time))
+            sys.stderr.write(test_run_duration)
+            stats.write(test_run_duration)
 
         if self.mode == 'remote':
             ofst_info = ''
@@ -577,7 +597,10 @@ class Test(object):
         self.setup()
 
         # run receiver and sender
-        self.run_congestion_control()
+        if not self.run_congestion_control():
+            sys.stderr.write('Error in testing scheme %s with run ID %d\n' %
+                             (self.cc, self.run_id))
+            return
 
         # write runtimes and clock offsets to file
         self.record_time_stats()
