@@ -61,7 +61,7 @@ schemes:
     color: pink
     marker: '+'
   rlcc:
-    friendly_name: RLCC
+    friendly_name: Indigo
     color: teal
     marker: '2'
 

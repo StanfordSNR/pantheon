@@ -70,7 +70,10 @@ def collect_data(args):
     return data
 
 
-def plot(data, output_dir, delay_suffix):
+def plot(args, data):
+    output_dir = args.data_dir
+    delay_suffix = args.delay
+
     fig, ax = plt.subplots()
     colors = ['b', 'g', 'r', 'y', 'c', 'm']
     color_i = 0
@@ -86,7 +89,12 @@ def plot(data, output_dir, delay_suffix):
             normalized_tput = 100.0 * data[cc][bw]['tput'] / bw
             delay = data[cc][bw]['delay']
 
-            y_data.append(np.log(normalized_tput) - np.log(delay))
+            if args.type == 'score':
+                y_data.append(np.log(normalized_tput) - np.log(delay))
+            elif args.type == 'tput':
+                y_data.append(normalized_tput)
+            elif args.type == 'delay':
+                y_data.append(delay)
 
         color = colors[color_i]
         ax.plot(x_data, y_data, label=cc, color=color)
@@ -96,18 +104,32 @@ def plot(data, output_dir, delay_suffix):
             color_i = 0
 
     # plot omniscient
-    x_data = sorted(data['rlcc'].keys())
-    y_data = [np.log(100.0) - np.log(float(delay_suffix)) for _ in x_data]
-    ax.plot(x_data, y_data, label='omniscient', color='k')
+    if args.type == 'score':
+        x_data = sorted(data['rlcc'].keys())
+        y_data = [np.log(100.0) - np.log(float(delay_suffix)) for _ in x_data]
+        ax.plot(x_data, y_data, label='omniscient', color='k')
 
     ax.set_xlabel('Link speed (Mbps)', fontsize=12)
-    ax.set_ylabel('log(normalized throughput) - log(delay)', fontsize=12)
+
+    if args.type == 'score':
+        ax.set_ylabel('log(normalized throughput) - log(delay)', fontsize=12)
+
+        plot_path = path.join(output_dir, 'linkspeed_score_%s_delay.png' %
+                             (delay_suffix))
+    elif args.type == 'tput':
+        ax.set_ylabel('Normalized throughput (%)', fontsize=12)
+
+        plot_path = path.join(output_dir, 'linkspeed_tput_%s_delay.png' %
+                             (delay_suffix))
+    elif args.type == 'delay':
+        ax.set_ylabel('Delay (ms)', fontsize=12)
+
+        plot_path = path.join(output_dir, 'linkspeed_delay_%s_delay.png' %
+                             (delay_suffix))
 
     ax.grid()
     ax.set_xticks(x_data)
 
-    plot_path = path.join(output_dir, 'linkspeed_score_%s_delay.png' %
-                         (delay_suffix))
     lgd = ax.legend(bbox_to_anchor=(1, 0.5), loc='center left', fontsize=12)
     fig.savefig(plot_path, dpi=300, bbox_extra_artists=(lgd,),
                 bbox_inches='tight', pad_inches=0.2)
@@ -115,6 +137,7 @@ def plot(data, output_dir, delay_suffix):
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--type', default='score', choices=['score', 'tput', 'delay'])
     parser.add_argument('--data-dir', metavar='DIR')
     parser.add_argument('--bandwidths', metavar='BW1 BW2 ...')
     parser.add_argument('--delay', metavar='DELAY')
@@ -124,7 +147,7 @@ def main():
     args = parser.parse_args()
 
     data = collect_data(args)
-    plot(data, args.data_dir, args.delay)
+    plot(args, data)
 
 
 if __name__ == '__main__':
