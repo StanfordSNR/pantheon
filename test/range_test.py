@@ -8,15 +8,15 @@ import project_root
 from helpers.helpers import parse_config
 
 
-def generate_traces(bandwidths):
+def generate_traces(bandwidths, output_dir):
     test_dir = path.join(project_root.DIR, 'test')
     gen_trace = path.join(test_dir, 'generate_trace.py')
 
     for bw in bandwidths:
-        trace_path = path.join(test_dir, '%smbps.trace' % bw)
+        trace_path = path.join(output_dir, '%smbps.trace' % bw)
         if not path.isfile(trace_path):
             cmd = ['python', gen_trace,
-                   '--bandwidth', bw, '--output-dir', test_dir]
+                   '--bandwidth', bw, '--output-dir', output_dir]
             sys.stderr.write('$ %s\n' % ' '.join(cmd))
             check_call(cmd)
 
@@ -37,12 +37,14 @@ def main():
         '--bandwidths', metavar='"BW1 BW2..."', required=True)
     parser.add_argument(
         '--delays', metavar='"DELAY1 DELAY2..."', required=True)
+    parser.add_argument('--output-dir', metavar='DIR', required=True)
 
     args = parser.parse_args()
+    output_dir = args.output_dir
 
     bandwidths = args.bandwidths.split()
     delays = args.delays.split()
-    generate_traces(bandwidths)
+    generate_traces(bandwidths, output_dir)
 
     schemes = args.schemes.split()
     valid_schemes_str = filter_schemes(schemes)
@@ -53,8 +55,8 @@ def main():
 
     for bw in bandwidths:
         for delay in delays:
-            trace_path = path.join(test_dir, '%smbps.trace' % bw)
-            data_dir = path.join(test_dir, '%smbps-%sms' % (bw, delay))
+            trace_path = path.join(output_dir, '%smbps.trace' % bw)
+            data_dir = path.join(output_dir, '%smbps-%sms' % (bw, delay))
 
             cmd = ['python', test_src, 'local',
                    '--schemes', valid_schemes_str,
