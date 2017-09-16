@@ -9,9 +9,8 @@ import project_root
 def main():
     args = parse_arguments('sender_first')
 
-    cc_repo = path.join(project_root.DIR, 'third_party', 'indigo')
-    send_src = path.join(cc_repo, 'dagger', 'run_sender.py')
-    recv_src = path.join(cc_repo, 'env', 'run_receiver.py')
+    send_src = path.expanduser('~/RLCC/dagger/run_sender.py')
+    recv_src = path.expanduser('~/RLCC/env/run_receiver.py')
 
     if args.option == 'run_first':
         print 'sender'
