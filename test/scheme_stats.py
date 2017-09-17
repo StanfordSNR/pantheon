@@ -2,6 +2,7 @@
 
 import json
 import re
+import sys
 import argparse
 import collections
 from os import path
@@ -100,7 +101,9 @@ def main():
                    for k, v in data.iteritems()}
         ordered = collections.OrderedDict(sorted(ordered.iteritems()))
 
-        with open('%s.json' % scheme, 'w') as outfile:
+        json_path = path.join(args.data_dir, '%s.json' % scheme)
+
+        with open(json_path, 'w') as outfile:
             json.dump(ordered, outfile)
 
 
