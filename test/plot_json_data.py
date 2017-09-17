@@ -6,8 +6,11 @@ matplotlib.use('Agg')
 import sys
 from os import path
 import numpy as np
+import project_root
 import argparse
 import matplotlib.pyplot as plt
+import json
+from helpers.helpers import parse_config
 
 
 def interp_num(n):
@@ -19,7 +22,7 @@ def interp_num(n):
 
 
 def json_keys_as_num(json_obj):
-    if isinstance(json_obj):
+    if isinstance(json_obj, dict):
         return {interp_num(k): v for k, v in json_obj.iteritems()}
     else:
         return json_obj
@@ -36,12 +39,13 @@ def plot(args, data, bw_range, delay):
     """
 
     output_dir = args.json_dir if args.output_dir is None else args.output_dir
+    all_schemes = parse_config()['schemes']
 
     fig, ax = plt.subplots()
-    colors = ['b', 'g', 'r', 'y', 'c', 'm', 'k']
-    color_i = 0
+    color_map = plt.get_cmap('jet')
+    colors = color_map(np.linspace(0.05, 0.95, len(data)))
 
-    for cc in data:
+    for cc, color in zip(data, colors):
         x_data = []
         y_data = []
 
@@ -59,12 +63,11 @@ def plot(args, data, bw_range, delay):
             elif args.type == 'delay':
                 y_data.append(seen_delay)
 
-        color = colors[color_i]
-        ax.plot(x_data, y_data, label=cc, color=color)
+        friendly_cc_name = cc
+        if cc in all_schemes:
+            friendly_cc_name = all_schemes[cc]['friendly_name']
 
-        color_i += 1
-        if color_i == len(colors):
-            color_i = 0
+        ax.plot(x_data, y_data, label=friendly_cc_name, color=color)
 
     # plot omniscient
     if args.type == 'score':
@@ -73,6 +76,8 @@ def plot(args, data, bw_range, delay):
         ax.plot(x_data, y_data, label='omniscient', color='k')
 
     ax.set_xlabel('Link speed (Mbps)', fontsize=12)
+    ax.tick_params(axis='x', which='major', labelsize=7)
+    ax.tick_params(axis='x', which='minor', labelsize=7)
 
     if args.type == 'score':
         ax.set_ylabel('log(normalized throughput) - log(delay)', fontsize=12)
