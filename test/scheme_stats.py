@@ -2,8 +2,8 @@
 
 import json
 import re
-import collections
 import argparse
+import collections
 from os import path
 
 def interp_num(n):
@@ -18,8 +18,6 @@ def collect_data(args):
 
     data dictionary is as such:
         {bw: delay: {tput: X, delay: Y}}
-
-    Each data dictionary is sorted by bandwidth and delay.
     """
 
     # process args
@@ -81,7 +79,6 @@ def collect_data(args):
 
                 stats_log.close()
         print 'Parsed data of scheme %s' % cc
-
     return data
 
 
@@ -100,7 +97,7 @@ def main():
         data = data_dicts[scheme]
 
         ordered = {k: collections.OrderedDict(sorted(v.iteritems()))
-                         for k, v in data.iteritems()}
+                   for k, v in data.iteritems()}
         ordered = collections.OrderedDict(sorted(ordered.iteritems()))
 
         with open('%s.json' % scheme, 'w') as outfile:
