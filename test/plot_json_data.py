@@ -43,9 +43,13 @@ def plot(args, data, bw_range, delay):
 
     fig, ax = plt.subplots()
 
+    colors = [all_schemes[cc]['color'] for cc in all_schemes]
+    markers = [all_schemes[cc]['marker'] for cc in all_schemes]
+
+    idx = 0
     for cc in data:
-        if cc not in all_schemes:
-            continue
+        # if cc not in all_schemes:
+        #     continue
 
         x_data = []
         y_data = []
@@ -64,9 +68,15 @@ def plot(args, data, bw_range, delay):
             elif args.type == 'delay':
                 y_data.append(seen_delay)
 
-        friendly_cc_name = all_schemes[cc]['friendly_name']
-        color = all_schemes[cc]['color']
-        marker = all_schemes[cc]['marker']
+        if cc in all_schemes:
+            friendly_cc_name = all_schemes[cc]['friendly_name']
+            color = all_schemes[cc]['color']
+            marker = all_schemes[cc]['marker']
+        else:
+            friendly_cc_name = cc
+            color = colors[idx]
+            marker = markers[idx]
+            idx += 1
 
         ax.plot(x_data, y_data, label=friendly_cc_name,
                 color=color, marker=marker, markersize=5)
