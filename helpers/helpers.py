@@ -141,3 +141,18 @@ def get_default_qdisc(ssh_cmd=None, debug=True):
 def set_default_qdisc(qdisc, ssh_cmd=None, debug=True):
     sh_cmd = 'sudo sysctl -w net.core.default_qdisc=%s' % qdisc
     set_kernel_attr(sh_cmd, ssh_cmd, debug)
+
+
+def interp_num(n):
+    try:
+        n = float(n)
+        return int(n) if n.is_integer() else n
+    except ValueError:
+        return n
+
+
+def json_keys_as_num(json_obj):
+    if isinstance(json_obj, dict):
+        return {interp_num(k): v for k, v in json_obj.iteritems()}
+    else:
+        return json_obj
