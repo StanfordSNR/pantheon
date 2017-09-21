@@ -66,23 +66,23 @@ schemes:
     marker: 'd'
   indigo_no_calibration:
     friendly_name: Indigo-calib
-    color: indigo
+    color: '#ba55d3'
     marker: 'H'
   indigo_no_queuing_delay:
     friendly_name: Indigo-delay
-    color: indigo
+    color: '#da70d6'
     marker: '^'
   indigo_no_delivery_rate:
     friendly_name: Indigo-deliver
-    color: indigo
+    color: '#dda0dd'
     marker: 'v'
   indigo_no_send_rate:
     friendly_name: Indigo-send
-    color: indigo
+    color: '#ee82ee'
     marker: '<'
   indigo_no_cwnd:
     friendly_name: Indigo-cwnd
-    color: indigo
+    color: '#9932cc'
     marker: '>'
 
 kernel_attrs:
