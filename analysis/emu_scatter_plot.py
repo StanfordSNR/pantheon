@@ -39,8 +39,7 @@ def plot(args, data):
     ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
     ax.invert_xaxis()
 
-    xlabel = '95th percentile one-way delay (ms)'
-    ax.set_xlabel(xlabel, fontsize=12)
+    ax.set_xlabel('95th percentile one-way delay (ms)', fontsize=12)
     ax.set_ylabel('Average throughput (Mbit/s)', fontsize=12)
     ax.grid()
 

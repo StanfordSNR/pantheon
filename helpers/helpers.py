@@ -156,3 +156,17 @@ def json_keys_as_num(json_obj):
         return {interp_num(k): v for k, v in json_obj.iteritems()}
     else:
         return json_obj
+
+
+def order_legend_labels(ordered_labels, handles, labels):
+    ret_handles = []
+    ret_labels = []
+
+    for label in ordered_labels:
+        for i in xrange(len(labels)):
+            if labels[i] == label:
+                ret_handles.append(handles[i])
+                ret_labels.append(labels[i])
+                break
+
+    return ret_handles, ret_labels

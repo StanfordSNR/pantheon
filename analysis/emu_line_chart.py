@@ -8,7 +8,7 @@ import argparse
 import matplotlib_agg
 import matplotlib.pyplot as plt
 import json
-from helpers.helpers import parse_config, json_keys_as_num
+from helpers.helpers import parse_config, json_keys_as_num, order_legend_labels
 
 
 def get_ordered_labels(ordered_schemes, schemes_config):
@@ -18,20 +18,6 @@ def get_ordered_labels(ordered_schemes, schemes_config):
         ordered_labels.append(schemes_config[cc]['friendly_name'])
 
     return ordered_labels
-
-
-def order_legend_labels(ordered_labels, handles, labels):
-    ret_handles = []
-    ret_labels = []
-
-    for label in ordered_labels:
-        for i in xrange(len(labels)):
-            if labels[i] == label:
-                ret_handles.append(handles[i])
-                ret_labels.append(labels[i])
-                break
-
-    return ret_handles, ret_labels
 
 
 def data_of_type(args, bandwidth, delay, perf_tput, perf_delay):
