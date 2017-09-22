@@ -32,10 +32,10 @@ def plot(args, data):
         ax.scatter(x_data, y_data, color=color, marker=marker)
         ax.annotate(cc_name, (x_data, y_data))
 
-    ax.set_xscale('log', basex=2, linthreshx=2, linscalex=0.5)
+    ax.set_xscale('log', basex=2)
     ax.set_ylim(0, int(args.bandwidth))
-    # ax.set_xlim(min, max)
-    # ax.set_xticks([])
+    #ax.set_xlim(min, max)
+    #ax.set_xticks([50, 80, 150, 200, 256, 512])
     ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
     ax.invert_xaxis()
 
@@ -44,8 +44,12 @@ def plot(args, data):
     ax.set_ylabel('Average throughput (Mbit/s)', fontsize=12)
     ax.grid()
 
-    emu_graph = path.join(args.output_dir,
-        'emu_perf_%smbps_%sms.svg' % (args.bandwidth, args.delay))
+    if args.graph_name is None:
+        emu_graph = path.join(args.output_dir,
+            'emu_perf_%smbps_%sms.svg' % (args.bandwidth, args.delay))
+    else:
+        emu_graph = path.join(args.output_dir, args.graph_name)
+
     fig.savefig(emu_graph, bbox_inches='tight', pad_inches=0.2)
 
     sys.stderr.write('Saved plot as %s\n' % emu_graph)
@@ -82,6 +86,7 @@ def main():
     parser.add_argument('--json-dir', metavar='DIR', required=True)
     parser.add_argument('--schemes', metavar='SCH1 SCH2...', required=True)
     parser.add_argument('--output-dir', metavar='DIR', default='.')
+    parser.add_argument('--graph-name')
     parser.add_argument('--bandwidth', metavar='Mbps', type=int, required=True)
     parser.add_argument('--delay', metavar='ms', type=int, required=True)
     args = parser.parse_args()
