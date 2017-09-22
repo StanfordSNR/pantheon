@@ -38,7 +38,7 @@ def plot(args, data, bw_range, delay):
     Each data dictionary is sorted by bandwidth and delay.
     """
 
-    output_dir = args.json_dir if args.output_dir is None else args.output_dir
+    output_dir = args.output_dir
     all_schemes = parse_config()['schemes']
 
     fig, ax = plt.subplots()
@@ -92,17 +92,17 @@ def plot(args, data, bw_range, delay):
     if args.type == 'score':
         ax.set_ylabel('log(normalized throughput) - log(delay)', fontsize=12)
 
-        plot_path = path.join(output_dir, 'linkspeed_score_%s_mmdelay.pdf' %
+        plot_path = path.join(output_dir, 'linkspeed_score_%s_mmdelay.svg' %
                              (delay))
     elif args.type == 'tput':
         ax.set_ylabel('Normalized throughput (%)', fontsize=12)
 
-        plot_path = path.join(output_dir, 'linkspeed_tput_%s_mmdelay.pdf' %
+        plot_path = path.join(output_dir, 'linkspeed_tput_%s_mmdelay.svg' %
                              (delay))
     elif args.type == 'delay':
         ax.set_ylabel('Delay (ms)', fontsize=12)
 
-        plot_path = path.join(output_dir, 'linkspeed_delay_%s_mmdelay.pdf' %
+        plot_path = path.join(output_dir, 'linkspeed_delay_%s_mmdelay.svg' %
                              (delay))
 
     ax.grid()
@@ -112,7 +112,7 @@ def plot(args, data, bw_range, delay):
     fig.set_size_inches(0.5 * len(bw_range), fig_h)
 
     lgd = ax.legend(bbox_to_anchor=(1, 0.5), loc='center left', fontsize=12)
-    fig.savefig(plot_path, dpi=300, bbox_extra_artists=(lgd,),
+    fig.savefig(plot_path, bbox_extra_artists=(lgd,),
                 bbox_inches='tight', pad_inches=0.2)
 
 
@@ -155,10 +155,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--type',
             default='score', choices=['score', 'tput', 'delay'])
-    parser.add_argument('--fix_param',      # TODO implement this
-            default='delay', choices=['bw', 'delay'])
     parser.add_argument('--json-dir', metavar='DIR', required=True)
-    parser.add_argument('--output-dir', metavar='DIR')
+    parser.add_argument('--output-dir', metavar='DIR', default='.')
     parser.add_argument('--schemes', metavar='SCH1 SCH2...', required=True)
     parser.add_argument('--rank', action='store_true')
 
