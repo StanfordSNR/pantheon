@@ -2,87 +2,87 @@ schemes:
   default_tcp:
     friendly_name: TCP Cubic
     color: black
-    marker: 'd'
+    marker: '*'
   vegas:
     friendly_name: TCP Vegas
-    color: silver
+    color: olive
     marker: 'h'
   bbr:
     friendly_name: TCP BBR
-    color: gold
-    marker: '^'
+    color: dodgerblue
+    marker: 'H'
     qdisc: 'fq'
   ledbat:
     friendly_name: LEDBAT
     color: green
-    marker: '<'
+    marker: 'D'
   pcc:
     friendly_name: PCC
-    color: cyan
+    color: orange
     marker: '>'
   verus:
     friendly_name: Verus
-    color: skyblue
-    marker: 'H'
+    color: brown
+    marker: '^'
   sprout:
     friendly_name: Sprout
-    color: orange
-    marker: 'p'
+    color: mediumblue
+    marker: 'v'
   quic:
     friendly_name: QUIC Cubic
-    color: magenta
+    color: orangered
     marker: '8'
   scream:
     friendly_name: SCReAM
-    color: pink
-    marker: '1'
+    color: mediumseagreen
+    marker: 'o'
   webrtc:
     friendly_name: WebRTC media
-    color: brown
-    marker: 'v'
+    color: goldenrod
+    marker: 'P'
   copa:
     friendly_name: Copa
-    color: red
-    marker: 'o'
+    color: pink
+    marker: '1'
   taova:
     friendly_name: TaoVA-100x
-    color: gray
-    marker: '*'
+    color: c
+    marker: '<'
   koho_cc:
     friendly_name: KohoCC
-    color: blue
+    color: gray
     marker: '+'
   calibrated_koho:
     friendly_name: CalibratedKoho
-    color: olive
-    marker: 'D'
+    color: silver
+    marker: 'x'
   indigo:
     friendly_name: Indigo
     color: indigo
     marker: 's'
   indigo_cellular:
     friendly_name: Indigo-cellular
-    color: indigo
+    color: violet
     marker: 'd'
   indigo_no_calibration:
-    friendly_name: Indigo-calib
-    color: '#ba55d3'
-    marker: 'H'
+    friendly_name: Indigo w/o calib
+    color: blueviolet
+    marker: 'd'
   indigo_no_queuing_delay:
-    friendly_name: Indigo-delay
-    color: '#da70d6'
+    friendly_name: Indigo w/o delay
+    color: mediumpurple
     marker: '^'
   indigo_no_delivery_rate:
-    friendly_name: Indigo-deliver
-    color: '#dda0dd'
+    friendly_name: Indigo w/o deliver
+    color: darkviolet
     marker: 'v'
   indigo_no_send_rate:
-    friendly_name: Indigo-send
-    color: '#ee82ee'
+    friendly_name: Indigo w/o send
+    color: rebeccapurple
     marker: '<'
   indigo_no_cwnd:
-    friendly_name: Indigo-cwnd
-    color: '#9932cc'
+    friendly_name: Indigo w/o cwnd
+    color: darkorchid
     marker: '>'
 
 kernel_attrs:
