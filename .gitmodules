@@ -49,36 +49,36 @@
   ignore = dirty
 [submodule "third_party/indigo"]
   path = third_party/indigo
-  url = https://github.com/StanfordSNR/RLCC.git
-  branch = indigo
+  url = https://github.com/StanfordSNR/indigo.git
+  branch = master
   ignore = dirty
 [submodule "third_party/indigo-cellular"]
   path = third_party/indigo-cellular
-  url = https://github.com/StanfordSNR/RLCC.git
+  url = https://github.com/StanfordSNR/indigo.git
   branch = indigo-cellular
   ignore = dirty
 [submodule "third_party/indigo-no-calib"]
   path = third_party/indigo-no-calib
-  url = https://github.com/StanfordSNR/RLCC.git
+  url = https://github.com/StanfordSNR/indigo.git
   branch = indigo-no-calib
   ignore = dirty
 [submodule "third_party/indigo-no-queuing-delay"]
   path = third_party/indigo-no-queuing-delay
-  url = https://github.com/StanfordSNR/RLCC.git
+  url = https://github.com/StanfordSNR/indigo.git
   branch = indigo-no-queuing-delay
   ignore = dirty
 [submodule "third_party/indigo-no-delivery-rate"]
   path = third_party/indigo-no-delivery-rate
-  url = https://github.com/StanfordSNR/RLCC.git
+  url = https://github.com/StanfordSNR/indigo.git
   branch = indigo-no-delivery-rate
   ignore = dirty
 [submodule "third_party/indigo-no-send-rate"]
   path = third_party/indigo-no-send-rate
-  url = https://github.com/StanfordSNR/RLCC.git
+  url = https://github.com/StanfordSNR/indigo.git
   branch = indigo-no-send-rate
   ignore = dirty
 [submodule "third_party/indigo-no-cwnd"]
   path = third_party/indigo-no-cwnd
-  url = https://github.com/StanfordSNR/RLCC.git
+  url = https://github.com/StanfordSNR/indigo.git
   branch = indigo-no-cwnd
   ignore = dirty
