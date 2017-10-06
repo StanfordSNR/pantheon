@@ -49,6 +49,6 @@
   ignore = dirty
 [submodule "third_party/indigo"]
   path = third_party/indigo
-  url = https://github.com/StanfordSNR/RLCC.git
-  branch = indigo
+  url = https://github.com/StanfordSNR/indigo.git
+  branch = master
   ignore = dirty
