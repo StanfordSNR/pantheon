@@ -60,7 +60,10 @@ schemes:
     friendly_name: Indigo
     color: indigo
     marker: 's'
-
+  FillP:
+    friendly_name: FillP
+    color: violet
+    marker: 'F'
 kernel_attrs:
   default_qdisc: pfifo_fast
   sock_recv_bufs:
