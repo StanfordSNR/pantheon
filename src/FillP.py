@@ -54,13 +54,16 @@ def main():
         check_default_qdisc('FillP')
 
     if args.option == 'sender':
+        server_ip = localhost
         os.environ['LD_LIBRARY_PATH'] = cc_repo
-        cmd = [send_src, '-s' ,args.ip,'-p',args.port,'-t']
+        cmd = [send_src, '-s' ,server_ip,'-p',args.port,'-t']
         check_call(cmd)
 
     if args.option == 'receiver':
+        server_ip = localhost
         os.environ['LD_LIBRARY_PATH'] = cc_repo
-        cmd = [recv_src, '-d' ,args.ip,'-p',args.port,'-t']
+        cmd = [recv_src, '-d' ,server_ip,'-p',args.port,'-t']
+        check_call(cmd)
 
 
 if __name__ == '__main__':
