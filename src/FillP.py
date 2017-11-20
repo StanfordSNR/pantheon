@@ -12,8 +12,13 @@ from src_helpers import (parse_arguments, make_sure_path_exists,
 import project_root
 
 def setup_FillP(cc_repo):
-    os.environ['LD_LIBRARY_PATH'] = cc_repo
-    os.system('sh ../third_party/FillP/udp_config.sh')	
+    cmd = ['chmod +x','./server/server']
+    check_call(cmd, shell=True, cwd=cc_repo)
+    cmd = ['chmod +x','./client/client']
+    check_call(cmd, shell=True, cwd=cc_repo)
+    cmd = ['sh','udp_config.sh']
+    check_call(cmd, shell=True, cwd=cc_repo)
+#   os.system('sh ../third_party/FillP/udp_config.sh')	
 #    cmd = ['sysclt -w', 'net.ipv4.udp_mem="98304 6291456 6291456"']
 #    check_call(cmd, shell=True, cwd=cc_repo)
 #    cmd = ['sysclt -w', 'net.core.rmem_default="6291456"']
@@ -49,10 +54,12 @@ def main():
         check_default_qdisc('FillP')
 
     if args.option == 'sender':
+        os.environ['LD_LIBRARY_PATH'] = cc_repo
         cmd = [send_src, '-s' ,args.ip,'-p',args.port,'-t']
         check_call(cmd)
 
     if args.option == 'receiver':
+        os.environ['LD_LIBRARY_PATH'] = cc_repo
         cmd = [recv_src, '-d' ,args.ip,'-p',args.port,'-t']
 
 
