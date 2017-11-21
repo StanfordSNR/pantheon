@@ -157,4 +157,10 @@ def set_recv_sock_bufsizes(bufsizes, ssh_cmd=None):
         set_kernel_attr(default_sh_cmd % bufsizes['local']['default'])
     if 'remote' in bufsizes and ssh_cmd is not None:
         set_kernel_attr(max_sh_cmd % bufsizes['remote']['max'], ssh_cmd)
-        set_kernel_attr(default_sh_cmd % bufsizes['remote']['default'], ssh_cmd)
+        set_kernel_attr(default_sh_cmd % bufsizes['remote']['default'], ssh_cmd
+def set_sock_bufsizes_for_fillp(orgin_udp_men_default,orgin_udp_men_max):
+    if orgin_udp_men_default >= 62914560 and orgin_udp_men_max >= 62914560:
+        pass
+    else:
+        cmd = ['sudo sysctl -w','net.ipv4.udp_mem="98304 62914560 62914560"']
+        check_call(cmd, shell=True, cwd=cc_repo)
