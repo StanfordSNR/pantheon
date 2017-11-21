@@ -17,11 +17,11 @@ def setup_FillP(cc_repo):
     check_call(cmd, shell=True, cwd=cc_repo)
     cmd = ['sudo chmod +x','./client/client']
     check_call(cmd, shell=True, cwd=cc_repo)
-    #if orgin_udp_men_default >= 62914560 and orgin_udp_men_max >= 62914560:
-    #    pass
-    #else:
-     #   cmd = ['sudo sysctl -w','net.ipv4.udp_mem="98304 62914560 62914560"']
-     #   check_call(cmd, shell=True, cwd=cc_repo)
+    if orgin_udp_men_default >= 62914560 and orgin_udp_men_max >= 62914560:
+        pass
+    else:
+        cmd = ['sudo sysctl -w','net.ipv4.udp_mem="98304 62914560 62914560"']
+        check_call(cmd, shell=True, cwd=cc_repo)
 def wait_and_kill_fillp(proc):
     time.sleep(35)
     os.kill(proc.pid, signal.SIGKILL)
