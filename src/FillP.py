@@ -6,7 +6,7 @@ from os import path
 import string
 import random
 import shutil
-from subprocess import check_call Popen
+from subprocess import (check_call, Popen)
 from src_helpers import (parse_arguments, make_sure_path_exists,
                          check_default_qdisc)
 from test.test_helpers import set_sock_bufsizes_for_fillp
