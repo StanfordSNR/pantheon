@@ -26,7 +26,7 @@ def setup_fillp(cc_repo):
 def wait_and_kill_fillp(proc):
     time.sleep(35)
     os.kill(proc.pid, signal.SIGKILL)
-    cmd = ['sysctl -w','net.ipv4.udp_mem="orgin_udp_men_min orgin_udp_men_max orgin_udp_men_default"']
+    cmd = ['sysctl -w','net.ipv4.udp_mem="%s %s %s" % (orgin_udp_men_min ,orgin_udp_men_max ,orgin_udp_men_default)']
     check_call(cmd, shell=True, cwd=cc_repo)
              
 def main():
@@ -61,13 +61,13 @@ def main():
     if args.option == 'sender':
         os.environ['LD_LIBRARY_PATH'] = cc_repo
         cmd = [send_src, '-s' ,args.ip,'-p',args.port,'-t']
-        wait_and_kill_iperf(Popen(cmd))
+        wait_and_kill_fillp(Popen(cmd))
 
     if args.option == 'receiver':
         server_ip = 'localhost'
         os.environ['LD_LIBRARY_PATH'] = cc_repo
         cmd = [recv_src, '-d' ,server_ip,'-p',args.port,'-t']        
-        wait_and_kill_iperf(Popen(cmd))
+        wait_and_kill_fillp(Popen(cmd))
 
 
 if __name__ == '__main__':
