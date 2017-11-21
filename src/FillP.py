@@ -12,7 +12,7 @@ from src_helpers import (parse_arguments, make_sure_path_exists,
 from test_helpers import set_sock_bufsizes_for_fillp
 import project_root
 
-def setup_FillP(cc_repo):
+def setup_fillp(cc_repo):
     cmd = ['sudo chmod +x','./server/server']
     check_call(cmd, shell=True, cwd=cc_repo)
     cmd = ['sudo chmod +x','./client/client']
@@ -22,6 +22,7 @@ def setup_FillP(cc_repo):
     else:
         cmd = ['sudo sysctl -w','net.ipv4.udp_mem="98304 62914560 62914560"']
         check_call(cmd, shell=True, cwd=cc_repo)
+        
 def wait_and_kill_fillp(proc):
     time.sleep(35)
     os.kill(proc.pid, signal.SIGKILL)
@@ -50,12 +51,12 @@ def main():
         print 'receiver'
 
     if args.option == 'setup':
-        setup_FillP(cc_repo)
+        setup_fillp(cc_repo)
 
     if args.option == 'setup_after_reboot':
         cmd = ['sysctl -w','net.ipv4.udp_mem="98304 62914560 62914560"']
         check_call(cmd, shell=True, cwd=cc_repo)
-        check_default_qdisc('FillP')
+        check_default_qdisc('fillp')
 
     if args.option == 'sender':
         os.environ['LD_LIBRARY_PATH'] = cc_repo
