@@ -35,13 +35,13 @@ def main():
     cc_repo = path.join(project_root.DIR, 'third_party', 'fillp')
     send_src = path.join(cc_repo, 'client', 'client')
     recv_src = path.join(cc_repo, 'server', 'server')
-    cmd = ["sysctl net.ipv4.udp_mem","|awk -F '=' '{print $2}'",'awk -F ' ' '{print $2}'']
+    cmd = ["sysctl net.ipv4.udp_mem","|awk -F '=' '{print $2}'","|awk -F ' ' '{print $2}'"]
     output = Popen(cmd,stdout=subprocess.PIPE,shell=True).communicate()
     orgin_udp_men_default = output[0]
-    cmd = ["sysctl net.ipv4.udp_mem","|awk -F '=' '{print $2}'",'awk -F ' ' '{print $3}'']
+    cmd = ["sysctl net.ipv4.udp_mem","|awk -F '=' '{print $2}'","|awk -F ' ' '{print $3}'"]
     output = Popen(cmd,stdout=subprocess.PIPE,shell=True).communicate()
     orgin_udp_men_max = output[0]
-    cmd = ["sysctl net.ipv4.udp_mem","|awk -F '=' '{print $2}'",'awk -F ' ' '{print $1}'']
+    cmd = ["sysctl net.ipv4.udp_mem","|awk -F '=' '{print $2}'","|awk -F ' ' '{print $1}'"]
     output = Popen(cmd,stdout=subprocess.PIPE,shell=True).communicate()
     orgin_udp_men_min = output[0]
     if args.option == 'deps':
@@ -54,8 +54,6 @@ def main():
         setup_fillp(cc_repo)
 
     if args.option == 'setup_after_reboot':
-        cmd = ['sysctl -w','net.ipv4.udp_mem="98304 62914560 62914560"']
-        check_call(cmd, shell=True, cwd=cc_repo)
         check_default_qdisc('fillp')
 
     if args.option == 'sender':
