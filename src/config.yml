@@ -60,7 +60,7 @@ schemes:
     friendly_name: Indigo
     color: indigo
     marker: 's'
-  FillP:
+  fillp:
     friendly_name: FillP
     color: violet
     marker: 'F'
