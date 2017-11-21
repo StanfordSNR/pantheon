@@ -9,7 +9,7 @@ import shutil
 from subprocess import check_call Popen
 from src_helpers import (parse_arguments, make_sure_path_exists,
                          check_default_qdisc)
-from test_helpers import set_sock_bufsizes_for_fillp
+from test.test_helpers import set_sock_bufsizes_for_fillp
 import project_root
 
 def setup_fillp(cc_repo):
