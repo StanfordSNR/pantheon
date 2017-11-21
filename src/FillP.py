@@ -32,7 +32,7 @@ def wait_and_kill_fillp(proc):
 def main():
     args = parse_arguments('receiver_first')
 
-    cc_repo = path.join(project_root.DIR, 'third_party', 'FillP')
+    cc_repo = path.join(project_root.DIR, 'third_party', 'fillp')
     send_src = path.join(cc_repo, 'client', 'client')
     recv_src = path.join(cc_repo, 'server', 'server')
     cmd = ["sysctl net.ipv4.udp_mem","|awk -F '=' '{print $2}'",'awk -F ' ' '{print $2}'']
