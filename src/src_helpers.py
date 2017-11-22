@@ -60,7 +60,7 @@ def wait_and_kill_fillp(proc,orgin_udp_men_min, orgin_udp_men_max, orgin_udp_men
             sys.stderr.write(
                 'wait_and_kill_fillp: caught signal %s and killed fillp with '
                 'pid %s\n' % (signum, proc.pid))
-            cmd = ['sysctl -w','net.ipv4.udp_mem="%s %s %s" % (orgin_udp_men_min, orgin_udp_men_max, orgin_udp_men_default)']
+            cmd = ['sysctl -w net.ipv4.udp_mem="%s %s %s" % (orgin_udp_men_min, orgin_udp_men_max, orgin_udp_men_default)']
             check_call(cmd, shell=True, cwd=cc_repo)
 
     signal.signal(signal.SIGINT, stop_signal_handler)
