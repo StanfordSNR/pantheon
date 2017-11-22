@@ -164,7 +164,7 @@ def set_recv_sock_bufsizes(bufsizes, ssh_cmd=None):
     if orgin_udp_men_default >= 62914560 and orgin_udp_men_max >= 62914560:
         pass
     else:
-        cmd = ['sudo sysctl -w','net.ipv4.udp_mem="98304 62914560 62914560"']
+        cmd = ['sudo sysctl -w net.ipv4.udp_mem="98304 62914560 62914560"']
         check_call(cmd, shell=True)
 
                         
