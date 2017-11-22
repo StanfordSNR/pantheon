@@ -6,6 +6,7 @@ from os import path
 import string
 import random
 import shutil
+from commands import getstatusoutput
 from subprocess import (check_call, Popen)
 from src_helpers import (parse_arguments, make_sure_path_exists,
                          check_default_qdisc,wait_and_kill_fillp)
@@ -24,12 +25,11 @@ def main():
     cc_repo = path.join(project_root.DIR, 'third_party', 'fillp')
     send_src = path.join(cc_repo, 'client', 'client')
     recv_src = path.join(cc_repo, 'server', 'server')
-    cmd = ["sysctl net.ipv4.udp_mem","|awk -F '=' '{print $2}'"]
-    output = Popen(cmd,stdout=subprocess.PIPE,shell=True).communicate()
-    udp_men=output[0].split()
-    orgin_udp_men_min = udp_men[0]
-    orgin_udp_men_default = udp_men[1]
-    orgin_udp_men_max = oudp_menu[2]
+    output = commands.getstatusoutput("sysctl net.ipv4.udp_mem |awk -F '=' '{print $2}'")  
+    udp_men=output[1].strip().split()
+    orgin_udp_men_min = int(udp_men[0])
+    orgin_udp_men_default = int(udp_men[1])
+    orgin_udp_men_max = int(oudp_menu[2])
    
     
     if args.option == 'deps':
