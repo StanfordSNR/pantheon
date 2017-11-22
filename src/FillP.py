@@ -13,9 +13,9 @@ from test.test_helpers import set_sock_bufsizes_for_fillp
 import project_root
 
 def setup_fillp(cc_repo):
-    cmd = ['sudo chmod +x','./server/server']
+    cmd = ['sudo chmod +x ./server/server']
     check_call(cmd, shell=True, cwd=cc_repo)
-    cmd = ['sudo chmod +x','./client/client']
+    cmd = ['sudo chmod +x ./client/client']
     check_call(cmd, shell=True, cwd=cc_repo)
 
 def main():
