@@ -24,15 +24,13 @@ def main():
     cc_repo = path.join(project_root.DIR, 'third_party', 'fillp')
     send_src = path.join(cc_repo, 'client', 'client')
     recv_src = path.join(cc_repo, 'server', 'server')
-    cmd = ["sysctl net.ipv4.udp_mem","|awk -F '=' '{print $2}'","|awk -F ' ' '{print $2}'"]
+    cmd = ["sysctl net.ipv4.udp_mem","|awk -F '=' '{print $2}'"]
     output = Popen(cmd,stdout=subprocess.PIPE,shell=True).communicate()
-    orgin_udp_men_default = output[0]
-    cmd = ["sysctl net.ipv4.udp_mem","|awk -F '=' '{print $2}'","|awk -F ' ' '{print $3}'"]
-    output = Popen(cmd,stdout=subprocess.PIPE,shell=True).communicate()
-    orgin_udp_men_max = output[0]
-    cmd = ["sysctl net.ipv4.udp_mem","|awk -F '=' '{print $2}'","|awk -F ' ' '{print $1}'"]
-    output = Popen(cmd,stdout=subprocess.PIPE,shell=True).communicate()
-    orgin_udp_men_min = output[0]
+    udp_men=output[0].split()
+    orgin_udp_men_min = udp_men[0]
+    orgin_udp_men_default = udp_men[1]
+    orgin_udp_men_max = oudp_menu[2]
+   
     
     if args.option == 'deps':
         print 'iperf'
