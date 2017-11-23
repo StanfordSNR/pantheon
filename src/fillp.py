@@ -25,6 +25,8 @@ def main():
     cc_repo = path.join(project_root.DIR, 'third_party', 'fillp')
     send_src = path.join(cc_repo, 'client', 'client')
     recv_src = path.join(cc_repo, 'server', 'server')
+    send_path = path.join(cc_repo, 'client')
+    recv_path = path.join(cc_repo, 'server')
     output = getstatusoutput("sysctl net.ipv4.udp_mem |awk -F '=' '{print $2}'")  
     udp_men=output[1].strip().split()
     orgin_udp_men_min = int(udp_men[0])
@@ -45,13 +47,13 @@ def main():
         check_default_qdisc('fillp')
 
     if args.option == 'sender':
-        os.environ['LD_LIBRARY_PATH'] = cc_repo
+        os.environ['LD_LIBRARY_PATH'] = send_path
         set_sock_bufsizes_for_fillp(orgin_udp_men_default, orgin_udp_men_max)
         cmd = [send_src, '-s' ,args.ip,'-p',args.port,'-t']
         wait_and_kill_fillp(Popen(cmd),orgin_udp_men_min, orgin_udp_men_max, orgin_udp_men_default)
 
     if args.option == 'receiver':
-        os.environ['LD_LIBRARY_PATH'] = cc_repo
+        os.environ['LD_LIBRARY_PATH'] = recv_path
         set_sock_bufsizes_for_fillp(orgin_udp_men_default, orgin_udp_men_max)
         cmd = [recv_src, '-d' ,'localhost','-p',args.port,'-t']        
         wait_and_kill_fillp(Popen(cmd),orgin_udp_men_min, orgin_udp_men_max, orgin_udp_men_default)
