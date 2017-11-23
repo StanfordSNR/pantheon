@@ -29,7 +29,7 @@ def main():
     udp_men=output[1].strip().split()
     orgin_udp_men_min = int(udp_men[0])
     orgin_udp_men_default = int(udp_men[1])
-    orgin_udp_men_max = int(udp_menu[2])
+    orgin_udp_men_max = int(udp_men[2])
    
     
     if args.option == 'deps':
