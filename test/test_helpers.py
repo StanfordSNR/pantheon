@@ -147,6 +147,14 @@ def get_recv_sock_bufsizes(ssh_cmd=None):
 
     return buf_sizes
 
+def set_sock_bufsizes_for_fillp(orgin_udp_men_default, orgin_udp_men_max, orgin_wmen_max):
+    if orgin_udp_men_default < 268435456 or orgin_udp_men_max < 268435456:
+        cmd = ['sudo sysctl -w net.ipv4.udp_mem="98304 268435456 268435456"']
+        check_call(cmd, shell=True)
+
+    if orgin_wmen_max < 268435456:               
+        cmd = ['sudo sysctl -w net.core.wmem_max=268435456']
+        check_call(cmd, shell=True)
 
 def set_recv_sock_bufsizes(bufsizes, ssh_cmd=None):
     max_sh_cmd = 'sudo sysctl -w net.core.rmem_max=%s'
@@ -158,28 +166,5 @@ def set_recv_sock_bufsizes(bufsizes, ssh_cmd=None):
     if 'remote' in bufsizes and ssh_cmd is not None:
         set_kernel_attr(max_sh_cmd % bufsizes['remote']['max'], ssh_cmd)
         set_kernel_attr(default_sh_cmd % bufsizes['remote']['default'], ssh_cmd
-                        
-   
-def set_recv_sock_bufsizes2(bufsizes, ssh_cmd=None):
-    max_sh_cmd = 'sudo sysctl -w net.core.rmem_max=%s'
-    default_sh_cmd = 'sudo sysctl -w net.core.rmem_default=%s'
-
-    if 'local' in bufsizes:
-        set_kernel_attr(max_sh_cmd % bufsizes['local']['max'])
-        set_kernel_attr(default_sh_cmd % bufsizes['local']['default'])
-    if 'remote' in bufsizes and ssh_cmd is not None:
-        set_kernel_attr(max_sh_cmd % bufsizes['remote']['max'], ssh_cmd)
-        set_kernel_attr(default_sh_cmd % bufsizes['remote']['default'], ssh_cmd
-                        
-def set_sock_bufsizes_for_fillp(orgin_udp_men_default, orgin_udp_men_max, orgin_wmen_max):
-    if orgin_udp_men_default < 268435456 or orgin_udp_men_max < 268435456:
-        cmd = ['sudo sysctl -w net.ipv4.udp_mem="98304 268435456 268435456"']
-        check_call(cmd, shell=True)
-                        
-    if orgin_wmen_max < 268435456:               
-        cmd = ['sudo sysctl -w net.core.wmem_max=268435456']
-        check_call(cmd, shell=True)
-
-                        
-                        
-                        
+                                               
+                                               
