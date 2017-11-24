@@ -27,10 +27,13 @@ def main():
     send_path = path.join(cc_repo, 'client')
     recv_path = path.join(cc_repo, 'server')
     output = getstatusoutput("sysctl net.ipv4.udp_mem |awk -F '=' '{print $2}'")  
+    output1 = getstatusoutput("sysctl net.core.wmem_max |awk -F '=' '{print $2}'")
     udp_men=output[1].strip().split()
+    wmen_max = output1[1].strip().split()
     orgin_udp_men_min = int(udp_men[0])
     orgin_udp_men_default = int(udp_men[1])
     orgin_udp_men_max = int(udp_men[2])
+    orgin_wmen_max = int(wmen_max[0])
    
     
     if args.option == 'deps':
@@ -47,15 +50,15 @@ def main():
 
     if args.option == 'sender':
         os.environ['LD_LIBRARY_PATH'] = send_path
-        set_sock_bufsizes_for_fillp(orgin_udp_men_default, orgin_udp_men_max)
+        set_sock_bufsizes_for_fillp(orgin_udp_men_default, orgin_udp_men_max,orgin_wmen_max)
         cmd = [send_src, '-s' ,args.ip,'-p',args.port,'-t']
-        wait_and_kill_fillp(Popen(cmd),orgin_udp_men_min, orgin_udp_men_max, orgin_udp_men_default)
+        wait_and_kill_fillp(Popen(cmd),orgin_udp_men_min, orgin_udp_men_max, orgin_udp_men_default,orgin_wmen_max)
 
     if args.option == 'receiver':
         os.environ['LD_LIBRARY_PATH'] = recv_path
-        set_sock_bufsizes_for_fillp(orgin_udp_men_default, orgin_udp_men_max)
+        set_sock_bufsizes_for_fillp(orgin_udp_men_default, orgin_udp_men_max,orgin_wmen_max)
         cmd = [recv_src, '-d' ,'localhost','-p',args.port,'-t']        
-        wait_and_kill_fillp(Popen(cmd),orgin_udp_men_min, orgin_udp_men_max, orgin_udp_men_default)
+        wait_and_kill_fillp(Popen(cmd),orgin_udp_men_min, orgin_udp_men_max, orgin_udp_men_default,orgin_wmen_max)
 
 
 if __name__ == '__main__':
