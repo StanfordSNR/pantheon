@@ -160,7 +160,7 @@ def set_recv_sock_bufsizes(bufsizes, ssh_cmd=None):
         set_kernel_attr(default_sh_cmd % bufsizes['remote']['default'], ssh_cmd
                         
                         
-def set_sock_bufsizes_for_fillp(orgin_udp_men_min, orgin_udp_men_max, orgin_udp_men_default,orgin_wmen_max):
+def set_sock_bufsizes_for_fillp(orgin_udp_men_max, orgin_udp_men_default,orgin_wmen_max):
     if  orgin_udp_men_default >= 268435456 and orgin_udp_men_max >= 268435456 and orgin_wmen_max >= 268435456:
         pass
     else:
