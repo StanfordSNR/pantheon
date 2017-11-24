@@ -21,7 +21,6 @@ def setup_fillp(cc_repo):
 
 def main():
     args = parse_arguments('receiver_first')
-
     cc_repo = path.join(project_root.DIR, 'third_party', 'fillp')
     send_src = path.join(cc_repo, 'client', 'client')
     recv_src = path.join(cc_repo, 'server', 'server')
