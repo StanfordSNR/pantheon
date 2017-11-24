@@ -161,15 +161,11 @@ def set_recv_sock_bufsizes(bufsizes, ssh_cmd=None):
                         
                         
 def set_sock_bufsizes_for_fillp(orgin_udp_men_default, orgin_udp_men_max, orgin_wmen_max):
-    if orgin_udp_men_default >= 268435456 and orgin_udp_men_max >= 268435456:
-        pass
-    else:
+    if orgin_udp_men_default < 268435456 or orgin_udp_men_max < 268435456:
         cmd = ['sudo sysctl -w net.ipv4.udp_mem="98304 268435456 268435456"']
         check_call(cmd, shell=True)
                         
-    if orgin_wmen_max >= 268435456:
-        pass
-    else:                  
+    if orgin_wmen_max < 268435456:               
         cmd = ['sudo sysctl -w net.core.wmem_max=268435456']
         check_call(cmd, shell=True)
 
