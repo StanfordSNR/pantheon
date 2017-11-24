@@ -37,7 +37,7 @@ def main():
    
     
     if args.option == 'deps':
-        print 'iperf'
+        print 'no need iperf'
 
     if args.option == 'run_first':
         print 'receiver'
@@ -50,14 +50,14 @@ def main():
 
     if args.option == 'sender':
         os.environ['LD_LIBRARY_PATH'] = send_path
-        set_sock_bufsizes_for_fillp(orgin_udp_men_default, orgin_udp_men_max,orgin_wmen_max)
-        cmd = [send_src, '-s' ,args.ip,'-p',args.port,'-t']
+        set_sock_bufsizes_for_fillp(orgin_udp_men_default, orgin_udp_men_max, orgin_wmen_max)
+        cmd = [send_src, '-d', args.ip, '-p', args.port, '-t']
         wait_and_kill_fillp(Popen(cmd),orgin_udp_men_min, orgin_udp_men_max, orgin_udp_men_default,orgin_wmen_max)
 
     if args.option == 'receiver':
         os.environ['LD_LIBRARY_PATH'] = recv_path
         set_sock_bufsizes_for_fillp(orgin_udp_men_default, orgin_udp_men_max,orgin_wmen_max)
-        cmd = [recv_src, '-d' ,'localhost','-p',args.port,'-t']        
+        cmd = [recv_src, '-s', 'localhost', '-p', args.port, '-t']        
         wait_and_kill_fillp(Popen(cmd),orgin_udp_men_min, orgin_udp_men_max, orgin_udp_men_default,orgin_wmen_max)
 
 
