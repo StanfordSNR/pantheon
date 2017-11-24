@@ -57,7 +57,7 @@ def main():
     if args.option == 'receiver':
         os.environ['LD_LIBRARY_PATH'] = recv_path
         set_sock_bufsizes_for_fillp(orgin_udp_men_default, orgin_udp_men_max,orgin_wmen_max)
-        cmd = [recv_src, '-s', 'localhost', '-p', args.port, '-t']        
+        cmd = [recv_src, '-s', '0.0.0.0', '-p', args.port, '-t']        
         wait_and_kill_fillp(Popen(cmd),orgin_udp_men_min, orgin_udp_men_max, orgin_udp_men_default,orgin_wmen_max)
 
 
