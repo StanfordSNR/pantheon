@@ -37,7 +37,7 @@ def main():
    
     
     if args.option == 'deps':
-        print 'no need iperf'
+        print 'iperf'
 
     if args.option == 'run_first':
         print 'receiver'
