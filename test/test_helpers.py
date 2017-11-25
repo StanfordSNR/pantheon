@@ -166,5 +166,3 @@ def set_recv_sock_bufsizes(bufsizes, ssh_cmd=None):
     if 'remote' in bufsizes and ssh_cmd is not None:
         set_kernel_attr(max_sh_cmd % bufsizes['remote']['max'], ssh_cmd)
         set_kernel_attr(default_sh_cmd % bufsizes['remote']['default'], ssh_cmd
-                                               
-                                               
