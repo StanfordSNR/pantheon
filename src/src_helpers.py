@@ -58,7 +58,7 @@ def wait_and_kill_fillp(proc,orgin_udp_men_min, orgin_udp_men_max, orgin_udp_men
         if proc:
             os.kill(proc.pid, signal.SIGKILL)
             sys.stderr.write(
-                'wait_and_kill_fillp: caught signal %s and killed fillp with '
+                'wait_and_kill_fillp: caught signal %s and killed FillP with '
                 'pid %s\n' % (signum, proc.pid))
             cmd = ['sudo sysctl -w net.ipv4.udp_mem="%s %s %s"' % (orgin_udp_men_min, orgin_udp_men_default, orgin_udp_men_max)]
             check_call(cmd, shell=True)
