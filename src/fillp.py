@@ -11,7 +11,7 @@ from subprocess import (check_call, Popen)
 from src_helpers import (parse_arguments, make_sure_path_exists,
                          check_default_qdisc,wait_and_kill_fillp)
 import project_root
-test.test_helpers import set_sock_bufsizes_for_fillp
+from test.test_helpers import set_sock_bufsizes_for_fillp
 
 def setup_fillp(cc_repo):
     cmd = ['sudo chmod +x ./server/server']
