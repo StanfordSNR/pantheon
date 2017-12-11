@@ -4,7 +4,7 @@ import signal
 import argparse
 import os
 from os import path
-from subprocess import (call,check_call)
+from subprocess import call
 import project_root
 from helpers.helpers import (
     make_sure_path_exists, TMPDIR, parse_config, get_default_qdisc)
