@@ -32,7 +32,14 @@ def main():
     recv_src = path.join(cc_repo, 'server', 'server')
     send_path = path.join(cc_repo, 'client')
     recv_path = path.join(cc_repo, 'server')
-    
+    output_udp_mem = getstatusoutput("sysctl net.ipv4.udp_mem |awk -F '=' '{print $2}'")  
+    output_wmem = getstatusoutput("sysctl net.core.wmem_max |awk -F '=' '{print $2}'")
+    udp_men=output_udp_mem[1].strip().split()
+    wmen_max = output_wmem[1].strip().split()
+    orgin_udp_men_min = int(udp_men[0])
+    orgin_udp_men_default = int(udp_men[1])
+    orgin_udp_men_max = int(udp_men[2])
+    orgin_wmen_max = int(wmen_max[0])
  
     if args.option == 'run_first':
          print 'receiver'
