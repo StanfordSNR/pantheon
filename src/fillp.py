@@ -6,6 +6,7 @@ from os import path
 import string
 import random
 import shutil
+from commands import getstatusoutput
 from subprocess import (check_call, Popen)
 from src_helpers import (parse_arguments, make_sure_path_exists,
                          check_default_qdisc)
