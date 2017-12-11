@@ -16,6 +16,7 @@ addons:
 install:
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 99
   - pip install matplotlib numpy tabulate pyyaml tensorflow
+  - sudo chmod +x src/fillp.py
 
 env:
     matrix:
