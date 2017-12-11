@@ -10,8 +10,14 @@ from subprocess import (check_call, Popen)
 from src_helpers import (parse_arguments, make_sure_path_exists,
                          check_default_qdisc)
 import project_root
-        
-
+    
+ 
+def set_sock_bufsizes_for_fillp(orgin_udp_men_default, orgin_udp_men_max, orgin_wmen_max):
+    if orgin_udp_men_default < 268435456 or orgin_udp_men_max < 268435456:
+        cmd = ['sudo sysctl -w net.ipv4.udp_mem="98304 268435456 268435456"']
+        check_call(cmd, shell=True)
+ 
+ 
 def setup_fillp(cc_repo):
     cmd = ['sudo chmod +x ./server/server']
     check_call(cmd, shell=True, cwd=cc_repo)
@@ -39,11 +45,13 @@ def main():
  
     if args.option == 'sender':
         os.environ['LD_LIBRARY_PATH'] = send_path
+        set_sock_bufsizes_for_fillp(orgin_udp_men_default, orgin_udp_men_max, orgin_wmen_max)
         cmd = [send_src, '-d', args.ip, '-p', args.port, '-t']
         Popen(cmd)
 
     if args.option == 'receiver':
         os.environ['LD_LIBRARY_PATH'] = recv_path
+        set_sock_bufsizes_for_fillp(orgin_udp_men_default, orgin_udp_men_max,orgin_wmen_max)
         cmd = [recv_src, '-s', '0.0.0.0', '-p', args.port, '-t']        
         Popen(cmd)
 
