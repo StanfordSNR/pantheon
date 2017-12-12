@@ -20,7 +20,6 @@ def main():
     send_path = path.join(cc_repo, 'client')
     recv_path = path.join(cc_repo, 'server')
 
- 
     if args.option == 'run_first':
          print 'receiver'
  
@@ -37,5 +36,6 @@ def main():
         cmd = [recv_src, '-s', '0.0.0.0', '-p', args.port, '-t']        
         Popen(cmd)
 
+        
 if __name__ == '__main__':
     main()
