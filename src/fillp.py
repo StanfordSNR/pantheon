@@ -9,7 +9,7 @@ import shutil
 from commands import getstatusoutput
 from subprocess import (check_call, Popen)
 from src_helpers import (parse_arguments, make_sure_path_exists,
-                         check_default_qdisc)
+                         check_default_qdisc,wait_and_kill_fillp)
 import project_root
     
  
@@ -59,13 +59,13 @@ def main():
         os.environ['LD_LIBRARY_PATH'] = send_path
         set_sock_bufsizes_for_fillp(orgin_udp_men_default, orgin_udp_men_max, orgin_wmen_max)
         cmd = [send_src, '-d', args.ip, '-p', args.port, '-t']
-        Popen(cmd)
+        wait_and_kill_fillp(Popen(cmd),orgin_udp_men_min, orgin_udp_men_max, orgin_udp_men_default,orgin_wmen_max)
 
     if args.option == 'receiver':
         os.environ['LD_LIBRARY_PATH'] = recv_path
         set_sock_bufsizes_for_fillp(orgin_udp_men_default, orgin_udp_men_max,orgin_wmen_max)
         cmd = [recv_src, '-s', '0.0.0.0', '-p', args.port, '-t']        
-        Popen(cmd)
+        wait_and_kill_fillp(Popen(cmd),orgin_udp_men_min, orgin_udp_men_max, orgin_udp_men_default,orgin_wmen_max)
 
 
 if __name__ == '__main__':
