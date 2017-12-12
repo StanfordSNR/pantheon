@@ -4,7 +4,7 @@ import signal
 import argparse
 import os
 from os import path
-from subprocess import call
+from subprocess import (call,check_call)
 import project_root
 from helpers.helpers import (
     make_sure_path_exists, TMPDIR, parse_config, get_default_qdisc)
@@ -48,6 +48,24 @@ def wait_and_kill_iperf(proc):
                 'wait_and_kill_iperf: caught signal %s and killed iperf with '
                 'pid %s\n' % (signum, proc.pid))
 
+    signal.signal(signal.SIGINT, stop_signal_handler)
+    signal.signal(signal.SIGTERM, stop_signal_handler)
+
+    proc.wait()
+    
+    
+def wait_and_kill_fillp(proc,orgin_udp_men_min, orgin_udp_men_max, orgin_udp_men_default, orgin_wmen_max):
+    def stop_signal_handler(signum, frame):
+        if proc:
+            os.kill(proc.pid, signal.SIGKILL)
+            sys.stderr.write(
+                'wait_and_kill_fillp: caught signal %s and killed FillP with '
+                'pid %s\n' % (signum, proc.pid))
+            cmd = ['sudo sysctl -w net.ipv4.udp_mem="%s %s %s"' % (orgin_udp_men_min, orgin_udp_men_default, orgin_udp_men_max)]
+            check_call(cmd, shell=True)
+            cmd = ['sudo sysctl -w net.core.wmem_max=%s' % orgin_wmen_max]
+            check_call(cmd, shell=True)
+  
     signal.signal(signal.SIGINT, stop_signal_handler)
     signal.signal(signal.SIGTERM, stop_signal_handler)
 
