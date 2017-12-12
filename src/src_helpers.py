@@ -52,8 +52,8 @@ def wait_and_kill_iperf(proc):
     signal.signal(signal.SIGTERM, stop_signal_handler)
 
     proc.wait()
-
-
+    
+   
 def parse_arguments(run_first):
     if run_first != 'receiver_first' and run_first != 'sender_first':
         sys.exit('Specify "receiver_first" or "sender_first" '
