@@ -57,3 +57,7 @@
   url = https://github.com/StanfordSNR/indigo.git
   branch = indigo-no-calib
   ignore = dirty
+[submodule "third_party/fillp"]
+  path = third_party/fillp
+  url = https://github.com/fillthepipe/fill-the-pipe.git
+  ignore = dirty

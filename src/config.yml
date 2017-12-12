@@ -64,6 +64,10 @@ schemes:
     friendly_name: Indigo-no-calib
     color: '#ba55d3'
     marker: 'H'
+  fillp:
+    friendly_name: FillP
+    color: violet
+    marker: 'F'
 
 kernel_attrs:
   default_qdisc: pfifo_fast
