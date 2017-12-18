@@ -43,4 +43,4 @@ def main(delta_conf):
 
 
 if __name__ == '__main__':
-    main("do_ss:auto")
+    main('do_ss:auto')

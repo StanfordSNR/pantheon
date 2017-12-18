@@ -2,7 +2,7 @@
 
 import os
 from os import path
-from subprocess import check_call, Popen
+from subprocess import check_call
 from src_helpers import parse_arguments, apply_patch, check_default_qdisc
 import project_root
 
@@ -30,20 +30,16 @@ def main():
         check_default_qdisc('pcc')
 
     if args.option == 'receiver':
-        new_env = os.environ.copy()
-        new_env['LD_LIBRARY_PATH'] = path.join(recv_dir, 'src')
-
+        os.environ['LD_LIBRARY_PATH'] = path.join(recv_dir, 'src')
         cmd = [recv_src, args.port]
-        Popen(cmd, env=new_env).wait()
+        check_call(cmd)
 
     if args.option == 'sender':
-        new_env = os.environ.copy()
-        new_env['LD_LIBRARY_PATH'] = path.join(send_dir, 'src')
-
+        os.environ['LD_LIBRARY_PATH'] = path.join(send_dir, 'src')
         cmd = [send_src, args.ip, args.port]
         # suppress debugging output to stderr
         with open(os.devnull, 'w') as devnull:
-            Popen(cmd, env=new_env, stderr=devnull).wait()
+            check_call(cmd, stderr=devnull)
 
 
 if __name__ == '__main__':
