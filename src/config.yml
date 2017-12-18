@@ -60,6 +60,10 @@ schemes:
     friendly_name: Indigo
     color: indigo
     marker: 's'
+  indigo_no_calibration:
+    friendly_name: Indigo-no-calib
+    color: '#ba55d3'
+    marker: 'H'
 
 kernel_attrs:
   default_qdisc: pfifo_fast
