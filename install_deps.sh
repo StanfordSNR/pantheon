@@ -1,6 +1,4 @@
-#!/bin/sh
-
-set -xv
+#!/bin/sh -x
 
 # update submodules
 git submodule update --init --recursive
@@ -18,5 +16,5 @@ sudo apt-get -y install debhelper autotools-dev dh-autoreconf iptables \
                         pkg-config iproute2
 
 DIR=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
-(cd $DIR/third_party/pantheon-tunnel && ./autogen.sh && ./configure &&
- make -j2 && sudo make install)
+cd $DIR/third_party/pantheon-tunnel && ./autogen.sh && ./configure && \
+make -j2 && sudo make install
