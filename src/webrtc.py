@@ -56,8 +56,7 @@ def main():
     if args.option == 'sender':
         if not xvfb_in_use(1):
             Popen(['Xvfb', ':1'])
-        new_env = os.environ.copy()
-        new_env['DISPLAY'] = ':1'
+        os.environ['DISPLAY'] = ':1'
 
         # run signaling server on the sender side
         signaling_server_src = path.join(cc_repo, 'app.js')
@@ -70,19 +69,18 @@ def main():
                '--use-fake-device-for-media-stream',
                '--use-file-for-fake-video-capture=%s' % video,
                '--user-data-dir=%s' % user_data_dir]
-        Popen(cmd, env=new_env).wait()
+        check_call(cmd)
 
     if args.option == 'receiver':
         if not xvfb_in_use(2):
             Popen(['Xvfb', ':2'])
-        new_env = os.environ.copy()
-        new_env['DISPLAY'] = ':2'
+        os.environ['DISPLAY'] = ':2'
 
         user_data_dir = path.join(TMPDIR, 'webrtc-%s' % uuid.uuid4())
         cmd = ['chromium-browser',
                '--app=http://%s:%s/receiver' % (args.ip, args.port),
                '--user-data-dir=%s' % user_data_dir]
-        Popen(cmd, env=new_env).wait()
+        check_call(cmd)
 
 
 if __name__ == '__main__':

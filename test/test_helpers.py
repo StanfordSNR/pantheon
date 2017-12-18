@@ -130,17 +130,17 @@ def save_test_metadata(meta, data_dir, git_summary):
 def get_recv_sock_bufsizes(ssh_cmd=None):
     buf_sizes = {'remote': {}, 'local': {}}
 
-    max_sh_cmd = 'sysctl net.core.rmem_max'
-    default_sh_cmd = 'sysctl net.core.rmem_default'
-    local_max_bufsize = get_kernel_attr(max_sh_cmd)
-    local_default_bufsize = get_kernel_attr(default_sh_cmd)
+    max_cmd = 'sysctl net.core.rmem_max'
+    default_cmd = 'sysctl net.core.rmem_default'
+    local_max_bufsize = get_kernel_attr(max_cmd)
+    local_default_bufsize = get_kernel_attr(default_cmd)
 
     buf_sizes['local']['max'] = local_max_bufsize
     buf_sizes['local']['default'] = local_default_bufsize
 
     if ssh_cmd is not None:
-        remote_max_bufsize = get_kernel_attr(max_sh_cmd, ssh_cmd)
-        remote_default_bufsize = get_kernel_attr(default_sh_cmd, ssh_cmd)
+        remote_max_bufsize = get_kernel_attr(max_cmd, ssh_cmd)
+        remote_default_bufsize = get_kernel_attr(default_cmd, ssh_cmd)
 
         buf_sizes['remote']['max'] = remote_max_bufsize
         buf_sizes['remote']['default'] = remote_default_bufsize
@@ -149,12 +149,12 @@ def get_recv_sock_bufsizes(ssh_cmd=None):
 
 
 def set_recv_sock_bufsizes(bufsizes, ssh_cmd=None):
-    max_sh_cmd = 'sudo sysctl -w net.core.rmem_max=%s'
-    default_sh_cmd = 'sudo sysctl -w net.core.rmem_default=%s'
+    max_cmd = 'sudo sysctl -w net.core.rmem_max=%s'
+    default_cmd = 'sudo sysctl -w net.core.rmem_default=%s'
 
     if 'local' in bufsizes:
-        set_kernel_attr(max_sh_cmd % bufsizes['local']['max'])
-        set_kernel_attr(default_sh_cmd % bufsizes['local']['default'])
+        set_kernel_attr(max_cmd % bufsizes['local']['max'])
+        set_kernel_attr(default_cmd % bufsizes['local']['default'])
     if 'remote' in bufsizes and ssh_cmd is not None:
-        set_kernel_attr(max_sh_cmd % bufsizes['remote']['max'], ssh_cmd)
-        set_kernel_attr(default_sh_cmd % bufsizes['remote']['default'], ssh_cmd)
+        set_kernel_attr(max_cmd % bufsizes['remote']['max'], ssh_cmd)
+        set_kernel_attr(default_cmd % bufsizes['remote']['default'], ssh_cmd)

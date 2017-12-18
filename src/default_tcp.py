@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 from subprocess import Popen
-from src_helpers import parse_arguments, wait_and_kill_iperf, check_default_qdisc
+from src_helpers import (parse_arguments, wait_and_kill_iperf,
+                         check_default_qdisc)
 
 
 def main():
