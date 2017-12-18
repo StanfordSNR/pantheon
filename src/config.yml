@@ -67,7 +67,7 @@ schemes:
   fillp:
     friendly_name: FillP
     color: violet
-    marker: 'F'
+    marker: '+'
 
 kernel_attrs:
   default_qdisc: pfifo_fast
