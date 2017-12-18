@@ -52,3 +52,8 @@
   url = https://github.com/StanfordSNR/indigo.git
   branch = master
   ignore = dirty
+[submodule "third_party/indigo-no-calib"]
+  path = third_party/indigo-no-calib
+  url = https://github.com/StanfordSNR/indigo.git
+  branch = indigo-no-calib
+  ignore = dirty
