@@ -6,20 +6,22 @@ import os
 from os import path
 from subprocess import PIPE
 import signal
+import argparse
 import project_root
 from helpers.helpers import (
     get_open_port, check_output, call, Popen, parse_config,
     kill_proc_group, timeout_handler, TimeoutError)
 
 
-def test_schemes():
+def test_schemes(args):
     src_dir = path.join(project_root.DIR, 'src')
-    schemes = parse_config()['schemes'].keys()
+
+    if args.all:
+        schemes = parse_config()['schemes'].keys()
+    elif args.schemes is not None:
+        schemes = args.schemes.split()
 
     for scheme in schemes:
-        if scheme == 'bbr' or scheme == 'quic':  # skip them on Travis
-            continue
-
         sys.stderr.write('Testing %s...\n' % scheme)
         src = path.join(src_dir, scheme + '.py')
 
@@ -68,8 +70,18 @@ def cleanup():
 
 
 def main():
+    parser = argparse.ArgumentParser()
+
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('--all', action='store_true',
+                       help='test all the schemes specified in src/config.yml')
+    group.add_argument('--schemes', metavar='"SCHEME1 SCHEME2..."',
+                       help='test a space-separated list of schemes')
+
+    args = parser.parse_args()
+
     try:
-        test_schemes()
+        test_schemes(args)
     except:
         cleanup()
         raise

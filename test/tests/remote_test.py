@@ -14,7 +14,7 @@ def main():
 
     test_py = path.join(project_root.DIR, 'test', 'test.py')
 
-    # test a receiver-first scheme
+    # test a receiver-first scheme --- default_tcp
     cc = 'default_tcp'
 
     cmd = ['python', test_py, 'remote', remote, '--pkill-cleanup',
@@ -33,7 +33,7 @@ def main():
            '--pkill-cleanup', '--interval', '2', '--schemes', cc]
     check_call(cmd)
 
-    # test a sender-first scheme
+    # test a sender-first scheme --- verus
     cc = 'verus'
 
     cmd = ['python', test_py, 'remote', remote, '-t', '5', '--pkill-cleanup',

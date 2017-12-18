@@ -12,7 +12,7 @@ def main():
 
     test_py = path.join(project_root.DIR, 'test', 'test.py')
 
-    # test a receiver-first scheme
+    # test a receiver-first scheme --- default_tcp
     cc = 'default_tcp'
 
     cmd = ['python', test_py, 'local', '-t', '5', '-f', '0',
@@ -46,7 +46,7 @@ def main():
            '--schemes', '%s' % cc]
     check_call(cmd)
 
-    # test a sender-first scheme
+    # test a sender-first scheme --- verus
     cc = 'verus'
 
     cmd = ['python', test_py, 'local', '-t', '5', '-f', '0',

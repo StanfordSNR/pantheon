@@ -63,7 +63,7 @@ schemes:
   indigo_no_calibration:
     friendly_name: Indigo-no-calib
     color: '#ba55d3'
-    marker: 'H'
+    marker: 'D'
   fillp:
     friendly_name: FillP
     color: violet
