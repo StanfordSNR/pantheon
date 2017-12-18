@@ -16,7 +16,7 @@ def main(delta_conf):
 
     if args.option == 'deps':
         print ('makepp libboost-dev libprotobuf-dev protobuf-c-compiler '
-               'protobuf-compiler libjemalloc-dev')
+               'protobuf-compiler libjemalloc-dev libboost-python-dev')
 
     if args.option == 'run_first':
         print 'receiver'
