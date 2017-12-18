@@ -9,12 +9,15 @@ branches:
 addons:
   apt:
     sources:
-    - sourceline: 'ppa:ubuntu-toolchain-r/test'
+      - ubuntu-toolchain-r-test
     packages:
-    - g++-4.9
+      - gcc-7
+      - g++-7
 
 install:
-  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 99
+  - sudo apt-get update -q
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 99
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 99
   - pip install matplotlib numpy tabulate pyyaml tensorflow
 
 env:
@@ -23,12 +26,10 @@ env:
         test/setup.py --schemes quic --setup &&
         test/test.py local --schemes quic -t 10'
       - CMD='SCHEMES="default_tcp vegas bbr ledbat pcc verus sprout webrtc
-        scream copa taova koho_cc calibrated_koho indigo" &&
+        scream copa taova calibrated_koho indigo" &&
         test/setup.py --schemes "$SCHEMES" --install-deps &&
         test/setup.py --schemes "$SCHEMES" --setup &&
-        src/tests/test_schemes.py &&
-        test/tests/local_test.py &&
-        analysis/tests/test_analyze.py'
+        analysis/tests/test_analyze.py --schemes "$SCHEMES"'
 
 script:
   - ./install_deps.sh && eval $CMD
