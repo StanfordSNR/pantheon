@@ -119,7 +119,11 @@ def set_kernel_attr(sh_cmd, ssh_cmd=None, debug=True):
 
     if debug:
         is_local = 'local' if ssh_cmd is None else 'remote'
-        attr, val = sh_cmd.split()[-1].split('=')
+
+        items = sh_cmd.split('=')
+        attr = items[0].split()[-1].strip()
+        val = items[1].strip()
+
         if res != 0:
             sys.stderr.write('Failed: %s %s to %s\n' % (is_local, attr, val))
         else:
