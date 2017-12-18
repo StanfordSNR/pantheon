@@ -17,8 +17,8 @@ from helpers.helpers import (
     get_default_qdisc, set_default_qdisc)
 from test_helpers import (
     who_runs_first, parse_remote_path, query_clock_offset, get_git_summary,
-    save_test_metadata,
-    get_recv_sock_bufsizes, set_recv_sock_bufsizes)
+    save_test_metadata, get_recv_sock_bufsizes, set_recv_sock_bufsizes,
+    get_cmds_to_revert_conf, set_conf, revert_conf)
 
 
 class Test(object):
@@ -641,22 +641,34 @@ def run_tests(args):
         for cc in cc_schemes:
             default_qdisc = get_default_qdisc(ssh_cmd)
             old_recv_bufsizes = get_recv_sock_bufsizes(ssh_cmd)
+
+            if 'qdisc' in schemes_config[cc]:
+                test_qdisc = schemes_config[cc]['qdisc']
+            else:
+                test_qdisc = config['kernel_attrs']['default_qdisc']
+
+            test_recv_sock_bufs = config['kernel_attrs']['sock_recv_bufs']
+
+            # special case currently used by fillp only
+            cmds_to_revert_conf = get_cmds_to_revert_conf(cc, ssh_cmd)
+
             try:
-                test_recv_sock_bufs = config['kernel_attrs']['sock_recv_bufs']
-
-                if 'qdisc' in schemes_config[cc]:
-                    test_qdisc = schemes_config[cc]['qdisc']
-                else:
-                    test_qdisc = config['kernel_attrs']['default_qdisc']
-
                 if default_qdisc != test_qdisc:
                     set_default_qdisc(test_qdisc, ssh_cmd)
 
                 set_recv_sock_bufsizes(test_recv_sock_bufs, ssh_cmd)
+
+                if cmds_to_revert_conf:
+                    set_conf(cc, ssh_cmd)
+
                 Test(args, run_id, cc).run()
             finally:
                 set_default_qdisc(default_qdisc, ssh_cmd)
                 set_recv_sock_bufsizes(old_recv_bufsizes, ssh_cmd)
+
+                if cmds_to_revert_conf:
+                    revert_conf(cmds_to_revert_conf, ssh_cmd)
+
 
     if not args.no_metadata:
         meta = vars(args).copy()

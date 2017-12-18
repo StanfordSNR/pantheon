@@ -149,8 +149,8 @@ def get_recv_sock_bufsizes(ssh_cmd=None):
 
 
 def set_recv_sock_bufsizes(bufsizes, ssh_cmd=None):
-    max_cmd = 'sudo sysctl -w net.core.rmem_max=%s'
-    default_cmd = 'sudo sysctl -w net.core.rmem_default=%s'
+    max_cmd = 'sudo sysctl -w net.core.rmem_max="%s"'
+    default_cmd = 'sudo sysctl -w net.core.rmem_default="%s"'
 
     if 'local' in bufsizes:
         set_kernel_attr(max_cmd % bufsizes['local']['max'])
@@ -158,3 +158,34 @@ def set_recv_sock_bufsizes(bufsizes, ssh_cmd=None):
     if 'remote' in bufsizes and ssh_cmd is not None:
         set_kernel_attr(max_cmd % bufsizes['remote']['max'], ssh_cmd)
         set_kernel_attr(default_cmd % bufsizes['remote']['default'], ssh_cmd)
+
+
+def get_cmds_to_revert_conf(cc, ssh_cmd=None):
+    cmds = []
+
+    if cc == 'fillp':
+        attr = get_kernel_attr('sysctl net.ipv4.udp_mem')
+        cmds.append('sudo sysctl -w net.ipv4.udp_mem="%s"' % attr)
+
+        attr = get_kernel_attr('sysctl net.core.wmem_max')
+        cmds.append('sudo sysctl -w net.core.wmem_max="%s"' % attr)
+
+    return cmds
+
+
+def set_conf_cmds(cmds, ssh_cmd):
+    for cmd in cmds:
+        set_kernel_attr(cmd)
+        if ssh_cmd is not None:
+            set_kernel_attr(cmd, ssh_cmd)
+
+
+def set_conf(cc, ssh_cmd):
+    if cc == 'fillp':
+        cmds = ['sudo sysctl -w net.ipv4.udp_mem="98304 268435456 268435456"',
+                'sudo sysctl -w net.core.wmem_max=268435456']
+        set_conf_cmds(cmds, ssh_cmd)
+
+
+def revert_conf(cmds, ssh_cmd):
+    set_conf_cmds(cmds, ssh_cmd)
