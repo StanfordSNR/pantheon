@@ -61,3 +61,7 @@
   path = third_party/fillp
   url = https://github.com/fillthepipe/fill-the-pipe.git
   ignore = dirty
+[submodule "third_party/vivace"]
+  path = third_party/vivace
+  url = https://github.com/StanfordSNR/vivace.git
+  ignore = dirty
