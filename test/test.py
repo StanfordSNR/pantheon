@@ -649,26 +649,16 @@ def run_tests(args):
 
             test_recv_sock_bufs = config['kernel_attrs']['sock_recv_bufs']
 
-            # special case currently used by fillp only
-            cmds_to_revert_conf = get_cmds_to_revert_conf(cc, ssh_cmd)
-
             try:
                 if default_qdisc != test_qdisc:
                     set_default_qdisc(test_qdisc, ssh_cmd)
 
                 set_recv_sock_bufsizes(test_recv_sock_bufs, ssh_cmd)
 
-                if cmds_to_revert_conf:
-                    set_conf(cc, ssh_cmd)
-
                 Test(args, run_id, cc).run()
             finally:
                 set_default_qdisc(default_qdisc, ssh_cmd)
                 set_recv_sock_bufsizes(old_recv_bufsizes, ssh_cmd)
-
-                if cmds_to_revert_conf:
-                    revert_conf(cmds_to_revert_conf, ssh_cmd)
-
 
     if not args.no_metadata:
         meta = vars(args).copy()
