@@ -2,7 +2,7 @@ schemes:
   default_tcp:
     friendly_name: TCP Cubic
     color: black
-    marker: 'd'
+    marker: '*'
   vegas:
     friendly_name: TCP Vegas
     color: silver
@@ -47,7 +47,7 @@ schemes:
   taova:
     friendly_name: TaoVA-100x
     color: gray
-    marker: '*'
+    marker: 'd'
   koho_cc:
     friendly_name: KohoCC
     color: blue
@@ -68,6 +68,18 @@ schemes:
     friendly_name: FillP
     color: violet
     marker: '+'
+  vivace_latency:
+    friendly_name: Vivace-latency
+    color: '#0149d0'
+    marker: '<'
+  vivace_loss:
+    friendly_name: Vivace-loss
+    color: '#003cad'
+    marker: '>'
+  vivace_lte:
+    friendly_name: Vivace-LTE
+    color: '#002a79'
+    marker: '^'
 
 kernel_attrs:
   default_qdisc: pfifo_fast
