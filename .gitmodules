@@ -52,3 +52,42 @@
   url = https://github.com/StanfordSNR/RLCC.git
   branch = indigo
   ignore = dirty
+[submodule "third_party/indigo-1-layer-4-dim"]
+	path = third_party/indigo-1-layer-4-dim
+	url = https://github.com/StanfordSNR/indigo.git
+[submodule "third_party/indigo-1-layer-8-dim"]
+	path = third_party/indigo-1-layer-8-dim
+	url = https://github.com/StanfordSNR/indigo.git
+[submodule "third_party/indigo-1-layer-16-dim"]
+	path = third_party/indigo-1-layer-16-dim
+	url = https://github.com/StanfordSNR/indigo.git
+[submodule "third_party/indigo-1-layer-32-dim"]
+	path = third_party/indigo-1-layer-32-dim
+	url = https://github.com/StanfordSNR/indigo.git
+[submodule "third_party/indigo-1-layer-64-dim"]
+	path = third_party/indigo-1-layer-64-dim
+	url = https://github.com/StanfordSNR/indigo.git
+[submodule "third_party/indigo-1-layer-128-dim"]
+	path = third_party/indigo-1-layer-128-dim
+	url = https://github.com/StanfordSNR/indigo.git
+[submodule "third_party/indigo-1-layer-256-dim"]
+	path = third_party/indigo-1-layer-256-dim
+	url = https://github.com/StanfordSNR/indigo.git
+[submodule "third_party/indigo-2-layer-4-dim"]
+	path = third_party/indigo-2-layer-4-dim
+	url = https://github.com/StanfordSNR/indigo.git
+[submodule "third_party/indigo-2-layer-8-dim"]
+	path = third_party/indigo-2-layer-8-dim
+	url = https://github.com/StanfordSNR/indigo.git
+[submodule "third_party/indigo-2-layer-16-dim"]
+	path = third_party/indigo-2-layer-16-dim
+	url = https://github.com/StanfordSNR/indigo.git
+[submodule "third_party/indigo-2-layer-32-dim"]
+	path = third_party/indigo-2-layer-32-dim
+	url = https://github.com/StanfordSNR/indigo.git
+[submodule "third_party/indigo-2-layer-64-dim"]
+	path = third_party/indigo-2-layer-64-dim
+	url = https://github.com/StanfordSNR/indigo.git
+[submodule "third_party/indigo-2-layer-128-dim"]
+	path = third_party/indigo-2-layer-128-dim
+	url = https://github.com/StanfordSNR/indigo.git
