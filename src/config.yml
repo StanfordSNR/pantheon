@@ -60,6 +60,58 @@ schemes:
     friendly_name: Indigo
     color: indigo
     marker: 's'
+  indigo-2-layer-128-dim:
+    friendly_name: Indigo-2-layer-128-dim
+    color: black 
+    marker: 'o'
+  indigo-2-layer-64-dim:
+    friendly_name: Indigo-2-layer-64-dim
+    color: green 
+    marker: 'v'
+  indigo-2-layer-32-dim:
+    friendly_name: Indigo-2-layer-32-dim
+    color: blue 
+    marker: '^'
+  indigo-2-layer-16-dim:
+    friendly_name: Indigo-2-layer-16-dim
+    color: red 
+    marker: '<'
+  indigo-2-layer-8-dim:
+    friendly_name: Indigo-2-layer-8-dim
+    color: gray
+    marker: '>'
+  indigo-2-layer-4-dim:
+    friendly_name: Indigo-2-layer-4-dim
+    color: olive
+    marker: '1'
+  indigo-1-layer-256-dim:
+    friendly_name: Indigo-1-layer-256-dim
+    color: magenta
+    marker: '2'
+  indigo-1-layer-128-dim:
+    friendly_name: Indigo-1-layer-128-dim
+    color: orange 
+    marker: '3'
+  indigo-1-layer-64-dim:
+    friendly_name: Indigo-1-layer-64-dim
+    color: brown 
+    marker: '4'
+  indigo-1-layer-32-dim:
+    friendly_name: Indigo-1-layer-32-dim
+    color: gold 
+    marker: '8'
+  indigo-1-layer-16-dim:
+    friendly_name: Indigo-1-layer-16-dim
+    color: cyan
+    marker: 'p'
+  indigo-1-layer-8-dim:
+    friendly_name: Indigo-1-layer-8-dim
+    color: skyblue
+    marker: 'P'
+  indigo-1-layer-4-dim:
+    friendly_name: Indigo-1-layer-4-dim
+    color: silver
+    marker: '*'
 
 kernel_attrs:
   default_qdisc: pfifo_fast
