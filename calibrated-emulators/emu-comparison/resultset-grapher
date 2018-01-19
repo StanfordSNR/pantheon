@@ -1,0 +1,61 @@
+#!/usr/bin/perl -w
+
+use strict;
+use IPC::Open2;
+require q{graph-support.pl};
+
+# Parse arguments
+if ( scalar @ARGV != 1 ) {
+  die qq{Usage: $0 DIRNAME\n};
+}
+
+my ( $dirname ) = @ARGV;
+
+my %res = %{ analyze_resultset( $dirname ) };
+
+# expand graph
+my $display_minimum_throughput = $res{ limits }[ 0 ] - 0.1 * ($res{ limits }[ 1 ] - $res{ limits }[ 0 ]);
+$display_minimum_throughput = 0 if $display_minimum_throughput < 0;
+my $display_maximum_throughput = $res{ limits }[ 1 ] + 0.1 * ($res{ limits }[ 1 ] - $res{ limits }[ 0 ]);
+my $display_minimum_delay = 0.8 * $res{ limits }[ 2 ];
+my $display_maximum_delay = 1.25 * $res{ limits }[ 3 ];
+
+my $gnuplot_pid = open2( my $gnuplot_reader, my $gnuplot_writer, q{gnuplot} ) or die qq{gnuplot: $!};
+
+print $gnuplot_writer <<"END";
+set xlabel "delay (95th percentile ms)"
+set ylabel "throughput (Mbits/s)"
+set terminal svg size 1024,768 fsize 20 rounded solid
+set logscale x
+unset key
+set xrange [$display_maximum_delay:$display_minimum_delay] reverse
+set yrange [$display_minimum_throughput:$display_maximum_throughput]
+set xtics 2
+END
+
+my %display_name = ( copa => q{Copa}, default_tcp => q{TCP Cubic}, greg_saturator => q{GHsat},
+		     koho_cc => q{Koho}, ledbat => q{LEDBAT}, pcc => q{PCC},
+		     quic => q{QUIC Cubic}, saturator => q{YYsat},
+		     scream => q{SCReAM}, sprout => q{Sprout},
+		     vegas => q{Vegas}, verus => q{Verus}, webrtc => q{WebRTC} );
+
+# print labels
+for my $scheme ( sort keys %{ $res{ median } } ) {
+  print $gnuplot_writer qq{set label "$display_name{ $scheme }" at $res{ median}{ $scheme }{ delay }, $res{ median }{ $scheme }{ throughput } center offset -1, 1\n};
+}
+
+# print closed circles for each median
+print $gnuplot_writer qq{plot "-" using 1:2 lt 7 ps 2.0 lc rgb "#000000ff"\n};
+for my $scheme ( sort keys %{ $res{ median } } ) {
+  print $gnuplot_writer qq{$res{ median }{ $scheme }{ delay } $res{ median }{ $scheme }{ throughput }\n};
+}
+
+close $gnuplot_writer or die qq{$!};
+
+while ( <$gnuplot_reader> ) {
+  print;
+}
+
+close $gnuplot_reader or die qq{$!};
+
+waitpid( $gnuplot_pid, 0 );

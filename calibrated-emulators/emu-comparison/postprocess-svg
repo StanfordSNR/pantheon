@@ -1,0 +1,74 @@
+#!/usr/bin/perl -w
+
+use strict;
+use XML::Twig;
+
+# read XML
+my $contents;
+{
+  local $/;
+  $contents = <>;
+}
+
+my $twig = XML::Twig->new( pretty_print => q{indented} );
+$twig->parse( $contents );
+
+my $root = $twig->root;
+die q{Not an SVG} unless $root->tag eq q{svg};
+
+
+sub find_labels {
+  my ( $node ) = @_;
+
+  # case 1: is this the label node?
+  if ( $node->tag eq q{g} ) {
+    for my $child ( $node->children ) {
+      if ( $child->att_exists( q{font-weight} ) and $child->att( q{font-weight} ) eq q{bold} ) {
+	return $node;
+      }
+    }
+  }
+
+  # case 2: recurse
+  for ( $node->children ) {
+    my $ret = find_labels( $_ );
+    if ( defined $ret ) {
+      return $ret;
+    }
+  }
+  return undef;
+}
+
+sub lock_plots {
+  my ( $node ) = @_;
+  if ( defined $node->att( q{id} ) and $node->att( q{id} ) =~ m{^gnuplot_plot_} ) {
+    $node->set_att( q{sodipodi:insensitive}, q{true} );
+  }
+
+  if ( defined $node->att( q{id} ) and $node->att( q{id} ) =~ m{^gnuplot_canvas} ) {
+    $node->set_att( q{inkscape:groupmode}, q{layer} );
+  }
+
+  # recurse
+  for ( $node->children ) {
+    lock_plots( $_ );
+  }
+}
+
+# separate out the labels
+my $labels = find_labels( $root );
+die q{Couldn't find labels} unless defined $labels;
+$labels->cut;
+$labels->paste( $root );
+$root->set_att( q{xmlns:inkscape}, q{http://www.inkscape.org/namespaces/inkscape} );
+$root->set_att( q{xmlns:sodipodi}, q{http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd} );
+$labels->set_att( q{inkscape:groupmode}, q{layer} );
+$labels->set_att( q{inkscape:label}, q{Labels} );
+my $nv = $root->insert_new_elt( q{sodipodi:namedview} );
+$nv->set_att( q{inkscape:pageopacity}, q{1.0} );
+
+# lock the important parts of the plot
+lock_plots( $root );
+
+$root->print;
+print qq{\n};
