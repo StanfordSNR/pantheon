@@ -65,3 +65,13 @@
   path = third_party/vivace
   url = https://github.com/StanfordSNR/vivace.git
   ignore = dirty
+[submodule "third_party/indigo-1-layer-32-unit"]
+  path = third_party/indigo-1-layer-32-unit
+  url = https://github.com/StanfordSNR/indigo.git
+  branch = 1-layer-32-unit
+  ignore = dirty
+[submodule "third_party/indigo-1-layer-128-unit"]
+  path = third_party/indigo-1-layer-128-unit
+  url = https://github.com/StanfordSNR/indigo.git
+  branch = 1-layer-128-unit
+  ignore = dirty
