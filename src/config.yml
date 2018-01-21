@@ -63,6 +63,14 @@ schemes:
   indigo_no_calibration:
     friendly_name: Indigo-no-calib
     color: '#ba55d3'
+    marker: 'v'
+  indigo_1_layer_32_unit:
+    friendly_name: Indigo-1-layer-32-unit
+    color: '#f01a1a'
+    marker: 'o'
+  indigo_1_layer_128_unit:
+    friendly_name: Indigo-1-layer-128-unit
+    color: '#c21818'
     marker: 'D'
   fillp:
     friendly_name: FillP
