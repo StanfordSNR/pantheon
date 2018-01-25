@@ -20,7 +20,7 @@ def main():
         check_call(['sudo pip install tensorflow'], shell=True)
 
     if args.option == 'setup_after_reboot':
-        check_default_qdisc('indigo_no_calibration')
+        check_default_qdisc('indigo')
 
     if args.option == 'sender':
         cmd = [send_src, args.port]
