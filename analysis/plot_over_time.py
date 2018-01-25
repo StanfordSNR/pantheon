@@ -163,6 +163,8 @@ class PlotThroughputTime(object):
         sys.stderr.write(
             'Saved pantheon_throughput_time in %s\n' % self.data_dir)
 
+        plt.close('all')
+
 
 def main():
     args = parse_arguments(path.basename(__file__))
