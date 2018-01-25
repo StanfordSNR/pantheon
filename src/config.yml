@@ -57,20 +57,24 @@ schemes:
     color: olive
     marker: 'D'
   indigo:
-    friendly_name: Indigo
+    friendly_name: Indigo-2-256
     color: indigo
     marker: 's'
-  indigo_no_calibration:
-    friendly_name: Indigo-no-calib
-    color: '#ba55d3'
+  indigo_no_calib:
+    friendly_name: Indigo-2-256-no-calib
+    color: indigo
     marker: 'v'
-  indigo_1_layer_32_unit:
-    friendly_name: Indigo-1-layer-32-unit
-    color: '#f01a1a'
+  indigo_1_128:
+    friendly_name: Indigo-1-128
+    color: '#8A2BE2'
+    marker: '^'
+  indigo_1_32:
+    friendly_name: Indigo-1-32
+    color: '#6F00FF'
     marker: 'o'
-  indigo_1_layer_128_unit:
-    friendly_name: Indigo-1-layer-128-unit
-    color: '#c21818'
+  indigo_1_32_no_calib:
+    friendly_name: Indigo-1-32-no-calib
+    color: '#9683EC'
     marker: 'D'
   fillp:
     friendly_name: FillP
@@ -78,15 +82,15 @@ schemes:
     marker: '+'
   vivace_latency:
     friendly_name: Vivace-latency
-    color: '#0149d0'
+    color: '#0149D0'
     marker: '<'
   vivace_loss:
     friendly_name: Vivace-loss
-    color: '#003cad'
+    color: '#003CAD'
     marker: '>'
   vivace_lte:
     friendly_name: Vivace-LTE
-    color: '#002a79'
+    color: '#002A79'
     marker: '^'
 
 kernel_attrs:
