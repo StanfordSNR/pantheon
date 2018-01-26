@@ -2,6 +2,7 @@
 
 from os import path
 import pickle
+import json
 import sys
 import math
 import multiprocessing
@@ -22,17 +23,20 @@ class Plot(object):
         self.data_dir = path.abspath(args.data_dir)
         self.include_acklink = args.include_acklink
         self.no_graphs = args.no_graphs
+        self.json_only = args.json_only
 
         metadata_path = path.join(self.data_dir, 'pantheon_metadata.json')
         meta = load_test_metadata(metadata_path)
+        self.meta = meta
         self.cc_schemes = verify_schemes_with_meta(args.schemes, meta)
 
         self.run_times = meta['run_times']
         self.flows = meta['flows']
         self.runtime = meta['runtime']
-        self.expt_title = self.generate_expt_title(meta)
 
-    def generate_expt_title(self, meta):
+    def generate_expt_title(self):
+        meta = self.meta
+
         if meta['mode'] == 'local':
             expt_title = 'local test in mahimahi, '
         elif meta['mode'] == 'remote':
@@ -140,6 +144,26 @@ class Plot(object):
 
         return (tput, delay, loss, stats)
 
+    def parse_tunnel_log_json(self, cc, run_id):
+        log_name = '%s_datalink_run%s.log' % (cc, run_id)
+        log_path = path.join(self.data_dir, log_name)
+
+        if not path.isfile(log_path):
+            sys.stderr.write('Warning: %s does not exist\n' % log_path)
+            return None
+
+        print_cmd('tunnel_graph %s\n' % log_path)
+        try:
+            tunnel_results = tunnel_graph.TunnelGraph(
+                tunnel_log=log_path).run()
+        except Exception as exception:
+            sys.stderr.write('Error: %s\n' % exception)
+            sys.stderr.write('Warning: "tunnel_graph %s" failed but '
+                             'continued to run.\n' % log_path)
+            return None
+
+        return tunnel_results['flow_data']
+
     def update_stats_log(self, cc, run_id, stats):
         stats_log_path = path.join(
             self.data_dir, '%s_stats_run%s.log' % (cc, run_id))
@@ -168,6 +192,49 @@ class Plot(object):
                                 (path.basename(__file__), utc_time()))
                 stats_log.write('# Datalink statistics\n')
                 stats_log.write('%s' % stats)
+
+    def save_performance_to_json(self):
+        data = {}
+        for cc in self.cc_schemes:
+            data[cc] = {}
+
+        cc_id = 0
+        run_id = 1
+        pool = ThreadPool(processes=multiprocessing.cpu_count())
+
+        while cc_id < len(self.cc_schemes):
+            cc = self.cc_schemes[cc_id]
+            data[cc][run_id] = pool.apply_async(
+                self.parse_tunnel_log_json, args=(cc, run_id))
+
+            run_id += 1
+            if run_id > self.run_times:
+                run_id = 1
+                cc_id += 1
+
+        for cc in self.cc_schemes:
+            mean_flow = {}
+            for run_id in xrange(1, 1 + self.run_times):
+                data[cc][run_id] = data[cc][run_id].get()
+
+                for flow_id in data[cc][run_id]:
+                    if flow_id not in mean_flow:
+                        mean_flow[flow_id] = {}
+                        for t in ['tput', 'delay', 'loss']:
+                            mean_flow[flow_id][t] = []
+
+                    for t in ['tput', 'delay', 'loss']:
+                        mean_flow[flow_id][t].append(data[cc][run_id][flow_id][t])
+
+            for flow_id in data[cc][run_id]:
+                for t in ['tput', 'delay', 'loss']:
+                    mean_flow[flow_id][t] = np.mean(mean_flow[flow_id][t])
+
+            data[cc]['mean'] = mean_flow
+
+        perf_data_json_path = path.join(self.data_dir, 'perf_data.json')
+        with open(perf_data_json_path, 'w') as f:
+            json.dump(data, f)
 
     def eval_performance(self):
         data = {}
@@ -244,6 +311,8 @@ class Plot(object):
             ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
 
     def plot_throughput_delay(self, data):
+        expt_title = self.generate_expt_title()
+
         min_raw_delay = sys.maxint
         min_mean_delay = sys.maxint
         max_raw_delay = -sys.maxint
@@ -302,7 +371,7 @@ class Plot(object):
             ax.grid()
 
         # save pantheon_summary.svg and .pdf
-        ax_raw.set_title(self.expt_title.strip(), y=1.02, fontsize=12)
+        ax_raw.set_title(expt_title.strip(), y=1.02, fontsize=12)
         lgd = ax_raw.legend(scatterpoints=1, bbox_to_anchor=(1, 0.5),
                             loc='center left', fontsize=12)
 
@@ -313,7 +382,7 @@ class Plot(object):
                             bbox_inches='tight', pad_inches=0.2)
 
         # save pantheon_summary_mean.svg and .pdf
-        ax_mean.set_title(self.expt_title +
+        ax_mean.set_title(expt_title +
                           ' (mean of all runs by scheme)', fontsize=12)
 
         for graph_format in ['svg', 'pdf']:
@@ -327,21 +396,24 @@ class Plot(object):
             'graphs in %s\n' % self.data_dir)
 
     def run(self):
-        stats_logs, data = self.eval_performance()
+        if self.json_only:
+            self.save_performance_to_json()
+        else:
+            stats_logs, data = self.eval_performance()
 
-        if not self.no_graphs:
-            self.plot_throughput_delay(data)
+            if not self.no_graphs:
+                self.plot_throughput_delay(data)
 
-        # change data names to displayable names
-        schemes_config = parse_config()['schemes']
-        stats_logs_display = {}
-        for cc in stats_logs:
-            cc_name = schemes_config[cc]['friendly_name']
-            stats_logs_display[cc_name] = stats_logs[cc]
+            # change data names to displayable names
+            schemes_config = parse_config()['schemes']
+            stats_logs_display = {}
+            for cc in stats_logs:
+                cc_name = schemes_config[cc]['friendly_name']
+                stats_logs_display[cc_name] = stats_logs[cc]
 
-        perf_data_path = path.join(self.data_dir, 'perf_data.pkl')
-        with open(perf_data_path, 'wb') as f:
-            pickle.dump(stats_logs_display, f)
+            perf_data_path = path.join(self.data_dir, 'perf_data.pkl')
+            with open(perf_data_path, 'wb') as f:
+                pickle.dump(stats_logs_display, f)
 
 
 def main():

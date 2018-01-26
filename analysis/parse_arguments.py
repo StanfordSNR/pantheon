@@ -59,6 +59,10 @@ def parse_plot():
     parser.add_argument(
         '--no-graphs', action='store_true', help='only append datalink '
         'statistics to stats files with no graphs generated')
+    parser.add_argument(
+        '--json-only', action='store_true', help='only output datalink '
+        'statistics to a json file perf_data.json for analysis '
+        '(without graphs or acklink statistics)')
 
     args = parser.parse_args()
     if args.schemes is not None:
