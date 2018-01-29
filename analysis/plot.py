@@ -162,6 +162,15 @@ class Plot(object):
                              'continued to run.\n' % log_path)
             return None
 
+        duration = tunnel_results['duration'] / 1000.0
+
+        if duration < 0.8 * self.runtime:
+            sys.stderr.write(
+                'Warning: "tunnel_graph %s" had duration %.2f seconds '
+                'but should have been around %s seconds. Ignoring this run.\n'
+                % (log_path, duration, self.runtime))
+            return None
+
         return tunnel_results['flow_data']
 
     def update_stats_log(self, cc, run_id, stats):
@@ -217,6 +226,9 @@ class Plot(object):
             for run_id in xrange(1, 1 + self.run_times):
                 data[cc][run_id] = data[cc][run_id].get()
 
+                if data[cc][run_id] is None:
+                    continue
+
                 for flow_id in data[cc][run_id]:
                     if flow_id not in mean_flow:
                         mean_flow[flow_id] = {}
@@ -226,7 +238,7 @@ class Plot(object):
                     for t in ['tput', 'delay', 'loss']:
                         mean_flow[flow_id][t].append(data[cc][run_id][flow_id][t])
 
-            for flow_id in data[cc][run_id]:
+            for flow_id in mean_flow:
                 for t in ['tput', 'delay', 'loss']:
                     mean_flow[flow_id][t] = np.mean(mean_flow[flow_id][t])
 
