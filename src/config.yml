@@ -2,7 +2,7 @@ schemes:
   default_tcp:
     friendly_name: TCP Cubic
     color: black
-    marker: '*'
+    marker: 'o'
   vegas:
     friendly_name: TCP Vegas
     color: olive
@@ -35,7 +35,7 @@ schemes:
   scream:
     friendly_name: SCReAM
     color: mediumseagreen
-    marker: 'o'
+    marker: 'p'
   webrtc:
     friendly_name: WebRTC media
     color: goldenrod
