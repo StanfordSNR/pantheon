@@ -8,26 +8,9 @@ import matplotlib_agg
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
-import project_root
-from helpers.helpers import parse_config, order_legend_labels
 from analyze_helpers import plot_point_cov
-
-
-def get_ranked_schemes(args, data):
-    ranked_schemes = []
-
-    data_to_sort = []
-    for cc in data:
-        cc_mean = np.mean(data[cc], axis=0)
-        score = np.log(cc_mean[1]) - np.log(cc_mean[0])
-        data_to_sort.append((cc, score))
-
-    data_to_sort = sorted(data_to_sort, key=lambda x: x[1], reverse=True)
-
-    for t in data_to_sort:
-        ranked_schemes.append(t[0])
-
-    return ranked_schemes
+import project_root
+from helpers.helpers import parse_config
 
 
 def parse_raw_data(raw_data):
@@ -53,39 +36,39 @@ def parse_raw_data(raw_data):
     return data
 
 
-def plot(args, data, ranked_schemes):
+def plot(args, real_data, emu_data):
     config = args['config']
     output_dir = args['dir']
     output_path = path.join(output_dir, args['name'] + '.svg')
 
-    # create ranked friendly names
-    ranked_friendly = []
-    for cc in ranked_schemes:
-        ranked_friendly.append(config[cc]['friendly_name'])
-
     # plotting
     fig, ax = plt.subplots()
 
-    for cc in reversed(ranked_schemes):
+    for cc in emu_data:
         friendly_name = config[cc]['friendly_name']
         color = config[cc]['color']
         marker = config[cc]['marker']
 
-        plot_point_cov(data[cc], nstd=1, ax=ax, color=color, alpha=0.5)
+        plot_point_cov(real_data[cc], nstd=1, ax=ax, color=color, alpha=0.5)
 
-        x, y = np.mean(data[cc], axis=0)
-        ax.scatter(x, y, color=color, marker=marker)
-        ax.annotate(friendly_name, (x, y))
+        x1, y1 = np.mean(real_data[cc], axis=0)
+        ax.scatter(x1, y1, color=color, marker=marker)
 
-    ax.set_xlim(32, 128)
-    #ax.set_ylim(,)
-    #ax.set_xscale('log', basex=2)
-    #ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
+        plot_point_cov(emu_data[cc], nstd=1, ax=ax, color='blue', alpha=0.5)
+
+        x2, y2 = np.mean(emu_data[cc], axis=0)
+        ax.scatter(x2, y2, marker=marker, facecolors='None',
+                   edgecolors=color)
+        ax.annotate(friendly_name, (x2, y2))
+
+        #ax.plot([x1, x2], [y1, y2], color=color, linestyle='-')
+
+    ax.set_xlim(40, 50)
+    ax.set_ylim(80, 90)
 
     ax.invert_xaxis()
     ax.set_xlabel('95th percentile one-way delay (ms)', fontsize=12)
     ax.set_ylabel('Average throughput (Mbit/s)', fontsize=12)
-    #ax.grid()
 
     fig.savefig(output_path, bbox_inches='tight', pad_inches=0.2)
 
@@ -94,21 +77,25 @@ def plot(args, data, ranked_schemes):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('json', metavar='JSON')
+    parser.add_argument('--real')
+    parser.add_argument('--emu')
     parser.add_argument('--schemes', metavar='"SCH1 SCH2..."')
     parser.add_argument('--dir', metavar='OUTPUT-DIR', default='.')
-    parser.add_argument('--name', metavar='OUTPUT-NAME', required=True)
+    parser.add_argument('--name', metavar='OUTPUT-NAME')
     args = vars(parser.parse_args())
 
     config = parse_config()['schemes']
     args['config'] = config
 
-    with open(args['json']) as fh:
-        raw_data = json.load(fh)
+    with open(args['real']) as fh:
+        real_data = json.load(fh)
 
-    data = parse_raw_data(raw_data)
-    ranked_schemes = get_ranked_schemes(args, data)
-    plot(args, data, ranked_schemes)
+    with open(args['emu']) as fh:
+        emu_data = json.load(fh)
+
+    real_data = parse_raw_data(real_data)
+    emu_data = parse_raw_data(emu_data)
+    plot(args, real_data, emu_data)
 
 
 if __name__ == '__main__':

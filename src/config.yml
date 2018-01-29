@@ -1,14 +1,14 @@
 schemes:
   default_tcp:
-    friendly_name: TCP Cubic
+    friendly_name: Cubic
     color: black
     marker: 'o'
   vegas:
-    friendly_name: TCP Vegas
+    friendly_name: Vegas
     color: olive
     marker: 'h'
   bbr:
-    friendly_name: TCP BBR
+    friendly_name: BBR
     color: dodgerblue
     marker: 'H'
     qdisc: 'fq'
@@ -29,15 +29,15 @@ schemes:
     color: mediumblue
     marker: 'v'
   quic:
-    friendly_name: QUIC Cubic
+    friendly_name: QUIC
     color: orangered
     marker: '8'
   scream:
     friendly_name: SCReAM
-    color: mediumseagreen
+    color: mediumaquamarine
     marker: 'p'
   webrtc:
-    friendly_name: WebRTC media
+    friendly_name: WebRTC
     color: goldenrod
     marker: 'P'
   copa:
@@ -45,7 +45,7 @@ schemes:
     color: pink
     marker: '1'
   taova:
-    friendly_name: TaoVA-100x
+    friendly_name: Tao
     color: c
     marker: '<'
   koho_cc:

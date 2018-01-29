@@ -17,7 +17,9 @@ def get_abs_diff(metric_1, metric_2):
     return 1.0 * abs(metric_2 - metric_1) / metric_1
 
 
-def compare(real_data, emu_data):
+def compare(args, real_data, emu_data):
+    flow = args['flow']
+
     tput_loss = 0.0
     delay_loss = 0.0
     cnt = 0
@@ -27,8 +29,12 @@ def compare(real_data, emu_data):
             sys.exit('%s not in real_data' % cc)
 
         for flow_id in emu_data[cc]['mean']:
-            if flow_id == 'all':
-                continue
+            if flow is not None:
+                if flow_id != flow:
+                    continue
+            else:
+                if flow_id == 'all':
+                    continue
 
             emu_tput = emu_data[cc]['mean'][flow_id]['tput']
             emu_delay = emu_data[cc]['mean'][flow_id]['delay']
@@ -55,7 +61,8 @@ def compare(real_data, emu_data):
     print 'overall_loss', overall_loss
 
 
-def parse_raw_data(raw_data):
+def parse_raw_data(args, raw_data):
+    flow = args['flow']
     data = {}
 
     for cc in raw_data:
@@ -68,8 +75,12 @@ def parse_raw_data(raw_data):
             if raw_data[cc][run_id] is None:
                 continue
 
-            delay = raw_data[cc][run_id]['all']['delay']
-            tput = raw_data[cc][run_id]['all']['tput']
+            if flow is None:
+                delay = raw_data[cc][run_id]['all']['delay']
+                tput = raw_data[cc][run_id]['all']['tput']
+            else:
+                delay = raw_data[cc][run_id][flow]['delay']
+                tput = raw_data[cc][run_id][flow]['tput']
 
             data[cc].append([delay, tput])
 
@@ -91,7 +102,7 @@ def plot(args, real_data, emu_data):
         color = config[cc]['color']
         marker = config[cc]['marker']
 
-        plot_point_cov(real_data[cc], nstd=1, ax=ax, color=color, alpha=0.5)
+        plot_point_cov(real_data[cc], nstd=1, ax=ax, color=color, alpha=0.4)
 
         x1, y1 = np.mean(real_data[cc], axis=0)
         ax.scatter(x1, y1, color=color, marker=marker)
@@ -99,12 +110,12 @@ def plot(args, real_data, emu_data):
         x2, y2 = np.mean(emu_data[cc], axis=0)
         ax.scatter(x2, y2, marker=marker, facecolors='None',
                    edgecolors=color)
-        ax.annotate(friendly_name, (x2, y2))
+        ax.annotate(friendly_name, (x2, y2), color=color)
 
         ax.plot([x1, x2], [y1, y2], color=color, linestyle='-')
 
     #ax.set_xlim(,)
-    #ax.set_ylim(,)
+    ax.set_ylim(-4, 55)
 
     ax.invert_xaxis()
     ax.set_xlabel('95th percentile one-way delay (ms)', fontsize=12)
@@ -117,11 +128,12 @@ def plot(args, real_data, emu_data):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--real')
-    parser.add_argument('--emu')
+    parser.add_argument('--real', help='folder containing perf_data.json')
+    parser.add_argument('--emu', help='folder containing perf_data.json')
     parser.add_argument('--schemes', metavar='"SCH1 SCH2..."')
     parser.add_argument('--dir', metavar='OUTPUT-DIR', default='.')
     parser.add_argument('--name', metavar='OUTPUT-NAME')
+    parser.add_argument('--flow', metavar='FLOW', help='None for all flows')
     args = vars(parser.parse_args())
 
     config = parse_config()['schemes']
@@ -133,11 +145,11 @@ def main():
     with open(path.join(args['emu'], 'perf_data.json')) as fh:
         emu_data = json.load(fh)
 
-    compare(real_data, emu_data)
+    compare(args, real_data, emu_data)
 
     if args['name'] is not None:
-        real_data = parse_raw_data(real_data)
-        emu_data = parse_raw_data(emu_data)
+        real_data = parse_raw_data(args, real_data)
+        emu_data = parse_raw_data(args, emu_data)
         plot(args, real_data, emu_data)
 
 
