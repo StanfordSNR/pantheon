@@ -4,6 +4,9 @@ from os import path
 import argparse
 import json
 import numpy as np
+from matplotlib import rcParams
+rcParams['font.family'] = 'sans-serif'
+rcParams['font.sans-serif'] = ['Times New Roman']
 import matplotlib_agg
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
@@ -75,7 +78,7 @@ def plot(args, data, ranked_schemes):
 
         x, y = np.mean(data[cc], axis=0)
         ax.scatter(x, y, color=color, marker=marker)
-        ax.annotate(friendly_name, (x, y))
+        ax.annotate(friendly_name, (x, y), color=color, fontsize=14)
 
     ax.set_xlim(32, 128)
     #ax.set_ylim(,)
@@ -83,12 +86,11 @@ def plot(args, data, ranked_schemes):
     #ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
 
     ax.invert_xaxis()
-    ax.set_xlabel('95th percentile one-way delay (ms)', fontsize=12)
-    ax.set_ylabel('Average throughput (Mbit/s)', fontsize=12)
-    #ax.grid()
+    ax.tick_params(labelsize=13)
+    ax.set_xlabel('95th percentile one-way delay (ms)', fontsize=14)
+    ax.set_ylabel('Average throughput (Mbit/s)', fontsize=14)
 
     fig.savefig(output_path, bbox_inches='tight', pad_inches=0.2)
-
     plt.close('all')
 
 

@@ -4,6 +4,9 @@ from os import path
 import argparse
 import json
 import numpy as np
+from matplotlib import rcParams
+rcParams['font.family'] = 'sans-serif'
+rcParams['font.sans-serif'] = ['Times New Roman']
 import matplotlib_agg
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
@@ -102,7 +105,7 @@ def plot(args, real_data, emu_data):
         color = config[cc]['color']
         marker = config[cc]['marker']
 
-        plot_point_cov(real_data[cc], nstd=1, ax=ax, color=color, alpha=0.4)
+        plot_point_cov(real_data[cc], nstd=1, ax=ax, color=color, alpha=0.5)
 
         x1, y1 = np.mean(real_data[cc], axis=0)
         ax.scatter(x1, y1, color=color, marker=marker)
@@ -110,19 +113,21 @@ def plot(args, real_data, emu_data):
         x2, y2 = np.mean(emu_data[cc], axis=0)
         ax.scatter(x2, y2, marker=marker, facecolors='None',
                    edgecolors=color)
-        ax.annotate(friendly_name, (x2, y2), color=color)
+        ax.annotate(friendly_name, (x2, y2), color=color, fontsize=14)
 
         ax.plot([x1, x2], [y1, y2], color=color, linestyle='-')
 
-    #ax.set_xlim(,)
-    ax.set_ylim(-4, 55)
+    ax.set_xlim(30, 85)
+    ax.set_ylim(-4, 84)
+    #ax.set_xscale('log', basex=2)
+    #ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
 
     ax.invert_xaxis()
-    ax.set_xlabel('95th percentile one-way delay (ms)', fontsize=12)
-    ax.set_ylabel('Average throughput (Mbit/s)', fontsize=12)
+    ax.tick_params(labelsize=13)
+    ax.set_xlabel('95th percentile one-way delay (ms)', fontsize=14)
+    ax.set_ylabel('Average throughput (Mbit/s)', fontsize=14)
 
     fig.savefig(output_path, bbox_inches='tight', pad_inches=0.2)
-
     plt.close('all')
 
 
