@@ -11,8 +11,8 @@ def main():
     args = parse_arguments('receiver_first')
 
     cc_repo = path.join(project_root.DIR, 'third_party', 'vivace')
-    recv_dir = path.join(cc_repo, 'vivace-loss', 'receiver')
-    send_dir = path.join(cc_repo, 'vivace-loss', 'sender')
+    recv_dir = path.join(cc_repo, 'receiver')
+    send_dir = path.join(cc_repo, 'sender')
     recv_src = path.join(recv_dir, 'appserver')
     send_src = path.join(send_dir, 'gradient_descent_pcc_client')
 
@@ -29,7 +29,7 @@ def main():
 
     if args.option == 'sender':
         os.environ['LD_LIBRARY_PATH'] = path.join(send_dir)
-        cmd = [send_src, args.ip, '9000']
+        cmd = [send_src, args.ip, '9000', '0']
         check_call(cmd)
 
 
