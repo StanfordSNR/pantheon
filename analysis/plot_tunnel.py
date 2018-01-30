@@ -59,21 +59,22 @@ def plot(args, pcap_data, perf_data):
         color = config[cc]['color']
         marker = config[cc]['marker']
 
-        plot_point_cov(pcap_data[cc], nstd=1, ax=ax, color=color, alpha=0.5)
+        plot_point_cov(pcap_data[cc], nstd=1, ax=ax, color='green', alpha=0.5)
 
         x1, y1 = np.mean(pcap_data[cc], axis=0)
         ax.scatter(x1, y1, color=color, marker=marker)
+        ax.annotate('Cubic (without tunnel)', (x1, y1), color='black', fontsize=14)
 
         plot_point_cov(perf_data[cc], nstd=1, ax=ax, color='blue', alpha=0.5)
 
         x2, y2 = np.mean(perf_data[cc], axis=0)
         ax.scatter(x2, y2, marker=marker, facecolors='None',
                    edgecolors=color)
-        ax.annotate(friendly_name, (x2, y2), color=color, fontsize=14)
+        ax.annotate('Cubic (in tunnel)', (x2, y2), color='black', fontsize=14)
 
         ax.plot([x1, x2], [y1, y2], color=color, linestyle='-')
 
-    ax.set_xlim(46.5, 52.5)
+    ax.set_xlim(46.5, 54.5)
     ax.set_ylim(89.5, 101.5)
 
     ax.invert_xaxis()

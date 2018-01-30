@@ -18,9 +18,13 @@ from analyze_helpers import plot_point_cov
 
 def get_ranked_schemes(args, data):
     ranked_schemes = []
+    schemes = args['schemes']
 
     data_to_sort = []
     for cc in data:
+        if schemes is not None and cc not in schemes:
+            continue
+
         cc_mean = np.mean(data[cc], axis=0)
         score = np.log(cc_mean[1]) - np.log(cc_mean[0])
         data_to_sort.append((cc, score))
@@ -74,16 +78,17 @@ def plot(args, data, ranked_schemes):
         color = config[cc]['color']
         marker = config[cc]['marker']
 
+        #if cc == 'indigo_1_32' or cc == 'taova':
         plot_point_cov(data[cc], nstd=1, ax=ax, color=color, alpha=0.5)
 
         x, y = np.mean(data[cc], axis=0)
         ax.scatter(x, y, color=color, marker=marker)
         ax.annotate(friendly_name, (x, y), color=color, fontsize=14)
 
-    ax.set_xlim(32, 128)
-    #ax.set_ylim(,)
+    ax.set_xlim(94, 136)
+    #ax.set_ylim(-4, 107)
     #ax.set_xscale('log', basex=2)
-    #ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
+    ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
 
     ax.invert_xaxis()
     ax.tick_params(labelsize=13)

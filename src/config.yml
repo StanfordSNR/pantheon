@@ -42,8 +42,8 @@ schemes:
     marker: 'P'
   copa:
     friendly_name: Copa
-    color: pink
-    marker: '1'
+    color: chocolate
+    marker: 's'
   taova:
     friendly_name: Tao
     color: c
@@ -59,12 +59,20 @@ schemes:
   indigo:
     friendly_name: Indigo
     color: indigo
-    marker: 's'
+    marker: '*'
   indigo_cellular:
     friendly_name: Indigo-cellular
     color: violet
     marker: 'd'
   indigo_no_calibration:
+    friendly_name: Indigo w/o calib
+    color: blueviolet
+    marker: 'd'
+  indigo_1_32:
+    friendly_name: Indigo
+    color: indigo
+    marker: '*'
+  indigo_1_32_no_calib:
     friendly_name: Indigo w/o calib
     color: blueviolet
     marker: 'd'
