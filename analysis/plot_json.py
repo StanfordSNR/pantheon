@@ -85,8 +85,8 @@ def plot(args, data, ranked_schemes):
         ax.scatter(x, y, color=color, marker=marker)
         ax.annotate(friendly_name, (x, y), color=color, fontsize=14)
 
-    ax.set_xlim(94, 136)
-    #ax.set_ylim(-4, 107)
+    ax.set_xlim(23.5, 44.5)
+    #ax.set_ylim(-70, 940)
     #ax.set_xscale('log', basex=2)
     ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
 
