@@ -66,9 +66,9 @@ def parse_test_shared(local, remote):
                            help='test all schemes specified in src/config.yml')
         group.add_argument('--schemes', metavar='"SCHEME1 SCHEME2..."',
                            help='test a space-separated list of schemes')
-        group.add_argument('--checkpoints', metavar='"CP1 CP2..."',
-                           help='checkpoints for each of the schemes. -1 for no checkpoint')
 
+        mode.add_argument('--checkpoints', metavar='"CP1 CP2..."',
+                           help='checkpoints for each of the schemes. -1 for no checkpoint')
         mode.add_argument('--run-times', metavar='TIMES', type=int, default=1,
                           help='run times of each scheme (default 1)')
         mode.add_argument('--random-order', action='store_true',

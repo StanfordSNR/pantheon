@@ -26,8 +26,13 @@ class Test(object):
         self.mode = args.mode
         self.run_id = run_id
         self.cc = cc
-        self.checkpoint = cc_checkpoint
+        self.ckpt = cc_checkpoint
         self.data_dir = path.abspath(args.data_dir)
+
+        if cc_checkpoint == '-1':
+            self.ckpt_cc= cc
+        else:
+            self.ckpt_cc = cc + '-cp%s' % cc_checkpoint
 
         # shared arguments between local and remote modes
         self.flows = args.flows
@@ -73,12 +78,8 @@ class Test(object):
             self.r = parse_remote_path(args.remote_path, self.cc)
 
     def setup_mm_cmd(self):
-        if self.checkpoint == -1:
-            mm_datalink_log = self.cc + '_mm_datalink_run%d.log' % self.run_id
-            mm_acklink_log = self.cc + '_mm_acklink_run%d.log' % self.run_id
-        else:
-            mm_datalink_log = self.cc + '-%d_mm_datalink_run%d.log' % (self.checkpoint, self.run_id)
-            mm_acklink_log = self.cc + '-%d_mm_acklink_run%d.log' % (self.checkpoint, self.run_id)
+        mm_datalink_log = self.ckpt_cc + '_mm_datalink_run%d.log' % self.run_id
+        mm_acklink_log = self.ckpt_cc + '_mm_acklink_run%d.log' % self.run_id
         self.mm_datalink_log = path.join(self.data_dir, mm_datalink_log)
         self.mm_acklink_log = path.join(self.data_dir, mm_acklink_log)
 
@@ -124,13 +125,8 @@ class Test(object):
         self.run_first_setup_time = 3
 
         # setup output logs
-        if self.checkpoint == -1:
-            self.datalink_name = self.cc + '_datalink_run%d' % self.run_id
-            self.acklink_name = self.cc + '_acklink_run%d' % self.run_id
-        else:
-            self.datalink_name = self.cc + '-%d_datalink_run%d' % (self.checkpoint, self.run_id)
-            self.acklink_name = self.cc + '-%d_acklink_run%d' % (self.checkpoint, self.run_id)
-
+        self.datalink_name = self.ckpt_cc + '_datalink_run%d' % self.run_id
+        self.acklink_name = self.ckpt_cc + '_acklink_run%d' % self.run_id
         self.datalink_log = path.join(
             self.data_dir, self.datalink_name + '.log')
         self.acklink_log = path.join(
@@ -171,7 +167,10 @@ class Test(object):
         port = get_open_port()
 
         # run the side specified by self.run_first
-        cmd = ['python', self.cc_src, self.run_first, port, '--checkpoint', self.checkpoint]
+        if self.run_first == 'sender':
+            cmd = ['python', self.cc_src, self.run_first, port, self.ckpt]
+        else:
+            cmd = ['python', self.cc_src, self.run_first, port]
         sys.stderr.write('Running %s %s...\n' % (self.cc, self.run_first))
         self.proc_first = Popen(cmd, preexec_fn=os.setsid)
 
@@ -181,8 +180,13 @@ class Test(object):
 
         self.test_start_time = utc_time()
         # run the other side specified by self.run_second
-        sh_cmd = 'python %s %s $MAHIMAHI_BASE %s --checkpoint %s' % (
-            self.cc_src, self.run_second, port, self.checkpoint)
+        if self.run_first == 'sender':
+            sh_cmd = 'python %s %s $MAHIMAHI_BASE %s %s' % (
+                    self.cc_src, self.run_second, port, self.ckpt)
+        else:
+            sh_cmd = 'python %s %s $MAHIMAHI_BASE %s' % (
+                    self.cc_src, self.run_second, port)
+
         sh_cmd = ' '.join(self.mm_cmd) + " -- sh -c '%s'" % sh_cmd
         sys.stderr.write('Running %s %s...\n' % (self.cc, self.run_second))
         self.proc_second = Popen(sh_cmd, shell=True, preexec_fn=os.setsid)
@@ -369,8 +373,8 @@ class Test(object):
 
             first_cmd = 'tunnel %s python %s receiver %s\n' % (
                 tun_id, first_src, port)
-            second_cmd = 'tunnel %s python %s sender %s %s --checkpoint %s\n' % (
-                tun_id, second_src, recv_pri_ip, port, self.checkpoint)
+            second_cmd = 'tunnel %s python %s sender %s %s %s\n' % (
+                tun_id, second_src, recv_pri_ip, port, self.ckpt)
 
             recv_manager.stdin.write(first_cmd)
             recv_manager.stdin.flush()
@@ -383,8 +387,8 @@ class Test(object):
 
             port = get_open_port()
 
-            first_cmd = 'tunnel %s python %s sender %s --checkpoint %s\n' % (
-                tun_id, first_src, port, self.checkpoint)
+            first_cmd = 'tunnel %s python %s sender %s %s\n' % (
+                tun_id, first_src, port, self.ckpt)
             second_cmd = 'tunnel %s python %s receiver %s %s\n' % (
                 tun_id, second_src, send_pri_ip, port)
 
@@ -570,8 +574,8 @@ class Test(object):
                 kill_proc_group(self.proc_second)
 
     def record_time_stats(self):
-        stats_log = path.join(
-            self.data_dir, '%s_stats_run%s.log' % (self.cc, self.run_id))
+        stats_log_filename = '%s_stats_run%s.log' % (self.ckpt_cc, self.run_id)
+        stats_log = path.join(self.data_dir, stats_log_filename)
         stats = open(stats_log, 'w')
 
         # save start time and end time of test
@@ -630,9 +634,9 @@ def run_tests(args):
         cc_schemes = args.schemes.split()
 
     if args.checkpoints is not None:
-        checkpoints = [int(cp) for cp in args.checkpoints.split()]
+        checkpoints = args.checkpoints.split()
     else:
-        checkpoints = [-1] * len(cc_schemes)
+        checkpoints = ['-1'] * len(cc_schemes)
 
     if args.random_order:
         schemes_and_checkpoints = list(zip(cc_schemes, checkpoints))

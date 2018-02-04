@@ -56,7 +56,7 @@ def main():
     if args.checkpoints is not None:
         checkpoints = args.checkpoints.split()
     else:
-        checkpoints = [-1] * len(schemes)
+        checkpoints = ['-1'] * len(schemes)
 
     assert len(schemes) == len(checkpoints)
     valid_schemes_str, valid_checkpoints_str = filter_schemes(schemes, checkpoints)
@@ -82,6 +82,7 @@ def main():
             check_call(cmd)
 
             cmd = ['python', plot_src, '--schemes', valid_schemes_str,
+                   '--checkpoints', valid_checkpoints_str,
                    '--data-dir', data_dir, '--no-graphs']
             sys.stderr.write('$ %s\n' % ' '.join(cmd))
             check_call(cmd)

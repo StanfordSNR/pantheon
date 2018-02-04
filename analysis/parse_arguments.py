@@ -43,6 +43,9 @@ def parse_analyze_shared(parser):
         help='analyze a space-separated list of schemes '
         '(default: "cc_schemes" in pantheon_metadata.json)')
     parser.add_argument(
+        '--checkpoints', metavar='"CP1 CP2..."',
+        help='checkpoints for the schemes, -1 each for none, empty for none all')
+    parser.add_argument(
         '--data-dir', metavar='DIR',
         default=path.join(project_root.DIR, 'test', 'data'),
         help='directory that contains logs and metadata '

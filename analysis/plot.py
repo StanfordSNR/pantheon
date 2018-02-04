@@ -27,6 +27,12 @@ class Plot(object):
         meta = load_test_metadata(metadata_path)
         self.cc_schemes = verify_schemes_with_meta(args.schemes, meta)
 
+        if args.checkpoints is not None:
+            checkpoints = args.checkpoints.split()
+            for i in xrange(len(self.cc_schemes)):
+                if int(checkpoints[i]) != -1:
+                    self.cc_schemes[i] += '-cp%s' % checkpoints[i]
+
         self.run_times = meta['run_times']
         self.flows = meta['flows']
         self.runtime = meta['runtime']
@@ -336,7 +342,10 @@ class Plot(object):
         schemes_config = parse_config()['schemes']
         stats_logs_display = {}
         for cc in stats_logs:
-            cc_name = schemes_config[cc]['friendly_name']
+            cc_parts = cc.split('-cp')
+            cc_name = schemes_config[cc_parts[0]]['friendly_name']
+            if len(cc_parts) > 1:
+                cc_name += ' checkpoint %s' % cc_parts[-1]
             stats_logs_display[cc_name] = stats_logs[cc]
 
         perf_data_path = path.join(self.data_dir, 'perf_data.pkl')
