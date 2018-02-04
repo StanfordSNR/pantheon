@@ -87,5 +87,7 @@ def parse_arguments(run_first):
             'ip', metavar='IP', help='IP address of sender')
         receiver_parser.add_argument('port', help='port of sender')
 
+    parser.add_argument('--checkpoint', type=int, default=-1, help='checkpoint for sender (default: -1)')
+
     args = parser.parse_args()
     return args

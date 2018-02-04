@@ -9,7 +9,7 @@ import project_root
 def main():
     args = parse_arguments('sender_first')
 
-    cc_repo = path.join(project_root.DIR, 'third_party', 'indigo-2-layer-32-dim')
+    cc_repo = path.join(project_root.DIR, 'third_party', 'indigo-1-layer-1-dim')
     send_src = path.join(cc_repo, 'dagger', 'run_sender.py')
     recv_src = path.join(cc_repo, 'env', 'run_receiver.py')
 

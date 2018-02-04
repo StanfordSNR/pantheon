@@ -21,18 +21,24 @@ def generate_traces(bandwidths, output_dir):
             check_call(cmd)
 
 
-def filter_schemes(schemes):
+def filter_schemes(schemes, cps):
     all_schemes = parse_config()['schemes']
+    valid_checkpoints = [cps[i] for i in xrange(len(cps)) if schemes[i] in all_schemes]
     valid_schemes = [scheme for scheme in schemes if scheme in all_schemes]
+
+    valid_checkpoints_str = ' '.join(valid_checkpoints)
     valid_schemes_str = ' '.join(valid_schemes)
 
-    return valid_schemes_str
+    return valid_schemes_str, valid_checkpoints_str
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '--schemes', metavar='"SCHEME1 SCHEME2..."', required=True)
+    parser.add_argument(
+        '--checkpoints', metavar='CP1, CP2, CP3',
+        help='Number checkpoints for each scheme. Must match schemes in length. Put -1 for none.')
     parser.add_argument(
         '--bandwidths', metavar='"BW1 BW2..."', required=True)
     parser.add_argument(
@@ -47,7 +53,13 @@ def main():
     generate_traces(bandwidths, output_dir)
 
     schemes = args.schemes.split()
-    valid_schemes_str = filter_schemes(schemes)
+    if args.checkpoints is not None:
+        checkpoints = args.checkpoints.split()
+    else:
+        checkpoints = [-1] * len(schemes)
+
+    assert len(schemes) == len(checkpoints)
+    valid_schemes_str, valid_checkpoints_str = filter_schemes(schemes, checkpoints)
 
     test_dir = path.join(project_root.DIR, 'test')
     test_src = path.join(test_dir, 'test.py')
@@ -59,6 +71,7 @@ def main():
             data_dir = path.join(output_dir, '%smbps-%sms' % (bw, delay))
 
             cmd = ['python', test_src, 'local',
+                   '--checkpoints', valid_checkpoints_str,
                    '--schemes', valid_schemes_str,
                    '--data-dir', data_dir,
                    '--uplink-trace', trace_path,

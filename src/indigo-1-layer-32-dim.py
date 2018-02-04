@@ -23,7 +23,7 @@ def main():
         check_default_qdisc('indigo')
 
     if args.option == 'sender':
-        cmd = [send_src, args.port]
+        cmd = [send_src, args.port, args.checkpoint]
         check_call(cmd)
 
     if args.option == 'receiver':
