@@ -91,3 +91,9 @@
 [submodule "third_party/indigo-2-layer-128-dim"]
 	path = third_party/indigo-2-layer-128-dim
 	url = https://github.com/StanfordSNR/indigo.git
+[submodule "third_party/indigo-1-layer-2-dim"]
+	path = third_party/indigo-1-layer-2-dim
+	url = git@github.com:StanfordSNR/indigo.git
+[submodule "third_party/indigo-1-layer-1-dim"]
+	path = third_party/indigo-1-layer-1-dim
+	url = git@github.com:StanfordSNR/indigo.git
