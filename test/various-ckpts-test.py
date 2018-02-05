@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 import sys
-import random
 import argparse
+import copy
 import json
 from os import path
 from subprocess import check_call
@@ -17,29 +17,32 @@ schemes_ckpts = {
         'indigo-2-16': [-1, 130, 120, 110, 100, 90, 80, 70, 60, 50, 40, 30, 20, 10],
         'indigo-2-8': [-1],
         'indigo-2-4': [-1, 110, 100, 90, 80, 70, 60, 50, 40, 30, 20, 10],
-        'indigo-1-256': [-1, 120, 80],
+        'indigo-1-256': [-1, 120],#], 80],
         'indigo-1-128': [-1, 130, 120, 110, 100, 90, 80, 70, 60, 50, 40, 30, 20, 10],
-        'indigo-1-64': [-1, 120, 110, 100, 90, 80, 70, 60, 50, 40, 30, 20, 10],
+        'indigo-1-64': [110],#-1, 120, 110, 100, 90, 80, 70, 60, 50, 40, 30, 20, 10],
         'indigo-1-32': [-1, 130, 120, 110, 100, 90, 80, 70, 60, 50, 40, 30, 20, 10],
         'indigo-1-16': [-1, 130, 120, 110, 100, 90, 80, 70, 60, 50, 40, 30, 20, 10],
-        'indigo-1-8': [-1, 90, 80, 70, 60, 50, 40, 30, 20, 10],
+        'indigo-1-8': [40],#-1, 90, 80, 70, 60, 50, 40, 30, 20, 10],
         'indigo-1-4': [-1, 130, 120, 110, 100, 90, 80, 70, 60, 50, 40, 30, 20, 10],
         'indigo-1-2': [-1, 130, 120, 110, 100, 90, 80, 70, 60, 50, 40, 30, 20, 10],
         'indigo-1-1': [-1, 130, 120, 110, 100, 90, 80, 70, 60, 50, 40, 30, 20, 10],
         }
 
-def get_random_checkpoint(schemes):
+def get_next_checkpoint(schemes):
+    if not hasattr(get_next_checkpoint, "ckpts"):
+        get_next_checkpoint.ckpts = copy.deepcopy(schemes_ckpts)
+
     checkpoints = []
     num_done = 0
     for cc in schemes:
-        if cc not in schemes_ckpts or not schemes_ckpts[cc]:
-            schemes_ckpts[cc] = [-1]
+        if cc not in get_next_checkpoint.ckpts:
+            get_next_checkpoint.ckpts[cc] = []
             checkpoints.append('-1')
-        elif schemes_ckpts[cc] == [-1]:
+        elif not get_next_checkpoint.ckpts[cc]:
             num_done += 1
             checkpoints.append('-1')
         else:
-            checkpoints.append(str(schemes_ckpts[cc].pop()))
+            checkpoints.append(str(get_next_checkpoint.ckpts[cc].pop()))
 
     return ' '.join(checkpoints) if num_done != len(schemes) else None
 
@@ -74,7 +77,7 @@ def main():
 
     # Keep running tests until all checkpoints have been tested.
     while True:
-        valid_checkpoints_str = get_random_checkpoint(valid_schemes)
+        valid_checkpoints_str = get_next_checkpoint(valid_schemes)
         if valid_checkpoints_str == None:
             print 'Done with all checkpoints'
             break
@@ -107,7 +110,7 @@ def main():
             if ckpt != -1:
                 cc_ckpt_name += '-cp%s' % ckpt
 
-            print 'looking at %s' % cc_ckpt_name
+            print 'adding json of %s' % cc_ckpt_name
 
             stats_json_file = path.join(args.output_dir,
                                         '%s.json' % cc_ckpt_name)
