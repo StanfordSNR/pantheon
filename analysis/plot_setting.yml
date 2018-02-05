@@ -1,0 +1,62 @@
+2018-01-31T07-50-AWS-Brazil-2-to-Colombia-ppp0-3-runs:
+  ymin: -0.1
+  xscale: log
+
+2018-01-25T08-58-AWS-Brazil-2-to-Colombia-10-runs:
+  xmin: 96
+  xmax: 136
+  ymin: -6
+
+2018-01-31T10-42-AWS-Brazil-2-to-Colombia-ppp0-3-runs-3-flows:
+  xmax: 4400
+  ymin: -0.05
+  ymax: 2.9
+  xscale: log
+
+2018-01-31T06-47-Colombia-ppp0-to-AWS-Brazil-2-3-runs:
+  xmin: 120
+  xmax: 30000
+  xscale: log
+
+2017-12-20T16-02-Stanford-ppp0-to-AWS-California-1-3-runs:
+  xscale: log
+
+2018-01-25T05-40-Stanford-to-AWS-California-1-10-runs:
+  xmax: 68
+  ymin: -70
+  xscale: log
+
+2018-01-31T16-12-GCE-Tokyo-to-GCE-Sydney-10-runs-3-flows:
+  xmin: 30
+  xmax: 280
+  xscale: log
+
+colombia-cellular-over-time:
+  xscale: log
+
+loss-tput:
+  xmin: 4
+  ymin: -4
+  xscale: log
+
+nepal-calib:
+  xmin: 54
+  xmax: 530
+  xscale: log
+
+mexico-3flows-calib:
+  xscale:
+
+2018-01-25T05-40-Mexico-to-AWS-California-2-10-runs:
+  xmin: 23
+  xmax: 44
+  ymin: -7
+  alpha: 0.1
+
+2018-01-31T16-14-AWS-Brazil-2-to-Colombia-10-runs:
+  alpha: 0.1
+
+2018-02-02T22-06-India-to-AWS-India-1-10-runs-3-flows:
+  xmax: 82
+  alpha: 0.1
+

@@ -9,16 +9,16 @@ schemes:
     marker: 'h'
   bbr:
     friendly_name: BBR
-    color: dodgerblue
+    color: mediumblue
     marker: 'H'
     qdisc: 'fq'
   ledbat:
     friendly_name: LEDBAT
-    color: green
+    color: darkgreen
     marker: 'D'
   pcc:
     friendly_name: PCC
-    color: orange
+    color: maroon
     marker: '>'
   verus:
     friendly_name: Verus
@@ -26,7 +26,7 @@ schemes:
     marker: '^'
   sprout:
     friendly_name: Sprout
-    color: mediumblue
+    color: dodgerblue
     marker: 'v'
   quic:
     friendly_name: QUIC
@@ -34,11 +34,11 @@ schemes:
     marker: '8'
   scream:
     friendly_name: SCReAM
-    color: mediumaquamarine
+    color: seagreen
     marker: 'p'
   webrtc:
     friendly_name: WebRTC
-    color: goldenrod
+    color: darkgoldenrod
     marker: 'P'
   copa:
     friendly_name: Copa
@@ -46,7 +46,7 @@ schemes:
     marker: 's'
   taova:
     friendly_name: Tao
-    color: c
+    color: darkcyan
     marker: '<'
   koho_cc:
     friendly_name: KohoCC

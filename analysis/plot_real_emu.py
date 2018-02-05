@@ -1,19 +1,20 @@
 #!/usr/bin/env python
 
+import sys
 from os import path
 import argparse
 import json
 import numpy as np
 from matplotlib import rcParams
 rcParams['font.family'] = 'sans-serif'
-rcParams['font.sans-serif'] = ['Times New Roman']
+rcParams['font.sans-serif'] = ['Arial']
 import matplotlib_agg
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
-from analyze_helpers import plot_point_cov
 import project_root
 from helpers.helpers import parse_config
+from analyze_helpers import plot_point_cov, parse_plot_setting
 
 
 def get_abs_diff(metric_1, metric_2):
@@ -27,9 +28,11 @@ def compare(args, real_data, emu_data):
     delay_loss = 0.0
     cnt = 0
 
-    for cc in emu_data:
+    for cc in args['schemes']:
         if cc not in real_data:
             sys.exit('%s not in real_data' % cc)
+        if cc not in emu_data:
+            sys.exit('%s not in emu_data' % cc)
 
         for flow_id in emu_data[cc]['mean']:
             if flow is not None:
@@ -100,34 +103,45 @@ def plot(args, real_data, emu_data):
     # plotting
     fig, ax = plt.subplots()
 
-    for cc in emu_data:
+    for cc in args['schemes']:
         friendly_name = config[cc]['friendly_name']
         color = config[cc]['color']
         marker = config[cc]['marker']
 
-        plot_point_cov(real_data[cc], nstd=1, ax=ax, color=color, alpha=0.5)
+        plot_point_cov(real_data[cc], nstd=1, ax=ax, color=color, alpha=0.4)
 
         x1, y1 = np.mean(real_data[cc], axis=0)
-        ax.scatter(x1, y1, color=color, marker=marker)
+        ax.scatter(x1, y1, color=color, marker=marker, s=60)
 
         x2, y2 = np.mean(emu_data[cc], axis=0)
         ax.scatter(x2, y2, marker=marker, facecolors='None',
-                   edgecolors=color)
-        ax.annotate(friendly_name, (x2, y2), color=color, fontsize=14)
+                   edgecolors=color, s=60)
+        ax.annotate(friendly_name, (x2, y2), color=color, fontsize=16)
 
         ax.plot([x1, x2], [y1, y2], color=color, linestyle='-')
 
-    #ax.set_xlim(54, 520)
-    #ax.set_ylim(-4, 84)
-    #ax.set_xscale('log', basex=2)
-    ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
+    if 'xmin' in args['setting']:
+        ax.set_xlim(left=args['setting']['xmin'])
+
+    if 'xmax' in args['setting']:
+        ax.set_xlim(right=args['setting']['xmax'])
+
+    if 'ymin' in args['setting']:
+        ax.set_ylim(bottom=args['setting']['ymin'])
+
+    if 'ymax' in args['setting']:
+        ax.set_ylim(top=args['setting']['ymax'])
+
+    if 'xscale' in args['setting'] and args['setting']['xscale'] == 'log':
+        ax.set_xscale('log', basex=2)
+        ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
 
     ax.invert_xaxis()
-    ax.tick_params(labelsize=13)
-    ax.set_xlabel('95th percentile one-way delay (ms)', fontsize=14)
-    ax.set_ylabel('Average throughput (Mbit/s)', fontsize=14)
+    ax.tick_params(labelsize=14)
+    ax.set_xlabel('95th percentile one-way delay (ms)', fontsize=16)
+    ax.set_ylabel('Average throughput (Mbit/s)', fontsize=16)
 
-    fig.savefig(output_path, bbox_inches='tight', pad_inches=0.2)
+    fig.savefig(output_path, bbox_inches='tight')
     plt.close('all')
 
 
@@ -137,12 +151,14 @@ def main():
     parser.add_argument('--emu', help='folder containing perf_data.json')
     parser.add_argument('--schemes', metavar='"SCH1 SCH2..."')
     parser.add_argument('--dir', metavar='OUTPUT-DIR', default='.')
-    parser.add_argument('--name', metavar='OUTPUT-NAME')
+    parser.add_argument('--name', metavar='OUTPUT-NAME', required=True)
     parser.add_argument('--flow', metavar='FLOW', help='None for all flows')
     args = vars(parser.parse_args())
 
     config = parse_config()['schemes']
     args['config'] = config
+    args['setting'] = parse_plot_setting()[args['name']]
+    args['schemes'] = args['schemes'].split()
 
     with open(path.join(args['real'], 'perf_data.json')) as fh:
         real_data = json.load(fh)

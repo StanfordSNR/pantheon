@@ -6,7 +6,7 @@ import json
 import numpy as np
 from matplotlib import rcParams
 rcParams['font.family'] = 'sans-serif'
-rcParams['font.sans-serif'] = ['Times New Roman']
+rcParams['font.sans-serif'] = ['Arial']
 import matplotlib_agg
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
@@ -24,7 +24,7 @@ def parse_raw_data(raw_data):
         data[cc] = []
 
         for run_id in raw_data[cc]:
-            if run_id == 'mean':
+            if run_id == 'mean' or run_id == 'median':
                 continue
 
             if raw_data[cc][run_id] is None:
@@ -62,15 +62,15 @@ def plot(args, pcap_data, perf_data):
         ax.scatter(pcap_delay, pcap_tput, color=pcap_color, marker='o')
 
         x1, y1 = np.mean(pcap_data[cc], axis=0)
-        ax.scatter(x1, y1, color=pcap_color, marker='*', s=100)
-        ax.annotate('BBR (without tunnel)', (x1, y1), color=pcap_color, fontsize=14)
+        ax.scatter(x1, y1, color=pcap_color, marker='*', s=60)
+        ax.annotate('BBR (without tunnel)', (x1, y1), color=pcap_color, fontsize=16)
 
         plot_point_cov(perf_data[cc], nstd=1, ax=ax, color=perf_color, alpha=0.4)
         ax.scatter(perf_delay, perf_tput, color=perf_color, marker='d')
 
         x2, y2 = np.mean(perf_data[cc], axis=0)
-        ax.scatter(x2, y2, color=perf_color, marker='*', s=100)
-        ax.annotate('BBR (in tunnel)', (x2, y2), color=perf_color, fontsize=14)
+        ax.scatter(x2, y2, color=perf_color, marker='*', s=60)
+        ax.annotate('BBR (in tunnel)', (x2, y2), color=perf_color, fontsize=16)
 
         #ax.plot([x1, x2], [y1, y2], color='black', linestyle='-')
 
@@ -80,10 +80,10 @@ def plot(args, pcap_data, perf_data):
 
     ax.invert_xaxis()
     ax.tick_params(labelsize=13)
-    ax.set_xlabel('95th percentile one-way delay (ms)', fontsize=14)
-    ax.set_ylabel('Average throughput (Mbit/s)', fontsize=14)
+    ax.set_xlabel('95th percentile one-way delay (ms)', fontsize=16)
+    ax.set_ylabel('Average throughput (Mbit/s)', fontsize=16)
 
-    fig.savefig(output_path, bbox_inches='tight', pad_inches=0.2)
+    fig.savefig(output_path, bbox_inches='tight')
     plt.close('all')
 
 
@@ -98,6 +98,7 @@ def main():
 
     config = parse_config()['schemes']
     args['config'] = config
+    args['schemes'] = args['schemes'].split()
 
     with open(args['pcap']) as fh:
         pcap_data = json.load(fh)

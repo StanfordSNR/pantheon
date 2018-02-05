@@ -1,6 +1,8 @@
 import sys
 import json
 import numpy as np
+from os import path
+import yaml
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
 
@@ -93,3 +95,8 @@ def plot_cov_ellipse(cov, pos, nstd=1, ax=None, **kwargs):
 
     ax.add_artist(ellip)
     return ellip
+
+
+def parse_plot_setting():
+    with open(path.join(project_root.DIR, 'analysis', 'plot_setting.yml')) as config:
+        return yaml.load(config)

@@ -7,7 +7,7 @@ import itertools
 import numpy as np
 from matplotlib import rcParams
 rcParams['font.family'] = 'sans-serif'
-rcParams['font.sans-serif'] = ['Times New Roman']
+rcParams['font.sans-serif'] = ['Arial']
 import matplotlib_agg
 import matplotlib.pyplot as plt
 from parse_arguments import parse_arguments
@@ -267,7 +267,7 @@ class TunnelGraph(object):
                             facecolor='linen')
 
         # colors = ['b', 'g', 'r', 'y', 'c', 'm']
-        colors = ['seagreen', 'royalblue', 'orangered', 'y', 'c', 'm']
+        colors = ['darkgreen', 'mediumblue', 'orangered', 'y', 'c', 'm']
         color_i = 0
         for flow_id in self.flows:
             color = colors[color_i]
@@ -299,17 +299,16 @@ class TunnelGraph(object):
         ax.annotate('Flow 1', (0, 0), color=colors[0], fontsize=16)
         ax.annotate('Flow 2', (10, 0), color=colors[1], fontsize=16)
         ax.annotate('Flow 3', (20, 0), color=colors[2], fontsize=16)
-        ax.tick_params(labelsize=13)
-        ax.set_xlabel('Time (s)', fontsize=14)
-        ax.set_ylabel('Throughput (Mbit/s)', fontsize=14)
+        ax.tick_params(labelsize=14)
+        ax.set_xlabel('Time (s)', fontsize=16)
+        ax.set_ylabel('Throughput (Mbit/s)', fontsize=16)
 
         if self.link_capacity and self.avg_capacity:
             ax.set_title('Average capacity %.2f Mbit/s (shaded region)'
                          % self.avg_capacity)
 
         ax.grid()
-        fig.savefig(self.throughput_graph,
-                    bbox_inches='tight', pad_inches=0.2)
+        fig.savefig(self.throughput_graph, bbox_inches='tight')
 
     def plot_delay_graph(self):
         empty_graph = True

@@ -6,14 +6,14 @@ import json
 import numpy as np
 from matplotlib import rcParams
 rcParams['font.family'] = 'sans-serif'
-rcParams['font.sans-serif'] = ['Times New Roman']
+rcParams['font.sans-serif'] = ['Arial']
 import matplotlib_agg
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
 import project_root
 from helpers.helpers import parse_config, order_legend_labels
-from analyze_helpers import plot_point_cov
+from analyze_helpers import plot_point_cov, parse_plot_setting
 
 
 def get_ranked_schemes(args, data):
@@ -44,7 +44,7 @@ def parse_raw_data(raw_data):
         data[cc] = []
 
         for run_id in raw_data[cc]:
-            if run_id == 'mean':
+            if run_id == 'mean' or run_id == 'median':
                 continue
 
             if raw_data[cc][run_id] is None:
@@ -78,25 +78,36 @@ def plot(args, data, ranked_schemes):
         color = config[cc]['color']
         marker = config[cc]['marker']
 
-        #plot_point_cov(data[cc], nstd=1, ax=ax, color=color, alpha=0.5)
+        #plot_point_cov(data[cc], nstd=1, ax=ax, color=color, alpha=0.4)
 
         x, y = np.mean(data[cc], axis=0)
         x *= 100.0
-        ax.scatter(x, y, color=color, marker=marker)
-        ax.annotate(friendly_name, (x, y), color=color, fontsize=14)
+        ax.scatter(x, y, color=color, marker=marker, s=60)
+        ax.annotate(friendly_name, (x, y), color=color, fontsize=16)
+
+    if 'xmin' in args['setting']:
+        ax.set_xlim(left=args['setting']['xmin'])
+
+    if 'xmax' in args['setting']:
+        ax.set_xlim(right=args['setting']['xmax'])
+
+    if 'ymin' in args['setting']:
+        ax.set_ylim(bottom=args['setting']['ymin'])
+
+    if 'ymax' in args['setting']:
+        ax.set_ylim(top=args['setting']['ymax'])
+
+    if 'xscale' in args['setting'] and args['setting']['xscale'] == 'log':
+        ax.set_xscale('log', basex=2)
+        ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
 
     ax.grid()
-    ax.set_xlim(4, 100)
-    #ax.set_ylim(-40, 620)
-    ax.set_xscale('log', basex=2)
-    ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%.2f'))
-
     ax.invert_xaxis()
-    ax.tick_params(labelsize=13)
-    ax.set_xlabel('Average loss rate (%)', fontsize=14)
-    ax.set_ylabel('Average throughput (Mbit/s)', fontsize=14)
+    ax.tick_params(labelsize=14)
+    ax.set_xlabel('Average loss rate (%)', fontsize=16)
+    ax.set_ylabel('Average throughput (Mbit/s)', fontsize=16)
 
-    fig.savefig(output_path, bbox_inches='tight', pad_inches=0.2)
+    fig.savefig(output_path, bbox_inches='tight')
     plt.close('all')
 
 
@@ -110,6 +121,8 @@ def main():
 
     config = parse_config()['schemes']
     args['config'] = config
+    args['setting'] = parse_plot_setting()[args['name']]
+    args['schemes'] = args['schemes'].split()
 
     with open(args['json']) as fh:
         raw_data = json.load(fh)

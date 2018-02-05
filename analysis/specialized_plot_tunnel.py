@@ -6,7 +6,7 @@ import json
 import numpy as np
 from matplotlib import rcParams
 rcParams['font.family'] = 'sans-serif'
-rcParams['font.sans-serif'] = ['Times New Roman']
+rcParams['font.sans-serif'] = ['Arial']
 import matplotlib_agg
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
@@ -24,7 +24,7 @@ def parse_raw_data(raw_data):
         data[cc] = []
 
         for run_id in raw_data[cc]:
-            if run_id == 'mean':
+            if run_id == 'mean' or run_id == 'median':
                 continue
 
             if raw_data[cc][run_id] is None:
@@ -87,9 +87,7 @@ def plot(args):
             #ax.annotate('{} (without tunnel)'.format(friendly),
             #            (x1, y1), color=color, fontsize=14)
         else:
-            for t in pcap_tput:
-                ax.axhline(t, xmin=0.98, xmax=1.0, color='black', linewidth=0.05)
-            ax.axhline(y1, color=color, linewidth=1)
+            ax.axhline(y1, color=color, linewidth=1.2)
             print 'without tunnel: mean tput (%.2f)' % y1
             #ax.annotate('{} (in tunnel)'.format(friendly),
             #            (x1, y1), color=color, fontsize=14)
@@ -109,19 +107,17 @@ def plot(args):
         print 'inside tunnel: mean tput (%.2f), 95th delay (%.2f)' % (y2, x2)
 
         if cc == 'bbr':
-            ax.annotate('BBR inside tunnel', (x2, y2), color=color, fontsize=14)
+            ax.annotate('BBR inside tunnel', (x2, y2), color=color, fontsize=16)
         else:
-            ax.annotate(friendly, (x2, y2), color=color, fontsize=14)
+            ax.annotate(friendly, (x2, y2), color=color, fontsize=16)
         #ax.annotate('{} (in tunnel)'.format(friendly),
         #            (x2, y2), color=color, fontsize=14)
 
         if cc != 'bbr':
             ax.plot([x1, x2], [y1, y2], color=color, linestyle='-')
 
-    ax.annotate('Mean throughput of BBR without tunnel', (60, 90),
-                color=config['bbr']['color'], fontsize=14)
-    ax.annotate('Rug plot of BBR without tunnel', (20, 90),
-                color=config['bbr']['color'], fontsize=14)
+    ax.annotate('Mean throughput of BBR without tunnel', (50, 70),
+                color=config['bbr']['color'], fontsize=16)
 
     ax.set_xlim(18, 72)
     ax.set_ylim(18, 105)
@@ -130,13 +126,13 @@ def plot(args):
     #ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
 
     ax.invert_xaxis()
-    ax.tick_params(labelsize=13)
-    ax.set_xlabel('95th percentile one-way delay (ms)', fontsize=14)
-    ax.set_ylabel('Average throughput (Mbit/s)', fontsize=14)
+    ax.tick_params(labelsize=14)
+    ax.set_xlabel('95th percentile one-way delay (ms)', fontsize=16)
+    ax.set_ylabel('Average throughput (Mbit/s)', fontsize=16)
 
-    ax.legend(scatterpoints=1, loc='lower left', fontsize=14)
+    ax.legend(scatterpoints=1, loc='lower left', fontsize=16)
 
-    fig.savefig(output_path, bbox_inches='tight', pad_inches=0.2)
+    fig.savefig(output_path, bbox_inches='tight')
     plt.close('all')
 
 
