@@ -48,6 +48,10 @@ def plot_point_cov(points, nstd=1, ax=None, **kwargs):
     -------
         A matplotlib ellipse artist
     """
+    if len(points) <= 1:
+        sys.stderr.write('Warning: failed to plot ellipse\n')
+        return
+
     pos = points.mean(axis=0)
     cov = np.cov(points, rowvar=False)
     return plot_cov_ellipse(cov, pos, nstd, ax, **kwargs)

@@ -72,7 +72,7 @@ def parse_raw_data(args, raw_data):
         data[cc] = []
 
         for run_id in raw_data[cc]:
-            if run_id == 'mean':
+            if run_id == 'median' or run_id == 'mean':
                 continue
 
             if raw_data[cc][run_id] is None:
@@ -117,10 +117,10 @@ def plot(args, real_data, emu_data):
 
         ax.plot([x1, x2], [y1, y2], color=color, linestyle='-')
 
-    ax.set_xlim(30, 85)
-    ax.set_ylim(-4, 84)
+    #ax.set_xlim(54, 520)
+    #ax.set_ylim(-4, 84)
     #ax.set_xscale('log', basex=2)
-    #ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
+    ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
 
     ax.invert_xaxis()
     ax.tick_params(labelsize=13)

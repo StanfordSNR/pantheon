@@ -50,10 +50,10 @@ def parse_raw_data(raw_data):
             if raw_data[cc][run_id] is None:
                 continue
 
-            delay = raw_data[cc][run_id]['all']['delay']
+            loss = raw_data[cc][run_id]['all']['loss']
             tput = raw_data[cc][run_id]['all']['tput']
 
-            data[cc].append([delay, tput])
+            data[cc].append([loss, tput])
 
         data[cc] = np.array(data[cc])
 
@@ -78,21 +78,22 @@ def plot(args, data, ranked_schemes):
         color = config[cc]['color']
         marker = config[cc]['marker']
 
-        #if cc == 'indigo_1_32' or cc == 'taova':
-        plot_point_cov(data[cc], nstd=1, ax=ax, color=color, alpha=0.5)
+        #plot_point_cov(data[cc], nstd=1, ax=ax, color=color, alpha=0.5)
 
         x, y = np.mean(data[cc], axis=0)
+        x *= 100.0
         ax.scatter(x, y, color=color, marker=marker)
         ax.annotate(friendly_name, (x, y), color=color, fontsize=14)
 
-    ax.set_xlim(28, 81)
+    ax.grid()
+    ax.set_xlim(4, 100)
     #ax.set_ylim(-40, 620)
-    #ax.set_xscale('log', basex=2)
-    #ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
+    ax.set_xscale('log', basex=2)
+    ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%.2f'))
 
     ax.invert_xaxis()
     ax.tick_params(labelsize=13)
-    ax.set_xlabel('95th percentile one-way delay (ms)', fontsize=14)
+    ax.set_xlabel('Average loss rate (%)', fontsize=14)
     ax.set_ylabel('Average throughput (Mbit/s)', fontsize=14)
 
     fig.savefig(output_path, bbox_inches='tight', pad_inches=0.2)

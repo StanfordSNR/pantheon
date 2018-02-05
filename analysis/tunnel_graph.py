@@ -5,6 +5,9 @@ import sys
 import math
 import itertools
 import numpy as np
+from matplotlib import rcParams
+rcParams['font.family'] = 'sans-serif'
+rcParams['font.sans-serif'] = ['Times New Roman']
 import matplotlib_agg
 import matplotlib.pyplot as plt
 from parse_arguments import parse_arguments
@@ -206,10 +209,14 @@ class TunnelGraph(object):
                     self.avg_egress[flow_id] = flow_departures / delta
 
                 egress_bins = departures[flow_id].keys()
+
+                self.egress_tput[flow_id].append(0.0)
+                self.egress_t[flow_id].append(self.bin_to_s(min(egress_bins)))
+
                 for bin_id in xrange(min(egress_bins), max(egress_bins) + 1):
                     self.egress_tput[flow_id].append(
                         departures[flow_id].get(bin_id, 0) / us_per_bin)
-                    self.egress_t[flow_id].append(self.bin_to_s(bin_id))
+                    self.egress_t[flow_id].append(self.bin_to_s(bin_id + 1))
 
             # calculate 95th percentile per-packet one-way delay
             self.percentile_delay[flow_id] = None
@@ -259,17 +266,20 @@ class TunnelGraph(object):
             ax.fill_between(self.link_capacity_t, 0, self.link_capacity,
                             facecolor='linen')
 
-        colors = ['b', 'g', 'r', 'y', 'c', 'm']
+        # colors = ['b', 'g', 'r', 'y', 'c', 'm']
+        colors = ['seagreen', 'royalblue', 'orangered', 'y', 'c', 'm']
         color_i = 0
         for flow_id in self.flows:
             color = colors[color_i]
 
+            '''
             if flow_id in self.ingress_tput and flow_id in self.ingress_t:
                 empty_graph = False
                 ax.plot(self.ingress_t[flow_id], self.ingress_tput[flow_id],
                         label='Flow %s ingress (mean %.2f Mbit/s)'
                         % (flow_id, self.avg_ingress.get(flow_id, 0)),
                         color=color, linestyle='dashed')
+            '''
 
             if flow_id in self.egress_tput and flow_id in self.egress_t:
                 empty_graph = False
@@ -286,21 +296,19 @@ class TunnelGraph(object):
             sys.stderr.write('No valid throughput graph is generated\n')
             return
 
-        ax.set_xlabel('Time (s)', fontsize=12)
-        ax.set_ylabel('Throughput (Mbit/s)', fontsize=12)
+        ax.annotate('Flow 1', (0, 0), color=colors[0], fontsize=16)
+        ax.annotate('Flow 2', (10, 0), color=colors[1], fontsize=16)
+        ax.annotate('Flow 3', (20, 0), color=colors[2], fontsize=16)
+        ax.tick_params(labelsize=13)
+        ax.set_xlabel('Time (s)', fontsize=14)
+        ax.set_ylabel('Throughput (Mbit/s)', fontsize=14)
 
         if self.link_capacity and self.avg_capacity:
             ax.set_title('Average capacity %.2f Mbit/s (shaded region)'
                          % self.avg_capacity)
 
         ax.grid()
-        handles, labels = ax.get_legend_handles_labels()
-        lgd = ax.legend(self.flip(handles, 2), self.flip(labels, 2),
-                        scatterpoints=1, bbox_to_anchor=(0.5, -0.1),
-                        loc='upper center', ncol=2, fontsize=12)
-
-        fig.set_size_inches(12, 6)
-        fig.savefig(self.throughput_graph, bbox_extra_artists=(lgd,),
+        fig.savefig(self.throughput_graph,
                     bbox_inches='tight', pad_inches=0.2)
 
     def plot_delay_graph(self):

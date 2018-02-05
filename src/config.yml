@@ -92,6 +92,22 @@ schemes:
     friendly_name: Indigo w/o cwnd
     color: darkorchid
     marker: '>'
+  fillp:
+    friendly_name: FillP
+    color: violet
+    marker: '+'
+  vivace_latency:
+    friendly_name: Vivace-latency
+    color: '#0149D0'
+    marker: '<'
+  vivace_loss:
+    friendly_name: Vivace-loss
+    color: '#003CAD'
+    marker: '>'
+  vivace_lte:
+    friendly_name: Vivace-LTE
+    color: '#002A79'
+    marker: '^'
 
 kernel_attrs:
   default_qdisc: pfifo_fast

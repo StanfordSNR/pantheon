@@ -222,7 +222,7 @@ class Plot(object):
                 cc_id += 1
 
         for cc in self.cc_schemes:
-            mean_flow = {}
+            datalist = {}
             for run_id in xrange(1, 1 + self.run_times):
                 data[cc][run_id] = data[cc][run_id].get()
 
@@ -230,19 +230,25 @@ class Plot(object):
                     continue
 
                 for flow_id in data[cc][run_id]:
-                    if flow_id not in mean_flow:
-                        mean_flow[flow_id] = {}
+                    if flow_id not in datalist:
+                        datalist[flow_id] = {}
                         for t in ['tput', 'delay', 'loss']:
-                            mean_flow[flow_id][t] = []
+                            datalist[flow_id][t] = []
 
                     for t in ['tput', 'delay', 'loss']:
-                        mean_flow[flow_id][t].append(data[cc][run_id][flow_id][t])
+                        datalist[flow_id][t].append(data[cc][run_id][flow_id][t])
 
-            for flow_id in mean_flow:
+            datalist_mean = {}
+            datalist_median = {}
+            for flow_id in datalist:
+                datalist_mean[flow_id] = {}
+                datalist_median[flow_id] = {}
                 for t in ['tput', 'delay', 'loss']:
-                    mean_flow[flow_id][t] = np.mean(mean_flow[flow_id][t])
+                    datalist_mean[flow_id][t] = np.mean(datalist[flow_id][t])
+                    datalist_median[flow_id][t] = np.median(datalist[flow_id][t])
 
-            data[cc]['mean'] = mean_flow
+            data[cc]['mean'] = datalist_mean
+            data[cc]['median'] = datalist_median
 
         perf_data_json_path = path.join(self.data_dir, 'perf_data.json')
         with open(perf_data_json_path, 'w') as f:
