@@ -1,21 +1,20 @@
 [![Build Status](https://travis-ci.org/StanfordSNR/pantheon.svg?branch=master)](https://travis-ci.org/StanfordSNR/pantheon)
 
 # Pantheon of Congestion Control
-The Pantheon contains wrappers for many popular practical and research congestion 
-control schemes. The Pantheon enables them to run on a common interface, and has 
-tools to benchmark and compare their performances.
+The Pantheon contains wrappers for many popular practical and research
+congestion control schemes. The Pantheon enables them to run on a common
+interface, and has tools to benchmark and compare their performances.
 Pantheon tests can be run locally over emulated links using
 [mahimahi](http://mahimahi.mit.edu/) or over the Internet to a remote machine.
 
 Our website is <http://pantheon.stanford.edu>, where you can find more
-information about Pantheon, including supported schemes, our real-world 
+information about Pantheon, including supported schemes, our real-world
 experiment results so far, and how to get involved.
 
-To discuss and talk about Pantheon-related topics and issues, 
+To discuss and talk about Pantheon-related topics and issues,
 
 Feel free to contact our mailing list:
-`pantheon-stanford <at> googlegroups <dot> com`\
-(Changed from `the name of this repository`@cs.stanford.edu)
+`pantheon-stanford <at> googlegroups <dot> com`.
 
 ## Disclaimer
 This is research software. Our scripts will write to the file system in the
@@ -29,14 +28,14 @@ our handy scripts will install packages and perform some system-wide settings
 own risk.
 
 ## Preparation
-Many of the tools and programs run by the Pantheon are git submodules in the
-`third_party` folder. To clone this repository, run:
+To clone this repository, run:
 
 ```
 git clone https://github.com/StanfordSNR/pantheon.git
 ```
 
-To add submodules after cloning, run:
+Many of the tools and programs run by the Pantheon are git submodules in the
+`third_party` folder. To add submodules after cloning, run:
 
 ```
 git submodule update --init --recursive
@@ -65,8 +64,8 @@ After installing dependencies, run
 test/setup.py [--setup] [--all | --schemes "<cc1> <cc2> ..."]
 ```
 
-to set up supported congestion control schemes. `--setup` is only required the 
-first time when running these schemes. Otherwise, `test/setup.py` is 
+to set up supported congestion control schemes. `--setup` is only required the
+first time when running these schemes. Otherwise, `test/setup.py` is
 required to be run only every reboot (without `--setup`).
 
 ## Running the Pantheon
@@ -79,7 +78,7 @@ test/test.py local (--all | --schemes "<cc1> <cc2> ...")
 To test schemes over the Internet to remote machine, run
 
 ```
-test/test.py remote (--all | --schemes "<cc1> <cc2> ...") HOSTADDR:PANTHEON-DIR
+test/test.py remote (--all | --schemes "<cc1> <cc2> ...") HOST:PANTHEON-DIR
 ```
 
 Run `test/test.py local -h` and `test/test.py remote -h` for detailed
@@ -147,13 +146,19 @@ steps:
    git submodule add <your-cc-repo-url> third_party/<your-cc-name>
    ```
 
-3. In `pantheon/src`, create `<your-cc-name>.py` following the other schemes
-   as examples. Basically, you only need to feed in several options such as
-   `deps`, `run_first`, `setup`, `setup_after_reboot`, `receiver`, `sender`.
+   It would be even better if you could also add `ignore = dirty` to
+   `.gitmodules` under your submodule.
 
-4. Add your scheme to `pantheon/src/config.yml` along with settings of
+3. In `src`, read `example.py` and create your own `<your-cc-name>.py`.
+   Make sure the sender and receiver run longer than 30 seconds
+   (preferably longer than 60 seconds); you could also leave
+   them running forever without the need to kill them.
+
+4. Add your scheme to `src/config.yml` along with settings of
    `friendly_name`, `color` and `marker`, so that `test/test.py` is able to
    find your scheme and `analysis/analyze.py` is able to generate plots with
    your specified settings.
 
-5. Send us a pull request and that's it, you're in the Pantheon!
+5. Add your scheme to `SCHEMES` in `.travis.yml` for continuous testing.
+
+6. Send us a pull request and that's it, you're in the Pantheon!

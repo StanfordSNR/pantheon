@@ -69,6 +69,8 @@ def parse_test_shared(local, remote):
 
         mode.add_argument('--run-times', metavar='TIMES', type=int, default=1,
                           help='run times of each scheme (default 1)')
+        mode.add_argument('--start-run-id', metavar='ID', type=int, default=1,
+                          help='run ID to start with')
         mode.add_argument('--random-order', action='store_true',
                           help='test schemes in random order')
         mode.add_argument('--data-dir', metavar='DIR',

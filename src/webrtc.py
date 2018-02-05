@@ -42,7 +42,7 @@ def main():
 
     if args.option == 'deps':
         print ('chromium-browser xvfb xfonts-100dpi xfonts-75dpi '
-               'xfonts-cyrillic xorg dbus-x11 npm nodejs nodejs-legacy')
+               'xfonts-cyrillic xorg dbus-x11 npm nodejs')
 
     if args.option == 'run_first':
         print 'sender'

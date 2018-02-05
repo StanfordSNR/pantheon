@@ -343,6 +343,8 @@ class Plot(object):
         with open(perf_data_path, 'wb') as f:
             pickle.dump(stats_logs_display, f)
 
+        plt.close('all')
+
 
 def main():
     args = parse_arguments(path.basename(__file__))

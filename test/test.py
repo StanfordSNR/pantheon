@@ -631,7 +631,8 @@ def run_tests(args):
     # For each run of each scheme, change the queueing discipline and
     # receiving socket buffer sizes before and after the test.
     # Check config.yml for values.
-    for run_id in xrange(1, args.run_times + 1):
+    for run_id in xrange(args.start_run_id,
+                         args.start_run_id + args.run_times):
         # clean the contents in /tmp/pantheon-tmp
         clean_tmp_cmd = 'rm -rf /tmp/pantheon-tmp/*'
         if args.mode == 'remote':
@@ -649,26 +650,16 @@ def run_tests(args):
 
             test_recv_sock_bufs = config['kernel_attrs']['sock_recv_bufs']
 
-            # special case currently used by fillp only
-            cmds_to_revert_conf = get_cmds_to_revert_conf(cc, ssh_cmd)
-
             try:
                 if default_qdisc != test_qdisc:
                     set_default_qdisc(test_qdisc, ssh_cmd)
 
                 set_recv_sock_bufsizes(test_recv_sock_bufs, ssh_cmd)
 
-                if cmds_to_revert_conf:
-                    set_conf(cc, ssh_cmd)
-
                 Test(args, run_id, cc).run()
             finally:
                 set_default_qdisc(default_qdisc, ssh_cmd)
                 set_recv_sock_bufsizes(old_recv_bufsizes, ssh_cmd)
-
-                if cmds_to_revert_conf:
-                    revert_conf(cmds_to_revert_conf, ssh_cmd)
-
 
     if not args.no_metadata:
         meta = vars(args).copy()
