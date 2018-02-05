@@ -23,6 +23,12 @@ def collect_data(args):
 
     # process args
     cc_schemes = args.schemes.split()
+    if args.checkpoints is not None:
+        checkpoints = args.checkpoints.split()
+        for i in xrange(len(cc_schemes)):
+            if checkpoints[i] != '-1':
+                cc_schemes[i] += '-cp%s' % checkpoints[i]
+
     data_dir = args.data_dir
     bandwidths = sorted(map(interp_num, args.bandwidths.split()))
     delays = sorted(map(int, args.delays.split()))
@@ -89,6 +95,7 @@ def main():
     parser.add_argument('--bandwidths', metavar='BW1 BW2 ...', required=True)
     parser.add_argument('--delays', metavar='D1 D2 ...', required=True)
     parser.add_argument('--schemes', metavar='SCH1 SCH2...', required=True)
+    parser.add_argument('--checkpoints', metavar='CP1 CP2...')
 
     args = parser.parse_args()
 
@@ -100,11 +107,16 @@ def main():
         ordered = {k: collections.OrderedDict(sorted(v.iteritems()))
                    for k, v in data.iteritems()}
         ordered = collections.OrderedDict(sorted(ordered.iteritems()))
+        data_dicts[scheme] = ordered
 
         json_path = path.join(args.data_dir, '%s.json' % scheme)
 
         with open(json_path, 'w') as outfile:
             json.dump(ordered, outfile)
+
+    json_path = path.join(args.data_dir, 'perf_data.json')
+    with open(json_path, 'w') as outfile:
+        json.dump(data_dicts, outfile)
 
 
 if __name__ == '__main__':
