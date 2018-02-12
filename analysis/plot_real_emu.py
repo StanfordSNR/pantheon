@@ -136,6 +136,9 @@ def plot(args, real_data, emu_data):
         ax.set_xscale('log', basex=2)
         ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
 
+    if 'xticks' in args['setting']:
+        ax.set_xticks(args['setting']['xticks'])
+
     ax.invert_xaxis()
     ax.tick_params(labelsize=14)
     ax.set_xlabel('95th percentile one-way delay (ms)', fontsize=16)

@@ -44,7 +44,7 @@ def parse_raw_data(raw_data):
         data[cc] = []
 
         for run_id in raw_data[cc]:
-            if run_id == 'mean':
+            if run_id == 'mean' or run_id == 'median':
                 continue
 
             if raw_data[cc][run_id] is None:
@@ -87,6 +87,8 @@ def plot(args, data, ranked_schemes):
 
         x, y = np.mean(data[cc], axis=0)
 
+        print cc, y, x
+
         if marker == '*':
             marker_size = 100
         else:
@@ -109,6 +111,10 @@ def plot(args, data, ranked_schemes):
     if 'xscale' in args['setting'] and args['setting']['xscale'] == 'log':
         ax.set_xscale('log', basex=2)
         ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%d'))
+
+    if 'xticks' in args['setting']:
+        ax.set_xticks(args['setting']['xticks'])
+        ax.get_xaxis().set_major_formatter(ticker.ScalarFormatter())
 
     ax.invert_xaxis()
     ax.tick_params(labelsize=14)
