@@ -1,0 +1,78 @@
+#!/usr/bin/env python
+
+import re
+import sys
+import os
+from os import path
+import argparse
+from subprocess import check_call
+
+
+def convert_svg(svg_path):
+    sys.stderr.write('\nConverting %s\n' % svg_path)
+    sys.stderr.write('\nOverwriting SVG to a Mac-compatible version...\n')
+
+    # replace opacity with fill-opacity and change stroke to none
+    with open(svg_path) as fh:
+        content = fh.readlines()
+
+    p = re.compile(r'style="(?:.+:.+;)+"')
+    opacity_pattern = re.compile(r'("|;)opacity:')
+    stroke_pattern = re.compile(r'("|;)stroke:(.+?);')
+    for i in xrange(len(content)):
+        line = content[i]
+
+        m = p.search(line)
+        if m is None:
+            continue
+
+        if opacity_pattern.search(line) and stroke_pattern.search(line):
+            line = opacity_pattern.sub(r'\1fill-opacity:', line)
+            line = stroke_pattern.sub(r'\1stroke:none;', line)
+            content[i] = line
+
+    with open(svg_path, 'w') as fh:
+        fh.write(''.join(content))
+
+    sys.stderr.write('Done!\n')
+
+    # convert SVG to PDF using inkscape
+    sys.stderr.write('\nConverting SVG to PDF...\n')
+    pdf_path = path.splitext(svg_path)[0] + '.pdf'
+    cmd = ['inkscape', svg_path, '--export-pdf=%s' % pdf_path]
+    sys.stderr.write('$ %s\n' % (' '.join(cmd)))
+
+    check_call(cmd)
+    sys.stderr.write('Done!\n')
+
+    # crop PDF to minimal size
+    sys.stderr.write('\nCropping PDF to minimal size...\n')
+    cmd = ['pdfcrop', pdf_path, pdf_path]
+    sys.stderr.write('$ %s\n' % (' '.join(cmd)))
+
+    DEVNULL = open(os.devnull, 'w')
+    check_call(cmd, stdout=DEVNULL)
+    sys.stderr.write('Done!\n')
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('file_or_dir',
+        help='convert an SVG or all the SVGs in the directory to PDF(s)')
+    args = parser.parse_args()
+
+    file_or_dir = path.abspath(args.file_or_dir)
+
+    if path.isdir(file_or_dir):
+        directory = file_or_dir
+        for fname in os.listdir(directory):
+            f = path.join(directory, fname)
+            if path.isfile(f) and path.splitext(fname)[1] == '.svg':
+                convert_svg(f)
+    elif path.isfile(file_or_dir):
+        svg_path = file_or_dir
+        convert_svg(svg_path)
+
+
+if __name__ == '__main__':
+    main()
