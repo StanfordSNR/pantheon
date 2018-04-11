@@ -26,9 +26,9 @@ def main():
     if args.option == 'deps':
         print 'example_dep_1 example_dep_2'
 
-    # [required] order to run: 'receiver_first' or 'sender_first'
+    # [required] order to run: 'receiver' or 'sender'
     if args.option == 'run_first':
-        print 'receiver_first'
+        print 'receiver'
 
     # [optional] persistent setup
     if args.option == 'setup':
