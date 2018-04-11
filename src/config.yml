@@ -17,7 +17,7 @@ schemes:
     color: green
     marker: '<'
   pcc:
-    friendly_name: PCC
+    friendly_name: PCC-Allegro
     color: cyan
     marker: '>'
   verus:
@@ -81,17 +81,13 @@ schemes:
     color: violet
     marker: '+'
   vivace_latency:
-    friendly_name: Vivace-latency
+    friendly_name: PCC-Vivace
     color: '#0149D0'
     marker: '<'
-  vivace_loss:
-    friendly_name: Vivace-loss
-    color: '#003CAD'
-    marker: '>'
-  vivace_lte:
-    friendly_name: Vivace-LTE
-    color: '#002A79'
-    marker: '^'
+  pcc_experimental:
+    friendly_name: PCC-Expr
+    color: orange
+    marker: '<'
 
 kernel_attrs:
   default_qdisc: pfifo_fast

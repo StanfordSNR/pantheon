@@ -80,3 +80,7 @@
 	url = https://github.com/StanfordSNR/indigo.git
 	branch = 1-layer-32-unit-no-calib
 	ignore = dirty
+[submodule "third_party/pcc-experimental"]
+	path = third_party/pcc-experimental
+	url = https://github.com/PCCproject/PCC-Uspace.git
+	ignore = dirty
