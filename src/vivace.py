@@ -20,7 +20,7 @@ def main():
         print 'receiver'
 
     if args.option == 'setup_after_reboot':
-        check_default_qdisc('vivace_latency')
+        check_default_qdisc('vivace')
 
     if args.option == 'receiver':
         os.environ['LD_LIBRARY_PATH'] = path.join(recv_dir)
