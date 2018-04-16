@@ -38,7 +38,7 @@ Many of the tools and programs run by the Pantheon are git submodules in the
 `third_party` folder. To add submodules after cloning, run:
 
 ```
-git submodule update --init --recursive
+git submodule update --init --recursive  # or ./fetch_submodules.sh
 ```
 
 ## Dependencies
@@ -113,15 +113,15 @@ default, and runs `setup` on schemes when `--setup` is given.
 
 Next, execute the following command to find the running order for a scheme:
 ```
-./<cc>.py run_first
+src/<cc>.py run_first
 ```
 
 Depending on the output of `run_first`, run
 
 ```
 # Receiver first
-./<cc>.py receiver port
-./<cc>.py sender IP port
+src/<cc>.py receiver port
+src/<cc>.py sender IP port
 ```
 
 or
