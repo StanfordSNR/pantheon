@@ -80,7 +80,7 @@ schemes:
     friendly_name: FillP
     color: violet
     marker: '+'
-  vivace_latency:
+  vivace:
     friendly_name: PCC-Vivace
     color: '#0149D0'
     marker: '<'

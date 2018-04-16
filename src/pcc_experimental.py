@@ -11,7 +11,7 @@ from os import path
 from subprocess import check_call
 from src_helpers import parse_arguments, check_default_qdisc
 import project_root  # 'project_root.DIR' is the root directory of Pantheon
-#import sys # we'd like to pass sys.argv into PCC-Vivace, but we can't quite 
+#import sys # we'd like to pass sys.argv into PCC-Vivace, but we can't quite
             # do that yet (parse_arguments doesn't allow arguments that are
             # unknown to this script).
 
