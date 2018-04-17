@@ -163,12 +163,20 @@ def verify_test_args(args):
                      'fit in runtime')
 
 def parse_test_config(test_config, local, remote):
+
+    # Check config file has atleast a test-name and a description of flows
+    if 'test-name' not in test_config:
+        raise ValueError('Config file must have a test-name argument')
+    if 'flows' not in test_config:
+        raise ValueError('Config file must specify flows')
+    
     defaults = {}
     defaults.update(**test_config)
     defaults['schemes'] = None
     defaults['all'] = False
     defaults['flows'] = len(test_config['flows'])
     defaults['test_config'] = test_config
+
     local.set_defaults(**defaults)
     remote.set_defaults(**defaults)
     
