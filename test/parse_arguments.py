@@ -163,12 +163,11 @@ def verify_test_args(args):
                      'fit in runtime')
 
 def parse_test_config(test_config, local, remote):
-
     # Check config file has atleast a test-name and a description of flows
     if 'test-name' not in test_config:
-        raise ValueError('Config file must have a test-name argument')
+        sys.exit('Config file must have a test-name argument')
     if 'flows' not in test_config:
-        raise ValueError('Config file must specify flows')
+        sys.exit('Config file must specify flows')
     
     defaults = {}
     defaults.update(**test_config)
@@ -221,6 +220,10 @@ def parse_test():
     args = parser.parse_args(remaining_argv)
     if args.schemes is not None:
         verify_schemes(args.schemes)
+    else:
+        assert(test_config is not None)
+        schemes = ' '.join([flow['scheme'] for flow in test_config['flows']])
+        verify_schemes(schemes)
     verify_test_args(args)
     make_sure_path_exists(args.data_dir)
     return args
