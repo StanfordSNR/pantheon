@@ -2,6 +2,7 @@ from os import path
 import sys
 import argparse
 import project_root
+import yaml
 from helpers.helpers import parse_config, make_sure_path_exists
 
 
@@ -49,11 +50,12 @@ def parse_setup():
     return args
 
 
-def parse_test_shared(local, remote):
+def parse_test_shared(local, remote, config_args):
     for mode in [local, remote]:
-        mode.add_argument(
-            '-f', '--flows', type=int, default=1,
-            help='number of flows (default 1)')
+        if config_args.config_file is None:
+            mode.add_argument(
+                '-f', '--flows', type=int, default=1,
+                help='number of flows (default 1)')
         mode.add_argument(
             '-t', '--runtime', type=int, default=30,
             help='total runtime in seconds (default 30)')
@@ -61,11 +63,12 @@ def parse_test_shared(local, remote):
             '--interval', type=int, default=0,
             help='interval in seconds between two flows (default 0)')
 
-        group = mode.add_mutually_exclusive_group(required=True)
-        group.add_argument('--all', action='store_true',
+        if config_args.config_file is None:
+            group = mode.add_mutually_exclusive_group(required=True)
+            group.add_argument('--all', action='store_true',
                            help='test all schemes specified in src/config.yml')
-        group.add_argument('--schemes', metavar='"SCHEME1 SCHEME2..."',
-                           help='test a space-separated list of schemes')
+            group.add_argument('--schemes', metavar='"SCHEME1 SCHEME2..."',
+                               help='test a space-separated list of schemes')
 
         mode.add_argument('--run-times', metavar='TIMES', type=int, default=1,
                           help='run times of each scheme (default 1)')
@@ -159,12 +162,31 @@ def verify_test_args(args):
             sys.exit('interval time between flows is too long to be '
                      'fit in runtime')
 
-
+def parse_test_config(config_file):
+    if config_file is None:
+        return {}
+    with open(config_file) as f:
+        test_config = yaml.safe_load(f)
+    return test_config
+    
 def parse_test():
+    # Load configuration file before parsing other command line options
+    # Command line options will override options in config file
+    config_parser = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        add_help=False)
+    config_parser.add_argument('-c','--config_file', metavar='CONFIG',
+                               help='path to configuration file. '
+                               'command line arguments will override options '
+                               'in config file. ')
+    config_args, remaining_argv = config_parser.parse_known_args()
+    test_config = parse_test_config(config_args.config_file)
+    
     parser = argparse.ArgumentParser(
-        description='perform congestion control tests')
+        description='perform congestion control tests',
+        parents=[config_parser])
     subparsers = parser.add_subparsers(dest='mode')
-
     local = subparsers.add_parser(
         'local', help='test schemes locally in mahimahi emulated networks')
     remote = subparsers.add_parser(
@@ -174,11 +196,11 @@ def parse_test():
         'remote_path', metavar='HOST:PANTHEON-DIR',
         help='HOST ([user@]IP) and PANTHEON-DIR (remote pantheon directory)')
 
-    parse_test_shared(local, remote)
+    parse_test_shared(local, remote, config_args)
     parse_test_local(local)
     parse_test_remote(remote)
 
-    args = parser.parse_args()
+    args = parser.parse_args(remaining_argv)
     if args.schemes is not None:
         verify_schemes(args.schemes)
     verify_test_args(args)
