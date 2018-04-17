@@ -801,7 +801,6 @@ def pkill(args):
 
 def main():
     args = parse_arguments(path.basename(__file__))
-    print(args)
     try:
         run_tests(args)
     except:  # intended to catch all exceptions
