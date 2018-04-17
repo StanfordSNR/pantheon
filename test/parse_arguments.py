@@ -162,12 +162,15 @@ def verify_test_args(args):
             sys.exit('interval time between flows is too long to be '
                      'fit in runtime')
 
-def parse_test_config(config_file):
-    if config_file is None:
-        return {}
-    with open(config_file) as f:
-        test_config = yaml.safe_load(f)
-    return test_config
+def parse_test_config(test_config, local, remote):
+    defaults = {}
+    defaults.update(**test_config)
+    defaults['schemes'] = None
+    defaults['all'] = False
+    defaults['flows'] = len(test_config['flows'])
+    defaults['test_config'] = test_config
+    local.set_defaults(**defaults)
+    remote.set_defaults(**defaults)
     
 def parse_test():
     # Load configuration file before parsing other command line options
@@ -181,11 +184,11 @@ def parse_test():
                                'command line arguments will override options '
                                'in config file. ')
     config_args, remaining_argv = config_parser.parse_known_args()
-    test_config = parse_test_config(config_args.config_file)
     
     parser = argparse.ArgumentParser(
         description='perform congestion control tests',
         parents=[config_parser])
+    
     subparsers = parser.add_subparsers(dest='mode')
     local = subparsers.add_parser(
         'local', help='test schemes locally in mahimahi emulated networks')
@@ -200,6 +203,13 @@ def parse_test():
     parse_test_local(local)
     parse_test_remote(remote)
 
+    # Make settings in config file the defaults
+    test_config = None
+    if config_args.config_file is not None:
+        with open(config_args.config_file) as f:
+            test_config = yaml.safe_load(f)
+        parse_test_config(test_config, local, remote)
+    
     args = parser.parse_args(remaining_argv)
     if args.schemes is not None:
         verify_schemes(args.schemes)
