@@ -85,6 +85,7 @@ class Test(object):
         if self.test_config is not None:
             self.cc = self.test_config['test-name']
             self.flow_objs = []
+            cc_src_remote_dir = ''
             if self.mode == 'remote':
                 cc_src_remote_dir = r['pantheon_dir']
             for flow in args.test_config['flows']:
@@ -731,15 +732,37 @@ def run_tests(args):
             call(ssh_cmd + [clean_tmp_cmd])
         call(clean_tmp_cmd, shell=True)
 
-        for cc in cc_schemes:
+        # ISSUE (ranysha): no support for multiple schemes where each uses diff
+        # qdisc. since version 4.13 of the kernel, TCP supports packet pacing
+        # so you don't need to specify qdisc for BBR. when running with config
+        # file, going to ignore qdisc setting for now.
+
+        if args.test_config is None:
+            for cc in cc_schemes:
+                default_qdisc = get_default_qdisc(ssh_cmd)
+                old_recv_bufsizes = get_recv_sock_bufsizes(ssh_cmd)
+
+                if 'qdisc' in schemes_config[cc]:
+                    test_qdisc = schemes_config[cc]['qdisc']
+                else:
+                    test_qdisc = config['kernel_attrs']['default_qdisc']
+
+                test_recv_sock_bufs = config['kernel_attrs']['sock_recv_bufs']
+
+                try:
+                    if default_qdisc != test_qdisc:
+                        set_default_qdisc(test_qdisc, ssh_cmd)
+
+                    set_recv_sock_bufsizes(test_recv_sock_bufs, ssh_cmd)
+                    
+                    Test(args, run_id, cc).run()
+                finally:
+                    set_default_qdisc(default_qdisc, ssh_cmd)
+                    set_recv_sock_bufsizes(old_recv_bufsizes, ssh_cmd)
+        else:
             default_qdisc = get_default_qdisc(ssh_cmd)
             old_recv_bufsizes = get_recv_sock_bufsizes(ssh_cmd)
-
-            if 'qdisc' in schemes_config[cc]:
-                test_qdisc = schemes_config[cc]['qdisc']
-            else:
-                test_qdisc = config['kernel_attrs']['default_qdisc']
-
+            test_qdisc = config['kernel_attrs']['default_qdisc']
             test_recv_sock_bufs = config['kernel_attrs']['sock_recv_bufs']
 
             try:
@@ -747,8 +770,8 @@ def run_tests(args):
                     set_default_qdisc(test_qdisc, ssh_cmd)
 
                 set_recv_sock_bufsizes(test_recv_sock_bufs, ssh_cmd)
-
-                Test(args, run_id, cc).run()
+                    
+                Test(args, run_id, None).run()
             finally:
                 set_default_qdisc(default_qdisc, ssh_cmd)
                 set_recv_sock_bufsizes(old_recv_bufsizes, ssh_cmd)
