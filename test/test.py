@@ -19,9 +19,15 @@ from test_helpers import (
     who_runs_first, parse_remote_path, query_clock_offset, get_git_summary,
     save_test_metadata, get_recv_sock_bufsizes, set_recv_sock_bufsizes,
     get_cmds_to_revert_conf, set_conf, revert_conf)
+from collections import namedtuple
 
+Flow = namedtuple('Flow', ['cc', # replace self.cc
+                           'cc_src_local', # replace self.cc_src
+                           'cc_src_remote', # replace self.r[cc_src]
+                           'run_first', # replace self.run_first
+                           'run_second']) # replace self.run_second
 
-class Test(object):
+class Test(object):    
     def __init__(self, args, run_id, cc):
         self.mode = args.mode
         self.run_id = run_id
@@ -54,7 +60,7 @@ class Test(object):
             # for convenience
             self.sender_side = 'remote'
             self.server_side = 'local'
-
+                      
         # remote mode
         if self.mode == 'remote':
             self.sender_side = args.sender_side
@@ -71,6 +77,29 @@ class Test(object):
 
             self.r = parse_remote_path(args.remote_path, self.cc)
 
+        # arguments when there's a config
+        self.test_config = None
+        if hasattr(args, 'test_config'):
+            self.test_config = args.test_config
+
+        if self.test_config is not None:
+            self.cc = self.test_config['test-name']
+            self.flow_objs = []
+            if self.mode == 'remote':
+                cc_src_remote_dir = r['pantheon_dir']
+            for flow in args.test_config['flows']:
+                cc = flow['scheme']
+                run_first, run_second = who_runs_first(cc)
+                self.flow_objs.append(Flow(cc=cc, 
+                                      cc_src_local=path.join(project_root.DIR,
+                                                             'src',
+                                                             cc + '.py'),
+                                      cc_src_remote=path.join(cc_src_remote_dir,
+                                                              'src',
+                                                              cc + '.py'),
+                                      run_first=run_first,
+                                      run_second=run_second)) 
+                
     def setup_mm_cmd(self):
         mm_datalink_log = self.cc + '_mm_datalink_run%d.log' % self.run_id
         mm_acklink_log = self.cc + '_mm_acklink_run%d.log' % self.run_id
@@ -113,8 +142,12 @@ class Test(object):
         self.tunnel_manager = path.join(self.test_dir, 'tunnel_manager.py')
 
         # record who runs first
-        self.run_first, self.run_second = who_runs_first(self.cc)
-
+        if self.test_config is None:
+            self.run_first, self.run_second = who_runs_first(self.cc)
+        else:
+            self.run_first = None
+            self.run_second = None
+            
         # wait for 3 seconds until run_first is ready
         self.run_first_setup_time = 3
 
@@ -345,7 +378,8 @@ class Test(object):
         return True
 
     def run_first_side(self, tun_id, send_manager, recv_manager,
-                       send_pri_ip, recv_pri_ip):
+                       send_pri_ip, recv_pri_ip):            
+        
         first_src = self.cc_src
         second_src = self.cc_src
 
@@ -365,7 +399,7 @@ class Test(object):
 
             recv_manager.stdin.write(first_cmd)
             recv_manager.stdin.flush()
-        else:  # self.run_first == 'sender'
+        elif self.run_first == 'sender':  # self.run_first == 'sender'
             if self.mode == 'remote':
                 if self.sender_side == 'local':
                     second_src = self.r['cc_src']
@@ -381,7 +415,48 @@ class Test(object):
 
             send_manager.stdin.write(first_cmd)
             send_manager.stdin.flush()
+            
+        # get run_first and run_second from the flow object
+        else:
+            assert(hasattr(self, 'flow_objs'))
+            flow = self.flow_objs[tun_id - 1] # tunnel id starts with 1
 
+            first_src = flow.cc_src_local
+            second_src = flow.cc_src_local
+            
+            if flow.run_first == 'receiver':
+                if self.mode == 'remote':
+                    if self.sender_side == 'local':
+                        first_src = flow.cc_src_remote
+                    else:
+                        second_src = flow.cc_src_remote
+
+                port = get_open_port()
+
+                first_cmd = 'tunnel %s python %s receiver %s\n' % (
+                    tun_id, first_src, port)
+                second_cmd = 'tunnel %s python %s sender %s %s\n' % (
+                    tun_id, second_src, recv_pri_ip, port)
+
+                recv_manager.stdin.write(first_cmd)
+                recv_manager.stdin.flush()
+            else:  # flow.run_first == 'sender'
+                if self.mode == 'remote':
+                    if self.sender_side == 'local':
+                        second_src = flow.cc_src_remote
+                    else:
+                        first_src = flow.cc_src_remote
+
+                port = get_open_port()
+                
+                first_cmd = 'tunnel %s python %s sender %s\n' % (
+                    tun_id, first_src, port)
+                second_cmd = 'tunnel %s python %s receiver %s %s\n' % (
+                    tun_id, second_src, send_pri_ip, port)
+
+                send_manager.stdin.write(first_cmd)
+                send_manager.stdin.flush()
+                        
         return second_cmd
 
     def run_second_side(self, send_manager, recv_manager, second_cmds):
@@ -395,12 +470,22 @@ class Test(object):
             if i != 0:
                 time.sleep(self.interval)
             second_cmd = second_cmds[i]
+
             if self.run_first == 'receiver':
                 send_manager.stdin.write(second_cmd)
                 send_manager.stdin.flush()
-            else:
+            elif self.run_first == 'sender':
                 recv_manager.stdin.write(second_cmd)
                 recv_manager.stdin.flush()
+            else:
+                assert(hasattr(self, 'flow_objs'))
+                flow = self.flow_objs[i]
+                if flow.run_first == 'receiver':
+                    send_manager.stdin.write(second_cmd)
+                    send_manager.stdin.flush()
+                elif flow.run_first == 'sender':
+                    recv_manager.stdin.write(second_cmd)
+                    recv_manager.stdin.flush()
 
         elapsed_time = time.time() - start_time
         if elapsed_time > self.runtime:
@@ -604,9 +689,10 @@ class Test(object):
 
         # write runtimes and clock offsets to file
         self.record_time_stats()
-
+        
         sys.stderr.write('Done testing %s\n' % self.cc)
 
+            
 
 def run_tests(args):
     git_summary = get_git_summary(
@@ -617,12 +703,18 @@ def run_tests(args):
 
     if args.all:
         cc_schemes = schemes_config.keys()
+        if args.random_order:
+            random.shuffle(cc_schemes)
     elif args.schemes is not None:
         cc_schemes = args.schemes.split()
-
-    if args.random_order:
-        random.shuffle(cc_schemes)
-
+        if args.random_order:
+            random.shuffle(cc_schemes)
+    else:
+        assert(args.test_config is not None)
+        if args.random_order:
+            random.shuffle(args.test_config['flows'])
+        cc_schemes = [flow['scheme'] for flow in args.test_config['flows']]
+            
     ssh_cmd = None
     if args.mode == 'remote':
         r = parse_remote_path(args.remote_path)
@@ -686,7 +778,7 @@ def pkill(args):
 
 def main():
     args = parse_arguments(path.basename(__file__))
-
+    print(args)
     try:
         run_tests(args)
     except:  # intended to catch all exceptions
