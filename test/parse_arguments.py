@@ -220,6 +220,7 @@ def parse_test():
     args = parser.parse_args(remaining_argv)
     if args.schemes is not None:
         verify_schemes(args.schemes)
+        args.test_config = None
     else:
         assert(test_config is not None)
         schemes = ' '.join([flow['scheme'] for flow in test_config['flows']])
