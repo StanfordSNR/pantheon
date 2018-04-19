@@ -41,7 +41,6 @@ def main():
 
     test_py = path.join(project_root.DIR, 'test', 'test.py')
 
-    """
     # test a receiver-first scheme --- default_tcp
     cc = 'default_tcp'
 
@@ -88,7 +87,6 @@ def main():
            '--uplink-trace', data_trace, '--downlink-trace', ack_trace,
            '--pkill-cleanup', '--schemes', '%s' % cc]
     check_call(cmd)
-    """
 
     # test running with a config file -- two reciever first schemes
     config = get_sample_config('bbr-cubic')
