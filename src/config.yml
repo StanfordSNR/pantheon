@@ -87,8 +87,12 @@ schemes:
   pcc_experimental:
     friendly_name: PCC-Expr
     color: orange
-    marker: '<'
-
+    marker: '<'   
+  fillp_loss:
+    friendly_name: FillP-Loss
+    color: '#8B008B'
+    marker: '◊'
+    
 kernel_attrs:
   default_qdisc: pfifo_fast
   sock_recv_bufs:

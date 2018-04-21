@@ -14,7 +14,7 @@ import project_root
 
 def main():
     args = parse_arguments('receiver_first')
-    cc_repo = path.join(project_root.DIR, 'third_party', 'fillp')
+    cc_repo = path.join(project_root.DIR, 'third_party', 'fillp_loss')
     send_src = path.join(cc_repo, 'client', 'client')
     recv_src = path.join(cc_repo, 'server', 'server')
     send_path = path.join(cc_repo, 'client')
@@ -24,16 +24,16 @@ def main():
         print 'receiver'
 
     if args.option == 'setup_after_reboot':
-        check_default_qdisc('fillp')
+        check_default_qdisc('fillp_loss')
 
     if args.option == 'sender':
         os.environ['LD_LIBRARY_PATH'] = send_path
-        cmd = [send_src, '-c', args.ip, '-p', args.port, '-r', 'testcase001']
+        cmd = [send_src, '-c', args.ip, '-p', args.port, '-r', 'testcase001', '-y', '1']
         check_call(cmd)
 
     if args.option == 'receiver':
         os.environ['LD_LIBRARY_PATH'] = recv_path
-        cmd = [recv_src, '-s', '0.0.0.0', '-p', args.port, '-r', 'testcase001']
+        cmd = [recv_src, '-s', '0.0.0.0', '-p', args.port, '-r', 'testcase001', '-y', '1']
         check_call(cmd)
 
 

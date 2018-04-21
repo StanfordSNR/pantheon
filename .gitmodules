@@ -84,3 +84,7 @@
 	path = third_party/pcc-experimental
 	url = https://github.com/PCCproject/PCC-Uspace.git
 	ignore = dirty
+[submodule "third_party/fillp_loss"]
+	path = third_party/fillp_loss
+	url = https://github.com/fillthepipe/fill-the-pipe
+	ignore = dirty
