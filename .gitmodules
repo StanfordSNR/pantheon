@@ -20,7 +20,7 @@
 	ignore = dirty
 [submodule "third_party/sprout"]
 	path = third_party/sprout
-	url = https://github.com/keithw/alfalfa.git
+	url = https://github.com/keithw/sprout.git
 	ignore = dirty
 [submodule "third_party/scream"]
 	path = third_party/scream
