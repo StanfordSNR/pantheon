@@ -1,40 +1,33 @@
 #!/usr/bin/env python
 
-import sys
 import os
 from os import path
-import string
-import random
-import shutil
 from subprocess import check_call
-from src_helpers import (parse_arguments, make_sure_path_exists,
-                         check_default_qdisc)
-import project_root
+
+import arg_parser
+import context
 
 
 def main():
-    args = parse_arguments('receiver_first')
-    cc_repo = path.join(project_root.DIR, 'third_party', 'fillp')
-    send_src = path.join(cc_repo, 'client', 'client')
-    recv_src = path.join(cc_repo, 'server', 'server')
-    send_path = path.join(cc_repo, 'client')
-    recv_path = path.join(cc_repo, 'server')
+    args = arg_parser.receiver_first()
 
-    if args.option == 'run_first':
-        print 'receiver'
-
-    if args.option == 'setup_after_reboot':
-        check_default_qdisc('fillp')
-
-    if args.option == 'sender':
-        os.environ['LD_LIBRARY_PATH'] = send_path
-        cmd = [send_src, '-d', args.ip, '-p', args.port, '-t']
-        check_call(cmd)
+    cc_repo = path.join(context.third_party_dir, 'fillp')
+    send_dir = path.join(cc_repo, 'client')
+    recv_dir = path.join(cc_repo, 'server')
+    send_src = path.join(send_dir, 'client')
+    recv_src = path.join(recv_dir, 'server')
 
     if args.option == 'receiver':
-        os.environ['LD_LIBRARY_PATH'] = recv_path
-        cmd = [recv_src, '-s', '0.0.0.0', '-p', args.port, '-t']
+        os.environ['LD_LIBRARY_PATH'] = recv_dir
+        cmd = [recv_src, '-s', '0.0.0.0', '-p', args.port, '-r', 'testcase001']
         check_call(cmd)
+        return
+
+    if args.option == 'sender':
+        os.environ['LD_LIBRARY_PATH'] = send_dir
+        cmd = [send_src, '-c', args.ip, '-p', args.port, '-r', 'testcase001']
+        check_call(cmd)
+        return
 
 
 if __name__ == '__main__':

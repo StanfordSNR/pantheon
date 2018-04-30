@@ -46,4 +46,4 @@ def receiver_first():
 
 
 def sender_first():
-    return parser_wrapper_args('sender')
+    return parse_wrapper_args('sender')

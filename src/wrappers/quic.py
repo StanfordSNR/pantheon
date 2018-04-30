@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 
-import sys
 import os
 from os import path
+import sys
 import string
 import random
 import shutil
 from subprocess import check_call
-from src_helpers import (parse_arguments, make_sure_path_exists,
-                         check_default_qdisc)
-import project_root
+
+import arg_parser
+import context
+from helpers import utils
 
 
 def generate_html(output_dir, size):
@@ -60,7 +61,7 @@ def setup_quic(cc_repo, cert_dir, html_dir):
     # initialize an empty NSS Shared DB
     nssdb_dir = path.join(path.expanduser('~'), '.pki', 'nssdb')
     shutil.rmtree(nssdb_dir, ignore_errors=True)
-    make_sure_path_exists(nssdb_dir)
+    utils.make_sure_dir_exists(nssdb_dir)
 
     # generate certificate
     cert_pwd = path.join(cert_dir, 'cert_pwd')
@@ -78,27 +79,23 @@ def setup_quic(cc_repo, cert_dir, html_dir):
 
 
 def main():
-    args = parse_arguments('sender_first')
+    args = arg_parser.sender_first()
 
-    cc_repo = path.join(project_root.DIR, 'third_party', 'proto-quic')
+    cc_repo = path.join(context.third_party_dir, 'proto-quic')
     send_src = path.join(cc_repo, 'src', 'out', 'Default', 'quic_server')
     recv_src = path.join(cc_repo, 'src', 'out', 'Default', 'quic_client')
 
-    cert_dir = path.join(project_root.DIR, 'src', 'quic-certs')
+    cert_dir = path.join(context.src_dir, 'wrappers', 'quic-certs')
     html_dir = path.join(cc_repo, 'www.example.org')
-    make_sure_path_exists(html_dir)
+    utils.make_sure_dir_exists(html_dir)
 
     if args.option == 'deps':
         print 'libnss3-tools libgconf-2-4'
-
-    if args.option == 'run_first':
-        print 'sender'
+        return
 
     if args.option == 'setup':
         setup_quic(cc_repo, cert_dir, html_dir)
-
-    if args.option == 'setup_after_reboot':
-        check_default_qdisc('quic')
+        return
 
     if args.option == 'sender':
         cmd = [send_src, '--port=%s' % args.port,
@@ -106,6 +103,7 @@ def main():
                '--certificate_file=%s' % path.join(cert_dir, 'leaf_cert.pem'),
                '--key_file=%s' % path.join(cert_dir, 'leaf_cert.pkcs8')]
         check_call(cmd)
+        return
 
     if args.option == 'receiver':
         cmd = [recv_src, '--host=%s' % args.ip, '--port=%s' % args.port,
@@ -113,6 +111,7 @@ def main():
         # suppress stdout as it prints the huge web page received
         with open(os.devnull, 'w') as devnull:
             check_call(cmd, stdout=devnull)
+        return
 
 
 if __name__ == '__main__':

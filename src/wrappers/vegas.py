@@ -1,49 +1,41 @@
 #!/usr/bin/env python
 
 from subprocess import Popen, check_call, check_output
-from src_helpers import (parse_arguments, wait_and_kill_iperf,
-                         check_default_qdisc)
+
+import arg_parser
+import context
+from helpers import kernel_ctl
 
 
 def setup_vegas():
-    # enable tcp_vegas kernel module
-    sh_cmd = 'sudo modprobe tcp_vegas'
-    check_call(sh_cmd, shell=True)
+    # load tcp_vegas kernel module
+    kernel_ctl.load_kernel_module('tcp_vegas')
 
     # add vegas to kernel-allowed congestion control list
-    sh_cmd = 'sysctl net.ipv4.tcp_allowed_congestion_control'
-    allowed_cc = check_output(sh_cmd, shell=True)
-    allowed_cc = allowed_cc.split('=')[-1].split()
-
-    if 'vegas' not in allowed_cc:
-        allowed_cc.append('vegas')
-
-        sh_cmd = 'sudo sysctl -w net.ipv4.tcp_allowed_congestion_control="%s"'
-        check_call(sh_cmd % ' '.join(allowed_cc), shell=True)
-
-    check_default_qdisc('vegas')
+    kernel_ctl.enable_congestion_control('vegas')
 
 
 def main():
-    args = parse_arguments('receiver_first')
+    args = arg_parser.receiver_first()
 
     if args.option == 'deps':
         print 'iperf'
-
-    if args.option == 'run_first':
-        print 'receiver'
+        return
 
     if args.option == 'setup_after_reboot':
         setup_vegas()
+        return
 
     if args.option == 'receiver':
         cmd = ['iperf', '-Z', 'vegas', '-s', '-p', args.port]
-        wait_and_kill_iperf(Popen(cmd))
+        check_call(cmd)
+        return
 
     if args.option == 'sender':
         cmd = ['iperf', '-Z', 'vegas', '-c', args.ip, '-p', args.port,
                '-t', '75']
-        wait_and_kill_iperf(Popen(cmd))
+        check_call(cmd)
+        return
 
 
 if __name__ == '__main__':

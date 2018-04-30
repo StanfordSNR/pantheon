@@ -3,43 +3,43 @@
 import os
 from os import path
 from subprocess import check_call
-from src_helpers import parse_arguments, apply_patch, check_default_qdisc
-import project_root
+
+import arg_parser
+import context
+from helpers import utils
 
 
 def main():
-    args = parse_arguments('receiver_first')
+    args = arg_parser.receiver_first()
 
-    cc_repo = path.join(project_root.DIR, 'third_party', 'sprout')
+    cc_repo = path.join(context.third_party_dir, 'sprout')
     model = path.join(cc_repo, 'src', 'examples', 'sprout.model')
     src = path.join(cc_repo, 'src', 'examples', 'sproutbt2')
 
     if args.option == 'deps':
         print ('libboost-math-dev libssl-dev libprotobuf-dev '
                'protobuf-compiler libncurses5-dev')
-
-    if args.option == 'run_first':
-        print 'receiver'
+        return
 
     if args.option == 'setup':
         # apply patch to reduce MTU size
-        apply_patch('sprout.patch', cc_repo)
+        utils.apply_patch('sprout.patch', cc_repo)
 
         sh_cmd = './autogen.sh && ./configure --enable-examples && make -j2'
         check_call(sh_cmd, shell=True, cwd=cc_repo)
-
-    if args.option == 'setup_after_reboot':
-        check_default_qdisc('sprout')
+        return
 
     if args.option == 'receiver':
         os.environ['SPROUT_MODEL_IN'] = model
         cmd = [src, args.port]
         check_call(cmd)
+        return
 
     if args.option == 'sender':
         os.environ['SPROUT_MODEL_IN'] = model
         cmd = [src, args.ip, args.port]
         check_call(cmd)
+        return
 
 
 if __name__ == '__main__':

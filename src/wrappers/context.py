@@ -1,4 +1,6 @@
 import os
+from os import path
 import sys
-SRCDIR=os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
-sys.path.insert(0, SRCDIR)
+src_dir = path.abspath(path.join(path.dirname(__file__), os.pardir))
+third_party_dir = path.abspath(path.join(src_dir, os.pardir, 'third_party'))
+sys.path.append(src_dir)

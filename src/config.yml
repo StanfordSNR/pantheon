@@ -11,7 +11,6 @@ schemes:
     friendly_name: TCP BBR
     color: gold
     marker: '^'
-    qdisc: 'fq'
   ledbat:
     friendly_name: LEDBAT
     color: green
@@ -90,7 +89,6 @@ schemes:
     marker: '<'
 
 kernel_attrs:
-  default_qdisc: pfifo_fast
   sock_recv_bufs:
     remote:
       max: '33554432'

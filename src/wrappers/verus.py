@@ -2,41 +2,40 @@
 
 from os import path
 from subprocess import check_call
-from src_helpers import (parse_arguments, apply_patch, TMPDIR,
-                         check_default_qdisc)
-import project_root
+
+import arg_parser
+import context
+from helpers import utils
 
 
 def main():
-    args = parse_arguments('sender_first')
+    args = arg_parser.sender_first()
 
-    cc_repo = path.join(project_root.DIR, 'third_party', 'verus')
+    cc_repo = path.join(context.third_party_dir, 'verus')
     send_src = path.join(cc_repo, 'src', 'verus_server')
     recv_src = path.join(cc_repo, 'src', 'verus_client')
 
     if args.option == 'deps':
         print 'libtbb-dev libasio-dev libalglib-dev libboost-system-dev'
-
-    if args.option == 'run_first':
-        print 'sender'
+        return
 
     if args.option == 'setup':
         # apply patch to reduce MTU size
-        apply_patch('verus.patch', cc_repo)
+        utils.apply_patch('verus.patch', cc_repo)
 
         sh_cmd = './bootstrap.sh && ./configure && make -j2'
         check_call(sh_cmd, shell=True, cwd=cc_repo)
-
-    if args.option == 'setup_after_reboot':
-        check_default_qdisc('verus')
+        return
 
     if args.option == 'sender':
-        cmd = [send_src, '-name', TMPDIR, '-p', args.port, '-t', '75']
+        cmd = [send_src, '-name', utils.tmp_dir, '-p', args.port, '-t', '75']
         check_call(cmd)
+        return
 
     if args.option == 'receiver':
         cmd = [recv_src, args.ip, '-p', args.port]
-        check_call(cmd, cwd=TMPDIR)
+        check_call(cmd, cwd=utils.tmp_dir)
+        return
 
 
 if __name__ == '__main__':

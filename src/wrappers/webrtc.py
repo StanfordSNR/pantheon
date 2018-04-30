@@ -1,19 +1,19 @@
 #!/usr/bin/env python
 
-import sys
-import uuid
 import os
 from os import path
+import sys
+import uuid
 from subprocess import call, check_call, check_output, Popen
-from src_helpers import parse_arguments, TMPDIR, check_default_qdisc
-import project_root
+
+import arg_parser
+import context
+from helpers import utils
 
 
 def xvfb_in_use(display):
     cmd = 'xdpyinfo -display :%d >/dev/null 2>&1' % display
-    if call(cmd, shell=True) == 0:
-        return True
-    return False
+    return call(cmd, shell=True) == 0
 
 
 def setup_webrtc(cc_repo, video):
@@ -35,34 +35,32 @@ def setup_webrtc(cc_repo, video):
 
 
 def main():
-    args = parse_arguments('sender_first')
+    args = arg_parser.sender_first()
 
-    cc_repo = path.join(project_root.DIR, 'third_party', 'webrtc')
+    cc_repo = path.join(context.third_party_dir, 'webrtc')
     video = path.join(cc_repo, 'video.y4m')
 
     if args.option == 'deps':
         print ('chromium-browser xvfb xfonts-100dpi xfonts-75dpi '
                'xfonts-cyrillic xorg dbus-x11 npm nodejs')
-
-    if args.option == 'run_first':
-        print 'sender'
+        return
 
     if args.option == 'setup':
         setup_webrtc(cc_repo, video)
-
-    if args.option == 'setup_after_reboot':
-        check_default_qdisc('webrtc')
+        return
 
     if args.option == 'sender':
         if not xvfb_in_use(1):
-            Popen(['Xvfb', ':1'])
+            xvfb_proc = Popen(['Xvfb', ':1'])
+        else:
+            xvfb_proc = None
         os.environ['DISPLAY'] = ':1'
 
         # run signaling server on the sender side
         signaling_server_src = path.join(cc_repo, 'app.js')
         Popen(['node', signaling_server_src, args.port])
 
-        user_data_dir = path.join(TMPDIR, 'webrtc-%s' % uuid.uuid4())
+        user_data_dir = path.join(utils.tmp_dir, 'webrtc-%s' % uuid.uuid4())
         cmd = ['chromium-browser',
                '--app=http://localhost:%s/sender' % args.port,
                '--use-fake-ui-for-media-stream',
@@ -70,17 +68,25 @@ def main():
                '--use-file-for-fake-video-capture=%s' % video,
                '--user-data-dir=%s' % user_data_dir]
         check_call(cmd)
+        if xvfb_proc:
+            xvfb_proc.kill()
+        return
 
     if args.option == 'receiver':
         if not xvfb_in_use(2):
-            Popen(['Xvfb', ':2'])
+            xvfb_proc = Popen(['Xvfb', ':2'])
+        else:
+            xvfb_proc = None
         os.environ['DISPLAY'] = ':2'
 
-        user_data_dir = path.join(TMPDIR, 'webrtc-%s' % uuid.uuid4())
+        user_data_dir = path.join(utils.tmp_dir, 'webrtc-%s' % uuid.uuid4())
         cmd = ['chromium-browser',
                '--app=http://%s:%s/receiver' % (args.ip, args.port),
                '--user-data-dir=%s' % user_data_dir]
         check_call(cmd)
+        if xvfb_proc:
+            xvfb_proc.kill()
+        return
 
 
 if __name__ == '__main__':
