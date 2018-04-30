@@ -96,10 +96,7 @@ class Report(object):
 
         desc += (
             'Increased UDP receive buffer to 16 MB (default) and '
-            '32 MB (max).\n\n'
-            'Tested BBR with qdisc of Fair Queuing (\\texttt{fq}), and '
-            'other schemes with the default Linux qdisc '
-            '(\\texttt{pfifo\_fast}).\n\n')
+            '32 MB (max).\n\n')
 
         if 'ntp_addr' in meta:
             desc += ('NTP offsets were measured against \\texttt{%s} and have '

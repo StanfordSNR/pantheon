@@ -34,9 +34,6 @@ def main():
     for cmd in pkill_cmds:
         call(cmd, shell=True)
 
-    # remove /tmp/pantheon-tmp
-    call('rm -rf ' + utils.tmp_dir, shell=True)
-
 
 if __name__ == '__main__':
     main()

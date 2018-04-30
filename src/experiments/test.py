@@ -90,15 +90,12 @@ class Test(object):
             for flow in args.test_config['flows']:
                 cc = flow['scheme']
                 run_first, run_second = who_runs_first(cc)
-                self.flow_objs.append(Flow(cc=cc,
-                                      cc_src_local=path.join(project_root.DIR,
-                                                             'src',
-                                                             cc + '.py'),
-                                      cc_src_remote=path.join(cc_src_remote_dir,
-                                                              'src',
-                                                              cc + '.py'),
-                                      run_first=run_first,
-                                      run_second=run_second))
+                self.flow_objs.append(Flow(
+                    cc=cc,
+                    cc_src_local=path.join(context.src_dir, 'wrappers', cc + '.py'),
+                    cc_src_remote=path.join(cc_src_remote_dir, 'wrappers', cc + '.py'),
+                    run_first=run_first,
+                    run_second=run_second))
 
     def setup_mm_cmd(self):
         mm_datalink_log = self.cc + '_mm_datalink_run%d.log' % self.run_id
@@ -137,9 +134,10 @@ class Test(object):
 
     def setup(self):
         # setup commonly used paths
-        self.cc_src = path.join(project_root.DIR, 'src', self.cc + '.py')
-        self.test_dir = path.join(project_root.DIR, 'test')
-        self.tunnel_manager = path.join(self.test_dir, 'tunnel_manager.py')
+        self.cc_src = path.join(context.src_dir, 'wrappers', self.cc + '.py')
+        self.experiments_dir = path.join(context.src_dir, 'experiments')
+        self.tunnel_manager = path.join(self.experiments_dir,
+                                        'tunnel_manager.py')
 
         # record who runs first
         if self.test_config is None:
@@ -731,48 +729,27 @@ def run_tests(args):
             call(ssh_cmd + [clean_tmp_cmd])
         call(clean_tmp_cmd, shell=True)
 
-        # ISSUE (ranysha): no support for multiple schemes where each uses diff
-        # qdisc. since version 4.13 of the kernel, TCP supports packet pacing
-        # so you don't need to specify qdisc for BBR. when running with config
-        # file, going to ignore qdisc setting for now.
-
         if args.test_config is None:
             for cc in cc_schemes:
-                default_qdisc = kernel_ctl.get_default_qdisc(ssh_cmd)
                 old_recv_bufsizes = get_recv_sock_bufsizes(ssh_cmd)
-
-                if 'qdisc' in schemes_config[cc]:
-                    test_qdisc = schemes_config[cc]['qdisc']
-                else:
-                    test_qdisc = config['kernel_attrs']['default_qdisc']
 
                 test_recv_sock_bufs = config['kernel_attrs']['sock_recv_bufs']
 
                 try:
-                    if default_qdisc != test_qdisc:
-                        kernel_ctl.set_default_qdisc(test_qdisc, ssh_cmd)
-
                     set_recv_sock_bufsizes(test_recv_sock_bufs, ssh_cmd)
 
                     Test(args, run_id, cc).run()
                 finally:
-                    kernel_ctl.set_default_qdisc(default_qdisc, ssh_cmd)
                     set_recv_sock_bufsizes(old_recv_bufsizes, ssh_cmd)
         else:
-            default_qdisc = kernel_ctl.get_default_qdisc(ssh_cmd)
             old_recv_bufsizes = get_recv_sock_bufsizes(ssh_cmd)
-            test_qdisc = config['kernel_attrs']['default_qdisc']
             test_recv_sock_bufs = config['kernel_attrs']['sock_recv_bufs']
 
             try:
-                if default_qdisc != test_qdisc:
-                    kernel_ctl.set_default_qdisc(test_qdisc, ssh_cmd)
-
                 set_recv_sock_bufsizes(test_recv_sock_bufs, ssh_cmd)
 
                 Test(args, run_id, None).run()
             finally:
-                kernel_ctl.set_default_qdisc(default_qdisc, ssh_cmd)
                 set_recv_sock_bufsizes(old_recv_bufsizes, ssh_cmd)
 
     if not args.no_metadata:
@@ -793,8 +770,8 @@ def pkill(args):
             'python', remote_pkill_src, '--kill-dir', r['pantheon_dir']]
         call(cmd)
 
-    pkill_src = path.join(project_root.DIR, 'helpers', 'pkill.py')
-    cmd = ['python', pkill_src, '--kill-dir', project_root.DIR]
+    pkill_src = path.join(context.src_dir, 'helpers', 'pkill.py')
+    cmd = ['python', pkill_src, '--kill-dir', context.src_dir]
     call(cmd)
 
 

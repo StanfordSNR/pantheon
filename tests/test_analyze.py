@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
 from os import path
-import project_root
 import shutil
 import argparse
-from helpers.helpers import check_call, parse_config, make_sure_path_exists
+
+import context
+from helpers import utils
+from helpers.subprocess_wrappers import check_call
 
 
 def main():
@@ -19,17 +21,17 @@ def main():
     args = parser.parse_args()
 
     if args.all:
-        schemes = parse_config()['schemes'].keys()
+        schemes = utils.parse_config()['schemes'].keys()
     elif args.schemes is not None:
         schemes = args.schemes.split()
 
     curr_dir = path.abspath(path.dirname(__file__))
     data_dir = path.join(curr_dir, 'data')
     shutil.rmtree(data_dir, ignore_errors=True)
-    make_sure_path_exists(data_dir)
+    utils.make_sure_dir_exists(data_dir)
 
-    test_py = path.join(project_root.DIR, 'test', 'test.py')
-    analyze_py = path.join(project_root.DIR, 'analysis', 'analyze.py')
+    test_py = path.join(context.src_dir, 'experiments', 'test.py')
+    analyze_py = path.join(context.src_dir, 'analysis', 'analyze.py')
 
     cmd = ['python', test_py, 'local', '--schemes', ' '.join(schemes),
            '-t', '10', '--data-dir', data_dir, '--pkill-cleanup',

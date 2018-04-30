@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
 from os import path
-import project_root
-from helpers.helpers import check_call
+
+import context
+from helpers.subprocess_wrappers import check_call
+
 
 def get_sample_config(config_name):
     if config_name == 'bbr-cubic':
@@ -28,10 +30,10 @@ def get_sample_config(config_name):
                   'flows: \n'
                   '  - scheme: verus \n'
                   '  - scheme: default_tcp # cubic ')
-               
+
     with open('/tmp/pantheon-tmp/{}.yml'.format(config_name), 'w') as f:
         f.write(config)
-        
+
     return '/tmp/pantheon-tmp/{}.yml'.format(config_name)
 
 def main():
@@ -39,7 +41,7 @@ def main():
     data_trace = path.join(curr_dir, '12mbps_data.trace')
     ack_trace = path.join(curr_dir, '12mbps_ack.trace')
 
-    test_py = path.join(project_root.DIR, 'test', 'test.py')
+    test_py = path.join(context.src_dir, 'experiments', 'test.py')
 
     # test a receiver-first scheme --- default_tcp
     cc = 'default_tcp'
@@ -94,14 +96,14 @@ def main():
            '--uplink-trace', data_trace, '--downlink-trace', ack_trace,
            '--pkill-cleanup']
     check_call(cmd)
-    
+
     # test running with a config file -- one receiver first, one sender first scheme
     config = get_sample_config('verus-cubic')
     cmd = ['python', test_py, '-c', config, 'local',
            '--uplink-trace', data_trace, '--downlink-trace', ack_trace,
            '--pkill-cleanup']
     check_call(cmd)
-    
+
 
 if __name__ == '__main__':
     main()

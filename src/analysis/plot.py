@@ -106,7 +106,7 @@ class Plot(object):
                 delay_graph = cc + '_%s_delay_run%s.png' % (link_t, run_id)
                 delay_graph_path = path.join(self.data_dir, delay_graph)
 
-            print_cmd('tunnel_graph %s\n' % log_path)
+            sys.stderr.write('$ tunnel_graph %s\n' % log_path)
             try:
                 tunnel_results = tunnel_graph.TunnelGraph(
                     tunnel_log=log_path,

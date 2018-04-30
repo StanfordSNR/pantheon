@@ -22,18 +22,12 @@ def enable_congestion_control(cc):
                % ' '.join(cc_list), shell=True)
 
 
-def set_qdisc(qdisc):
-    default_qdisc = check_output('sysctl net.core.default_qdisc', shell=True)
-    default_qdisc = default_qdisc.split('=')[-1].strip()
+def check_qdisc(qdisc):
+    curr_qdisc = check_output('sysctl net.core.default_qdisc', shell=True)
+    curr_qdisc = curr_qdisc.split('=')[-1].strip()
 
-    # return if default_qdisc is already qdisc
-    if qdisc == default_qdisc:
-        return
-
-    check_call('sudo sysctl -w net.core.default_qdisc=%s' % qdisc)
-    sys.stderr.write(
-        'Warning: changed default qdisc from %s to %s; change it '
-        'back before testing other schemes' % (default_qdisc, qdisc))
+    if qdisc != curr_qdisc:
+        sys.exit('Error: current qdisc %s is not %s' % (curr_qdisc, qdisc))
 
 
 def enable_ip_forwarding():
@@ -79,20 +73,3 @@ def set_kernel_attr(sh_cmd, ssh_cmd=None, debug=True):
             sys.stderr.write('Failed: %s %s to %s\n' % (is_local, attr, val))
         else:
             sys.stderr.write('Set %s %s to %s\n' % (is_local, attr, val))
-
-
-def get_default_qdisc(ssh_cmd=None, debug=True):
-    sh_cmd = 'sysctl net.core.default_qdisc'
-    local_qdisc = get_kernel_attr(sh_cmd, debug=debug)
-
-    if ssh_cmd is not None:
-        remote_qdisc = get_kernel_attr(sh_cmd, ssh_cmd, debug)
-        if local_qdisc != remote_qdisc:
-            sys.exit('default_qdisc differs on local and remote sides')
-
-    return local_qdisc
-
-
-def set_default_qdisc(qdisc, ssh_cmd=None, debug=True):
-    sh_cmd = 'sudo sysctl -w net.core.default_qdisc=%s' % qdisc
-    set_kernel_attr(sh_cmd, ssh_cmd, debug)

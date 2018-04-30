@@ -2,12 +2,14 @@ import sys
 from os import path
 import json
 import subprocess
-import project_root
-from helpers.helpers import (check_output, get_kernel_attr, set_kernel_attr)
+
+import context
+from subprocess_wrappers import check_output
+from kernel_ctl import get_kernel_attr, set_kernel_attr
 
 
 def who_runs_first(cc):
-    cc_src = path.join(project_root.DIR, 'src', cc + '.py')
+    cc_src = path.join(context.src_dir, 'wrappers', cc + '.py')
 
     cmd = ['python', cc_src, 'run_first']
     run_first = check_output(cmd).strip()
@@ -29,7 +31,7 @@ def parse_remote_path(remote_path, cc=None):
     ret['ip'] = ret['host_addr'].split('@')[-1]
     ret['ssh_cmd'] = ['ssh', ret['host_addr']]
     ret['tunnel_manager'] = path.join(
-        ret['pantheon_dir'], 'test', 'tunnel_manager.py')
+        ret['pantheon_dir'], 'experiments', 'tunnel_manager.py')
 
     if cc is not None:
         ret['cc_src'] = path.join(ret['pantheon_dir'], 'src', cc + '.py')
@@ -78,8 +80,8 @@ def query_clock_offset(ntp_addr, ssh_cmd):
 
 
 def get_git_summary(mode='local', remote_path=None):
-    git_summary_src = path.join(project_root.DIR, 'test', 'git_summary.sh')
-    local_git_summary = check_output(git_summary_src, cwd=project_root.DIR)
+    git_summary_src = path.join(context.src_dir, 'experiments', 'git_summary.sh')
+    local_git_summary = check_output(git_summary_src, cwd=context.src_dir)
 
     if mode == 'remote':
         r = parse_remote_path(remote_path)

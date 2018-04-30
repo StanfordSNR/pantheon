@@ -2,8 +2,9 @@
 
 from os import path
 import argparse
-import project_root
-from helpers.helpers import check_call
+
+import context
+from helpers.subprocess_wrappers import check_call
 
 
 def main():
@@ -12,7 +13,7 @@ def main():
     args = parser.parse_args()
     remote = args.remote
 
-    test_py = path.join(project_root.DIR, 'test', 'test.py')
+    test_py = path.join(context.src_dir, 'experiments', 'test.py')
 
     # test a receiver-first scheme --- default_tcp
     cc = 'default_tcp'

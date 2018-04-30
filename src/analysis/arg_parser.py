@@ -45,9 +45,9 @@ def parse_analyze_shared(parser):
         '(default: "cc_schemes" in pantheon_metadata.json)')
     parser.add_argument(
         '--data-dir', metavar='DIR',
-        default=path.join(project_root.DIR, 'test', 'data'),
+        default=path.join(context.src_dir, 'experiments', 'data'),
         help='directory that contains logs and metadata '
-        'of pantheon tests (default pantheon/test/data)')
+        'of pantheon tests (default pantheon/experiments/data)')
 
 
 def parse_plot():

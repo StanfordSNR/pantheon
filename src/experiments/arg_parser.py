@@ -78,10 +78,11 @@ def parse_test_shared(local, remote, config_args):
                           help='run ID to start with')
         mode.add_argument('--random-order', action='store_true',
                           help='test schemes in random order')
-        mode.add_argument('--data-dir', metavar='DIR',
-                          default=path.join(project_root.DIR, 'test', 'data'),
-                          help='directory to save all test logs, graphs, '
-                          'metadata, and report (default pantheon/test/data)')
+        mode.add_argument(
+            '--data-dir', metavar='DIR',
+            default=path.join(context.src_dir, 'experiments', 'data'),
+            help='directory to save all test logs, graphs, '
+            'metadata, and report (default pantheon/test/data)')
         mode.add_argument(
             '--no-metadata', action='store_true',
             help='don\'t save metadata (in JSON) of tests for future analysis')
@@ -93,12 +94,12 @@ def parse_test_shared(local, remote, config_args):
 def parse_test_local(local):
     local.add_argument(
         '--uplink-trace', metavar='TRACE',
-        default=path.join(project_root.DIR, 'test', '12mbps.trace'),
+        default=path.join(context.src_dir, 'experiments', '12mbps.trace'),
         help='uplink trace (from sender to receiver) to pass to mm-link '
         '(default pantheon/test/12mbps.trace)')
     local.add_argument(
         '--downlink-trace', metavar='TRACE',
-        default=path.join(project_root.DIR, 'test', '12mbps.trace'),
+        default=path.join(context.src_dir, 'experiments', '12mbps.trace'),
         help='downlink trace (from receiver to sender) to pass to mm-link '
         '(default pantheon/test/12mbps.trace)')
     local.add_argument(
