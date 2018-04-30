@@ -7,7 +7,8 @@ import itertools
 import numpy as np
 import matplotlib_agg
 import matplotlib.pyplot as plt
-from parse_arguments import parse_arguments
+
+import arg_parser
 
 
 class TunnelGraph(object):
@@ -410,7 +411,7 @@ class TunnelGraph(object):
 
 
 def main():
-    args = parse_arguments(path.basename(__file__))
+    args = arg_parser.parse_tunnel_graph()
 
     tunnel_graph = TunnelGraph(
         tunnel_log=args.tunnel_log,

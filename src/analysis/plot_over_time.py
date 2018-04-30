@@ -7,9 +7,10 @@ import time
 import matplotlib_agg
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-from parse_arguments import parse_arguments
-from analyze_helpers import load_test_metadata, verify_schemes_with_meta
-from helpers.helpers import parse_config
+
+import arg_parser
+import context
+from helpers import utils
 
 
 class PlotThroughputTime(object):
@@ -19,8 +20,8 @@ class PlotThroughputTime(object):
         self.amplify = args.amplify
 
         metadata_path = path.join(self.data_dir, 'pantheon_metadata.json')
-        meta = load_test_metadata(metadata_path)
-        self.cc_schemes = verify_schemes_with_meta(args.schemes, meta)
+        meta = utils.load_test_metadata(metadata_path)
+        self.cc_schemes = utils.verify_schemes_with_meta(args.schemes, meta)
 
         self.run_times = meta['run_times']
         self.flows = meta['flows']
@@ -106,7 +107,7 @@ class PlotThroughputTime(object):
         else:
             datalink_fmt_str = '%s_mm_datalink_run%s.log'
 
-        schemes_config = parse_config()['schemes']
+        schemes_config = utils.parse_config()['schemes']
         for cc in self.cc_schemes:
             cc_name = schemes_config[cc]['friendly_name']
 
@@ -167,7 +168,7 @@ class PlotThroughputTime(object):
 
 
 def main():
-    args = parse_arguments(path.basename(__file__))
+    args = arg_parser.parse_over_time()
     PlotThroughputTime(args).run()
 
 

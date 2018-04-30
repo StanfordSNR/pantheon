@@ -1,13 +1,14 @@
 import sys
-import argparse
 from os import path
-import project_root
-from helpers.helpers import parse_config
+import argparse
+
+import context
+from helpers import utils
 
 
 def verify_schemes(schemes):
     schemes = schemes.split()
-    all_schemes = parse_config()['schemes'].keys()
+    all_schemes = utils.parse_config()['schemes'].keys()
 
     for cc in schemes:
         if cc not in all_schemes:
@@ -114,16 +115,3 @@ def parse_over_time():
         verify_schemes(args.schemes)
 
     return args
-
-
-def parse_arguments(filename):
-    if filename == 'tunnel_graph.py':
-        return parse_tunnel_graph()
-    elif filename == 'plot.py':
-        return parse_plot()
-    elif filename == 'report.py':
-        return parse_report()
-    elif filename == 'analyze.py':
-        return parse_analyze()
-    elif filename == 'plot_over_time.py':
-        return parse_over_time()

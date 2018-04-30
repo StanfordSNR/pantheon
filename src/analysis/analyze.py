@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 
 from os import path
-from parse_arguments import parse_arguments
-import project_root
-from helpers.helpers import check_call
+
+import arg_parser
+import context
+from helpers.subprocess_wrappers import check_call
 
 
 def main():
-    args = parse_arguments(path.basename(__file__))
+    args = arg_parser.parse_analyze()
 
-    analysis_dir = path.join(project_root.DIR, 'analysis')
+    analysis_dir = path.join(context.src_dir, 'analysis')
     plot = path.join(analysis_dir, 'plot.py')
     report = path.join(analysis_dir, 'report.py')
 

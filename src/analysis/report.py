@@ -6,11 +6,11 @@ from os import path
 import re
 import uuid
 import numpy as np
-from parse_arguments import parse_arguments
-from analyze_helpers import load_test_metadata, verify_schemes_with_meta
-import project_root
-from helpers.helpers import (
-    parse_config, check_call, check_output, TMPDIR, utc_time)
+
+import arg_parser
+import context
+from helpers import utils
+from helpers.subprocess_wrappers import check_call, check_output
 
 
 class Report(object):
@@ -19,17 +19,17 @@ class Report(object):
         self.include_acklink = args.include_acklink
 
         metadata_path = path.join(args.data_dir, 'pantheon_metadata.json')
-        self.meta = load_test_metadata(metadata_path)
-        self.cc_schemes = verify_schemes_with_meta(args.schemes, self.meta)
+        self.meta = utils.load_test_metadata(metadata_path)
+        self.cc_schemes = utils.verify_schemes_with_meta(args.schemes, self.meta)
 
         self.run_times = self.meta['run_times']
         self.flows = self.meta['flows']
-        self.config = parse_config()
+        self.config = utils.parse_config()
 
     def describe_metadata(self):
         desc = '\\centerline{\\textbf{\\large{Pantheon Report}}}\n'
         desc += '\\vspace{20pt}\n\n'
-        desc += 'Generated at %s (UTC).\n\n' % utc_time()
+        desc += 'Generated at %s (UTC).\n\n' % utils.utc_time()
 
         meta = self.meta
 
@@ -320,7 +320,7 @@ class Report(object):
 
     def run(self):
         report_uid = uuid.uuid4()
-        latex_path = path.join(TMPDIR, 'pantheon_report_%s.tex' % report_uid)
+        latex_path = path.join(utils.tmp_dir, 'pantheon_report_%s.tex' % report_uid)
         self.latex = open(latex_path, 'w')
         self.include_summary()
         self.include_runs()
@@ -328,9 +328,9 @@ class Report(object):
 
         cmd = ['pdflatex', '-halt-on-error', '-jobname',
                'pantheon_report_%s' % report_uid, latex_path]
-        check_call(cmd, cwd=TMPDIR)
+        check_call(cmd, cwd=utils.tmp_dir)
 
-        pdf_src_path = path.join(TMPDIR, 'pantheon_report_%s.pdf' % report_uid)
+        pdf_src_path = path.join(utils.tmp_dir, 'pantheon_report_%s.pdf' % report_uid)
         pdf_dst_path = path.join(self.data_dir, 'pantheon_report.pdf')
         os.rename(pdf_src_path, pdf_dst_path)
 
@@ -339,7 +339,7 @@ class Report(object):
 
 
 def main():
-    args = parse_arguments(path.basename(__file__))
+    args = arg_parser.parse_report()
     Report(args).run()
 
 
