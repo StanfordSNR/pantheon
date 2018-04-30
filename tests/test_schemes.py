@@ -1,34 +1,33 @@
 #!/usr/bin/env python
 
-import sys
-import time
 import os
 from os import path
-from subprocess import PIPE
+import sys
+import time
 import signal
 import argparse
-import project_root
-from helpers.helpers import (
-    get_open_port, check_output, call, Popen, parse_config,
-    kill_proc_group, timeout_handler, TimeoutError)
+
+import context
+from helpers import utils
+from helpers.subprocess_wrappers import Popen, check_output, call
 
 
 def test_schemes(args):
-    src_dir = path.join(project_root.DIR, 'src')
+    wrappers_dir = path.join(context.src_dir, 'wrappers')
 
     if args.all:
-        schemes = parse_config()['schemes'].keys()
+        schemes = utils.parse_config()['schemes'].keys()
     elif args.schemes is not None:
         schemes = args.schemes.split()
 
     for scheme in schemes:
         sys.stderr.write('Testing %s...\n' % scheme)
-        src = path.join(src_dir, scheme + '.py')
+        src = path.join(wrappers_dir, scheme + '.py')
 
         run_first = check_output([src, 'run_first']).strip()
         run_second = 'receiver' if run_first == 'sender' else 'sender'
 
-        port = get_open_port()
+        port = utils.get_open_port()
 
         # run first to run
         cmd = [src, run_first, port]
@@ -42,7 +41,7 @@ def test_schemes(args):
         second_proc = Popen(cmd, preexec_fn=os.setsid)
 
         # test lasts for 3 seconds
-        signal.signal(signal.SIGALRM, timeout_handler)
+        signal.signal(signal.SIGALRM, utils.timeout_handler)
         signal.alarm(3)
 
         try:
@@ -50,7 +49,7 @@ def test_schemes(args):
                 proc.wait()
                 if proc.returncode != 0:
                     sys.exit('%s failed in tests' % scheme)
-        except TimeoutError:
+        except utils.TimeoutError:
             pass
         except Exception as exception:
             sys.exit('test_schemes.py: %s\n' % exception)
@@ -59,13 +58,13 @@ def test_schemes(args):
             sys.exit('test exited before time limit')
         finally:
             # cleanup
-            kill_proc_group(first_proc)
-            kill_proc_group(second_proc)
+            utils.kill_proc_group(first_proc)
+            utils.kill_proc_group(second_proc)
 
 
 def cleanup():
-    pkill_src = path.join(project_root.DIR, 'helpers', 'pkill.py')
-    cmd = ['python', pkill_src, '--kill-dir', project_root.DIR]
+    cleanup_src = path.join(context.src_dir, 'helpers', 'cleanup.py')
+    cmd = [cleanup_src, '--kill-dir', context.root_dir]
     call(cmd)
 
 
