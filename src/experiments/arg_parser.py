@@ -1,14 +1,15 @@
 from os import path
 import sys
-import argparse
-import project_root
 import yaml
-from helpers.helpers import parse_config, make_sure_path_exists
+import argparse
+
+import context
+from helpers import utils
 
 
 def verify_schemes(schemes):
     schemes = schemes.split()
-    all_schemes = parse_config()['schemes'].keys()
+    all_schemes = utils.parse_config()['schemes'].keys()
 
     for cc in schemes:
         if cc not in all_schemes:
@@ -47,6 +48,7 @@ def parse_setup():
 
         if args.setup or args.interface is not None:
             sys.exit('cannot perform setup when --install-deps is given')
+
     return args
 
 
@@ -168,7 +170,7 @@ def parse_test_config(test_config, local, remote):
         sys.exit('Config file must have a test-name argument')
     if 'flows' not in test_config:
         sys.exit('Config file must specify flows')
-    
+
     defaults = {}
     defaults.update(**test_config)
     defaults['schemes'] = None
@@ -178,7 +180,7 @@ def parse_test_config(test_config, local, remote):
 
     local.set_defaults(**defaults)
     remote.set_defaults(**defaults)
-    
+
 def parse_test():
     # Load configuration file before parsing other command line options
     # Command line options will override options in config file
@@ -191,11 +193,11 @@ def parse_test():
                                'command line arguments will override options '
                                'in config file. ')
     config_args, remaining_argv = config_parser.parse_known_args()
-    
+
     parser = argparse.ArgumentParser(
         description='perform congestion control tests',
         parents=[config_parser])
-    
+
     subparsers = parser.add_subparsers(dest='mode')
     local = subparsers.add_parser(
         'local', help='test schemes locally in mahimahi emulated networks')
@@ -216,7 +218,7 @@ def parse_test():
         with open(config_args.config_file) as f:
             test_config = yaml.safe_load(f)
         parse_test_config(test_config, local, remote)
-    
+
     args = parser.parse_args(remaining_argv)
     if args.schemes is not None:
         verify_schemes(args.schemes)
@@ -226,12 +228,5 @@ def parse_test():
         schemes = ' '.join([flow['scheme'] for flow in test_config['flows']])
         verify_schemes(schemes)
     verify_test_args(args)
-    make_sure_path_exists(args.data_dir)
+    utils.make_sure_dir_exists(args.data_dir)
     return args
-
-
-def parse_arguments(filename):
-    if filename == 'setup.py':
-        return parse_setup()
-    elif filename == 'test.py':
-        return parse_test()

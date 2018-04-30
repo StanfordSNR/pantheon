@@ -5,8 +5,9 @@ from os import path
 import sys
 import signal
 from subprocess import Popen, PIPE
-import project_root
-from helpers.helpers import kill_proc_group
+
+import context
+from helpers import utils
 
 
 def main():
@@ -18,7 +19,7 @@ def main():
         sys.stderr.write('tunnel_manager: caught signal %s and cleanning '
                          'up...\n' % signum)
         for tun_id in procs:
-            kill_proc_group(procs[tun_id])
+            utils.kill_proc_group(procs[tun_id])
 
     signal.signal(signal.SIGINT, stop_signal_handler)
     signal.signal(signal.SIGTERM, stop_signal_handler)
@@ -88,7 +89,7 @@ def main():
                 continue
 
             for tun_id in procs:
-                kill_proc_group(procs[tun_id])
+                utils.kill_proc_group(procs[tun_id])
 
             sys.exit(0)
         else:

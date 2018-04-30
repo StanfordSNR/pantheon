@@ -9,17 +9,16 @@ import random
 import signal
 import traceback
 from subprocess import PIPE
-from parse_arguments import parse_arguments
-import project_root
-from helpers.helpers import (
-    Popen, call, TMPDIR, kill_proc_group, parse_config,
-    timeout_handler, TimeoutError, utc_time, get_open_port,
-    get_default_qdisc, set_default_qdisc)
-from test_helpers import (
+from collections import namedtuple
+
+import arg_parser
+import context
+from helpers import utils, kernel_ctl
+from helpers.subprocess_wrappers import Popen, call
+from helpers.experiments import (
     who_runs_first, parse_remote_path, query_clock_offset, get_git_summary,
     save_test_metadata, get_recv_sock_bufsizes, set_recv_sock_bufsizes,
     get_cmds_to_revert_conf, set_conf, revert_conf)
-from collections import namedtuple
 
 Flow = namedtuple('Flow', ['cc', # replace self.cc
                            'cc_src_local', # replace self.cc_src
@@ -27,7 +26,7 @@ Flow = namedtuple('Flow', ['cc', # replace self.cc
                            'run_first', # replace self.run_first
                            'run_second']) # replace self.run_second
 
-class Test(object):    
+class Test(object):
     def __init__(self, args, run_id, cc):
         self.mode = args.mode
         self.run_id = run_id
@@ -60,7 +59,7 @@ class Test(object):
             # for convenience
             self.sender_side = 'remote'
             self.server_side = 'local'
-                      
+
         # remote mode
         if self.mode == 'remote':
             self.sender_side = args.sender_side
@@ -91,7 +90,7 @@ class Test(object):
             for flow in args.test_config['flows']:
                 cc = flow['scheme']
                 run_first, run_second = who_runs_first(cc)
-                self.flow_objs.append(Flow(cc=cc, 
+                self.flow_objs.append(Flow(cc=cc,
                                       cc_src_local=path.join(project_root.DIR,
                                                              'src',
                                                              cc + '.py'),
@@ -99,8 +98,8 @@ class Test(object):
                                                               'src',
                                                               cc + '.py'),
                                       run_first=run_first,
-                                      run_second=run_second)) 
-                
+                                      run_second=run_second))
+
     def setup_mm_cmd(self):
         mm_datalink_log = self.cc + '_mm_datalink_run%d.log' % self.run_id
         mm_acklink_log = self.cc + '_mm_acklink_run%d.log' % self.run_id
@@ -148,7 +147,7 @@ class Test(object):
         else:
             self.run_first = None
             self.run_second = None
-            
+
         # wait for 3 seconds until run_first is ready
         self.run_first_setup_time = 3
 
@@ -171,16 +170,16 @@ class Test(object):
                 uid = uuid.uuid4()
 
                 self.datalink_ingress_logs.append(path.join(
-                    TMPDIR, '%s_flow%s_uid%s.log.ingress'
+                    utils.tmp_dir, '%s_flow%s_uid%s.log.ingress'
                     % (self.datalink_name, tun_id, uid)))
                 self.datalink_egress_logs.append(path.join(
-                    TMPDIR, '%s_flow%s_uid%s.log.egress'
+                    utils.tmp_dir, '%s_flow%s_uid%s.log.egress'
                     % (self.datalink_name, tun_id, uid)))
                 self.acklink_ingress_logs.append(path.join(
-                    TMPDIR, '%s_flow%s_uid%s.log.ingress'
+                    utils.tmp_dir, '%s_flow%s_uid%s.log.ingress'
                     % (self.acklink_name, tun_id, uid)))
                 self.acklink_egress_logs.append(path.join(
-                    TMPDIR, '%s_flow%s_uid%s.log.egress'
+                    utils.tmp_dir, '%s_flow%s_uid%s.log.egress'
                     % (self.acklink_name, tun_id, uid)))
 
         if self.mode == 'local':
@@ -193,7 +192,7 @@ class Test(object):
 
     # test congestion control without running pantheon tunnel
     def run_without_tunnel(self):
-        port = get_open_port()
+        port = utils.get_open_port()
 
         # run the side specified by self.run_first
         cmd = ['python', self.cc_src, self.run_first, port]
@@ -204,7 +203,7 @@ class Test(object):
         # the cleaner approach might be to try to verify the socket is open
         time.sleep(self.run_first_setup_time)
 
-        self.test_start_time = utc_time()
+        self.test_start_time = utils.utc_time()
         # run the other side specified by self.run_second
         sh_cmd = 'python %s %s $MAHIMAHI_BASE %s' % (
             self.cc_src, self.run_second, port)
@@ -212,19 +211,19 @@ class Test(object):
         sys.stderr.write('Running %s %s...\n' % (self.cc, self.run_second))
         self.proc_second = Popen(sh_cmd, shell=True, preexec_fn=os.setsid)
 
-        signal.signal(signal.SIGALRM, timeout_handler)
+        signal.signal(signal.SIGALRM, utils.timeout_handler)
         signal.alarm(self.runtime)
 
         try:
             self.proc_first.wait()
             self.proc_second.wait()
-        except TimeoutError:
+        except utils.TimeoutError:
             pass
         else:
             signal.alarm(0)
             sys.stderr.write('Warning: test exited before time limit\n')
         finally:
-            self.test_end_time = utc_time()
+            self.test_end_time = utils.utc_time()
 
         return True
 
@@ -358,13 +357,13 @@ class Test(object):
                 tc_manager.stdin.write(readline_cmd)
                 tc_manager.stdin.flush()
 
-                signal.signal(signal.SIGALRM, timeout_handler)
+                signal.signal(signal.SIGALRM, utils.timeout_handler)
                 signal.alarm(20)
 
                 try:
                     got_connection = tc_manager.stdout.readline()
                     sys.stderr.write('Tunnel is connected\n')
-                except TimeoutError:
+                except utils.TimeoutError:
                     sys.stderr.write('Tunnel connection timeout\n')
                     break
                 except IOError:
@@ -379,8 +378,8 @@ class Test(object):
         return True
 
     def run_first_side(self, tun_id, send_manager, recv_manager,
-                       send_pri_ip, recv_pri_ip):            
-        
+                       send_pri_ip, recv_pri_ip):
+
         first_src = self.cc_src
         second_src = self.cc_src
 
@@ -391,7 +390,7 @@ class Test(object):
                 else:
                     second_src = self.r['cc_src']
 
-            port = get_open_port()
+            port = utils.get_open_port()
 
             first_cmd = 'tunnel %s python %s receiver %s\n' % (
                 tun_id, first_src, port)
@@ -407,7 +406,7 @@ class Test(object):
                 else:
                     first_src = self.r['cc_src']
 
-            port = get_open_port()
+            port = utils.get_open_port()
 
             first_cmd = 'tunnel %s python %s sender %s\n' % (
                 tun_id, first_src, port)
@@ -416,7 +415,7 @@ class Test(object):
 
             send_manager.stdin.write(first_cmd)
             send_manager.stdin.flush()
-            
+
         # get run_first and run_second from the flow object
         else:
             assert(hasattr(self, 'flow_objs'))
@@ -424,7 +423,7 @@ class Test(object):
 
             first_src = flow.cc_src_local
             second_src = flow.cc_src_local
-            
+
             if flow.run_first == 'receiver':
                 if self.mode == 'remote':
                     if self.sender_side == 'local':
@@ -432,7 +431,7 @@ class Test(object):
                     else:
                         second_src = flow.cc_src_remote
 
-                port = get_open_port()
+                port = utils.get_open_port()
 
                 first_cmd = 'tunnel %s python %s receiver %s\n' % (
                     tun_id, first_src, port)
@@ -448,8 +447,8 @@ class Test(object):
                     else:
                         first_src = flow.cc_src_remote
 
-                port = get_open_port()
-                
+                port = utils.get_open_port()
+
                 first_cmd = 'tunnel %s python %s sender %s\n' % (
                     tun_id, first_src, port)
                 second_cmd = 'tunnel %s python %s receiver %s %s\n' % (
@@ -457,14 +456,14 @@ class Test(object):
 
                 send_manager.stdin.write(first_cmd)
                 send_manager.stdin.flush()
-                        
+
         return second_cmd
 
     def run_second_side(self, send_manager, recv_manager, second_cmds):
         time.sleep(self.run_first_setup_time)
 
         start_time = time.time()
-        self.test_start_time = utc_time()
+        self.test_start_time = utils.utc_time()
 
         # start each flow self.interval seconds after the previous one
         for i in xrange(len(second_cmds)):
@@ -494,7 +493,7 @@ class Test(object):
             return False
 
         time.sleep(self.runtime - elapsed_time)
-        self.test_end_time = utc_time()
+        self.test_end_time = utils.utc_time()
 
         return True
 
@@ -592,10 +591,10 @@ class Test(object):
 
             uid = uuid.uuid4()
             datalink_tun_log = path.join(
-                TMPDIR, '%s_flow%s_uid%s.log.merged'
+                utils.tmp_dir, '%s_flow%s_uid%s.log.merged'
                 % (self.datalink_name, tun_id, uid))
             acklink_tun_log = path.join(
-                TMPDIR, '%s_flow%s_uid%s.log.merged'
+                utils.tmp_dir, '%s_flow%s_uid%s.log.merged'
                 % (self.acklink_name, tun_id, uid))
 
             cmd = ['merge-tunnel-logs', 'single',
@@ -636,15 +635,15 @@ class Test(object):
             try:
                 return self.run_with_tunnel()
             finally:
-                kill_proc_group(self.ts_manager)
-                kill_proc_group(self.tc_manager)
+                utils.kill_proc_group(self.ts_manager)
+                utils.kill_proc_group(self.tc_manager)
         else:
             # test without pantheon tunnel when self.flows = 0
             try:
                 return self.run_without_tunnel()
             finally:
-                kill_proc_group(self.proc_first)
-                kill_proc_group(self.proc_second)
+                utils.kill_proc_group(self.proc_first)
+                utils.kill_proc_group(self.proc_second)
 
     def record_time_stats(self):
         stats_log = path.join(
@@ -690,16 +689,16 @@ class Test(object):
 
         # write runtimes and clock offsets to file
         self.record_time_stats()
-        
+
         sys.stderr.write('Done testing %s\n' % self.cc)
 
-            
+
 
 def run_tests(args):
     git_summary = get_git_summary(
         args.mode, getattr(args, 'remote_path', None))
 
-    config = parse_config()
+    config = utils.parse_config()
     schemes_config = config['schemes']
 
     if args.all:
@@ -715,7 +714,7 @@ def run_tests(args):
         if args.random_order:
             random.shuffle(args.test_config['flows'])
         cc_schemes = [flow['scheme'] for flow in args.test_config['flows']]
-            
+
     ssh_cmd = None
     if args.mode == 'remote':
         r = parse_remote_path(args.remote_path)
@@ -739,7 +738,7 @@ def run_tests(args):
 
         if args.test_config is None:
             for cc in cc_schemes:
-                default_qdisc = get_default_qdisc(ssh_cmd)
+                default_qdisc = kernel_ctl.get_default_qdisc(ssh_cmd)
                 old_recv_bufsizes = get_recv_sock_bufsizes(ssh_cmd)
 
                 if 'qdisc' in schemes_config[cc]:
@@ -751,29 +750,29 @@ def run_tests(args):
 
                 try:
                     if default_qdisc != test_qdisc:
-                        set_default_qdisc(test_qdisc, ssh_cmd)
+                        kernel_ctl.set_default_qdisc(test_qdisc, ssh_cmd)
 
                     set_recv_sock_bufsizes(test_recv_sock_bufs, ssh_cmd)
-                    
+
                     Test(args, run_id, cc).run()
                 finally:
-                    set_default_qdisc(default_qdisc, ssh_cmd)
+                    kernel_ctl.set_default_qdisc(default_qdisc, ssh_cmd)
                     set_recv_sock_bufsizes(old_recv_bufsizes, ssh_cmd)
         else:
-            default_qdisc = get_default_qdisc(ssh_cmd)
+            default_qdisc = kernel_ctl.get_default_qdisc(ssh_cmd)
             old_recv_bufsizes = get_recv_sock_bufsizes(ssh_cmd)
             test_qdisc = config['kernel_attrs']['default_qdisc']
             test_recv_sock_bufs = config['kernel_attrs']['sock_recv_bufs']
 
             try:
                 if default_qdisc != test_qdisc:
-                    set_default_qdisc(test_qdisc, ssh_cmd)
+                    kernel_ctl.set_default_qdisc(test_qdisc, ssh_cmd)
 
                 set_recv_sock_bufsizes(test_recv_sock_bufs, ssh_cmd)
-                    
+
                 Test(args, run_id, None).run()
             finally:
-                set_default_qdisc(default_qdisc, ssh_cmd)
+                kernel_ctl.set_default_qdisc(default_qdisc, ssh_cmd)
                 set_recv_sock_bufsizes(old_recv_bufsizes, ssh_cmd)
 
     if not args.no_metadata:
@@ -800,7 +799,7 @@ def pkill(args):
 
 
 def main():
-    args = parse_arguments(path.basename(__file__))
+    args = arg_parser.parse_test()
     try:
         run_tests(args)
     except:  # intended to catch all exceptions

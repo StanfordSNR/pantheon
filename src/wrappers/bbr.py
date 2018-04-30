@@ -15,7 +15,7 @@ def setup_bbr():
     kernel_ctl.enable_congestion_control('bbr')
 
     # set the default qdisc to fq_codel if it is not already fq_codel
-    kernel_ctl.set_default_qdisc('fq_codel')
+    kernel_ctl.set_qdisc('fq_codel')
 
 
 def main():
