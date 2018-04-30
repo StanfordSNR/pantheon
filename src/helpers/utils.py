@@ -6,11 +6,10 @@ import signal
 import errno
 import tempfile
 import yaml
-import time
 from datetime import datetime
 
-from context import SRCDIR
-from subprocess_wrappers import check_call
+import context
+from subprocess_wrappers import check_call, call
 
 
 def get_open_port():
@@ -30,11 +29,11 @@ def make_sure_dir_exists(d):
         if exception.errno != errno.EEXIST:
             raise
 
-TMPDIR = path.join(tempfile.gettempdir(), 'pantheon-tmp')
-make_sure_dir_exists(TMPDIR)
+tmp_dir = path.join(tempfile.gettempdir(), 'pantheon-tmp')
+make_sure_dir_exists(tmp_dir)
 
 def parse_config():
-    with open(path.join(SRCDIR, 'config.yml')) as config:
+    with open(path.join(context.src_dir, 'config.yml')) as config:
         return yaml.load(config)
 
 
@@ -67,12 +66,8 @@ def kill_proc_group(proc, signum=signal.SIGTERM):
         sys.stderr.write('kill_proc_group: %s\n' % exception)
 
 
-def curr_time_sec():
-    return int(time.time())
-
-
 def apply_patch(patch_name, repo_dir):
-    patch = path.join(SRCDIR, 'patches', patch_name)
+    patch = path.join(context.src_dir, 'wrappers', 'patches', patch_name)
 
     if call(['git', 'apply', patch], cwd=repo_dir) != 0:
         sys.stderr.write('patch apply failed but assuming things okay '

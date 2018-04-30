@@ -2,7 +2,10 @@
 
 import signal
 import argparse
-from helpers import call
+
+import context
+from helpers import utils
+from helpers.subprocess_wrappers import call
 
 
 # prevent this script from being killed before cleaning up using pkill
@@ -30,6 +33,9 @@ def main():
 
     for cmd in pkill_cmds:
         call(cmd, shell=True)
+
+    # remove /tmp/pantheon-tmp
+    call('rm -rf ' + utils.tmp_dir, shell=True)
 
 
 if __name__ == '__main__':
