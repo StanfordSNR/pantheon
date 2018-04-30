@@ -6,6 +6,7 @@ import signal
 import errno
 import tempfile
 import yaml
+import time
 from datetime import datetime
 
 from context import SRCDIR
@@ -64,3 +65,15 @@ def kill_proc_group(proc, signum=signal.SIGTERM):
         os.killpg(os.getpgid(proc.pid), signum)
     except OSError as exception:
         sys.stderr.write('kill_proc_group: %s\n' % exception)
+
+
+def curr_time_sec():
+    return int(time.time())
+
+
+def apply_patch(patch_name, repo_dir):
+    patch = path.join(SRCDIR, 'patches', patch_name)
+
+    if call(['git', 'apply', patch], cwd=repo_dir) != 0:
+        sys.stderr.write('patch apply failed but assuming things okay '
+                         '(patch applied previously?)\n')
