@@ -16,14 +16,28 @@ def verify_schemes(schemes):
             sys.exit('%s is not a scheme included in src/config.yml' % cc)
 
 
+def parse_sysctl():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--interface',
+                        help='interface to disable reverse path filtering')
+
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument(
+        '--set-rmem', action='store_true',
+        help='set socket receive buffer sizes to Pantheon\'s required ones')
+    group.add_argument(
+        '--reset-rmem', action='store_true',
+        help='set socket receive buffer sizes to Linux default ones')
+
+    args = parser.parse_args()
+    return args
+
+
 def parse_setup():
     parser = argparse.ArgumentParser(
         description='by default, run "setup_after_reboot" on specified '
         'schemes and system-wide setup required every time after reboot')
-
-    # system-wide
-    parser.add_argument('--interface',
-                        help='interface to disable reverse path filtering')
 
     # schemes related
     group = parser.add_mutually_exclusive_group()
@@ -46,7 +60,7 @@ def parse_setup():
             sys.exit('must specify --all or --schemes '
                      'when --install-deps is given')
 
-        if args.setup or args.interface is not None:
+        if args.setup:
             sys.exit('cannot perform setup when --install-deps is given')
 
     return args
@@ -182,6 +196,7 @@ def parse_test_config(test_config, local, remote):
     local.set_defaults(**defaults)
     remote.set_defaults(**defaults)
 
+
 def parse_test():
     # Load configuration file before parsing other command line options
     # Command line options will override options in config file
@@ -228,6 +243,8 @@ def parse_test():
         assert(test_config is not None)
         schemes = ' '.join([flow['scheme'] for flow in test_config['flows']])
         verify_schemes(schemes)
+
     verify_test_args(args)
     utils.make_sure_dir_exists(args.data_dir)
+
     return args

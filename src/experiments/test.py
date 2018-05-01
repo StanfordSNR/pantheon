@@ -15,10 +15,7 @@ import arg_parser
 import context
 from helpers import utils, kernel_ctl
 from helpers.subprocess_wrappers import Popen, call
-from helpers.experiments import (
-    who_runs_first, parse_remote_path, query_clock_offset, get_git_summary,
-    save_test_metadata, get_recv_sock_bufsizes, set_recv_sock_bufsizes,
-    get_cmds_to_revert_conf, set_conf, revert_conf)
+
 
 Flow = namedtuple('Flow', ['cc', # replace self.cc
                            'cc_src_local', # replace self.cc_src
@@ -74,7 +71,7 @@ class Test(object):
             self.local_ofst = None
             self.remote_ofst = None
 
-            self.r = parse_remote_path(args.remote_path, self.cc)
+            self.r = utils.parse_remote_path(args.remote_path, self.cc)
 
         # arguments when there's a config
         self.test_config = None
@@ -87,13 +84,18 @@ class Test(object):
             cc_src_remote_dir = ''
             if self.mode == 'remote':
                 cc_src_remote_dir = r['pantheon_dir']
+
             for flow in args.test_config['flows']:
                 cc = flow['scheme']
-                run_first, run_second = who_runs_first(cc)
+                run_first, run_second = utils.who_runs_first(cc)
+
+                local_p = path.join(context.src_dir, 'wrappers', cc + '.py')
+                remote_p = path.join(cc_src_remote_dir, 'wrappers', cc + '.py')
+
                 self.flow_objs.append(Flow(
                     cc=cc,
-                    cc_src_local=path.join(context.src_dir, 'wrappers', cc + '.py'),
-                    cc_src_remote=path.join(cc_src_remote_dir, 'wrappers', cc + '.py'),
+                    cc_src_local=local_p,
+                    cc_src_remote=remote_p,
                     run_first=run_first,
                     run_second=run_second))
 
@@ -135,13 +137,12 @@ class Test(object):
     def setup(self):
         # setup commonly used paths
         self.cc_src = path.join(context.src_dir, 'wrappers', self.cc + '.py')
-        self.experiments_dir = path.join(context.src_dir, 'experiments')
-        self.tunnel_manager = path.join(self.experiments_dir,
+        self.tunnel_manager = path.join(context.src_dir, 'experiments',
                                         'tunnel_manager.py')
 
         # record who runs first
         if self.test_config is None:
-            self.run_first, self.run_second = who_runs_first(self.cc)
+            self.run_first, self.run_second = utils.who_runs_first(self.cc)
         else:
             self.run_first = None
             self.run_second = None
@@ -185,7 +186,7 @@ class Test(object):
         else:
             # record local and remote clock offset
             if self.ntp_addr is not None:
-                self.local_ofst, self.remote_ofst = query_clock_offset(
+                self.local_ofst, self.remote_ofst = utils.query_clock_offset(
                     self.ntp_addr, self.r['ssh_cmd'])
 
     # test congestion control without running pantheon tunnel
@@ -693,8 +694,8 @@ class Test(object):
 
 
 def run_tests(args):
-    git_summary = get_git_summary(
-        args.mode, getattr(args, 'remote_path', None))
+    git_summary = utils.get_git_summary(args.mode,
+                                        getattr(args, 'remote_path', None))
 
     config = utils.parse_config()
     schemes_config = config['schemes']
@@ -715,12 +716,11 @@ def run_tests(args):
 
     ssh_cmd = None
     if args.mode == 'remote':
-        r = parse_remote_path(args.remote_path)
+        r = utils.parse_remote_path(args.remote_path)
         ssh_cmd = r['ssh_cmd']
 
-    # For each run of each scheme, change the queueing discipline and
-    # receiving socket buffer sizes before and after the test.
-    # Check config.yml for values.
+    # For each run of each scheme, change the socket receive buffer sizes
+    # before and after the test. Check config.yml for values.
     for run_id in xrange(args.start_run_id,
                          args.start_run_id + args.run_times):
         # clean the contents in /tmp/pantheon-tmp
@@ -731,31 +731,15 @@ def run_tests(args):
 
         if args.test_config is None:
             for cc in cc_schemes:
-                old_recv_bufsizes = get_recv_sock_bufsizes(ssh_cmd)
-
-                test_recv_sock_bufs = config['kernel_attrs']['sock_recv_bufs']
-
-                try:
-                    set_recv_sock_bufsizes(test_recv_sock_bufs, ssh_cmd)
-
-                    Test(args, run_id, cc).run()
-                finally:
-                    set_recv_sock_bufsizes(old_recv_bufsizes, ssh_cmd)
+                Test(args, run_id, cc).run()
         else:
-            old_recv_bufsizes = get_recv_sock_bufsizes(ssh_cmd)
-            test_recv_sock_bufs = config['kernel_attrs']['sock_recv_bufs']
-
-            try:
-                set_recv_sock_bufsizes(test_recv_sock_bufs, ssh_cmd)
-
-                Test(args, run_id, None).run()
-            finally:
-                set_recv_sock_bufsizes(old_recv_bufsizes, ssh_cmd)
+            Test(args, run_id, None).run()
 
     if not args.no_metadata:
         meta = vars(args).copy()
         meta['cc_schemes'] = sorted(cc_schemes)
-        save_test_metadata(meta, path.abspath(args.data_dir), git_summary)
+        utils.save_test_metadata(meta, path.abspath(args.data_dir),
+                                 git_summary)
 
 
 def pkill(args):
@@ -763,7 +747,7 @@ def pkill(args):
                      '(enabled by --pkill-cleanup)\n')
 
     if args.mode == 'remote':
-        r = parse_remote_path(args.remote_path)
+        r = utils.parse_remote_path(args.remote_path)
         remote_pkill_src = path.join(r['pantheon_dir'], 'helpers', 'pkill.py')
 
         cmd = r['ssh_cmd'] + [
@@ -777,6 +761,7 @@ def pkill(args):
 
 def main():
     args = arg_parser.parse_test()
+
     try:
         run_tests(args)
     except:  # intended to catch all exceptions

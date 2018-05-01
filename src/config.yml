@@ -87,12 +87,3 @@ schemes:
     friendly_name: PCC-Expr
     color: orange
     marker: '<'
-
-kernel_attrs:
-  sock_recv_bufs:
-    remote:
-      max: '33554432'
-      default: '16777216'
-    local:
-      max: '33554432'
-      default: '16777216'
