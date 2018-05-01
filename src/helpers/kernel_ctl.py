@@ -41,35 +41,20 @@ def disable_rp_filter(interface):
     check_call('sudo sysctl -w %s=0' % (rpf % interface), shell=True)
 
 
-# TODO: replace the legacy code below
-def get_kernel_attr(sh_cmd, ssh_cmd=None, debug=True):
-    if ssh_cmd is not None:
-        kernel_attr = check_output(ssh_cmd + [sh_cmd])
-    else:
-        kernel_attr = check_output(sh_cmd, shell=True)
+def set_sock_recv_buf(new_default, new_max):
+    buf_default = check_output('sysctl net.core.rmem_default', shell=True)
+    buf_default = int(buf_default.split('=')[-1])
 
-    if debug:
-        is_local = 'local' if ssh_cmd is None else 'remote'
-        sys.stderr.write('Got %s %s' % (is_local, kernel_attr))
+    buf_max = check_output('sysctl net.core.rmem_max', shell=True)
+    buf_max = int(buf_max.split('=')[-1])
 
-    kernel_attr = kernel_attr.split('=')[-1].strip()
-    return kernel_attr
+    if buf_default != new_default:
+        check_call('sudo sysctl -w net.core.rmem_default=%s' % new_default,
+                   shell=True)
+        sys.stderr.write('Changed rmem_default from %s to %s\n'
+                         % (buf_default, new_default))
 
-
-def set_kernel_attr(sh_cmd, ssh_cmd=None, debug=True):
-    if ssh_cmd is not None:
-        res = call(ssh_cmd + [sh_cmd])
-    else:
-        res = call(sh_cmd, shell=True)
-
-    if debug:
-        is_local = 'local' if ssh_cmd is None else 'remote'
-
-        items = sh_cmd.split('=')
-        attr = items[0].split()[-1].strip()
-        val = items[1].strip()
-
-        if res != 0:
-            sys.stderr.write('Failed: %s %s to %s\n' % (is_local, attr, val))
-        else:
-            sys.stderr.write('Set %s %s to %s\n' % (is_local, attr, val))
+    if buf_max != new_max:
+        check_call('sudo sysctl -w net.core.rmem_max=%s' % new_max, shell=True)
+        sys.stderr.write('Changed rmem_max from %s to %s\n'
+                         % (buf_max, new_max))
