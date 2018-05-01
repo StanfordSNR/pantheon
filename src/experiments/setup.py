@@ -5,7 +5,7 @@ import sys
 
 import arg_parser
 import context
-from helpers import utils, kernel_ctl
+from helpers import utils
 from helpers.subprocess_wrappers import call, check_call, check_output
 
 
@@ -19,16 +19,8 @@ def install_deps(cc_src):
 
 
 def setup(args):
-    if not args.install_deps:
-        # update submodules
-        utils.update_submodules()
-
-        # enable IP forwarding
-        kernel_ctl.enable_ip_forwarding()
-
-        # disable reverse path filtering
-        if args.interface is not None:
-            kernel_ctl.disable_rp_filter()
+    # update submodules
+    utils.update_submodules()
 
     # setup specified schemes
     cc_schemes = None
