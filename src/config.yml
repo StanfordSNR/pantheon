@@ -1,65 +1,65 @@
 schemes:
   cubic:
-    friendly_name: TCP Cubic
+    name: TCP Cubic
     color: black
     marker: '*'
   vegas:
-    friendly_name: TCP Vegas
+    name: TCP Vegas
     color: silver
     marker: 'h'
   bbr:
-    friendly_name: TCP BBR
+    name: TCP BBR
     color: gold
     marker: '^'
   ledbat:
-    friendly_name: LEDBAT
+    name: LEDBAT
     color: green
     marker: '<'
   pcc:
-    friendly_name: PCC-Allegro
+    name: PCC-Allegro
     color: cyan
     marker: '>'
   verus:
-    friendly_name: Verus
+    name: Verus
     color: skyblue
     marker: 'H'
   sprout:
-    friendly_name: Sprout
+    name: Sprout
     color: orange
     marker: 'p'
   quic:
-    friendly_name: QUIC Cubic
+    name: QUIC Cubic
     color: magenta
     marker: '8'
   scream:
-    friendly_name: SCReAM
+    name: SCReAM
     color: pink
     marker: '1'
   webrtc:
-    friendly_name: WebRTC media
+    name: WebRTC media
     color: brown
     marker: 'v'
   copa:
-    friendly_name: Copa
+    name: Copa
     color: red
     marker: 'o'
   taova:
-    friendly_name: TaoVA-100x
+    name: TaoVA-100x
     color: gray
     marker: 'd'
   vivace:
-    friendly_name: PCC-Vivace
+    name: PCC-Vivace
     color: blue
     marker: '<'
   pcc_experimental:
-    friendly_name: PCC-Expr
+    name: PCC-Expr
     color: olive
     marker: '<'
   fillp:
-    friendly_name: FillP
+    name: FillP
     color: violet
     marker: '+'
   indigo:
-    friendly_name: Indigo
+    name: Indigo
     color: indigo
     marker: 'D'

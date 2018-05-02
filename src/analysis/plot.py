@@ -259,7 +259,7 @@ class Plot(object):
                 continue
 
             value = data[cc]
-            cc_name = schemes_config[cc]['friendly_name']
+            cc_name = schemes_config[cc]['name']
             color = schemes_config[cc]['color']
             marker = schemes_config[cc]['marker']
             y_data, x_data, _ = zip(*value)
@@ -336,7 +336,7 @@ class Plot(object):
         schemes_config = utils.parse_config()['schemes']
         stats_logs_display = {}
         for cc in stats_logs:
-            cc_name = schemes_config[cc]['friendly_name']
+            cc_name = schemes_config[cc]['name']
             stats_logs_display[cc_name] = stats_logs[cc]
 
         perf_data_path = path.join(self.data_dir, 'perf_data.pkl')

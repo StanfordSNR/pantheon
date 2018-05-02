@@ -149,9 +149,9 @@ class Report(object):
                         flow_data[data_t].append('N/A')
 
             table += (
-                '%(friendly_name)s & %(valid_runs)s & %(flow_tputs)s & '
+                '%(name)s & %(valid_runs)s & %(flow_tputs)s & '
                 '%(flow_delays)s & %(flow_losses)s \\\\\n'
-            ) % {'friendly_name': data[cc]['friendly_name'],
+            ) % {'name': data[cc]['name'],
                  'valid_runs': data[cc]['valid_runs'],
                  'flow_tputs': ' & '.join(flow_data['tput']),
                  'flow_delays': ' & '.join(flow_data['delay']),
@@ -176,9 +176,9 @@ class Report(object):
             data[cc] = {}
             data[cc]['valid_runs'] = 0
 
-            cc_name = self.config['schemes'][cc]['friendly_name']
+            cc_name = self.config['schemes'][cc]['name']
             cc_name = cc_name.strip().replace('_', '\\_')
-            data[cc]['friendly_name'] = cc_name
+            data[cc]['name'] = cc_name
 
             for flow_id in xrange(1, self.flows + 1):
                 data[cc][flow_id] = {}
@@ -266,7 +266,7 @@ class Report(object):
         cc_id = 0
         for cc in self.cc_schemes:
             cc_id += 1
-            cc_name = self.config['schemes'][cc]['friendly_name']
+            cc_name = self.config['schemes'][cc]['name']
             cc_name = cc_name.strip().replace('_', '\\_')
 
             for run_id in xrange(1, 1 + self.run_times):

@@ -109,7 +109,7 @@ class PlotThroughputTime(object):
 
         schemes_config = utils.parse_config()['schemes']
         for cc in self.cc_schemes:
-            cc_name = schemes_config[cc]['friendly_name']
+            cc_name = schemes_config[cc]['name']
 
             for run_id in xrange(1, self.run_times + 1):
                 tunnel_log_path = path.join(
