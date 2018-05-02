@@ -569,6 +569,9 @@ class Test(object):
                     data_e_ofst = self.local_ofst
                     ack_i_ofst = self.local_ofst
 
+        merge_tunnel_logs = path.join(context.src_dir, 'experiments',
+                                      'merge_tunnel_logs.py')
+
         for i in xrange(self.flows):
             tun_id = i + 1
 
@@ -596,7 +599,7 @@ class Test(object):
                 utils.tmp_dir, '%s_flow%s_uid%s.log.merged'
                 % (self.acklink_name, tun_id, uid))
 
-            cmd = ['merge-tunnel-logs', 'single',
+            cmd = [merge_tunnel_logs, 'single',
                    '-i', self.datalink_ingress_logs[i],
                    '-e', self.datalink_egress_logs[i],
                    '-o', datalink_tun_log]
@@ -605,7 +608,7 @@ class Test(object):
                         '-e-clock-offset', data_e_ofst]
             call(cmd)
 
-            cmd = ['merge-tunnel-logs', 'single',
+            cmd = [merge_tunnel_logs, 'single',
                    '-i', self.acklink_ingress_logs[i],
                    '-e', self.acklink_egress_logs[i],
                    '-o', acklink_tun_log]
@@ -617,13 +620,13 @@ class Test(object):
             datalink_tun_logs.append(datalink_tun_log)
             acklink_tun_logs.append(acklink_tun_log)
 
-        cmd = ['merge-tunnel-logs', 'multiple', '-o', self.datalink_log]
+        cmd = [merge_tunnel_logs, 'multiple', '-o', self.datalink_log]
         if self.mode == 'local':
             cmd += ['--link-log', self.mm_datalink_log]
         cmd += datalink_tun_logs
         call(cmd)
 
-        cmd = ['merge-tunnel-logs', 'multiple', '-o', self.acklink_log]
+        cmd = [merge_tunnel_logs, 'multiple', '-o', self.acklink_log]
         if self.mode == 'local':
             cmd += ['--link-log', self.mm_acklink_log]
         cmd += acklink_tun_logs

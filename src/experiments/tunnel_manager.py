@@ -16,10 +16,10 @@ def main():
 
     # register SIGINT and SIGTERM events to clean up gracefully before quit
     def stop_signal_handler(signum, frame):
-        sys.stderr.write('tunnel_manager: caught signal %s and cleanning '
-                         'up...\n' % signum)
         for tun_id in procs:
             utils.kill_proc_group(procs[tun_id])
+
+        sys.exit('tunnel_manager: caught signal %s and cleaned up\n' % signum)
 
     signal.signal(signal.SIGINT, stop_signal_handler)
     signal.signal(signal.SIGTERM, stop_signal_handler)
@@ -32,7 +32,7 @@ def main():
 
         # print all the commands fed into tunnel manager
         if prompt:
-            sys.stderr.write(prompt)
+            sys.stderr.write(prompt + ' ')
         sys.stderr.write(input_cmd + '\n')
         cmd = input_cmd.split()
 
@@ -43,7 +43,7 @@ def main():
                 continue
 
             try:
-                tun_id = int(cmd[1]) - 1
+                tun_id = int(cmd[1])
             except ValueError:
                 sys.stderr.write('error: usage: tunnel ID CMD...\n')
                 continue
@@ -82,7 +82,7 @@ def main():
                 sys.stderr.write('error: usage: prompt PROMPT\n')
                 continue
 
-            prompt = cmd[1].strip() + ' '
+            prompt = cmd[1].strip()
         elif cmd[0] == 'halt':  # terminate all tunnel processes and quit
             if len(cmd) != 1:
                 sys.stderr.write('error: usage: halt\n')

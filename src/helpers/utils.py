@@ -30,6 +30,7 @@ def make_sure_dir_exists(d):
         if exception.errno != errno.EEXIST:
             raise
 
+
 tmp_dir = path.join(tempfile.gettempdir(), 'pantheon-tmp')
 make_sure_dir_exists(tmp_dir)
 
@@ -103,7 +104,7 @@ def verify_schemes_with_meta(schemes, meta):
 def who_runs_first(cc):
     cc_src = path.join(context.src_dir, 'wrappers', cc + '.py')
 
-    cmd = ['python', cc_src, 'run_first']
+    cmd = [cc_src, 'run_first']
     run_first = check_output(cmd).strip()
 
     if run_first == 'receiver':
