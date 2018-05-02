@@ -47,21 +47,13 @@ schemes:
     friendly_name: TaoVA-100x
     color: gray
     marker: 'd'
-  koho_cc:
-    friendly_name: KohoCC
-    color: blue
-    marker: '+'
-  calibrated_koho:
-    friendly_name: CalibratedKoho
-    color: olive
-    marker: 'D'
   vivace:
     friendly_name: PCC-Vivace
-    color: '#0149D0'
+    color: blue
     marker: '<'
   pcc_experimental:
     friendly_name: PCC-Expr
-    color: orange
+    color: olive
     marker: '<'
   fillp:
     friendly_name: FillP
@@ -70,4 +62,4 @@ schemes:
   indigo:
     friendly_name: Indigo
     color: indigo
-    marker: 'o'
+    marker: 'D'

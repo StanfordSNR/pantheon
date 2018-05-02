@@ -28,11 +28,7 @@
 	ignore = dirty
 [submodule "third_party/sourdough"]
 	path = third_party/sourdough
-	url = https://github.com/keithw/sourdough
-	ignore = dirty
-[submodule "third_party/koho_cc"]
-	path = third_party/koho_cc
-	url = https://github.com/greghill/koho_cc.git
+	url = https://github.com/keithw/sourdough.git
 	ignore = dirty
 [submodule "third_party/pantheon-tunnel"]
 	path = third_party/pantheon-tunnel
@@ -41,11 +37,6 @@
 [submodule "third_party/genericCC"]
 	path = third_party/genericCC
 	url = https://github.com/venkatarun95/genericCC
-	ignore = dirty
-[submodule "third_party/calibrated_koho"]
-	path = third_party/calibrated_koho
-	url = https://github.com/greghill/koho_cc.git
-	branch = calibrated_koho
 	ignore = dirty
 [submodule "third_party/fillp"]
 	path = third_party/fillp
@@ -62,5 +53,4 @@
 [submodule "third_party/indigo"]
 	path = third_party/indigo
 	url = https://github.com/StanfordSNR/indigo.git
-	branch = master
 	ignore = dirty

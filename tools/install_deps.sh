@@ -1,6 +1,6 @@
 #!/bin/sh -x
 
-# update mahimahi source line and package listings if necessary
+# update mahimahi source line and package listings when necessary
 # sudo add-apt-repository -y ppa:keithw/mahimahi
 # sudo apt-get update
 
