@@ -15,8 +15,8 @@ def main():
 
     test_py = path.join(context.src_dir, 'experiments', 'test.py')
 
-    # test a receiver-first scheme --- default_tcp
-    cc = 'default_tcp'
+    # test a receiver-first scheme --- cubic
+    cc = 'cubic'
 
     cmd = ['python', test_py, 'remote', remote, '--pkill-cleanup',
            '-t', '5', '--schemes', cc]

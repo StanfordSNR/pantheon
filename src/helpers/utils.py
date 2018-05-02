@@ -10,7 +10,7 @@ import yaml
 from datetime import datetime
 
 import context
-from subprocess_wrappers import check_call, call
+from subprocess_wrappers import check_call, check_output, call
 
 
 def get_open_port():
@@ -175,7 +175,7 @@ def query_clock_offset(ntp_addr, ssh_cmd):
 def get_git_summary(mode='local', remote_path=None):
     git_summary_src = path.join(context.src_dir, 'experiments',
                                 'git_summary.sh')
-    local_git_summary = check_output(git_summary_src, cwd=context.root_dir)
+    local_git_summary = check_output(git_summary_src, cwd=context.project_root)
 
     if mode == 'remote':
         r = parse_remote_path(remote_path)

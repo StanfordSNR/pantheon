@@ -17,7 +17,7 @@ def get_sample_config(config_name):
                   'prepend_mm_cmds: mm-delay 30 \n'
                   'flows: \n'
                   '  - scheme: bbr \n'
-                  '  - scheme: default_tcp # cubic ')
+                  '  - scheme: cubic')
 
     elif config_name == 'verus-cubic':
         config = ('test-name: test-bbr \n'
@@ -29,7 +29,7 @@ def get_sample_config(config_name):
                   'prepend_mm_cmds: mm-delay 30 \n'
                   'flows: \n'
                   '  - scheme: verus \n'
-                  '  - scheme: default_tcp # cubic ')
+                  '  - scheme: cubic')
 
     with open('/tmp/pantheon-tmp/{}.yml'.format(config_name), 'w') as f:
         f.write(config)
@@ -43,8 +43,8 @@ def main():
 
     test_py = path.join(context.src_dir, 'experiments', 'test.py')
 
-    # test a receiver-first scheme --- default_tcp
-    cc = 'default_tcp'
+    # test a receiver-first scheme --- cubic
+    cc = 'cubic'
 
     cmd = ['python', test_py, 'local', '-t', '5', '-f', '0',
            '--uplink-trace', data_trace, '--downlink-trace', ack_trace,

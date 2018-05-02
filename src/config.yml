@@ -1,5 +1,5 @@
 schemes:
-  default_tcp:
+  cubic:
     friendly_name: TCP Cubic
     color: black
     marker: '*'
@@ -55,30 +55,6 @@ schemes:
     friendly_name: CalibratedKoho
     color: olive
     marker: 'D'
-  indigo:
-    friendly_name: Indigo-2-256
-    color: indigo
-    marker: 's'
-  indigo_no_calib:
-    friendly_name: Indigo-2-256-no-calib
-    color: indigo
-    marker: 'v'
-  indigo_1_128:
-    friendly_name: Indigo-1-128
-    color: '#8A2BE2'
-    marker: '^'
-  indigo_1_32:
-    friendly_name: Indigo-1-32
-    color: '#6F00FF'
-    marker: 'o'
-  indigo_1_32_no_calib:
-    friendly_name: Indigo-1-32-no-calib
-    color: '#9683EC'
-    marker: 'D'
-  fillp:
-    friendly_name: FillP
-    color: violet
-    marker: '+'
   vivace:
     friendly_name: PCC-Vivace
     color: '#0149D0'
@@ -87,3 +63,27 @@ schemes:
     friendly_name: PCC-Expr
     color: orange
     marker: '<'
+  fillp:
+    friendly_name: FillP
+    color: violet
+    marker: '+'
+  indigo_2_256:
+    friendly_name: Indigo-2-256
+    color: indigo
+    marker: 's'
+  indigo_2_256_no_calib:
+    friendly_name: Indigo-2-256-no-calib
+    color: '#6F00FF'
+    marker: 'v'
+  indigo_1_128:
+    friendly_name: Indigo-1-128
+    color: '#8A2BE2'
+    marker: '^'
+  indigo:
+    friendly_name: Indigo
+    color: indigo
+    marker: 'o'
+  indigo_1_32_no_calib:
+    friendly_name: Indigo-1-32-no-calib
+    color: '#9683EC'
+    marker: 'D'

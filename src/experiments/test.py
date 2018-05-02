@@ -692,7 +692,6 @@ class Test(object):
         sys.stderr.write('Done testing %s\n' % self.cc)
 
 
-
 def run_tests(args):
     git_summary = utils.get_git_summary(args.mode,
                                         getattr(args, 'remote_path', None))
@@ -748,7 +747,7 @@ def pkill(args):
 
     if args.mode == 'remote':
         r = utils.parse_remote_path(args.remote_path)
-        remote_pkill_src = path.join(r['pantheon_dir'], 'helpers', 'pkill.py')
+        remote_pkill_src = path.join(r['src_dir'], 'helpers', 'pkill.py')
 
         cmd = r['ssh_cmd'] + [
             'python', remote_pkill_src, '--kill-dir', r['pantheon_dir']]
