@@ -67,23 +67,7 @@ schemes:
     friendly_name: FillP
     color: violet
     marker: '+'
-  indigo_2_256:
-    friendly_name: Indigo-2-256
-    color: indigo
-    marker: 's'
-  indigo_2_256_no_calib:
-    friendly_name: Indigo-2-256-no-calib
-    color: '#6F00FF'
-    marker: 'v'
-  indigo_1_128:
-    friendly_name: Indigo-1-128
-    color: '#8A2BE2'
-    marker: '^'
   indigo:
     friendly_name: Indigo
     color: indigo
     marker: 'o'
-  indigo_1_32_no_calib:
-    friendly_name: Indigo-1-32-no-calib
-    color: '#9683EC'
-    marker: 'D'
