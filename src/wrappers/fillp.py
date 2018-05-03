@@ -6,6 +6,7 @@ from subprocess import check_call
 
 import arg_parser
 import context
+from helpers import utils
 
 
 def main():
@@ -20,13 +21,13 @@ def main():
     if args.option == 'receiver':
         os.environ['LD_LIBRARY_PATH'] = recv_dir
         cmd = [recv_src, '-s', '0.0.0.0', '-p', args.port, '-r', 'testcase001']
-        check_call(cmd)
+        check_call(cmd, cwd=utils.tmp_dir)
         return
 
     if args.option == 'sender':
         os.environ['LD_LIBRARY_PATH'] = send_dir
         cmd = [send_src, '-c', args.ip, '-p', args.port, '-r', 'testcase001']
-        check_call(cmd)
+        check_call(cmd, cwd=utils.tmp_dir)
         return
 
 

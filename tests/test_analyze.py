@@ -25,8 +25,7 @@ def main():
     elif args.schemes is not None:
         schemes = args.schemes.split()
 
-    curr_dir = path.abspath(path.dirname(__file__))
-    data_dir = path.join(curr_dir, 'data')
+    data_dir = path.join(utils.tmp_dir, 'test_analyze_output')
     shutil.rmtree(data_dir, ignore_errors=True)
     utils.make_sure_dir_exists(data_dir)
 

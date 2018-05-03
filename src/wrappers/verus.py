@@ -29,7 +29,7 @@ def main():
 
     if args.option == 'sender':
         cmd = [send_src, '-name', utils.tmp_dir, '-p', args.port, '-t', '75']
-        check_call(cmd)
+        check_call(cmd, cwd=utils.tmp_dir)
         return
 
     if args.option == 'receiver':
