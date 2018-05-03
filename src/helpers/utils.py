@@ -4,7 +4,6 @@ import sys
 import socket
 import signal
 import errno
-import tempfile
 import json
 import yaml
 from datetime import datetime
@@ -31,7 +30,7 @@ def make_sure_dir_exists(d):
             raise
 
 
-tmp_dir = path.join(tempfile.gettempdir(), 'pantheon-tmp')
+tmp_dir = path.join(context.project_root, 'tmp')
 make_sure_dir_exists(tmp_dir)
 
 

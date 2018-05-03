@@ -725,12 +725,6 @@ def run_tests(args):
     # before and after the test. Check config.yml for values.
     for run_id in xrange(args.start_run_id,
                          args.start_run_id + args.run_times):
-        # clean the contents in /tmp/pantheon-tmp
-        clean_tmp_cmd = 'rm -rf /tmp/pantheon-tmp/*'
-        if args.mode == 'remote':
-            call(ssh_cmd + [clean_tmp_cmd])
-        call(clean_tmp_cmd, shell=True)
-
         if args.test_config is None:
             for cc in cc_schemes:
                 Test(args, run_id, cc).run()

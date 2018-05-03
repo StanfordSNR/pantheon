@@ -3,6 +3,7 @@
 from os import path
 
 import context
+from helpers import utils
 from helpers.subprocess_wrappers import check_call
 
 
@@ -31,10 +32,12 @@ def get_sample_config(config_name):
                   '  - scheme: verus \n'
                   '  - scheme: cubic')
 
-    with open('/tmp/pantheon-tmp/{}.yml'.format(config_name), 'w') as f:
+    config_path = path.join(utils.tmp_dir, '%s.yml' % config_name)
+    with open(config_path, 'w') as f:
         f.write(config)
 
-    return '/tmp/pantheon-tmp/{}.yml'.format(config_name)
+    return config_path
+
 
 def main():
     curr_dir = path.dirname(path.abspath(__file__))
