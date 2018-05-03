@@ -83,7 +83,7 @@ class Test(object):
             self.flow_objs = []
             cc_src_remote_dir = ''
             if self.mode == 'remote':
-                cc_src_remote_dir = r['pantheon_dir']
+                cc_src_remote_dir = r['project_root']
 
             for flow in args.test_config['flows']:
                 cc = flow['scheme']
@@ -744,13 +744,13 @@ def pkill(args):
 
     if args.mode == 'remote':
         r = utils.parse_remote_path(args.remote_path)
-        remote_pkill_src = path.join(r['src_dir'], 'helpers', 'pkill.py')
+        remote_pkill_src = path.join(r['project_root'], 'tools', 'pkill.py')
 
         cmd = r['ssh_cmd'] + [
-            'python', remote_pkill_src, '--kill-dir', r['pantheon_dir']]
+            'python', remote_pkill_src, '--kill-dir', r['project_root']]
         call(cmd)
 
-    pkill_src = path.join(context.src_dir, 'helpers', 'pkill.py')
+    pkill_src = path.join(context.project_root, 'tools', 'pkill.py')
     cmd = ['python', pkill_src, '--kill-dir', context.src_dir]
     call(cmd)
 

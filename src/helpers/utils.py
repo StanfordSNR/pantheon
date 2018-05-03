@@ -119,8 +119,8 @@ def who_runs_first(cc):
 def parse_remote_path(remote_path, cc=None):
     ret = {}
 
-    ret['host_addr'], ret['pantheon_dir'] = remote_path.rsplit(':', 1)
-    ret['src_dir'] = path.join(ret['pantheon_dir'], 'src')
+    ret['host_addr'], ret['project_root'] = remote_path.rsplit(':', 1)
+    ret['src_dir'] = path.join(ret['project_root'], 'src')
     ret['ip'] = ret['host_addr'].split('@')[-1]
     ret['ssh_cmd'] = ['ssh', ret['host_addr']]
     ret['tunnel_manager'] = path.join(
@@ -182,7 +182,7 @@ def get_git_summary(mode='local', remote_path=None):
 
         git_summary_src = path.join(
             r['src_dir'], 'experiments', 'git_summary.sh')
-        ssh_cmd = 'cd %s; %s' % (r['pantheon_dir'], git_summary_src)
+        ssh_cmd = 'cd %s; %s' % (r['project_root'], git_summary_src)
         ssh_cmd = ' '.join(r['ssh_cmd']) + ' "%s"' % ssh_cmd
 
         remote_git_summary = check_output(ssh_cmd, shell=True)
