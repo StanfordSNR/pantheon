@@ -29,8 +29,7 @@ def main():
         return
 
     if args.option == 'sender':
-        rat_file = path.join(context.src_dir, 'wrappers',
-                             'RemyCC-2014-100x.dna')
+        rat_file = path.join(cc_repo, 'RemyCC-2014-100x.dna')
         sh_cmd = (
             'export MIN_RTT=1000000 && %s serverip=%s serverport=%s if=%s '
             'offduration=1 onduration=1000000 traffic_params=deterministic,'

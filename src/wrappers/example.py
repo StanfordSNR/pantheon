@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-'''Example file to add a new congestion control scheme.
+'''REMOVE ME: Example file to add a new congestion control scheme.
 
-Please use Python 2.7 and conform to PEP8. Also use snake_case as file name and
-make this file executable.
+Use Python 2.7 and conform to PEP8.
+Use snake_case as file name and make this file executable.
 '''
 
 from os import path
@@ -27,12 +27,12 @@ def main():
         print 'example_dep_1 example_dep_2'
         return
 
-    # [optional] persistent setup
+    # [optional] persistent setup that only needs to be run once
     if args.option == 'setup':
         # avoid running as root here
         return
 
-    # [optional] setup to be performed after every reboot
+    # [optional] non-persistent setup that should be performed on every reboot
     if args.option == 'setup_after_reboot':
         # avoid running as root here
         return
