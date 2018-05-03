@@ -16,7 +16,7 @@ def main():
     src = path.join(cc_repo, 'ucat-static')
 
     if args.option == 'setup':
-        check_call(['make', '-j2'], cwd=cc_repo)
+        check_call(['make', '-j'], cwd=cc_repo)
         return
 
     if args.option == 'receiver':

@@ -14,4 +14,4 @@ sudo apt-get -y install debhelper autotools-dev dh-autoreconf iptables \
 
 CURRDIR=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
 cd $CURRDIR/../third_party/pantheon-tunnel && ./autogen.sh && ./configure \
-&& make -j2 && sudo make install
+&& make -j && sudo make install

@@ -25,7 +25,7 @@ def main():
         # apply patch to reduce MTU size
         utils.apply_patch('sprout.patch', cc_repo)
 
-        sh_cmd = './autogen.sh && ./configure --enable-examples && make -j2'
+        sh_cmd = './autogen.sh && ./configure --enable-examples && make -j'
         check_call(sh_cmd, shell=True, cwd=cc_repo)
         return
 

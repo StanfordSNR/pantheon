@@ -23,7 +23,7 @@ def main():
         # apply patch to reduce MTU size
         utils.apply_patch('verus.patch', cc_repo)
 
-        sh_cmd = './bootstrap.sh && ./configure && make -j2'
+        sh_cmd = './bootstrap.sh && ./configure && make -j'
         check_call(sh_cmd, shell=True, cwd=cc_repo)
         return
 

@@ -5,11 +5,13 @@ services: docker
 branches:
   only:
     - master
+    - dev
 
 addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
+      - sourceline: ppa:keithw/mahimahi
     packages:
       - gcc-7
       - g++-7
@@ -22,19 +24,14 @@ install:
 
 env:
   matrix:
-    - CMD='test/setup.py --schemes quic --install-deps &&
-      test/setup.py --schemes quic --setup &&
-      test/test.py local --schemes quic -t 10'
-    - CMD='SCHEMES="default_tcp vegas bbr ledbat pcc verus sprout webrtc
-      scream copa taova calibrated_koho indigo fillp vivace pcc_experimental" &&
-      test/setup.py --schemes "$SCHEMES" --install-deps &&
-      test/setup.py --schemes "$SCHEMES" --setup &&
-      analysis/tests/test_analyze.py --schemes "$SCHEMES"'
+    - CMD='SCHEMES="cubic vegas bbr ledbat pcc verus sprout scream webrtc copa
+      taova vivace pcc_experimental fillp indigo" &&
+      src/experiments/setup.py --schemes "$SCHEMES" --install-deps &&
+      src/experiments/setup.py --schemes "$SCHEMES" --setup &&
+      tests/test_analyze.py --schemes "$SCHEMES"'
 
 script:
-  - ./install_deps.sh && eval $CMD
+  - ./tools/install_deps.sh && eval $CMD
 
 notifications:
   email: false
-  webhooks:
-    - https://snr.zulipchat.com/api/v1/external/travis?api_key=AtzK5F9kaHRKDQKNbD4ujZCTQTm91B5j&stream=pantheon-notification&topic=build-status
