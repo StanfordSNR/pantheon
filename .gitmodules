@@ -22,14 +22,6 @@
 	path = third_party/sprout
 	url = https://github.com/keithw/sprout.git
 	ignore = dirty
-[submodule "third_party/scream"]
-	path = third_party/scream
-	url = https://github.com/EricssonResearch/scream.git
-	ignore = dirty
-[submodule "third_party/sourdough"]
-	path = third_party/sourdough
-	url = https://github.com/keithw/sourdough.git
-	ignore = dirty
 [submodule "third_party/pantheon-tunnel"]
 	path = third_party/pantheon-tunnel
 	url = https://github.com/StanfordSNR/pantheon-tunnel.git
