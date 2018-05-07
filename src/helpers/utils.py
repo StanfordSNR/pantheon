@@ -30,7 +30,7 @@ def make_sure_dir_exists(d):
             raise
 
 
-tmp_dir = path.join(context.project_root, 'tmp')
+tmp_dir = path.join(context.base_dir, 'tmp')
 make_sure_dir_exists(tmp_dir)
 
 
@@ -119,8 +119,8 @@ def who_runs_first(cc):
 def parse_remote_path(remote_path, cc=None):
     ret = {}
 
-    ret['host_addr'], ret['project_root'] = remote_path.rsplit(':', 1)
-    ret['src_dir'] = path.join(ret['project_root'], 'src')
+    ret['host_addr'], ret['base_dir'] = remote_path.rsplit(':', 1)
+    ret['src_dir'] = path.join(ret['base_dir'], 'src')
     ret['ip'] = ret['host_addr'].split('@')[-1]
     ret['ssh_cmd'] = ['ssh', ret['host_addr']]
     ret['tunnel_manager'] = path.join(
@@ -175,14 +175,14 @@ def query_clock_offset(ntp_addr, ssh_cmd):
 def get_git_summary(mode='local', remote_path=None):
     git_summary_src = path.join(context.src_dir, 'experiments',
                                 'git_summary.sh')
-    local_git_summary = check_output(git_summary_src, cwd=context.project_root)
+    local_git_summary = check_output(git_summary_src, cwd=context.base_dir)
 
     if mode == 'remote':
         r = parse_remote_path(remote_path)
 
         git_summary_src = path.join(
             r['src_dir'], 'experiments', 'git_summary.sh')
-        ssh_cmd = 'cd %s; %s' % (r['project_root'], git_summary_src)
+        ssh_cmd = 'cd %s; %s' % (r['base_dir'], git_summary_src)
         ssh_cmd = ' '.join(r['ssh_cmd']) + ' "%s"' % ssh_cmd
 
         remote_git_summary = check_output(ssh_cmd, shell=True)

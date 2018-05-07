@@ -63,8 +63,8 @@ def test_schemes(args):
 
 
 def cleanup():
-    cleanup_src = path.join(context.project_root, 'tools', 'pkill.py')
-    cmd = [cleanup_src, '--kill-dir', context.project_root]
+    cleanup_src = path.join(context.base_dir, 'tools', 'pkill.py')
+    cmd = [cleanup_src, '--kill-dir', context.base_dir]
     call(cmd)
 
 
