@@ -19,10 +19,11 @@ def verify_schemes(schemes):
 def parse_setup_system():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--enable-ip-forwarding', action='store_true',
+    parser.add_argument('--enable-ip-forward', action='store_true',
                         help='enable IP forwarding')
     parser.add_argument('--interface',
                         help='interface to disable reverse path filtering')
+    parser.add_argument('--qdisc', help='change default qdisc')
 
     group = parser.add_mutually_exclusive_group()
     group.add_argument(

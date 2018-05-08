@@ -30,6 +30,17 @@ def check_qdisc(qdisc):
         sys.exit('Error: current qdisc %s is not %s' % (curr_qdisc, qdisc))
 
 
+def set_qdisc(qdisc):
+    curr_qdisc = check_output('sysctl net.core.default_qdisc', shell=True)
+    curr_qdisc = curr_qdisc.split('=')[-1].strip()
+
+    if curr_qdisc != qdisc:
+        check_call('sudo sysctl -w net.core.default_qdisc=%s' % qdisc,
+                   shell=True)
+        sys.stderr.write('Changed default_qdisc from %s to %s\n'
+                         % (curr_qdisc, qdisc))
+
+
 def enable_ip_forwarding():
     check_call('sudo sysctl -w net.ipv4.ip_forward=1', shell=True)
 
