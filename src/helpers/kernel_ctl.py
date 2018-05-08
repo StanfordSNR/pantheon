@@ -37,8 +37,8 @@ def enable_ip_forwarding():
 def disable_rp_filter(interface):
     rpf = 'net.ipv4.conf.%s.rp_filter'
 
-    check_call('sudo sysctl -w %s=0' % (rpf % 'all'), shell=True)
     check_call('sudo sysctl -w %s=0' % (rpf % interface), shell=True)
+    check_call('sudo sysctl -w %s=0' % (rpf % 'all'), shell=True)
 
 
 def set_sock_recv_buf(new_default, new_max):

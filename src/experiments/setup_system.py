@@ -7,10 +7,11 @@ from helpers import kernel_ctl
 
 
 def main():
-    args = arg_parser.parse_sysctl()
+    args = arg_parser.parse_setup_system()
 
     # enable IP forwarding
-    kernel_ctl.enable_ip_forwarding()
+    if args.enable_ip_forwarding:
+        kernel_ctl.enable_ip_forwarding()
 
     if args.reset_rmem:
         # change socket receive buffer sizes to Linux default ones
@@ -21,7 +22,7 @@ def main():
 
     # disable reverse path filtering
     if args.interface is not None:
-        kernel_ctl.disable_rp_filter()
+        kernel_ctl.disable_rp_filter(args.interface)
 
 
 if __name__ == '__main__':

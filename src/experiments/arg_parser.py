@@ -16,13 +16,15 @@ def verify_schemes(schemes):
             sys.exit('%s is not a scheme included in src/config.yml' % cc)
 
 
-def parse_sysctl():
+def parse_setup_system():
     parser = argparse.ArgumentParser()
 
+    parser.add_argument('--enable-ip-forwarding', action='store_true',
+                        help='enable IP forwarding')
     parser.add_argument('--interface',
                         help='interface to disable reverse path filtering')
 
-    group = parser.add_mutually_exclusive_group(required=True)
+    group = parser.add_mutually_exclusive_group()
     group.add_argument(
         '--set-rmem', action='store_true',
         help='set socket receive buffer sizes to Pantheon\'s required ones')
