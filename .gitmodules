@@ -46,7 +46,7 @@
 	path = third_party/indigo
 	url = https://github.com/StanfordSNR/indigo.git
 	ignore = dirty
-[submodule "third_party/scream"]
-	path = third_party/scream
+[submodule "third_party/scream-reproduce"]
+	path = third_party/scream-reproduce
 	url = https://github.com/StanfordSNR/scream.git
 	ignore = dirty

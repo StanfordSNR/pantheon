@@ -10,7 +10,7 @@ import context
 def main():
     args = arg_parser.receiver_first()
 
-    cc_repo = path.join(context.third_party_dir, 'scream')
+    cc_repo = path.join(context.third_party_dir, 'scream-reproduce')
     recv_src = path.join(cc_repo, 'src', 'ScreamServer')
     send_src = path.join(cc_repo, 'src', 'ScreamClient')
 
