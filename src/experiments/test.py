@@ -721,11 +721,9 @@ def run_tests(args):
         r = utils.parse_remote_path(args.remote_path)
         ssh_cmd = r['ssh_cmd']
 
-    # For each run of each scheme, change the socket receive buffer sizes
-    # before and after the test. Check config.yml for values.
     for run_id in xrange(args.start_run_id,
                          args.start_run_id + args.run_times):
-        if args.test_config is None:
+        if not hasattr(args, 'test_config') or args.test_config is None:
             for cc in cc_schemes:
                 Test(args, run_id, cc).run()
         else:
