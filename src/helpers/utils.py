@@ -122,6 +122,7 @@ def parse_remote_path(remote_path, cc=None):
 
     ret['host_addr'], ret['base_dir'] = remote_path.rsplit(':', 1)
     ret['src_dir'] = path.join(ret['base_dir'], 'src')
+    ret['tmp_dir'] = path.join(ret['base_dir'], 'tmp')
     ret['ip'] = ret['host_addr'].split('@')[-1]
     ret['ssh_cmd'] = ['ssh', ret['host_addr']]
     ret['tunnel_manager'] = path.join(
@@ -198,10 +199,9 @@ def get_git_summary(mode='local', remote_path=None):
     return local_git_summary
 
 
-def save_test_metadata(meta, data_dir, git_summary):
+def save_test_metadata(meta, metadata_path):
     meta.pop('all')
     meta.pop('schemes')
-    meta.pop('no_metadata')
     meta.pop('data_dir')
     meta.pop('pkill_cleanup')
 
@@ -210,15 +210,11 @@ def save_test_metadata(meta, data_dir, git_summary):
         if meta[key] is None:
             meta.pop(key)
 
-    meta['git_summary'] = git_summary
-
     if 'uplink_trace' in meta:
         meta['uplink_trace'] = path.basename(meta['uplink_trace'])
     if 'downlink_trace' in meta:
         meta['downlink_trace'] = path.basename(meta['downlink_trace'])
 
-    metadata_path = path.join(data_dir, 'pantheon_metadata.json')
-
-    with open(metadata_path, 'w') as metadata:
-        json.dump(meta, metadata, sort_keys=True, indent=4,
+    with open(metadata_path, 'w') as metadata_fh:
+        json.dump(meta, metadata_fh, sort_keys=True, indent=4,
                   separators=(',', ': '))

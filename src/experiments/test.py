@@ -23,6 +23,7 @@ Flow = namedtuple('Flow', ['cc', # replace self.cc
                            'run_first', # replace self.run_first
                            'run_second']) # replace self.run_second
 
+
 class Test(object):
     def __init__(self, args, run_id, cc):
         self.mode = args.mode
@@ -80,11 +81,12 @@ class Test(object):
 
         if self.test_config is not None:
             self.cc = self.test_config['test-name']
-            self.flow_objs = []
+            self.flow_objs = {}
             cc_src_remote_dir = ''
             if self.mode == 'remote':
                 cc_src_remote_dir = r['base_dir']
 
+            tun_id = 1
             for flow in args.test_config['flows']:
                 cc = flow['scheme']
                 run_first, run_second = utils.who_runs_first(cc)
@@ -92,12 +94,13 @@ class Test(object):
                 local_p = path.join(context.src_dir, 'wrappers', cc + '.py')
                 remote_p = path.join(cc_src_remote_dir, 'wrappers', cc + '.py')
 
-                self.flow_objs.append(Flow(
+                self.flow_objs[tun_id] = Flow(
                     cc=cc,
                     cc_src_local=local_p,
                     cc_src_remote=remote_p,
                     run_first=run_first,
-                    run_second=run_second))
+                    run_second=run_second)
+                tun_id += 1
 
     def setup_mm_cmd(self):
         mm_datalink_log = self.cc + '_mm_datalink_run%d.log' % self.run_id
@@ -134,6 +137,53 @@ class Test(object):
         if self.append_mm_cmds:
             self.mm_cmd += self.append_mm_cmds.split()
 
+    def prepare_tunnel_log_paths(self):
+        # boring work making sure logs have correct paths on local and remote
+        self.datalink_ingress_logs = {}
+        self.datalink_egress_logs = {}
+        self.acklink_ingress_logs = {}
+        self.acklink_egress_logs = {}
+
+        local_tmp = utils.tmp_dir
+
+        if self.mode == 'remote':
+            remote_tmp = self.r['tmp_dir']
+
+        for tun_id in xrange(1, self.flows + 1):
+            uid = uuid.uuid4()
+
+            datalink_ingress_logname = ('%s_flow%s_uid%s.log.ingress' %
+                                        (self.datalink_name, tun_id, uid))
+            self.datalink_ingress_logs[tun_id] = path.join(
+                    local_tmp, datalink_ingress_logname)
+
+            datalink_egress_logname = ('%s_flow%s_uid%s.log.egress' %
+                                       (self.datalink_name, tun_id, uid))
+            self.datalink_egress_logs[tun_id] = path.join(
+                    local_tmp, datalink_egress_logname)
+
+            acklink_ingress_logname = ('%s_flow%s_uid%s.log.ingress' %
+                                       (self.acklink_name, tun_id, uid))
+            self.acklink_ingress_logs[tun_id] = path.join(
+                    local_tmp, acklink_ingress_logname)
+
+            acklink_egress_logname = ('%s_flow%s_uid%s.log.egress' %
+                                      (self.acklink_name, tun_id, uid))
+            self.acklink_egress_logs[tun_id] = path.join(
+                    local_tmp, acklink_egress_logname)
+
+            if self.mode == 'remote':
+                if self.sender == 'local':
+                    self.datalink_ingress_logs[tun_id] = path.join(
+                            remote_tmp, datalink_ingress_logname)
+                    self.acklink_egress_logs[tun_id] = path.join(
+                            remote_tmp, acklink_egress_logname)
+                else:
+                    self.datalink_egress_logs[tun_id] = path.join(
+                            remote_tmp, datalink_egress_logname)
+                    self.acklink_ingress_logs[tun_id] = path.join(
+                            remote_tmp, acklink_ingress_logname)
+
     def setup(self):
         # setup commonly used paths
         self.cc_src = path.join(context.src_dir, 'wrappers', self.cc + '.py')
@@ -160,26 +210,7 @@ class Test(object):
             self.data_dir, self.acklink_name + '.log')
 
         if self.flows > 0:
-            self.datalink_ingress_logs = []
-            self.datalink_egress_logs = []
-            self.acklink_ingress_logs = []
-            self.acklink_egress_logs = []
-
-            for tun_id in xrange(1, self.flows + 1):
-                uid = uuid.uuid4()
-
-                self.datalink_ingress_logs.append(path.join(
-                    utils.tmp_dir, '%s_flow%s_uid%s.log.ingress'
-                    % (self.datalink_name, tun_id, uid)))
-                self.datalink_egress_logs.append(path.join(
-                    utils.tmp_dir, '%s_flow%s_uid%s.log.egress'
-                    % (self.datalink_name, tun_id, uid)))
-                self.acklink_ingress_logs.append(path.join(
-                    utils.tmp_dir, '%s_flow%s_uid%s.log.ingress'
-                    % (self.acklink_name, tun_id, uid)))
-                self.acklink_egress_logs.append(path.join(
-                    utils.tmp_dir, '%s_flow%s_uid%s.log.egress'
-                    % (self.acklink_name, tun_id, uid)))
+            self.prepare_tunnel_log_paths()
 
         if self.mode == 'local':
             self.setup_mm_cmd()
@@ -280,12 +311,12 @@ class Test(object):
     def run_tunnel_server(self, tun_id, ts_manager):
         if self.server_side == self.sender_side:
             ts_cmd = 'mm-tunnelserver --ingress-log=%s --egress-log=%s' % (
-                self.acklink_ingress_logs[tun_id - 1],
-                self.datalink_egress_logs[tun_id - 1])
+                self.acklink_ingress_logs[tun_id],
+                self.datalink_egress_logs[tun_id])
         else:
             ts_cmd = 'mm-tunnelserver --ingress-log=%s --egress-log=%s' % (
-                self.datalink_ingress_logs[tun_id - 1],
-                self.acklink_egress_logs[tun_id - 1])
+                self.datalink_ingress_logs[tun_id],
+                self.acklink_egress_logs[tun_id])
 
         if self.mode == 'remote':
             if self.server_side == 'remote':
@@ -321,13 +352,13 @@ class Test(object):
         if self.server_side == self.sender_side:
             tc_cmd = '%s --ingress-log=%s --egress-log=%s' % (
                 cmd_to_run_tc_str,
-                self.datalink_ingress_logs[tun_id - 1],
-                self.acklink_egress_logs[tun_id - 1])
+                self.datalink_ingress_logs[tun_id],
+                self.acklink_egress_logs[tun_id])
         else:
             tc_cmd = '%s --ingress-log=%s --egress-log=%s' % (
                 cmd_to_run_tc_str,
-                self.acklink_ingress_logs[tun_id - 1],
-                self.datalink_egress_logs[tun_id - 1])
+                self.acklink_ingress_logs[tun_id],
+                self.datalink_egress_logs[tun_id])
 
         if self.mode == 'remote':
             if self.server_side == 'remote':
@@ -418,7 +449,7 @@ class Test(object):
         # get run_first and run_second from the flow object
         else:
             assert(hasattr(self, 'flow_objs'))
-            flow = self.flow_objs[tun_id - 1] # tunnel id starts with 1
+            flow = self.flow_objs[tun_id]
 
             first_src = flow.cc_src_local
             second_src = flow.cc_src_local
@@ -549,6 +580,31 @@ class Test(object):
 
         return True
 
+    def download_tunnel_logs(self, tun_id):
+        assert(self.mode == 'remote')
+
+        # download logs from remote side
+        cmd = 'scp -C %s:' % self.r['host_addr']
+        cmd += '%(remote_log)s %(local_log)s'
+
+        # function to get a corresponding local path from a remote path
+        f = lambda p: path.join(utils.tmp_dir, path.basename(p))
+
+        if self.sender_side == 'remote':
+            call(cmd % {'remote_log': self.datalink_egress_logs[tun_id],
+                        'local_log': f(self.datalink_egress_logs[tun_id])},
+                 shell=True)
+            call(cmd % {'remote_log': self.acklink_ingress_logs[tun_id],
+                        'local_log': f(self.acklink_ingress_logs[tun_id])},
+                 shell=True)
+        else:
+            call(cmd % {'remote_log': self.datalink_ingress_logs[tun_id],
+                        'local_log': f(self.datalink_ingress_logs[tun_id])},
+                 shell=True)
+            call(cmd % {'remote_log': self.acklink_egress_logs[tun_id],
+                        'local_log': f(self.acklink_egress_logs[tun_id])},
+                 shell=True)
+
     def process_tunnel_logs(self):
         datalink_tun_logs = []
         acklink_tun_logs = []
@@ -572,24 +628,9 @@ class Test(object):
         merge_tunnel_logs = path.join(context.src_dir, 'experiments',
                                       'merge_tunnel_logs.py')
 
-        for i in xrange(self.flows):
-            tun_id = i + 1
-
+        for tun_id in xrange(1, self.flows + 1):
             if self.mode == 'remote':
-                # download logs from remote side
-                cmd = 'scp -C %s:' % self.r['host_addr']
-                cmd += '%(log)s %(log)s'
-
-                if self.sender_side == 'remote':
-                    call(cmd % {'log': self.datalink_egress_logs[i]},
-                         shell=True)
-                    call(cmd % {'log': self.acklink_ingress_logs[i]},
-                         shell=True)
-                else:
-                    call(cmd % {'log': self.datalink_ingress_logs[i]},
-                         shell=True)
-                    call(cmd % {'log': self.acklink_egress_logs[i]},
-                         shell=True)
+                self.download_tunnel_logs(tun_id)
 
             uid = uuid.uuid4()
             datalink_tun_log = path.join(
@@ -600,8 +641,8 @@ class Test(object):
                 % (self.acklink_name, tun_id, uid))
 
             cmd = [merge_tunnel_logs, 'single',
-                   '-i', self.datalink_ingress_logs[i],
-                   '-e', self.datalink_egress_logs[i],
+                   '-i', self.datalink_ingress_logs[tun_id],
+                   '-e', self.datalink_egress_logs[tun_id],
                    '-o', datalink_tun_log]
             if apply_ofst:
                 cmd += ['-i-clock-offset', data_i_ofst,
@@ -609,8 +650,8 @@ class Test(object):
             call(cmd)
 
             cmd = [merge_tunnel_logs, 'single',
-                   '-i', self.acklink_ingress_logs[i],
-                   '-e', self.acklink_egress_logs[i],
+                   '-i', self.acklink_ingress_logs[tun_id],
+                   '-e', self.acklink_egress_logs[tun_id],
                    '-o', acklink_tun_log]
             if apply_ofst:
                 cmd += ['-i-clock-offset', ack_i_ofst,
@@ -696,13 +737,15 @@ class Test(object):
 
 
 def run_tests(args):
+    # check and get git summary
     git_summary = utils.get_git_summary(args.mode,
                                         getattr(args, 'remote_path', None))
 
-    config = utils.parse_config()
-    schemes_config = config['schemes']
-
+    # get cc_schemes
     if args.all:
+        config = utils.parse_config()
+        schemes_config = config['schemes']
+
         cc_schemes = schemes_config.keys()
         if args.random_order:
             random.shuffle(cc_schemes)
@@ -716,11 +759,7 @@ def run_tests(args):
             random.shuffle(args.test_config['flows'])
         cc_schemes = [flow['scheme'] for flow in args.test_config['flows']]
 
-    ssh_cmd = None
-    if args.mode == 'remote':
-        r = utils.parse_remote_path(args.remote_path)
-        ssh_cmd = r['ssh_cmd']
-
+    # run tests
     for run_id in xrange(args.start_run_id,
                          args.start_run_id + args.run_times):
         if not hasattr(args, 'test_config') or args.test_config is None:
@@ -729,11 +768,13 @@ def run_tests(args):
         else:
             Test(args, run_id, None).run()
 
-    if not args.no_metadata:
-        meta = vars(args).copy()
-        meta['cc_schemes'] = sorted(cc_schemes)
-        utils.save_test_metadata(meta, path.abspath(args.data_dir),
-                                 git_summary)
+    # save metadata
+    meta = vars(args).copy()
+    meta['cc_schemes'] = sorted(cc_schemes)
+    meta['git_summary'] = git_summary
+
+    metadata_path = path.join(args.data_dir, 'pantheon_metadata.json')
+    utils.save_test_metadata(meta, metadata_path)
 
 
 def pkill(args):
@@ -744,8 +785,8 @@ def pkill(args):
         r = utils.parse_remote_path(args.remote_path)
         remote_pkill_src = path.join(r['base_dir'], 'tools', 'pkill.py')
 
-        cmd = r['ssh_cmd'] + [
-            'python', remote_pkill_src, '--kill-dir', r['base_dir']]
+        cmd = r['ssh_cmd'] + ['python', remote_pkill_src,
+                              '--kill-dir', r['base_dir']]
         call(cmd)
 
     pkill_src = path.join(context.base_dir, 'tools', 'pkill.py')

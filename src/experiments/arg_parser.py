@@ -99,10 +99,7 @@ def parse_test_shared(local, remote, config_args):
             '--data-dir', metavar='DIR',
             default=path.join(context.src_dir, 'experiments', 'data'),
             help='directory to save all test logs, graphs, '
-            'metadata, and report (default pantheon/test/data)')
-        mode.add_argument(
-            '--no-metadata', action='store_true',
-            help='don\'t save metadata (in JSON) of tests for future analysis')
+            'metadata, and report (default pantheon/src/experiments/data)')
         mode.add_argument(
             '--pkill-cleanup', action='store_true', help='clean up using pkill'
             ' (send SIGKILL when necessary) if there were errors during tests')

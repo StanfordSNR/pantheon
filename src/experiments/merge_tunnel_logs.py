@@ -25,10 +25,10 @@ def parse_arguments():
         required=True, help='tunnel log after merging')
     single_parser.add_argument(
         '-i-clock-offset', metavar='MS', type=float,
-        help='clock offset on the ingress end')
+        help='clock offset on the end where ingress log is saved')
     single_parser.add_argument(
         '-e-clock-offset', metavar='MS', type=float,
-        help='clock offset on the egress end')
+        help='clock offset on the end where egress log is saved')
 
     # subparser for multiple mode
     multiple_parser = subparsers.add_parser(

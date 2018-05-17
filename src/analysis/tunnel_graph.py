@@ -249,7 +249,7 @@ class TunnelGraph(object):
                 total_delays, 95, interpolation='nearest')
 
     def flip(self, items, ncol):
-        return itertools.chain(*[items[i::ncol] for i in range(ncol)])
+        return list(itertools.chain(*[items[i::ncol] for i in range(ncol)]))
 
     def plot_throughput_graph(self):
         empty_graph = True

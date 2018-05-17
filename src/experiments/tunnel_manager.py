@@ -43,7 +43,7 @@ def main():
                 continue
 
             try:
-                tun_id = int(cmd[1]) - 1
+                tun_id = int(cmd[1])
             except ValueError:
                 sys.stderr.write('error: usage: tunnel ID CMD...\n')
                 continue
