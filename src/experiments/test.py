@@ -173,7 +173,7 @@ class Test(object):
                     local_tmp, acklink_egress_logname)
 
             if self.mode == 'remote':
-                if self.sender == 'local':
+                if self.sender_side == 'local':
                     self.datalink_ingress_logs[tun_id] = path.join(
                             remote_tmp, datalink_ingress_logname)
                     self.acklink_egress_logs[tun_id] = path.join(
@@ -591,19 +591,26 @@ class Test(object):
         f = lambda p: path.join(utils.tmp_dir, path.basename(p))
 
         if self.sender_side == 'remote':
+            local_log = f(self.datalink_egress_logs[tun_id])
             call(cmd % {'remote_log': self.datalink_egress_logs[tun_id],
-                        'local_log': f(self.datalink_egress_logs[tun_id])},
-                 shell=True)
+                        'local_log': local_log}, shell=True)
+            self.datalink_egress_logs[tun_id] = local_log
+
+            local_log = f(self.acklink_ingress_logs[tun_id])
             call(cmd % {'remote_log': self.acklink_ingress_logs[tun_id],
-                        'local_log': f(self.acklink_ingress_logs[tun_id])},
-                 shell=True)
+                        'local_log': local_log}, shell=True)
+            self.acklink_ingress_logs[tun_id] = local_log
         else:
+            local_log = f(self.datalink_ingress_logs[tun_id])
             call(cmd % {'remote_log': self.datalink_ingress_logs[tun_id],
-                        'local_log': f(self.datalink_ingress_logs[tun_id])},
-                 shell=True)
+                        'local_log': local_log}, shell=True)
+            self.datalink_ingress_logs[tun_id] = local_log
+
+            local_log = f(self.acklink_egress_logs[tun_id])
             call(cmd % {'remote_log': self.acklink_egress_logs[tun_id],
-                        'local_log': f(self.acklink_egress_logs[tun_id])},
-                 shell=True)
+                        'local_log': local_log}, shell=True)
+            self.acklink_egress_logs[tun_id] = local_log
+
 
     def process_tunnel_logs(self):
         datalink_tun_logs = []

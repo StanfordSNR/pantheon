@@ -51,10 +51,18 @@ def main():
             cmd_to_run = ' '.join(cmd[2:])
 
             if cmd[2] == 'mm-tunnelclient' or cmd[2] == 'mm-tunnelserver':
-                # expand $MAHIMAHI_BASE
+                # expand env variables (e.g., MAHIMAHI_BASE)
                 cmd_to_run = path.expandvars(cmd_to_run).split()
-                procs[tun_id] = Popen(cmd_to_run, stdin=PIPE, stdout=PIPE,
-                                      preexec_fn=os.setsid)
+
+                # expand home directory
+                for i in xrange(len(cmd_to_run)):
+                    if ('--ingress-log' in cmd_to_run[i] or
+                        '--egress-log' in cmd_to_run[i]):
+                        t = cmd_to_run[i].split('=')
+                        cmd_to_run[i] = t[0] + '=' + path.expanduser(t[1])
+
+                procs[tun_id] = Popen(cmd_to_run, stdin=PIPE,
+                                      stdout=PIPE, preexec_fn=os.setsid)
             elif cmd[2] == 'python':  # run python scripts inside tunnel
                 if tun_id not in procs:
                     sys.stderr.write(
