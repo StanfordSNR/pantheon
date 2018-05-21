@@ -207,10 +207,14 @@ class TunnelGraph(object):
                     self.avg_egress[flow_id] = flow_departures / delta
 
                 egress_bins = departures[flow_id].keys()
+
+                self.egress_tput[flow_id].append(0.0)
+                self.egress_t[flow_id].append(self.bin_to_s(min(egress_bins)))
+
                 for bin_id in xrange(min(egress_bins), max(egress_bins) + 1):
                     self.egress_tput[flow_id].append(
                         departures[flow_id].get(bin_id, 0) / us_per_bin)
-                    self.egress_t[flow_id].append(self.bin_to_s(bin_id))
+                    self.egress_t[flow_id].append(self.bin_to_s(bin_id + 1))
 
             # calculate 95th percentile per-packet one-way delay
             self.percentile_delay[flow_id] = None
@@ -406,6 +410,21 @@ class TunnelGraph(object):
         tunnel_results['loss'] = self.total_loss_rate
         tunnel_results['duration'] = self.total_duration
         tunnel_results['stats'] = self.statistics_string()
+
+        flow_data = {}
+        flow_data['all'] = {}
+        flow_data['all']['tput'] = self.total_avg_egress
+        flow_data['all']['delay'] = self.total_percentile_delay
+        flow_data['all']['loss'] = self.total_loss_rate
+
+        for flow_id in self.flows:
+            if flow_id != 0:
+                flow_data[flow_id] = {}
+                flow_data[flow_id]['tput'] = self.avg_egress[flow_id]
+                flow_data[flow_id]['delay'] = self.percentile_delay[flow_id]
+                flow_data[flow_id]['loss'] = self.loss_rate[flow_id]
+
+        tunnel_results['flow_data'] = flow_data
 
         return tunnel_results
 

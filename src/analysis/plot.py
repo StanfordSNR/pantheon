@@ -3,9 +3,9 @@
 from os import path
 import sys
 import math
+import json
 import multiprocessing
 from multiprocessing.pool import ThreadPool
-import pickle
 import numpy as np
 import matplotlib_agg
 import matplotlib.pyplot as plt
@@ -76,12 +76,8 @@ class Plot(object):
         if self.flows == 0:
             log_prefix += '_mm'
 
-        tput = None
-        delay = None
-        loss = None
-        stats = None
-
         error = False
+        ret = None
 
         link_directions = ['datalink']
         if self.include_acklink:
@@ -122,11 +118,8 @@ class Plot(object):
                 continue
 
             if link_t == 'datalink':
-                tput = tunnel_results['throughput']
-                delay = tunnel_results['delay']
-                loss = tunnel_results['loss']
+                ret = tunnel_results
                 duration = tunnel_results['duration'] / 1000.0
-                stats = tunnel_results['stats']
 
                 if duration < 0.8 * self.runtime:
                     sys.stderr.write(
@@ -136,9 +129,9 @@ class Plot(object):
                     error = True
 
         if error:
-            return (None, None, None, None)
+            return None
 
-        return (tput, delay, loss, stats)
+        return ret
 
     def update_stats_log(self, cc, run_id, stats):
         stats_log_path = path.join(
@@ -170,13 +163,11 @@ class Plot(object):
                 stats_log.write('%s' % stats)
 
     def eval_performance(self):
-        data = {}
-        results = {}
+        perf_data = {}
         stats = {}
 
         for cc in self.cc_schemes:
-            data[cc] = []
-            results[cc] = {}
+            perf_data[cc] = {}
             stats[cc] = {}
 
         cc_id = 0
@@ -185,7 +176,7 @@ class Plot(object):
 
         while cc_id < len(self.cc_schemes):
             cc = self.cc_schemes[cc_id]
-            results[cc][run_id] = pool.apply_async(
+            perf_data[cc][run_id] = pool.apply_async(
                 self.parse_tunnel_log, args=(cc, run_id))
 
             run_id += 1
@@ -195,18 +186,19 @@ class Plot(object):
 
         for cc in self.cc_schemes:
             for run_id in xrange(1, 1 + self.run_times):
-                (tput, delay, loss, stats_str) = results[cc][run_id].get()
-                self.update_stats_log(cc, run_id, stats_str)
+                perf_data[cc][run_id] = perf_data[cc][run_id].get()
 
-                if tput is None or delay is None:
+                if perf_data[cc][run_id] is None:
                     continue
 
-                data[cc].append((tput, delay, loss))
+                stats_str = perf_data[cc][run_id]['stats']
+                self.update_stats_log(cc, run_id, stats_str)
                 stats[cc][run_id] = stats_str
 
         sys.stderr.write('Appended datalink statistics to stats files in %s\n'
                          % self.data_dir)
-        return stats, data
+
+        return perf_data, stats
 
     def xaxis_log_scale(self, ax, min_delay, max_delay):
         if min_delay < -2:
@@ -262,7 +254,7 @@ class Plot(object):
             cc_name = schemes_config[cc]['name']
             color = schemes_config[cc]['color']
             marker = schemes_config[cc]['marker']
-            y_data, x_data, _ = zip(*value)
+            y_data, x_data = zip(*value)
 
             # update min and max raw delay
             min_raw_delay = min(min(x_data), min_raw_delay)
@@ -327,23 +319,28 @@ class Plot(object):
             'graphs in %s\n' % self.data_dir)
 
     def run(self):
-        stats_logs, data = self.eval_performance()
+        perf_data, stats_logs = self.eval_performance()
+
+        data_for_plot = {}
+        data_for_json = {}
+
+        for cc in perf_data:
+            data_for_plot[cc] = []
+            data_for_json[cc] = {}
+
+            for run_id in perf_data[cc]:
+                data_for_plot[cc].append((perf_data[cc][run_id]['throughput'],
+                                          perf_data[cc][run_id]['delay']))
+                data_for_json[cc][run_id] = perf_data[cc][run_id]['flow_data']
 
         if not self.no_graphs:
-            self.plot_throughput_delay(data)
-
-        # change data names to displayable names
-        schemes_config = utils.parse_config()['schemes']
-        stats_logs_display = {}
-        for cc in stats_logs:
-            cc_name = schemes_config[cc]['name']
-            stats_logs_display[cc_name] = stats_logs[cc]
-
-        perf_data_path = path.join(self.data_dir, 'perf_data.pkl')
-        with open(perf_data_path, 'wb') as f:
-            pickle.dump(stats_logs_display, f)
+            self.plot_throughput_delay(data_for_plot)
 
         plt.close('all')
+
+        perf_path = path.join(self.data_dir, 'pantheon_perf.json')
+        with open(perf_path, 'w') as fh:
+            json.dump(data_for_json, fh)
 
 
 def main():
