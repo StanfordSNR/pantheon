@@ -23,15 +23,14 @@ install:
   - pip install matplotlib numpy tabulate pyyaml tensorflow
 
 env:
-  matrix:
-    - CMD='SCHEMES="cubic vegas bbr ledbat pcc verus sprout scream webrtc copa
-      taova vivace pcc_experimental fillp indigo" &&
-      src/experiments/setup.py --schemes "$SCHEMES" --install-deps &&
-      src/experiments/setup.py --schemes "$SCHEMES" --setup &&
-      tests/test_analyze.py --schemes "$SCHEMES"'
+  - SCHEMES="cubic vegas bbr ledbat pcc verus sprout scream webrtc copa taova vivace pcc_experimental fillp indigo"
 
 script:
-  - ./tools/install_deps.sh && eval $CMD
+  - ./tools/install_deps.sh &&
+    ./src/experiments/setup_system.py --enable-ip-forward --set-rmem --qdisc fq_codel &&
+    ./src/experiments/setup.py --schemes "$SCHEMES" --install-deps &&
+    ./src/experiments/setup.py --schemes "$SCHEMES" --setup &&
+    ./tests/test_analyze.py --schemes "$SCHEMES"
 
 notifications:
   email: false
