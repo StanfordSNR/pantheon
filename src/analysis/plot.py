@@ -329,9 +329,18 @@ class Plot(object):
             data_for_json[cc] = {}
 
             for run_id in perf_data[cc]:
-                data_for_plot[cc].append((perf_data[cc][run_id]['throughput'],
-                                          perf_data[cc][run_id]['delay']))
-                data_for_json[cc][run_id] = perf_data[cc][run_id]['flow_data']
+                if perf_data[cc][run_id] is None:
+                    continue
+
+                tput = perf_data[cc][run_id]['throughput']
+                delay = perf_data[cc][run_id]['delay']
+                if tput is None or delay is None:
+                    continue
+                data_for_plot[cc].append((tput, delay))
+
+                flow_data = perf_data[cc][run_id]['flow_data']
+                if flow_data is not None:
+                    data_for_json[cc][run_id] = flow_data
 
         if not self.no_graphs:
             self.plot_throughput_delay(data_for_plot)
