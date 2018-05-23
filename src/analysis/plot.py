@@ -45,11 +45,6 @@ class Plot(object):
                 else:
                     txt[side].append(side)
 
-                if '%s_if' % side in meta:
-                    txt[side].append(meta['%s_if' % side])
-                else:
-                    txt[side].append('Ethernet')
-
                 txt[side] = ' '.join(txt[side])
 
             if meta['sender_side'] == 'remote':
