@@ -20,7 +20,7 @@ def setup_webrtc(cc_repo, video):
     check_call(['npm', 'install'], cwd=cc_repo)
 
     # check if video already exists and if its md5 checksum is correct
-    video_md5 = 'a4ef8836e546bbef4276346d0b86e81b'
+    video_md5 = 'cd1cc8b69951796b72419413faed493b'
     if path.isfile(video):
         md5_out = check_output(['md5sum', video]).split()[0]
     else:
@@ -28,7 +28,7 @@ def setup_webrtc(cc_repo, video):
 
     if md5_out != video_md5:
         cmd = ['wget', '-O', video,
-               'https://media.xiph.org/video/derf/y4m/blue_sky_1080p25.y4m']
+               'https://s3.amazonaws.com/stanford-pantheon/files/bluesky_1080p60.y4m']
         check_call(cmd)
     else:
         sys.stderr.write('video already exists\n')
