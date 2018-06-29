@@ -50,3 +50,11 @@
 	path = third_party/scream-reproduce
 	url = https://github.com/StanfordSNR/scream.git
 	ignore = dirty
+[submodule "third_party/fillp-sheep"]
+	path = third_party/fillp-sheep
+	url = https://github.com/superlitong/fillp-sheep.git
+	ignore = dirty
+[submodule "third_party/fillp-wolf"]
+	path = third_party/fillp-wolf
+	url = https://github.com/superlitong/fillp-wolf.git
+	ignore = dirty
