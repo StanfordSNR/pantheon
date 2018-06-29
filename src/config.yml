@@ -63,3 +63,11 @@ schemes:
     name: Indigo
     color: indigo
     marker: 'D'
+  fillp_sheep:
+    name: Fillp-Sheep
+    color: red
+    marker: '+'
+  fillp_wolf:
+    name: Fillp-Wolf
+    color: yellow
+    marker: '+'
