@@ -1,6 +1,4 @@
-[![Build Status](https://travis-ci.org/StanfordSNR/pantheon.svg?branch=master)](https://travis-ci.org/StanfordSNR/pantheon)
-
-# Pantheon of Congestion Control
+# Pantheon of Congestion Control [![Build Status](https://travis-ci.org/StanfordSNR/pantheon.svg?branch=master)](https://travis-ci.org/StanfordSNR/pantheon)
 The Pantheon contains wrappers for many popular practical and research
 congestion control schemes. The Pantheon enables them to run on a common
 interface, and has tools to benchmark and compare their performances.
@@ -9,7 +7,7 @@ Pantheon tests can be run locally over emulated links using
 
 Our website is <https://pantheon.stanford.edu>, where you can find more
 information about Pantheon, including supported schemes, measurement results
-so far, and our paper at USENIX ATC 2018.
+so far, and our paper at USENIX ATC 2018 (**Awarded Best Paper!**).
 
 To discuss and talk about Pantheon-related topics and issues, feel free to
 contact our mailing list: `pantheon-stanford <at> googlegroups <dot> com`.
