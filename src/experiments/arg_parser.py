@@ -32,6 +32,12 @@ def parse_setup_system():
     group.add_argument(
         '--reset-rmem', action='store_true',
         help='set socket receive buffer sizes to Linux default ones')
+    group.add_argument(
+        '--set-all-mem', action='store_true',
+        help='set socket send and receive buffer sizes')
+    group.add_argument(
+        '--reset-all-mem', action='store_true',
+        help='set socket send and receive buffer sizes to Linux default ones')
 
     args = parser.parse_args()
     return args

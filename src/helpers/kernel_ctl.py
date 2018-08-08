@@ -50,22 +50,3 @@ def disable_rp_filter(interface):
 
     check_call('sudo sysctl -w %s=0' % (rpf % interface), shell=True)
     check_call('sudo sysctl -w %s=0' % (rpf % 'all'), shell=True)
-
-
-def set_sock_recv_buf(new_default, new_max):
-    buf_default = check_output('sysctl net.core.rmem_default', shell=True)
-    buf_default = int(buf_default.split('=')[-1])
-
-    buf_max = check_output('sysctl net.core.rmem_max', shell=True)
-    buf_max = int(buf_max.split('=')[-1])
-
-    if buf_default != new_default:
-        check_call('sudo sysctl -w net.core.rmem_default=%s' % new_default,
-                   shell=True)
-        sys.stderr.write('Changed rmem_default from %s to %s\n'
-                         % (buf_default, new_default))
-
-    if buf_max != new_max:
-        check_call('sudo sysctl -w net.core.rmem_max=%s' % new_max, shell=True)
-        sys.stderr.write('Changed rmem_max from %s to %s\n'
-                         % (buf_max, new_max))
