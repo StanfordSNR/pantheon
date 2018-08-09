@@ -94,14 +94,16 @@ class Report(object):
             'Each test lasted for %s running %s.\n\n'
             % (len(self.cc_schemes), times, runtime, flows))
 
-        desc += (
-            'Increased UDP receive buffer to 16 MB (default) and '
-            '32 MB (max).\n\n')
-
         if 'ntp_addr' in meta:
             desc += ('NTP offsets were measured against \\texttt{%s} and have '
                      'been applied to correct the timestamps in logs.\n\n'
                      % meta['ntp_addr'])
+
+        desc += (
+            '\\begin{verbatim}\n'
+            'System info:\n'
+            '%s'
+            '\\end{verbatim}\n\n' % utils.get_sys_info())
 
         desc += (
             '\\begin{verbatim}\n'

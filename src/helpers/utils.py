@@ -218,3 +218,16 @@ def save_test_metadata(meta, metadata_path):
     with open(metadata_path, 'w') as metadata_fh:
         json.dump(meta, metadata_fh, sort_keys=True, indent=4,
                   separators=(',', ': '))
+
+
+def get_sys_info():
+    sys_info = ''
+    sys_info += check_output(['uname', '-sr'])
+    sys_info += check_output(['sysctl', 'net.core.default_qdisc'])
+    sys_info += check_output(['sysctl', 'net.core.rmem_default'])
+    sys_info += check_output(['sysctl', 'net.core.rmem_max'])
+    sys_info += check_output(['sysctl', 'net.core.wmem_default'])
+    sys_info += check_output(['sysctl', 'net.core.wmem_max'])
+    sys_info += check_output(['sysctl', 'net.ipv4.tcp_rmem'])
+    sys_info += check_output(['sysctl', 'net.ipv4.tcp_wmem'])
+    return sys_info
