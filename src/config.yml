@@ -67,3 +67,7 @@ schemes:
     name: FillP-Sheep
     color: red
     marker: '+'
+  muses:
+    name: Muses
+    color: '#9933ff'
+    marker: 'D'
