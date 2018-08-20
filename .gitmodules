@@ -54,3 +54,8 @@
 	path = third_party/fillp-sheep
 	url = https://github.com/fillthepipe/fillp-sheep.git
 	ignore = dirty
+[submodule "third_party/muses"]
+	path = third_party/muses
+	url = https://github.com/StanfordSNR/indigo.git
+	branch = muses
+	ignore = dirty

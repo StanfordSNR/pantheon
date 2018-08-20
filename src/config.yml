@@ -67,3 +67,7 @@ schemes:
     name: FillP-Sheep
     color: violet
     marker: 'D'
+  muses:
+    name: Muses
+    color: '#9933ff'
+    marker: 'D'
