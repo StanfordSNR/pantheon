@@ -27,7 +27,7 @@ env:
 
 script:
   - ./tools/install_deps.sh &&
-    ./src/experiments/setup_system.py --enable-ip-forward --set-rmem --qdisc fq_codel &&
+    ./src/experiments/setup_system.py --enable-ip-forward --set-all-mem --qdisc fq &&
     ./src/experiments/setup.py --schemes "$SCHEMES" --install-deps &&
     ./src/experiments/setup.py --schemes "$SCHEMES" --setup &&
     ./tests/test_analyze.py --schemes "$SCHEMES"

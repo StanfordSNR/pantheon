@@ -7,10 +7,13 @@ Pantheon tests can be run locally over emulated links using
 
 Our website is <https://pantheon.stanford.edu>, where you can find more
 information about Pantheon, including supported schemes, measurement results
-so far, and our paper at USENIX ATC 2018 (**Awarded Best Paper!**).
+on a global [testbed](https://github.com/StanfordSNR/observatory)
+so far, and our paper at [USENIX ATC 2018](https://www.usenix.org/conference/atc18/presentation/yan-francis)
+(**Awarded Best Paper**).
 
 To discuss and talk about Pantheon-related topics and issues, feel free to
-contact our mailing list: `pantheon-stanford <at> googlegroups <dot> com`.
+post in the [Google Group](https://groups.google.com/forum/#!forum/pantheon-stanford)
+or send an email to `pantheon-stanford <at> googlegroups <dot> com`.
 
 ## Disclaimer
 This is research software. Our scripts will write to the file system in the
@@ -39,7 +42,9 @@ git submodule update --init --recursive  # or tools/fetch_submodules.sh
 ## Dependencies
 We provide a handy script `tools/install_deps.sh` to install globally required
 dependencies, but you might want to inspect the contents of this script and
-install these dependencies yourself.
+install these dependencies by yourself. In particular, we created
+the [Pantheon-tunnel](https://github.com/StanfordSNR/pantheon-tunnel)
+that is required to instrument each scheme.
 
 For those dependencies required by each congestion control scheme `<cc>`,
 run `src/wrappers/<cc>.py deps` to print a dependency list. You could install
