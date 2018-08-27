@@ -14,8 +14,8 @@ def setup_bbr():
     # add bbr to kernel-allowed congestion control list
     kernel_ctl.enable_congestion_control('bbr')
 
-    # check if qdisc is fq_codel
-    kernel_ctl.check_qdisc('fq_codel')
+    # check if qdisc is fq
+    kernel_ctl.check_qdisc('fq')
 
 
 def main():
