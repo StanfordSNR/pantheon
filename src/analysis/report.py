@@ -55,9 +55,7 @@ class Report(object):
                     txt[side].append(meta['%s_desc' % side])
 
                 if '%s_if' % side in meta:
-                    txt[side].append(meta['%s_if' % side])
-                else:
-                    txt[side].append('Ethernet')
+                    txt[side].append('on \\texttt{%s}' % meta['%s_if' % side])
 
                 txt[side] = ' '.join(txt[side]).replace('_', '\\_')
 
