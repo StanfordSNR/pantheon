@@ -13,7 +13,7 @@ def main():
     cc_repo = path.join(context.third_party_dir, 'muses')
     send_src = path.join(cc_repo, 'dagger', 'run_sender.py')
     recv_src = path.join(cc_repo, 'env', 'run_receiver.py')
-    model_src = path.join(cc_repo, 'dagger', 'model', 'model#7', 'model')
+    model_src = path.join(cc_repo, 'dagger', 'model', 'model#24', 'model')
 
     if args.option == 'setup':
         check_call(['sudo pip install tensorflow'], shell=True)
