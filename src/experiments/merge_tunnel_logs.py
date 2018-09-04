@@ -4,6 +4,9 @@ import sys
 import argparse
 import heapq
 
+import matplotlib_agg
+import matplotlib.pyplot as plt
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
@@ -22,13 +25,18 @@ def parse_arguments():
         required=True, help='egress log of a tunnel')
     single_parser.add_argument(
         '-o', action='store', metavar='OUTPUT-LOG', dest='output_log',
-        required=True, help='tunnel log after merging')
+        help='tunnel log after merging')
     single_parser.add_argument(
         '-i-clock-offset', metavar='MS', type=float,
         help='clock offset on the end where ingress log is saved')
     single_parser.add_argument(
         '-e-clock-offset', metavar='MS', type=float,
         help='clock offset on the end where egress log is saved')
+    single_parser.add_argument(
+        '--loss', metavar='OUTPUT-GRATH', dest='loss_graph')
+    single_parser.add_argument(
+        '--ms-per-bin', metavar='MS-PER-BIN', type=int, default=500,
+        help='bin size in ms (default 500)')
 
     # subparser for multiple mode
     multiple_parser = subparsers.add_parser(
@@ -51,10 +59,56 @@ def parse_line(line):
     return (float(ts), int(uid), int(size))
 
 
+def bin_to_s(bin_id, ms_per_bin):
+    return bin_id * ms_per_bin / 1000.0
+
+
+def plot_loss_graph(loss_send_pkts, loss_recv_pkts, ms_per_bin, loss_graph):
+    x_bin = []
+    y1_sent = []
+    y2_lost = []
+
+    idx = 0
+    bin_id = 0
+
+    while idx < len(loss_send_pkts):
+        x_bin.append(bin_to_s(bin_id, ms_per_bin))
+        bin_boundary = (bin_id + 1) * ms_per_bin
+
+        bin_sent = 0
+        bin_lost = 0
+        while idx < len(loss_send_pkts) and loss_send_pkts[idx][0] < bin_boundary:
+            uid = loss_send_pkts[idx][1]
+            size = loss_send_pkts[idx][2] * 8
+
+            bin_sent += size
+            if uid not in loss_recv_pkts:
+                bin_lost += size
+
+            idx += 1
+
+        y1_sent.append(bin_sent / (ms_per_bin * 1000.0))
+        y2_lost.append(bin_lost / (ms_per_bin * 1000.0))
+
+        bin_id += 1
+
+    fig, ax = plt.subplots()
+    ax.plot(x_bin, y1_sent, label='Sent', color='b')
+    ax.plot(x_bin, y2_lost, label='Lost', color='r')
+
+    ax.set_xlabel('Time (s) with bin size of %d ms' % ms_per_bin, fontsize=12)
+    ax.set_ylabel('Throughput (Mbps)', fontsize=12)
+    lgd = ax.legend(bbox_to_anchor=(1, 0.5), loc='center left', fontsize=12)
+    ax.grid()
+
+    fig.set_size_inches(12, 6)
+    fig.savefig(loss_graph, bbox_extra_artists=(lgd,),
+                bbox_inches='tight', pad_inches=0.2)
+
+
 def single_mode(args):
     recv_log = open(args.ingress_log)
     send_log = open(args.egress_log)
-    output_log = open(args.output_log, 'w')
 
     # retrieve initial timestamp of sender from the first line
     line = send_log.readline()
@@ -79,7 +133,31 @@ def single_mode(args):
     if recv_init_ts < min_init_ts:
         min_init_ts = recv_init_ts
 
-    output_log.write('# init timestamp: %.3f\n' % min_init_ts)
+    if not args.loss_graph:
+        if not args.output_log:
+            sys.exit('error: -o is required if --loss is not present')
+
+        output_log = open(args.output_log, 'w')
+        output_log.write('# init timestamp: %.3f\n' % min_init_ts)
+    else:
+        # if only interested in loss graph
+        first_ts = None
+
+        loss_send_pkts = []
+        for line in send_log:
+            (send_ts, send_uid, send_size) = parse_line(line)
+            if not first_ts:
+                first_ts = send_ts
+            loss_send_pkts.append((send_ts - first_ts, send_uid, send_size))
+
+        loss_recv_pkts = {}
+        for line in recv_log:
+            (recv_ts, recv_uid, recv_size) = parse_line(line)
+            loss_recv_pkts[recv_uid] = True
+
+        plot_loss_graph(loss_send_pkts, loss_recv_pkts,
+                        args.ms_per_bin, args.loss_graph)
+        return
 
     # timestamp calibration to ensure non-negative timestamps
     send_cal = send_init_ts - min_init_ts
