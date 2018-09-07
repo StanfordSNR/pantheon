@@ -230,5 +230,4 @@ def get_sys_info():
     sys_info += check_output(['sysctl', 'net.core.wmem_max'])
     sys_info += check_output(['sysctl', 'net.ipv4.tcp_rmem'])
     sys_info += check_output(['sysctl', 'net.ipv4.tcp_wmem'])
-    sys_info += check_output(['sysctl', 'net.ipv4.tcp_mem'])
     return sys_info
