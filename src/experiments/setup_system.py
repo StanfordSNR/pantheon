@@ -43,7 +43,6 @@ def main():
         sysctl('net.core.wmem_max', 212992)
         sysctl('net.ipv4.tcp_rmem', '4096 87380 6291456')
         sysctl('net.ipv4.tcp_wmem', '4096 16384 4194304')
-        sysctl('net.ipv4.tcp_mem', '383013 510686 766026')
     elif args.set_all_mem:
         # set socket buffer sizes
         sysctl('net.core.rmem_default', 16777216)
@@ -52,7 +51,6 @@ def main():
         sysctl('net.core.wmem_max', 536870912)
         sysctl('net.ipv4.tcp_rmem', '4096 16777216 536870912')
         sysctl('net.ipv4.tcp_wmem', '4096 16777216 536870912')
-        sysctl('net.ipv4.tcp_mem', '536870912 536870912 536870912')
 
 
 if __name__ == '__main__':
