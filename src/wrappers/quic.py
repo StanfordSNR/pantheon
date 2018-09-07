@@ -4,9 +4,9 @@ import os
 from os import path
 import sys
 import string
-import random
 import shutil
-from subprocess import check_call
+import time
+from subprocess import check_call, call
 
 import arg_parser
 import context
@@ -38,9 +38,10 @@ def generate_html(output_dir, size):
     html = open(html_path, 'w')
     html.write(head_text)
 
-    num_blocks = int(size) / 1024 + 1
+    block_size = 100 * 1024 * 1024
+    block = 'x' * block_size
+    num_blocks = int(size) / block_size + 1
     for _ in xrange(num_blocks):
-        block = ''.join(random.choice(string.letters) for _ in xrange(1024))
         html.write(block + '\n')
 
     html.write(foot_text)
@@ -74,8 +75,8 @@ def setup_quic(cc_repo, cert_dir, html_dir):
            (nssdb_dir, pem, cert_pwd))
     check_call(cmd, shell=True)
 
-    # generate a html of size that can be transferred longer than 60 s
-    generate_html(html_dir, 5e8)
+    # generate a html of size that can be transferred longer than 30s
+    generate_html(html_dir, 5 * 10**8)
 
 
 def main():
@@ -108,10 +109,14 @@ def main():
     if args.option == 'receiver':
         cmd = [recv_src, '--host=%s' % args.ip, '--port=%s' % args.port,
                'https://www.example.org/']
-        # suppress stdout as it prints the huge web page received
-        with open(os.devnull, 'w') as devnull:
-            check_call(cmd, stdout=devnull)
-        return
+
+        for _ in range(5):
+            # suppress stdout as it prints the huge web page received
+            with open(os.devnull, 'w') as devnull:
+                if call(cmd, stdout=devnull) == 0:
+                    return
+
+            time.sleep(1)
 
 
 if __name__ == '__main__':
