@@ -766,6 +766,14 @@ def run_tests(args):
             random.shuffle(args.test_config['flows'])
         cc_schemes = [flow['scheme'] for flow in args.test_config['flows']]
 
+    # save metadata
+    meta = vars(args).copy()
+    meta['cc_schemes'] = sorted(cc_schemes)
+    meta['git_summary'] = git_summary
+
+    metadata_path = path.join(args.data_dir, 'pantheon_metadata.json')
+    utils.save_test_metadata(meta, metadata_path)
+
     # run tests
     for run_id in xrange(args.start_run_id,
                          args.start_run_id + args.run_times):
@@ -774,14 +782,6 @@ def run_tests(args):
                 Test(args, run_id, cc).run()
         else:
             Test(args, run_id, None).run()
-
-    # save metadata
-    meta = vars(args).copy()
-    meta['cc_schemes'] = sorted(cc_schemes)
-    meta['git_summary'] = git_summary
-
-    metadata_path = path.join(args.data_dir, 'pantheon_metadata.json')
-    utils.save_test_metadata(meta, metadata_path)
 
 
 def pkill(args):
