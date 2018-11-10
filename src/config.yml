@@ -63,3 +63,7 @@ schemes:
     name: Indigo
     color: indigo
     marker: 'D'
+  fillp_sheep:
+    name: FillP-Sheep
+    color: violet
+    marker: 'D'

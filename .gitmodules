@@ -52,5 +52,5 @@
 	ignore = dirty
 [submodule "third_party/fillp-sheep"]
 	path = third_party/fillp-sheep
-	url = https://github.com/superlitong/fillp-sheep.git
+	url = https://github.com/fillthepipe/fillp-sheep.git
 	ignore = dirty
