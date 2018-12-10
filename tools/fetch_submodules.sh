@@ -1,3 +1,3 @@
 #!/bin/sh
 
-exec git submodule update --recursive --init
+git submodule sync && git submodule update --recursive --init
