@@ -59,3 +59,8 @@
 	url = https://github.com/StanfordSNR/indigo.git
 	branch = muses
 	ignore = dirty
+[submodule "third_party/muses-refactored"]
+	path = third_party/muses-refactored
+	url = https://github.com/StanfordSNR/indigo.git
+	branch = muses
+	ignore = dirty
