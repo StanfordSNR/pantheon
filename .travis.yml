@@ -23,7 +23,7 @@ install:
   - pip install matplotlib numpy tabulate pyyaml tensorflow
 
 env:
-  - SCHEMES="cubic vegas bbr ledbat pcc verus sprout scream webrtc copa taova vivace pcc_experimental fillp indigo fillp_sheep"
+  - SCHEMES="cubic vegas bbr ledbat pcc verus sprout scream webrtc copa taova vivace pcc_experimental indigo fillp fillp_sheep"
 
 script:
   - ./tools/install_deps.sh &&
