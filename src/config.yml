@@ -71,7 +71,3 @@ schemes:
     name: Indigo-Muses
     color: '#9933ff'
     marker: 'D'
-  indigo_96d2da3:
-    name: Indigo-96d2da3
-    color: '#6d2da3'
-    marker: 'D'
