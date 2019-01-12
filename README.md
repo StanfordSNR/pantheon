@@ -55,7 +55,7 @@ src/experiments/setup.py --install-deps (--all | --schemes "<cc1> <cc2> ...")
 ```
 
 to install dependencies required by all schemes or a list of schemes separated
-by spaces.
+by spaces. Please note that Pantheon only supports Python 2.7.
 
 ## Setup
 After installing dependencies, run
