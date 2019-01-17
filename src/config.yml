@@ -75,11 +75,11 @@ schemes:
     name: Indigo-MusesT
     color: '#6200BF'
     marker: 'D'
-  indigo_musesd:
+  indigo_musesc3:
     name: Indigo-MusesC3
     color: '#7300DF'
     marker: 'D'
-  indigo_musest:
+  indigo_musesc5:
     name: Indigo-MusesC5
     color: '#8300FF'
     marker: 'D'
