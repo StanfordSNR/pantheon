@@ -59,19 +59,27 @@ schemes:
     name: FillP
     color: violet
     marker: '+'
+  fillp_sheep:
+    name: FillP-Sheep
+    color: '#DDA0DD'
+    marker: '+'
   indigo:
     name: Indigo
     color: indigo
     marker: 'D'
-  fillp_sheep:
-    name: FillP-Sheep
-    color: violet
-    marker: 'D'
   indigo_musesd:
     name: Indigo-MusesD
-    color: '#9933ff'
+    color: '#52009F'
     marker: 'D'
   indigo_musest:
     name: Indigo-MusesT
-    color: '#6d2da3'
+    color: '#6200BF'
+    marker: 'D'
+  indigo_musesd:
+    name: Indigo-MusesC3
+    color: '#7300DF'
+    marker: 'D'
+  indigo_musest:
+    name: Indigo-MusesC5
+    color: '#8300FF'
     marker: 'D'

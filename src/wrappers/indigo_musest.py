@@ -10,11 +10,11 @@ import context
 def main():
     args = arg_parser.receiver_first()
 
-    cc_repo = path.join(context.third_party_dir, 'muses-refactored')
+    cc_repo = path.join(context.third_party_dir, 'muses')
     recv_src = path.join(cc_repo, 'dagger', 'receiver.py')
     send_src = path.join(cc_repo, 'dagger', 'sender.py')
     model_path = path.join(cc_repo, 'dagger', 'model',
-                           '1-128-6dim-5history-tg+iperf', 'model')
+                           'indigo-musesT', 'model')
 
     if args.option == 'setup':
         check_call(['sudo pip install tensorflow'], shell=True)

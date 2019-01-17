@@ -14,7 +14,7 @@ def main():
     recv_src = path.join(cc_repo, 'dagger', 'receiver.py')
     send_src = path.join(cc_repo, 'dagger', 'sender.py')
     model_path = path.join(cc_repo, 'dagger', 'model',
-                           'indigo-musesD', 'model')
+                           'indigo-musesC5', 'model')
 
     if args.option == 'setup':
         check_call(['sudo pip install tensorflow'], shell=True)
