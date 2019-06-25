@@ -83,3 +83,7 @@ schemes:
     name: Indigo-MusesC5
     color: '#8300FF'
     marker: 'D'
+  muses_dtree:
+    name: Muses_DecisionTree
+    color: '#00CD00'
+    marker: 'o'
