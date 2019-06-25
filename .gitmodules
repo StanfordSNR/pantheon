@@ -59,3 +59,8 @@
 	url = https://github.com/StanfordSNR/indigo.git
 	branch = dev
 	ignore = dirty
+[submodule "third_party/muses_dtree"]
+	path = third_party/muses_dtree
+	url = https://github.com/weiwang1206/Muses
+	branch = dev_dtree
+	ignore = dirty
