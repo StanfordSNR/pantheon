@@ -15,7 +15,7 @@ def main():
     recv_src = path.join(cc_repo, 'dagger', 'receiver.py')
     send_src = path.join(cc_repo, 'dagger', 'sender.py')
     model_path = path.join(cc_repo, 'dagger', 'model',
-                           'dtree', 'model')
+                           'dtree', 'model_h0')
     if args.option == 'deps':
         print 'python-scipy'
         return

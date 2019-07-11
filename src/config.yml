@@ -86,4 +86,13 @@ schemes:
   muses_dtree:
     name: Muses_DecisionTree
     color: '#00CD00'
-    marker: 'o'
+    marker: 'D'
+  muses_dtreer0:
+    name: Muses_DecisionTreeR0
+    color: '#008B00'
+    marker: 'D'
+  muses_dtreeh0:
+    name: Muses_DecisionTreeH0
+    color: '#00FF7F'
+    marker: 'D'
+
