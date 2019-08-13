@@ -7,9 +7,11 @@ Pantheon tests can be run locally over emulated links using
 
 Our website is <https://pantheon.stanford.edu>, where you can find more
 information about Pantheon, including supported schemes, measurement results
-on a global [testbed](https://github.com/StanfordSNR/observatory)
-so far, and our paper at [USENIX ATC 2018](https://www.usenix.org/conference/atc18/presentation/yan-francis)
+on a global testbed so far, and our paper at [USENIX ATC 2018](https://www.usenix.org/conference/atc18/presentation/yan-francis)
 (**Awarded Best Paper**).
+In case you are interested, the scripts and traces
+(including "calibrated emulators") for running the testbed can be found in
+[observatory](https://github.com/StanfordSNR/observatory).
 
 To discuss and talk about Pantheon-related topics and issues, feel free to
 post in the [Google Group](https://groups.google.com/forum/#!forum/pantheon-stanford)
