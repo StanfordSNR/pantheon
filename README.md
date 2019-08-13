@@ -43,12 +43,17 @@ git submodule update --init --recursive  # or tools/fetch_submodules.sh
 
 ## Dependencies
 We provide a handy script `tools/install_deps.sh` to install globally required
-dependencies, but you might want to inspect the contents of this script and
-install these dependencies by yourself. In particular, we created
-the [Pantheon-tunnel](https://github.com/StanfordSNR/pantheon-tunnel)
+dependencies; these dependencies are required before testing **any** scheme
+and are different from the flag `--install-deps` below.
+In particular, we created the [Pantheon-tunnel](https://github.com/StanfordSNR/pantheon-tunnel)
 that is required to instrument each scheme.
 
-For those dependencies required by each congestion control scheme `<cc>`,
+You might want to inspect the contents of
+`install_deps.sh` and install these dependencies by yourself in case you want to
+manage dependencies differently. Please note that Pantheon currently
+**only** supports Python 2.7.
+
+Next, for those dependencies required by each congestion control scheme `<cc>`,
 run `src/wrappers/<cc>.py deps` to print a dependency list. You could install
 them by yourself, or run
 
@@ -57,7 +62,7 @@ src/experiments/setup.py --install-deps (--all | --schemes "<cc1> <cc2> ...")
 ```
 
 to install dependencies required by all schemes or a list of schemes separated
-by spaces. Please note that Pantheon only supports Python 2.7.
+by spaces.
 
 ## Setup
 After installing dependencies, run
