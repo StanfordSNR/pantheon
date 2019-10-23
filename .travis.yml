@@ -22,7 +22,7 @@ install:
   - sudo apt-get update -q
   - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 99
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 99
-  - pip install matplotlib numpy tabulate pyyaml tensorflow
+  - pip install matplotlib numpy tabulate pyyaml tensorflow==1.14.0
 
 env:
   - SCHEMES="cubic vegas bbr ledbat pcc verus sprout scream webrtc copa taova vivace pcc_experimental fillp indigo fillp_sheep"
