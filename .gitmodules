@@ -54,3 +54,7 @@
 	path = third_party/fillp-sheep
 	url = https://github.com/fillthepipe/fillp-sheep.git
 	ignore = dirty
+[submodule "third_party/taoLearn"]
+	path = third_party/taoLearn
+	url = https://github.com/huiyusun/taoLearn.git
+	ignore = dirty

@@ -67,3 +67,7 @@ schemes:
     name: FillP-Sheep
     color: violet
     marker: 'D'
+  taoLearn:
+    name: tao 1000x
+    color: purple
+    marker: '^'
