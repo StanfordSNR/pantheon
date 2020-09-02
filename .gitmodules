@@ -54,3 +54,6 @@
 	path = third_party/fillp-sheep
 	url = https://github.com/fillthepipe/fillp-sheep.git
 	ignore = dirty
+[submodule "third_party/PDCC"]
+	path = third_party/PDCC
+	url = https://github.com/ZoraNeverEatFish/PDCC.git
